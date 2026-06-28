@@ -5,7 +5,7 @@
 
 ---
 
-## [TODO] HP/SAN/MPクイック更新UI — 優先度: 高
+## [DONE] HP/SAN/MPクイック更新UI — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクター詳細ページでHP・MP・SANをリロードなしで+1/-1更新できるUI
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` を新規作成（"use client"）。props: characterId, hpCurrent, hpMax, mpCurrent, mpMax, sanCurrent, sanMax。supabase.from("characters").update().eq("id", characterId) でDB更新。詳細ページの派生ステータスセクション直下に配置。

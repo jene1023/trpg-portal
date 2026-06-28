@@ -10,6 +10,7 @@ import PortraitImage from "@/app/_components/PortraitImage";
 import StatBlock from "@/app/_components/StatBlock";
 import DerivedStatBar from "@/app/_components/DerivedStatBar";
 import SkillList from "@/app/_components/SkillList";
+import QuickStatEditor from "@/app/_components/QuickStatEditor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -132,6 +133,16 @@ export default async function CharacterDetailPage({ params }: Props) {
               <DerivedStatBar label="MP マジックポイント" current={char.mp_current} max={char.mp_max} color="mp" />
               <DerivedStatBar label={`SAN 正気度（初期${char.san_start}）`} current={char.san_current} max={char.san_max} color="san" />
             </div>
+            <div className={divider} />
+            <QuickStatEditor
+              characterId={char.id}
+              hpCurrent={char.hp_current}
+              hpMax={char.hp_max}
+              mpCurrent={char.mp_current}
+              mpMax={char.mp_max}
+              sanCurrent={char.san_current}
+              sanMax={char.san_max}
+            />
             <div className="grid grid-cols-3 gap-2 pt-2">
               {[
                 { label: "幸運", value: char.luck },
