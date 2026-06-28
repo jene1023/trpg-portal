@@ -99,3 +99,16 @@ export type CharacterRelation = {
   memo: string | null;
   created_at: string;
 };
+
+export type MadnessType = "temporary" | "indefinite";
+
+export type MadnessRecord = {
+  id: string;
+  character_id: string;
+  madness_type: MadnessType;
+  symptom: string;
+  is_active: boolean;
+  started_at: string | null;
+  recovered_at: string | null;
+  created_at: string;
+};

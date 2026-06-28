@@ -53,7 +53,7 @@
 **実装ヒント:** Supabaseに`character_relations`テーブルを追加（id, character_id, target_name, relation_type, memo, created_at）。`src/app/characters/[id]/relations/page.tsx` を新規作成。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の末尾に「関係メモ」セクションへのリンクを追加。relation_typeは "友人"|"ライバル"|"恩人"|"要注意"|"その他" の select で実装。
 **コミット:** `feat: character relation memo`
 
-## [TODO] 狂気状態管理 — 優先度: 高
+## [DONE] 狂気状態管理 — 優先度: 高
 **対象:** PL
 **概要:** セッション中のSAN喪失で発生した一時的狂気・不定の狂気の症状を記録・追跡できる機能。発症中か回復済みかのステータス管理も行う。
 **実装ヒント:** Supabaseに`madness_records`テーブルを追加（id, character_id, madness_type: "temporary"|"indefinite", symptom, is_active: boolean, started_at, recovered_at, created_at）。`src/app/characters/[id]/madness/page.tsx` を新規作成（一覧＋追加フォーム）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）にSAN現在値が低い場合は警告バッジを表示し「狂気記録」リンクを追加。`src/lib/supabase.ts` に `MadnessRecord` 型を追加。
