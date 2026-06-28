@@ -88,3 +88,14 @@ export type Npc = {
   notes: string | null;
   created_at: string;
 };
+
+export type RelationType = "友人" | "ライバル" | "恩人" | "要注意" | "その他";
+
+export type CharacterRelation = {
+  id: string;
+  character_id: string;
+  target_name: string;
+  relation_type: RelationType;
+  memo: string | null;
+  created_at: string;
+};
