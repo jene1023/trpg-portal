@@ -30,12 +30,12 @@ const STATUS_OPTIONS: { value: CharacterStatus; label: string }[] = [
 ];
 
 const DEFAULT_SKILLS: SkillRow[] = [
-  { tempId: uuidv4(), skill_name: "目星",   base_value: 25, current_value: 25, is_occupation: false },
-  { tempId: uuidv4(), skill_name: "聞き耳", base_value: 20, current_value: 20, is_occupation: false },
-  { tempId: uuidv4(), skill_name: "図書館", base_value: 25, current_value: 25, is_occupation: false },
-  { tempId: uuidv4(), skill_name: "回避",   base_value: 0,  current_value: 0,  is_occupation: false },
-  { tempId: uuidv4(), skill_name: "心理学", base_value: 10, current_value: 10, is_occupation: false },
-  { tempId: uuidv4(), skill_name: "説得",   base_value: 10, current_value: 10, is_occupation: false },
+  { tempId: uuidv4(), skill_name: "目星",   base_value: 25, current_value: 25, is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "聞き耳", base_value: 20, current_value: 20, is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "図書館", base_value: 25, current_value: 25, is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "回避",   base_value: 0,  current_value: 0,  is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "心理学", base_value: 10, current_value: 10, is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "説得",   base_value: 10, current_value: 10, is_occupation: false, growth_checked: false },
 ];
 
 const inputClass =
@@ -133,7 +133,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   function addSkill() {
     setSkills((prev) => [
       ...prev,
-      { tempId: uuidv4(), skill_name: "", base_value: 0, current_value: 0, is_occupation: false },
+      { tempId: uuidv4(), skill_name: "", base_value: 0, current_value: 0, is_occupation: false, growth_checked: false },
     ]);
   }
 

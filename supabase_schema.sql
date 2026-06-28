@@ -88,3 +88,6 @@ create policy "allow all for anon" on materials for all using (true) with check 
 
 -- Storage: character-portraits バケットを作成後に実行
 -- insert into storage.buckets (id, name, public) values ('character-portraits', 'character-portraits', true);
+
+-- 技能成長チェックフラグ (追加マイグレーション)
+alter table character_skills add column if not exists growth_checked boolean not null default false;

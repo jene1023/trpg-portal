@@ -168,7 +168,7 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <div className={divider} />
               </>
             )}
-            <SkillList skills={skills ?? []} />
+            <SkillList skills={skills ?? []} characterId={id} />
           </div>
 
           {/* 背景・メモ */}

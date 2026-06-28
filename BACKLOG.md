@@ -17,7 +17,7 @@
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` を新規作成（"use client"）。props: skills: CharacterSkill[]。技能選択 → 判定ボタン → Math.floor(Math.random()*100)+1 → 成功度判定。キャラ詳細ページの技能セクション上部に配置。
 **コミット:** `feat: skill dice roller on character detail`
 
-## [TODO] 技能成長チェック — 優先度: 中
+## [DONE] 技能成長チェック — 優先度: 中
 **対象:** PL
 **概要:** セッション後に技能へ成長チェックフラグを立て、次セッション前に成長判定できるUI
 **実装ヒント:** `src/lib/supabase.ts` の CharacterSkill型に `growth_checked: boolean` 追加。`supabase_schema.sql` にALTER TABLE文追記。`src/app/_components/SkillList.tsx` にチェックボックスUI追加。
