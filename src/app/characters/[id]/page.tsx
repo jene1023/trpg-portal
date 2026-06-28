@@ -11,6 +11,7 @@ import StatBlock from "@/app/_components/StatBlock";
 import DerivedStatBar from "@/app/_components/DerivedStatBar";
 import SkillList from "@/app/_components/SkillList";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
+import DiceRoller from "@/app/_components/DiceRoller";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -161,6 +162,12 @@ export default async function CharacterDetailPage({ params }: Props) {
           {/* 技能 */}
           <div className={sectionClass}>
             <h2 className={sectionTitle}>技能</h2>
+            {(skills ?? []).length > 0 && (
+              <>
+                <DiceRoller skills={skills ?? []} />
+                <div className={divider} />
+              </>
+            )}
             <SkillList skills={skills ?? []} />
           </div>
 

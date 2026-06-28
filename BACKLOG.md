@@ -11,7 +11,7 @@
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` を新規作成（"use client"）。props: characterId, hpCurrent, hpMax, mpCurrent, mpMax, sanCurrent, sanMax。supabase.from("characters").update().eq("id", characterId) でDB更新。詳細ページの派生ステータスセクション直下に配置。
 **コミット:** `feat: HP/SAN/MP quick update buttons on character detail`
 
-## [TODO] ダイスローラー（技能連携） — 優先度: 高
+## [DONE] ダイスローラー（技能連携） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** 技能を選んで1d100判定し、成功度（決定的成功/通常成功/失敗/致命的失敗）をその場で表示
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` を新規作成（"use client"）。props: skills: CharacterSkill[]。技能選択 → 判定ボタン → Math.floor(Math.random()*100)+1 → 成功度判定。キャラ詳細ページの技能セクション上部に配置。
