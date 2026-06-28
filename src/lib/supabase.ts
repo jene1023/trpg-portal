@@ -78,3 +78,13 @@ export type SessionLog = {
   played_at: string | null;
   created_at: string;
 };
+
+export type Npc = {
+  id: string;
+  scenario_name: string | null;
+  name: string;
+  appearance: string | null;
+  purpose: string | null;
+  notes: string | null;
+  created_at: string;
+};
