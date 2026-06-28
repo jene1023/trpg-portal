@@ -91,3 +91,19 @@ create policy "allow all for anon" on materials for all using (true) with check 
 
 -- 技能成長チェックフラグ (追加マイグレーション)
 alter table character_skills add column if not exists growth_checked boolean not null default false;
+
+-- セッションログテーブル (追加マイグレーション)
+create table if not exists sessions (
+  id             uuid primary key default gen_random_uuid(),
+  character_id   uuid not null references characters(id) on delete cascade,
+  session_number integer not null default 1,
+  title          text not null,
+  summary        text,
+  san_loss       integer not null default 0,
+  hp_loss        integer not null default 0,
+  played_at      date,
+  created_at     timestamptz default now()
+);
+
+alter table sessions enable row level security;
+create policy "allow all for anon" on sessions for all using (true) with check (true);

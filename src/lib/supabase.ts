@@ -66,3 +66,15 @@ export type Material = {
 export type CharacterWithSkills = Character & {
   character_skills: CharacterSkill[];
 };
+
+export type SessionLog = {
+  id: string;
+  character_id: string;
+  session_number: number;
+  title: string;
+  summary: string | null;
+  san_loss: number;
+  hp_loss: number;
+  played_at: string | null;
+  created_at: string;
+};
