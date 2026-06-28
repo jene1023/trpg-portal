@@ -1,0 +1,131 @@
+export const dynamic = "force-dynamic";
+
+import Link from "next/link";
+import { Users, BookOpen, Image, ChevronRight } from "lucide-react";
+import { supabase, isSupabaseConfigured, CharacterWithSkills } from "@/lib/supabase";
+import CharacterCard from "./_components/CharacterCard";
+
+const tiles = [
+  {
+    href: "/characters",
+    icon: Users,
+    title: "キャラクター",
+    desc: "探索者の記録を管理する",
+    available: true,
+  },
+  {
+    href: "/rules",
+    icon: BookOpen,
+    title: "ルールリファレンス",
+    desc: "技能・判定・戦闘ルールを確認する",
+    available: false,
+  },
+  {
+    href: "/materials",
+    icon: Image,
+    title: "素材ライブラリ",
+    desc: "立ち絵・背景素材を管理する",
+    available: false,
+  },
+];
+
+export default async function HomePage() {
+  let recent: CharacterWithSkills[] | null = null;
+  if (isSupabaseConfigured) {
+    const { data } = await supabase
+      .from("characters")
+      .select("*, character_skills(*)")
+      .order("updated_at", { ascending: false })
+      .limit(5);
+    recent = data as CharacterWithSkills[];
+  }
+
+  const configured = isSupabaseConfigured;
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-12 space-y-12">
+      {/* Supabase未設定バナー */}
+      {!configured && (
+        <div className="rounded-lg border border-coc-gold-dim bg-coc-raised px-4 py-3 text-sm text-coc-muted">
+          <span className="text-coc-gold font-medium">セットアップ未完了: </span>
+          Supabase の URL と ANON KEY を{" "}
+          <code className="text-coc-text bg-coc-void px-1 rounded">.env.local</code>{" "}
+          に設定するとデータが保存できます。
+        </div>
+      )}
+
+      {/* ヒーロー */}
+      <div className="text-center space-y-3">
+        <p className="text-coc-muted text-sm tracking-[0.2em] uppercase font-cinzel">
+          Cthulhu Mythos TRPG
+        </p>
+        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-coc-text">
+          CoC Portal
+        </h1>
+        <div className="flex items-center justify-center gap-3 text-coc-faint text-lg">
+          <span className="flex-1 border-t border-coc-border" />
+          <span className="text-coc-gold select-none">✦</span>
+          <span className="flex-1 border-t border-coc-border" />
+        </div>
+        <p className="font-crimson text-coc-muted text-lg italic">
+          深淵をのぞき込むとき、深淵もまたのぞき込んでいる
+        </p>
+      </div>
+
+      {/* タイル */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {tiles.map(({ href, icon: Icon, title, desc, available }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`group relative rounded-lg border bg-coc-surface p-5 space-y-3 transition-all duration-200 ${
+              available
+                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_0_12px_rgba(122,90,42,0.2)]"
+                : "border-coc-border opacity-50 pointer-events-none"
+            }`}
+          >
+            {!available && (
+              <span className="absolute top-2 right-2 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-faint">
+                準備中
+              </span>
+            )}
+            <Icon size={24} className={available ? "text-coc-gold" : "text-coc-faint"} />
+            <div>
+              <p className="font-cinzel text-sm font-semibold text-coc-text">{title}</p>
+              <p className="text-xs text-coc-muted mt-1 leading-relaxed">{desc}</p>
+            </div>
+            {available && (
+              <ChevronRight
+                size={16}
+                className="absolute bottom-4 right-4 text-coc-faint group-hover:text-coc-gold transition-colors"
+              />
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {/* 最近のキャラクター */}
+      {recent && recent.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              最近のキャラクター
+            </h2>
+            <Link href="/characters" className="text-xs text-coc-gold hover:underline">
+              すべて表示
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {recent.map((char) => (
+              <CharacterCard
+                key={char.id}
+                character={char}
+                skills={char.character_skills}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

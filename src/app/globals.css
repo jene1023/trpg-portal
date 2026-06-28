@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* 背景 */
+  --color-coc-void:    #070503;
+  --color-coc-bg:      #0e0b08;
+  --color-coc-surface: #171109;
+  --color-coc-raised:  #201810;
+
+  /* ボーダー */
+  --color-coc-border:      #3d2f1a;
+  --color-coc-border-glow: #7a5a2a;
+
+  /* テキスト */
+  --color-coc-text:  #e2ccaa;
+  --color-coc-muted: #8a7055;
+  --color-coc-faint: #4a3c2a;
+
+  /* アクセント */
+  --color-coc-gold:     #c9853a;
+  --color-coc-gold-dim: #7a4f1e;
+
+  /* ステータス */
+  --color-coc-alive:   #1a5c35;
+  --color-coc-dead:    #5c1515;
+  --color-coc-insane:  #3d1260;
+  --color-coc-retired: #3a3530;
+
+  /* バー */
+  --color-coc-hp:  #4a8c3f;
+  --color-coc-mp:  #3a5c8c;
+  --color-coc-san: #7a5c9a;
+
+  /* フォント */
+  --font-cinzel:  var(--font-cinzel);
+  --font-crimson: var(--font-crimson-text);
+}
+
+body {
+  background: var(--color-coc-bg);
+  color: var(--color-coc-text);
+}
+
+/* スクロールバー */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-coc-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-coc-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-coc-border-glow);
+}
