@@ -194,7 +194,14 @@ export default async function CharacterDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* セッションログリンク */}
+          {/* クイックビュー / セッションログ リンク */}
+          <Link
+            href={`/characters/${id}/quick`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <span>クイックビュー（セッション中）</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
           <Link
             href={`/characters/${id}/sessions`}
             className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
