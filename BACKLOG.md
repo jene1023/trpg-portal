@@ -23,7 +23,7 @@
 **実装ヒント:** `src/lib/supabase.ts` の CharacterSkill型に `growth_checked: boolean` 追加。`supabase_schema.sql` にALTER TABLE文追記。`src/app/_components/SkillList.tsx` にチェックボックスUI追加。
 **コミット:** `feat: skill growth check tracking`
 
-## [TODO] ルールリファレンス — 優先度: 中
+## [DONE] ルールリファレンス — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** CoC 7版の技能一覧（技能名・基本値）と判定ルールを検索・参照できるページ
 **実装ヒント:** `src/app/rules/page.tsx` を実装。技能データは静的配列で定義（"use client" + useState でフィルタ）。判定ルール（通常/プッシュ/対抗）はアコーディオン表示。
