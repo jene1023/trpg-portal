@@ -41,6 +41,18 @@ body {
   color: var(--color-coc-text);
 }
 
+/* ステータスバッジ グローアニメーション */
+@keyframes coc-alive-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(74, 140, 63, 0.45); }
+  50%       { box-shadow: 0 0 13px rgba(74, 140, 63, 0.85); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-badge-alive {
+    animation: coc-alive-pulse 2.8s ease-in-out infinite;
+  }
+}
+
 /* スクロールバー */
 ::-webkit-scrollbar {
   width: 6px;
