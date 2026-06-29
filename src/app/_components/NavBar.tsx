@@ -18,7 +18,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-coc-border bg-coc-void/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 bg-coc-void/95 backdrop-blur-sm">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* ロゴ */}
         <Link
@@ -59,6 +59,9 @@ export default function NavBar() {
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </nav>
+
+      {/* グラデーションボーダーライン */}
+      <div className="h-px bg-gradient-to-r from-transparent via-coc-border to-transparent" />
 
       {/* モバイルドロワー */}
       {open && (

@@ -80,7 +80,7 @@ export default async function HomePage() {
             href={href}
             className={`group relative rounded-lg border bg-coc-surface p-5 space-y-3 transition-all duration-300 ease-out ${
               available
-                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.25)] motion-safe:hover:-translate-y-0.5"
+                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.25)] motion-safe:hover:-translate-y-0.5 coc-tile-shimmer"
                 : "border-coc-border opacity-50 pointer-events-none"
             }`}
           >

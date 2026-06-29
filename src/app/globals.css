@@ -116,3 +116,33 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-coc-border-glow);
 }
+
+/* タイル シマーエフェクト（ホバー時の黄金の光） */
+@keyframes coc-shimmer {
+  from { transform: translateX(-130%) skewX(-20deg); }
+  to   { transform: translateX(230%) skewX(-20deg); }
+}
+
+.coc-tile-shimmer {
+  overflow: hidden;
+}
+
+.coc-tile-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(201, 133, 58, 0.09) 50%,
+    transparent 60%
+  );
+  transform: translateX(-130%) skewX(-20deg);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-tile-shimmer:hover::after {
+    animation: coc-shimmer 0.7s ease-out forwards;
+  }
+}
