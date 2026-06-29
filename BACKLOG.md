@@ -195,7 +195,7 @@
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` に "use client" コンポーネントを追加。各武器カードに「ロール」ボタンを配置し、`item_type === "weapon"` の場合は character_skills から `格闘技 (武器)`, `回避`, `拳銃`, `ライフル` 等を候補として表示するプルダウンを出す。判定後は `supabase.from("dice_rolls").insert(...)` に保存（dice_history と連携）。追加DBなし（既存 `inventory_items`, `character_skills`, `dice_rolls` を流用）。
 **コミット:** `feat: combat roll integration on inventory weapon cards`
 
-## [TODO] キャラクター複製機能 — 優先度: 中
+## [DONE] キャラクター複製機能 — 優先度: 中
 **対象:** PL / 共通
 **概要:** 既存キャラクターを1クリックで複製し、名前だけ変えた新キャラクターとして保存できる機能。別シナリオ用バリアント作成・過去シートの再利用・NPCのひな型作成を高速化する。
 **実装ヒント:** `src/app/characters/[id]/page.tsx` のヘッダーに「複製」ボタンを追加（"use client" コンポーネント）。ボタン押下で `supabase.from("characters").select("*, character_skills(*)")` で全データ取得し、name に「（コピー）」を付加して `characters` テーブルに INSERT、続いて `character_skills` を新IDで一括 INSERT。複製後は新キャラクターの詳細ページへリダイレクト。追加DBなし。スキルの `growth_checked` はすべて `false` にリセット。

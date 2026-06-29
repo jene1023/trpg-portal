@@ -14,6 +14,7 @@ import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import DiceRoller from "@/app/_components/DiceRoller";
 import ExportButton from "@/app/_components/ExportButton";
 import PdfExportButton from "@/app/_components/PdfExportButton";
+import DuplicateButton from "@/app/_components/DuplicateButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -57,6 +58,7 @@ export default async function CharacterDetailPage({ params }: Props) {
         <div className="flex items-center gap-2">
           <PdfExportButton characterId={id} />
           <ExportButton characterId={id} characterName={char.name} />
+          <DuplicateButton characterId={id} />
           <Link
             href={`/characters/${id}/edit`}
             className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
