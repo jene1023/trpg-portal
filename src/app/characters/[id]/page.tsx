@@ -70,6 +70,7 @@ export default async function CharacterDetailPage({ params }: Props) {
         <div className="space-y-4">
           <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-coc-border">
             <PortraitImage url={char.portrait_url} name={char.name} />
+            <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           </div>
 
           <div className={sectionClass}>
