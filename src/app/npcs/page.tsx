@@ -108,13 +108,22 @@ export default function NpcsPage() {
             >
               <div className="flex items-start justify-between gap-4 mb-2">
                 <div>
-                  <p className="font-cinzel font-semibold text-coc-text text-lg leading-tight">
+                  <Link
+                    href={`/npcs/${npc.id}`}
+                    className="font-cinzel font-semibold text-coc-text text-lg leading-tight hover:text-coc-gold transition-colors"
+                  >
                     {npc.name}
-                  </p>
+                  </Link>
                   {npc.scenario_name && (
                     <p className="text-xs text-coc-gold mt-0.5">{npc.scenario_name}</p>
                   )}
                 </div>
+                <Link
+                  href={`/npcs/${npc.id}`}
+                  className="shrink-0 text-xs text-coc-muted hover:text-coc-gold border border-coc-border hover:border-coc-gold-dim rounded-md px-2 py-1 transition-colors"
+                >
+                  詳細
+                </Link>
               </div>
               {npc.appearance && (
                 <div className="mb-2">

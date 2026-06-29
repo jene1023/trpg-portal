@@ -165,7 +165,7 @@
 **実装ヒント:** `src/app/characters/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("dice_rolls").select("*").eq("character_id", id)` で全件取得し、技能名ごとにグループ化して成功数/総数を集計。追加DBなし（既存`dice_rolls`のみ使用）。グラフはCSSのみのバー表示（`width: calc(${rate}%)`）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「判定統計」リンクを追加。
 **コミット:** `feat: dice roll statistics dashboard per character`
 
-## [TODO] NPC詳細ページ＋クイックロール — 優先度: 中
+## [DONE] NPC詳細ページ＋クイックロール — 優先度: 中
 **対象:** KP
 **概要:** 現在NPCは一覧のみで詳細ページが存在しない。NPC個別詳細ページを追加し、拡張済みの能力値スタッツを確認しながら技能ロールをその場で実行できるKP専用ビュー。戦闘・対抗判定時の参照コストを大幅に下げる。
 **実装ヒント:** `src/app/npcs/[id]/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("npcs").select("*").eq("id", id)` でNPC取得。能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/DB）を StatBlock 風に表示。既存の `DiceRoller.tsx` を流用し、NPCの技能値を任意入力できるシンプルロールUIを配置。`src/app/npcs/page.tsx` の各NPCカードを `/npcs/[id]` へリンクするよう修正。追加DBなし。
