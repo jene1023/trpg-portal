@@ -201,7 +201,14 @@ export default async function CharacterDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* クイックビュー / セッションログ / 狂気記録 リンク */}
+          {/* セッション前確認 / クイックビュー / セッションログ / 狂気記録 リンク */}
+          <Link
+            href={`/characters/${id}/preflight`}
+            className="flex items-center justify-between rounded-lg border border-coc-gold/40 bg-coc-gold/5 px-4 py-3 text-sm text-coc-text hover:border-coc-gold/70 hover:bg-coc-gold/10 transition-colors"
+          >
+            <span className="font-semibold">セッション前確認</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
           <Link
             href={`/characters/${id}/quick`}
             className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"

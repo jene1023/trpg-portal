@@ -135,7 +135,7 @@
 **実装ヒント:** Supabaseに `character_traits` テーブルを追加（id, character_id, trait_type: "person"|"place"|"treasure"|"personality"|"ideology"|"wound", content, created_at）。`src/app/characters/[id]/traits/page.tsx` を新規作成（trait_typeごとにセクション分けして一覧・追加・削除）。`src/lib/supabase.ts` に `TraitType` と `CharacterTrait` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「特質・重要情報」リンクを追加。
 **コミット:** `feat: character trait and important info management for CoC 7th`
 
-## [TODO] セッション前チェックリスト — 優先度: 高
+## [DONE] セッション前チェックリスト — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション開始直前にHP/MP/SAN・装備・狂気状態・前回ログ・関係メモを一画面でまとめて確認できるプリフライトUI。セッション中の「確認し忘れ」を防ぐ。
 **実装ヒント:** `src/app/characters/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*), madness_records(*), sessions(*)")` でデータ一括取得。HP/MP/SAN の現在値をカラーコードで表示（残量50%以下で黄、25%以下で赤）。アクティブな狂気・所持武器・最新セッションサマリーを縦に並べる。追加DBなし。キャラクター詳細ページに「セッション前確認」リンクを追加。
