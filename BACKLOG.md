@@ -128,3 +128,33 @@
 **概要:** セッションログを時系列で可視化し、キャラクターの成長・出来事・SAN喪失の流れを年表形式で振り返れるビュー。既存のSessionLogデータを流用するため追加DBなし。
 **実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` を新規作成。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number", {ascending: true})` でログ取得。各セッションを縦線上のノードとして表示（CSS border-leftで疑似タイムライン）。SAN喪失量に応じてノードの色を変える（例: san_loss >= 5 で赤、1-4 で黄）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「年表」リンクを追加。
 **コミット:** `feat: character session timeline visualization`
+
+## [TODO] 探索者特質・重要情報管理 — 優先度: 高
+**対象:** PL
+**概要:** CoC7版キャラシートの「重要な人物」「重要な場所」「大切な宝物」「性格的特質」「イデオロギー/信念」を個別記録できる機能。現在のbackgroundフィールド（単一テキスト）では粒度が不足している。
+**実装ヒント:** Supabaseに `character_traits` テーブルを追加（id, character_id, trait_type: "person"|"place"|"treasure"|"personality"|"ideology"|"wound", content, created_at）。`src/app/characters/[id]/traits/page.tsx` を新規作成（trait_typeごとにセクション分けして一覧・追加・削除）。`src/lib/supabase.ts` に `TraitType` と `CharacterTrait` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「特質・重要情報」リンクを追加。
+**コミット:** `feat: character trait and important info management for CoC 7th`
+
+## [TODO] セッション前チェックリスト — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション開始直前にHP/MP/SAN・装備・狂気状態・前回ログ・関係メモを一画面でまとめて確認できるプリフライトUI。セッション中の「確認し忘れ」を防ぐ。
+**実装ヒント:** `src/app/characters/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*), madness_records(*), sessions(*)")` でデータ一括取得。HP/MP/SAN の現在値をカラーコードで表示（残量50%以下で黄、25%以下で赤）。アクティブな狂気・所持武器・最新セッションサマリーを縦に並べる。追加DBなし。キャラクター詳細ページに「セッション前確認」リンクを追加。
+**コミット:** `feat: pre-session checklist for in-session readiness`
+
+## [TODO] ダイスロール履歴 — 優先度: 中
+**対象:** PL / 共通
+**概要:** DiceRollerで行ったロールを自動保存し、セッション中・後に「いつ・何の技能・何を振ったか・成功度」を一覧確認できる履歴機能。KPとの確認作業や振り返りに使う。
+**実装ヒント:** Supabaseに `dice_rolls` テーブルを追加（id, character_id, skill_name, skill_value, roll_value, success_level: "critical_success"|"success"|"failure"|"fumble", rolled_at）。`src/app/_components/DiceRoller.tsx` でロール後に `supabase.from("dice_rolls").insert(...)` を呼ぶ。`src/app/characters/[id]/dice-history/page.tsx` を新規作成（セッション日付でグループ表示、直近50件）。`src/lib/supabase.ts` に `DiceRoll` 型を追加。
+**コミット:** `feat: dice roll history per character`
+
+## [TODO] NPCスタッツ拡張（能力値・技能） — 優先度: 中
+**対象:** KP
+**概要:** 現在のNPCは外見・目的・メモのみだが、戦闘NPCには STR/CON/DEX/HP等の能力値と代表技能値も記録できるよう拡張する。シナリオ中の戦闘・対抗判定に即座に参照できる。
+**実装ヒント:** Supabaseの `npcs` テーブルに `str`, `con`, `pow`, `dex`, `app`, `siz`, `int_stat`, `edu`, `hp`, `mp`, `db` (ダメージボーナス) カラムをNULL許容で追加（ALTER TABLE）。`src/app/npcs/new/page.tsx` と編集ページに「能力値」セクションを任意入力で追加。`src/app/_components/NpcForm.tsx` を更新。`src/lib/supabase.ts` の `Npc` 型に各カラムを追加。能力値未入力のNPCは従来通り外見・目的・メモのみ表示。
+**コミット:** `feat: NPC stats extension with ability scores and skills`
+
+## [TODO] お気に入りキャラクターのピン留め — 優先度: 低
+**対象:** PL / 共通
+**概要:** 複数キャラクターを管理するPLが「現在プレイ中のキャラ」をピン留めし、キャラクター一覧の先頭に固定表示できる機能。セッション開始時のキャラ選択を高速化する。
+**実装ヒント:** `characters` テーブルに `is_pinned: boolean DEFAULT false` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `is_pinned: boolean` を追加。`src/app/characters/page.tsx` のフィルタ処理でピン留めキャラを先頭ソート。`src/app/_components/CharacterCard.tsx` にピン留めトグルボタン（星アイコン等）を追加し `supabase.from("characters").update({is_pinned}).eq("id", id)` で更新。
+**コミット:** `feat: pin favorite characters to top of character list`
