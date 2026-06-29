@@ -117,7 +117,7 @@
 **実装ヒント:** `src/app/characters/page.tsx` を "use client" 化し、useState で `nameQuery`, `statusFilter`, `occupationQuery` を管理。`supabase.from("characters").select("*")` で全件取得後クライアントサイドでフィルタ（件数が多い場合は `.ilike()` クエリに切り替え可）。検索バー＋ステータスselectを既存 CharacterCard グリッドの上部に配置。追加DBなし。
 **コミット:** `feat: character list filter and search by name, occupation, status`
 
-## [TODO] シナリオ詳細ダッシュボード — 優先度: 中
+## [DONE] シナリオ詳細ダッシュボード — 優先度: 中
 **対象:** KP
 **概要:** シナリオのNPC一覧・ハンドアウト・参加者・セッション概要を一画面で確認できるKP専用の詳細ページ。各データへのナビゲーションハブとして機能する。
 **実装ヒント:** `src/app/scenarios/[id]/page.tsx` を新規作成（現在は未実装）。`supabase.from("scenarios").select("*").eq("id", id)` でシナリオ取得。同一ページ内で `npcs`（scenario_nameで絞り込み）と `handouts`（scenario_idで絞り込み）のカウントをサマリー表示。`src/app/scenarios/[id]/handouts/page.tsx` と `participants/page.tsx` へのカードリンクを配置。シナリオ一覧（`src/app/scenarios/page.tsx`）の各カードを `/scenarios/[id]` へリンクするよう修正。

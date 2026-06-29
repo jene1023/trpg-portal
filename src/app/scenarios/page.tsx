@@ -104,9 +104,12 @@ export default function ScenariosPage() {
               className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4"
             >
               <div className="flex items-start justify-between gap-4 mb-2">
-                <p className="font-cinzel font-semibold text-coc-text text-lg leading-tight">
+                <Link
+                  href={`/scenarios/${scenario.id}`}
+                  className="font-cinzel font-semibold text-coc-text text-lg leading-tight hover:text-coc-gold transition-colors"
+                >
                   {scenario.title}
-                </p>
+                </Link>
                 <div className="flex items-center gap-2 shrink-0">
                   {(participantCounts[scenario.id] ?? 0) > 0 && (
                     <span className="flex items-center gap-1 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-muted">
