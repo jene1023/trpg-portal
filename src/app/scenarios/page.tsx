@@ -124,6 +124,15 @@ export default function ScenariosPage() {
                   <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
                 </div>
               )}
+
+              <div className="mt-3 flex gap-3">
+                <Link
+                  href={`/scenarios/${scenario.id}/handouts`}
+                  className="text-xs text-coc-gold hover:underline"
+                >
+                  ハンドアウト管理 →
+                </Link>
+              </div>
             </div>
           ))}
         </div>

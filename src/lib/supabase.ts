@@ -124,3 +124,13 @@ export type Scenario = {
   played_at: string | null;
   created_at: string;
 };
+
+export type Handout = {
+  id: string;
+  scenario_id: string;
+  title: string;
+  content: string | null;
+  recipient_name: string | null;
+  is_secret: boolean;
+  created_at: string;
+};

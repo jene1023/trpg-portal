@@ -71,7 +71,7 @@
 **実装ヒント:** Supabaseに`scenarios`テーブルを追加（id, title, synopsis, gm_notes, status: "planning"|"ongoing"|"completed", played_at, created_at）。`src/app/scenarios/page.tsx`（一覧・ステータスフィルタ付き）と `src/app/scenarios/new/page.tsx`（作成フォーム）を新規作成。`src/app/_components/NavBar.tsx` に「シナリオ」リンクを追加。`src/lib/supabase.ts` に `Scenario` 型を追加。
 **コミット:** `feat: scenario management page for KP`
 
-## [TODO] ハンドアウト管理 — 優先度: 中
+## [DONE] ハンドアウト管理 — 優先度: 中
 **対象:** KP
 **概要:** シナリオ別にハンドアウト（情報カード）をタイトル・本文・受け取りPC名・秘匿フラグ付きで作成・一覧できる機能。セッション当日の情報配布ミスを防ぐ。
 **実装ヒント:** Supabaseに`handouts`テーブルを追加（id, scenario_id, title, content, recipient_name, is_secret: boolean, created_at）。`src/app/scenarios/[id]/handouts/page.tsx` を新規作成（一覧＋インライン作成フォーム）。is_secretがtrueのカードはデフォルト折りたたみ表示（`<details>` 要素またはstateで制御）。`src/lib/supabase.ts` に `Handout` 型を追加。
