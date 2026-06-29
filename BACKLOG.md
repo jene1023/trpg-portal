@@ -76,3 +76,31 @@
 **概要:** シナリオ別にハンドアウト（情報カード）をタイトル・本文・受け取りPC名・秘匿フラグ付きで作成・一覧できる機能。セッション当日の情報配布ミスを防ぐ。
 **実装ヒント:** Supabaseに`handouts`テーブルを追加（id, scenario_id, title, content, recipient_name, is_secret: boolean, created_at）。`src/app/scenarios/[id]/handouts/page.tsx` を新規作成（一覧＋インライン作成フォーム）。is_secretがtrueのカードはデフォルト折りたたみ表示（`<details>` 要素またはstateで制御）。`src/lib/supabase.ts` に `Handout` 型を追加。
 **コミット:** `feat: handout management per scenario for KP`
+
+## [TODO] チャットパレット生成 — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターの技能・能力値をもとに、ユドナリウム・ここフォリア等のVTTツールで使えるBCDice互換のチャットパレット（ロールコマンド集）を自動生成してコピーできる機能。
+**リサーチ根拠:** ユドナリウム・ここフォリア等の人気VTTツールがBCDiceチャットパレットを標準サポートしており、コピペで使えるパレット生成がユーザーの大きな需要として確認された。
+**実装ヒント:** `src/app/characters/[id]/chat-palette/page.tsx` を新規作成（"use client"）。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、技能ごとに `{技能名} 1D100<={現在値}` 形式のBCDiceコマンドを生成。テキストエリアに一覧表示し「クリップボードにコピー」ボタンを配置。キャラ詳細ページ（`src/app/characters/[id]/page.tsx`）にリンクを追加。
+**コミット:** `feat: BCDice chat palette generator for VTT tools`
+
+## [TODO] 武器・装備・所持品管理 — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターが所持する武器（ダメージ・射程・装弾数）と一般アイテムをセッション中に参照・更新できるインベントリ管理機能。
+**リサーチ根拠:** Roll20・PrismScroll Cthulhu・公式シートを含む主要CoC管理ツールほぼ全てで実装されている定番機能であり、このポータルに明確に欠けている要素として確認された。
+**実装ヒント:** Supabaseに `inventory_items` テーブルを追加（id, character_id, item_type: "weapon"|"item", name, damage, range, ammo_current, ammo_max, notes, created_at）。`src/app/characters/[id]/inventory/page.tsx` を新規作成（一覧＋インライン編集フォーム）。武器は damage/range/ammo を、アイテムは name/notes のみ表示するよう item_type で分岐。`src/app/_components/InventoryForm.tsx` を "use client" で作成。`src/lib/supabase.ts` に `InventoryItem` 型を追加。
+**コミット:** `feat: weapon and item inventory management`
+
+## [TODO] PDFシートエクスポート — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターシート全体（ステータス・技能・所持品）をA4 PDF形式でダウンロードできる機能。既存のJSONエクスポートを補完し、印刷・オフラインセッション用途に対応する。
+**リサーチ根拠:** Charaeno・PrismScroll Cthulhu・Roll20等の主要ツールが全てPDF出力をサポートしており、オフラインセッション・印刷需要がユーザーから継続的に挙げられている。
+**実装ヒント:** `src/app/_components/PdfExportButton.tsx` を "use client" で新規作成。ブラウザの `window.print()` + 印刷用CSSメディアクエリ（`@media print`）方式で実装するか、`react-to-print` ライブラリを使用。印刷対象コンポーネント `src/app/characters/[id]/print/page.tsx` を新規作成し、ステータス・技能・所持品を1ページに収めるレイアウトで構成。キャラクター詳細ページのヘッダーに「PDF出力」ボタンを追加。
+**コミット:** `feat: PDF character sheet export for offline/print use`
+
+## [TODO] キャラクター紹介カード — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターの名前・外見・職業・背景・能力値ハイライトをSNS共有向けのカード形式で表示し、画像としてダウンロードできる機能。セッション前の自己紹介や卓外での共有に使う。
+**リサーチ根拠:** Charaenoの「キャラ紹介」機能やいあキャラのプロフィールカードが人気を集めており、SNSでのキャラ共有・セッション募集時の自己紹介ニーズが高いことが確認された。
+**実装ヒント:** `src/app/characters/[id]/profile-card/page.tsx` を新規作成。`html2canvas` ライブラリでカードDOMをCanvas化し PNG ダウンロード。カードレイアウトはキャラ名・職業・外見テキスト・HP/SAN/能力値サマリを縦に配置する `src/app/_components/ProfileCard.tsx` で実装（"use client"）。OGP用途に `/api/characters/[id]/og` ルートも将来追加可能な構造にする。キャラクター詳細ページに「紹介カード」リンクを追加。
+**コミット:** `feat: character profile card for SNS sharing`
