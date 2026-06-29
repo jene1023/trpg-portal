@@ -5,6 +5,23 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc } from "@/lib/supabase";
 
+const STAT_DISPLAY = [
+  { key: "str" as const, label: "STR" },
+  { key: "con" as const, label: "CON" },
+  { key: "pow" as const, label: "POW" },
+  { key: "dex" as const, label: "DEX" },
+  { key: "app" as const, label: "APP" },
+  { key: "siz" as const, label: "SIZ" },
+  { key: "int_stat" as const, label: "INT" },
+  { key: "edu" as const, label: "EDU" },
+  { key: "hp" as const, label: "HP" },
+  { key: "mp" as const, label: "MP" },
+];
+
+function hasStats(npc: Npc): boolean {
+  return STAT_DISPLAY.some(({ key }) => npc[key] !== null);
+}
+
 export default function NpcsPage() {
   const [npcs, setNpcs] = useState<Npc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,6 +128,28 @@ export default function NpcsPage() {
                   <span className="text-sm text-coc-text">{npc.purpose}</span>
                 </div>
               )}
+
+              {/* 能力値表示（入力済みのもののみ） */}
+              {hasStats(npc) && (
+                <div className="mt-3 rounded-lg border border-coc-border bg-coc-raised px-3 py-3">
+                  <p className="text-xs font-medium text-coc-muted mb-2">能力値</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {STAT_DISPLAY.filter(({ key }) => npc[key] !== null).map(({ key, label }) => (
+                      <div key={key} className="flex items-baseline gap-1">
+                        <span className="text-xs text-coc-muted">{label}</span>
+                        <span className="text-sm font-semibold text-coc-text">{npc[key]}</span>
+                      </div>
+                    ))}
+                    {npc.db && (
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xs text-coc-muted">DB</span>
+                        <span className="text-sm font-semibold text-coc-text">{npc.db}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {npc.notes && (
                 <div className="mt-3 rounded-lg border border-coc-border bg-coc-raised px-3 py-2">
                   <p className="text-xs font-medium text-coc-muted mb-1">KP メモ</p>

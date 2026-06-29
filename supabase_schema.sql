@@ -149,3 +149,16 @@ create table if not exists dice_rolls (
 
 alter table dice_rolls enable row level security;
 create policy "allow all for anon" on dice_rolls for all using (true) with check (true);
+
+-- NPCスタッツ拡張 (追加マイグレーション)
+alter table npcs add column if not exists str integer;
+alter table npcs add column if not exists con integer;
+alter table npcs add column if not exists pow integer;
+alter table npcs add column if not exists dex integer;
+alter table npcs add column if not exists app integer;
+alter table npcs add column if not exists siz integer;
+alter table npcs add column if not exists int_stat integer;
+alter table npcs add column if not exists edu integer;
+alter table npcs add column if not exists hp integer;
+alter table npcs add column if not exists mp integer;
+alter table npcs add column if not exists db text;

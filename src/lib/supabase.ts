@@ -86,6 +86,17 @@ export type Npc = {
   appearance: string | null;
   purpose: string | null;
   notes: string | null;
+  str: number | null;
+  con: number | null;
+  pow: number | null;
+  dex: number | null;
+  app: number | null;
+  siz: number | null;
+  int_stat: number | null;
+  edu: number | null;
+  hp: number | null;
+  mp: number | null;
+  db: string | null;
   created_at: string;
 };
 

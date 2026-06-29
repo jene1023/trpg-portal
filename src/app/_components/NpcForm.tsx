@@ -2,12 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+
+type StatKey = "str" | "con" | "pow" | "dex" | "app" | "siz" | "int_stat" | "edu" | "hp" | "mp";
+
+const STAT_LABELS: { key: StatKey; label: string }[] = [
+  { key: "str", label: "STR" },
+  { key: "con", label: "CON" },
+  { key: "pow", label: "POW" },
+  { key: "dex", label: "DEX" },
+  { key: "app", label: "APP" },
+  { key: "siz", label: "SIZ" },
+  { key: "int_stat", label: "INT" },
+  { key: "edu", label: "EDU" },
+  { key: "hp", label: "HP" },
+  { key: "mp", label: "MP" },
+];
 
 export default function NpcForm() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showStats, setShowStats] = useState(false);
 
   const [form, setForm] = useState({
     scenario_name: "",
@@ -17,8 +34,28 @@ export default function NpcForm() {
     notes: "",
   });
 
+  const [stats, setStats] = useState<Record<StatKey, string>>({
+    str: "",
+    con: "",
+    pow: "",
+    dex: "",
+    app: "",
+    siz: "",
+    int_stat: "",
+    edu: "",
+    hp: "",
+    mp: "",
+  });
+
+  const [db, setDb] = useState("");
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  function handleStatChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const key = e.target.name as StatKey;
+    setStats((prev) => ({ ...prev, [key]: e.target.value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -33,12 +70,21 @@ export default function NpcForm() {
     }
     setSaving(true);
     setError(null);
+
+    const statPayload: Record<string, number | string | null> = {};
+    for (const { key } of STAT_LABELS) {
+      const v = stats[key].trim();
+      statPayload[key] = v !== "" ? parseInt(v, 10) : null;
+    }
+    statPayload.db = db.trim() || null;
+
     const { error: err } = await supabase.from("npcs").insert({
       scenario_name: form.scenario_name.trim() || null,
       name: form.name.trim(),
       appearance: form.appearance.trim() || null,
       purpose: form.purpose.trim() || null,
       notes: form.notes.trim() || null,
+      ...statPayload,
     });
     if (err) {
       setError(err.message);
@@ -52,6 +98,8 @@ export default function NpcForm() {
   const fieldClass =
     "w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder-coc-faint focus:outline-none focus:border-coc-gold transition-colors";
   const labelClass = "block text-xs font-medium text-coc-muted mb-1";
+  const statFieldClass =
+    "w-full rounded-lg border border-coc-border bg-coc-raised px-2 py-1.5 text-sm text-coc-text text-center focus:outline-none focus:border-coc-gold transition-colors";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -129,10 +177,54 @@ export default function NpcForm() {
           name="notes"
           value={form.notes}
           onChange={handleChange}
-          placeholder="KP用の秘密メモ・能力値など"
+          placeholder="KP用の秘密メモ"
           rows={4}
           className={fieldClass}
         />
+      </div>
+
+      {/* 能力値セクション（任意） */}
+      <div className="rounded-lg border border-coc-border bg-coc-surface overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowStats((v) => !v)}
+          className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-coc-text hover:bg-coc-raised transition-colors"
+        >
+          <span>能力値を入力する（任意・戦闘NPCなど）</span>
+          {showStats ? <ChevronUp size={16} className="text-coc-muted" /> : <ChevronDown size={16} className="text-coc-muted" />}
+        </button>
+
+        {showStats && (
+          <div className="px-4 pb-4 pt-2 border-t border-coc-border">
+            <div className="grid grid-cols-5 gap-2 mb-3">
+              {STAT_LABELS.map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-xs text-center text-coc-muted mb-1">{label}</label>
+                  <input
+                    type="number"
+                    name={key}
+                    value={stats[key]}
+                    onChange={handleStatChange}
+                    placeholder="—"
+                    min={1}
+                    max={999}
+                    className={statFieldClass}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="max-w-[120px]">
+              <label className="block text-xs text-coc-muted mb-1">DB（ダメージボーナス）</label>
+              <input
+                type="text"
+                value={db}
+                onChange={(e) => setDb(e.target.value)}
+                placeholder="例: +1d4"
+                className={fieldClass}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3 justify-end">

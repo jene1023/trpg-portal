@@ -147,7 +147,7 @@
 **実装ヒント:** Supabaseに `dice_rolls` テーブルを追加（id, character_id, skill_name, skill_value, roll_value, success_level: "critical_success"|"success"|"failure"|"fumble", rolled_at）。`src/app/_components/DiceRoller.tsx` でロール後に `supabase.from("dice_rolls").insert(...)` を呼ぶ。`src/app/characters/[id]/dice-history/page.tsx` を新規作成（セッション日付でグループ表示、直近50件）。`src/lib/supabase.ts` に `DiceRoll` 型を追加。
 **コミット:** `feat: dice roll history per character`
 
-## [TODO] NPCスタッツ拡張（能力値・技能） — 優先度: 中
+## [DONE] NPCスタッツ拡張（能力値・技能） — 優先度: 中
 **対象:** KP
 **概要:** 現在のNPCは外見・目的・メモのみだが、戦闘NPCには STR/CON/DEX/HP等の能力値と代表技能値も記録できるよう拡張する。シナリオ中の戦闘・対抗判定に即座に参照できる。
 **実装ヒント:** Supabaseの `npcs` テーブルに `str`, `con`, `pow`, `dex`, `app`, `siz`, `int_stat`, `edu`, `hp`, `mp`, `db` (ダメージボーナス) カラムをNULL許容で追加（ALTER TABLE）。`src/app/npcs/new/page.tsx` と編集ページに「能力値」セクションを任意入力で追加。`src/app/_components/NpcForm.tsx` を更新。`src/lib/supabase.ts` の `Npc` 型に各カラムを追加。能力値未入力のNPCは従来通り外見・目的・メモのみ表示。
