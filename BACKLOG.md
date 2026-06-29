@@ -201,7 +201,7 @@
 **実装ヒント:** `src/app/characters/[id]/page.tsx` のヘッダーに「複製」ボタンを追加（"use client" コンポーネント）。ボタン押下で `supabase.from("characters").select("*, character_skills(*)")` で全データ取得し、name に「（コピー）」を付加して `characters` テーブルに INSERT、続いて `character_skills` を新IDで一括 INSERT。複製後は新キャラクターの詳細ページへリダイレクト。追加DBなし。スキルの `growth_checked` はすべて `false` にリセット。
 **コミット:** `feat: duplicate character with skills for quick character creation`
 
-## [TODO] KPハンドアウト共有URL — 優先度: 中
+## [DONE] KPハンドアウト共有URL — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPがシナリオのハンドアウトを選択し、有効期限付き閲覧専用URLを発行してPLに共有できる機能。現在ハンドアウトはKP画面内にしか存在せず、PLへの情報提供が口頭かコピペに限られている。
 **実装ヒント:** Supabaseに `share_tokens` テーブルを追加（id, handout_id, token: uuid, expires_at: timestamptz, created_at）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の各ハンドアウトカードに「共有リンク生成」ボタンを追加し、`supabase.from("share_tokens").insert({handout_id, token: crypto.randomUUID(), expires_at: +24h})` でトークン発行。`src/app/share/[token]/page.tsx` を新規作成（Server Component）。`supabase.from("share_tokens").select("*, handouts(*)").eq("token", token).gt("expires_at", now)` で取得し、is_secret でなければ本文を表示。`src/lib/supabase.ts` に `ShareToken` 型を追加。

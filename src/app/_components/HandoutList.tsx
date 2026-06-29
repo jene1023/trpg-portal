@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Plus, X } from "lucide-react";
+import { Eye, EyeOff, Link as LinkIcon, Plus, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Handout } from "@/lib/supabase";
 
 type Props = {
@@ -18,6 +18,7 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
   const [isSecret, setIsSecret] = useState(false);
   const [saving, setSaving] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [shareUrls, setShareUrls] = useState<Record<string, string>>({});
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +62,21 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
     if (!isSupabaseConfigured) return;
     await supabase.from("handouts").delete().eq("id", id);
     setHandouts((prev) => prev.filter((h) => h.id !== id));
+  }
+
+  async function handleGenerateShareLink(handoutId: string) {
+    if (!isSupabaseConfigured) return;
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from("share_tokens")
+      .insert({ handout_id: handoutId, expires_at: expiresAt })
+      .select()
+      .single();
+    if (!error && data) {
+      const url = `${window.location.origin}/share/${data.token}`;
+      setShareUrls((prev) => ({ ...prev, [handoutId]: url }));
+      await navigator.clipboard.writeText(url).catch(() => {});
+    }
   }
 
   return (
@@ -194,6 +210,13 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
                       </button>
                     )}
                     <button
+                      onClick={() => handleGenerateShareLink(h.id)}
+                      className="text-coc-muted hover:text-coc-gold transition-colors"
+                      title="共有リンクを生成（24時間有効）"
+                    >
+                      <LinkIcon size={15} />
+                    </button>
+                    <button
                       onClick={() => handleDelete(h.id)}
                       className="text-coc-faint hover:text-red-400 transition-colors"
                       title="削除"
@@ -219,6 +242,13 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
                     {h.content}
                   </p>
                 ) : null}
+
+                {shareUrls[h.id] && (
+                  <div className="mt-2 rounded-md border border-coc-gold-dim bg-coc-raised px-3 py-2">
+                    <p className="text-xs text-coc-muted mb-1">共有リンク（24時間有効・クリップボードにコピー済み）</p>
+                    <p className="text-xs text-coc-gold break-all select-all">{shareUrls[h.id]}</p>
+                  </div>
+                )}
               </div>
             );
           })}

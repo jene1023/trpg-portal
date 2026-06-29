@@ -162,3 +162,15 @@ alter table npcs add column if not exists edu integer;
 alter table npcs add column if not exists hp integer;
 alter table npcs add column if not exists mp integer;
 alter table npcs add column if not exists db text;
+
+-- ハンドアウト共有URLテーブル (追加マイグレーション)
+create table if not exists share_tokens (
+  id          uuid primary key default gen_random_uuid(),
+  handout_id  uuid not null references handouts(id) on delete cascade,
+  token       uuid not null default gen_random_uuid() unique,
+  expires_at  timestamptz not null,
+  created_at  timestamptz default now()
+);
+
+alter table share_tokens enable row level security;
+create policy "allow all for anon" on share_tokens for all using (true) with check (true);

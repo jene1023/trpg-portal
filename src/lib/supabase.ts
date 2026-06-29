@@ -226,3 +226,11 @@ export type CharacterSpell = {
   source_page: string | null;
   created_at: string;
 };
+
+export type ShareToken = {
+  id: string;
+  handout_id: string;
+  token: string;
+  expires_at: string;
+  created_at: string;
+};
