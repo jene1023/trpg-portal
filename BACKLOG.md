@@ -77,7 +77,7 @@
 **実装ヒント:** Supabaseに`handouts`テーブルを追加（id, scenario_id, title, content, recipient_name, is_secret: boolean, created_at）。`src/app/scenarios/[id]/handouts/page.tsx` を新規作成（一覧＋インライン作成フォーム）。is_secretがtrueのカードはデフォルト折りたたみ表示（`<details>` 要素またはstateで制御）。`src/lib/supabase.ts` に `Handout` 型を追加。
 **コミット:** `feat: handout management per scenario for KP`
 
-## [TODO] チャットパレット生成 — 優先度: 高
+## [DONE] チャットパレット生成 — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターの技能・能力値をもとに、ユドナリウム・ここフォリア等のVTTツールで使えるBCDice互換のチャットパレット（ロールコマンド集）を自動生成してコピーできる機能。
 **リサーチ根拠:** ユドナリウム・ここフォリア等の人気VTTツールがBCDiceチャットパレットを標準サポートしており、コピペで使えるパレット生成がユーザーの大きな需要として確認された。
