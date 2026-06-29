@@ -98,7 +98,7 @@
 **実装ヒント:** `src/app/_components/PdfExportButton.tsx` を "use client" で新規作成。ブラウザの `window.print()` + 印刷用CSSメディアクエリ（`@media print`）方式で実装するか、`react-to-print` ライブラリを使用。印刷対象コンポーネント `src/app/characters/[id]/print/page.tsx` を新規作成し、ステータス・技能・所持品を1ページに収めるレイアウトで構成。キャラクター詳細ページのヘッダーに「PDF出力」ボタンを追加。
 **コミット:** `feat: PDF character sheet export for offline/print use`
 
-## [TODO] キャラクター紹介カード — 優先度: 中
+## [DONE] キャラクター紹介カード — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターの名前・外見・職業・背景・能力値ハイライトをSNS共有向けのカード形式で表示し、画像としてダウンロードできる機能。セッション前の自己紹介や卓外での共有に使う。
 **リサーチ根拠:** Charaenoの「キャラ紹介」機能やいあキャラのプロフィールカードが人気を集めており、SNSでのキャラ共有・セッション募集時の自己紹介ニーズが高いことが確認された。
