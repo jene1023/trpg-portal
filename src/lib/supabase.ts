@@ -149,3 +149,10 @@ export type InventoryItem = {
   notes: string | null;
   created_at: string;
 };
+
+export type ScenarioParticipant = {
+  id: string;
+  scenario_id: string;
+  character_id: string;
+  created_at: string;
+};

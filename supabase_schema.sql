@@ -122,3 +122,15 @@ create table if not exists scenarios (
 
 alter table scenarios enable row level security;
 create policy "allow all for anon" on scenarios for all using (true) with check (true);
+
+-- シナリオ参加キャラクターテーブル (追加マイグレーション)
+create table if not exists scenario_participants (
+  id           uuid primary key default gen_random_uuid(),
+  scenario_id  uuid not null references scenarios(id) on delete cascade,
+  character_id uuid not null references characters(id) on delete cascade,
+  created_at   timestamptz default now(),
+  unique (scenario_id, character_id)
+);
+
+alter table scenario_participants enable row level security;
+create policy "allow all for anon" on scenario_participants for all using (true) with check (true);

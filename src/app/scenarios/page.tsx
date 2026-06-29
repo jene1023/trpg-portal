@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
@@ -19,6 +19,7 @@ const STATUS_COLORS: Record<ScenarioStatus, string> = {
 
 export default function ScenariosPage() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ScenarioStatus | "all">("all");
 
@@ -28,11 +29,18 @@ export default function ScenariosPage() {
       return;
     }
     async function load() {
-      const { data } = await supabase
-        .from("scenarios")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (data) setScenarios(data as Scenario[]);
+      const [{ data: scenariosData }, { data: participantsData }] = await Promise.all([
+        supabase.from("scenarios").select("*").order("created_at", { ascending: false }),
+        supabase.from("scenario_participants").select("scenario_id"),
+      ]);
+      if (scenariosData) setScenarios(scenariosData as Scenario[]);
+      if (participantsData) {
+        const counts: Record<string, number> = {};
+        for (const row of participantsData) {
+          counts[row.scenario_id] = (counts[row.scenario_id] ?? 0) + 1;
+        }
+        setParticipantCounts(counts);
+      }
       setLoading(false);
     }
     load();
@@ -99,11 +107,19 @@ export default function ScenariosPage() {
                 <p className="font-cinzel font-semibold text-coc-text text-lg leading-tight">
                   {scenario.title}
                 </p>
-                <span
-                  className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[scenario.status]}`}
-                >
-                  {STATUS_LABELS[scenario.status]}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {(participantCounts[scenario.id] ?? 0) > 0 && (
+                    <span className="flex items-center gap-1 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-muted">
+                      <Users size={11} />
+                      {participantCounts[scenario.id]}
+                    </span>
+                  )}
+                  <span
+                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[scenario.status]}`}
+                  >
+                    {STATUS_LABELS[scenario.status]}
+                  </span>
+                </div>
               </div>
 
               {scenario.played_at && (
@@ -131,6 +147,12 @@ export default function ScenariosPage() {
                   className="text-xs text-coc-gold hover:underline"
                 >
                   ハンドアウト管理 →
+                </Link>
+                <Link
+                  href={`/scenarios/${scenario.id}/participants`}
+                  className="text-xs text-coc-gold hover:underline"
+                >
+                  参加者管理 →
                 </Link>
               </div>
             </div>

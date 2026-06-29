@@ -105,7 +105,7 @@
 **実装ヒント:** `src/app/characters/[id]/profile-card/page.tsx` を新規作成。`html2canvas` ライブラリでカードDOMをCanvas化し PNG ダウンロード。カードレイアウトはキャラ名・職業・外見テキスト・HP/SAN/能力値サマリを縦に配置する `src/app/_components/ProfileCard.tsx` で実装（"use client"）。OGP用途に `/api/characters/[id]/og` ルートも将来追加可能な構造にする。キャラクター詳細ページに「紹介カード」リンクを追加。
 **コミット:** `feat: character profile card for SNS sharing`
 
-## [TODO] シナリオ参加キャラクター管理 — 優先度: 高
+## [DONE] シナリオ参加キャラクター管理 — 優先度: 高
 **対象:** KP / 共通
 **概要:** KPがシナリオに参加するキャラクターを登録し、セッションの参加者を一画面で把握できる機能。既存のシナリオ・キャラクター両データと連携する。
 **実装ヒント:** Supabaseに `scenario_participants` テーブルを追加（id, scenario_id, character_id, created_at）。`src/app/scenarios/[id]/participants/page.tsx` を新規作成（一覧＋キャラクター選択フォーム）。`src/lib/supabase.ts` に `ScenarioParticipant` 型を追加。シナリオ一覧ページ（`src/app/scenarios/page.tsx`）の各カードに参加者数バッジを追加。
