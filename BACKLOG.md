@@ -183,7 +183,7 @@
 **実装ヒント:** Supabaseに `growth_history` テーブルを追加（id, character_id, skill_name, old_value, new_value, session_label, grown_at, created_at）。`src/app/characters/[id]/growth/page.tsx` を新規作成（一覧＋成長記録追加フォーム）。SkillList.tsx の成長チェック解除フロー（`growth_checked: false` に戻す処理）の直前に「成長記録を追加しますか？」モーダルを挿入するか、独立したページとして実装。`src/lib/supabase.ts` に `GrowthHistory` 型を追加。キャラクタータイムライン（`src/app/characters/[id]/timeline/page.tsx`）の各セッションノードに成長情報を付記。
 **コミット:** `feat: character skill growth history tracking`
 
-## [TODO] 呪文・魔術管理 — 優先度: 高
+## [DONE] 呪文・魔術管理 — 優先度: 高
 **対象:** PL
 **概要:** CoC 7版の呪文（マジック）をキャラクター単位で管理できる機能。呪文名・MP消費・SAN消費・効果概要・ページ参照を記録し、セッション中に素早く参照できる。現在インベントリ・技能・狂気は管理できるが呪文機能が完全に欠落している。
 **実装ヒント:** Supabaseに `character_spells` テーブルを追加（id, character_id, spell_name, mp_cost, san_cost, casting_time, effect, source_page, created_at）。`src/app/characters/[id]/spells/page.tsx` を新規作成（一覧＋追加フォーム）。呪文カードは `spell_name`・`mp_cost`/`san_cost` バッジ・`effect` テキストを縦に並べる。`src/lib/supabase.ts` に `CharacterSpell` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「呪文」リンクを追加。セッション前チェックリスト（`preflight/page.tsx`）にも習得呪文サマリーを追記。

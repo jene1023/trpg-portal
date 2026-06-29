@@ -311,6 +311,13 @@ export default async function CharacterDetailPage({ params }: Props) {
             <span>技能成長履歴</span>
             <span className="text-coc-gold">→</span>
           </Link>
+          <Link
+            href={`/characters/${id}/spells`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <span>呪文・魔術</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
         </div>
       </div>
     </div>

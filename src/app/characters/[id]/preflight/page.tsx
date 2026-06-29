@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -43,6 +43,12 @@ export default async function PreflightPage({ params }: Props) {
     .select("*, character_skills(*), inventory_items(*), madness_records(*), sessions(*)")
     .eq("id", id)
     .single();
+
+  const { data: spells } = await supabase
+    .from("character_spells")
+    .select("id, spell_name, mp_cost, san_cost")
+    .eq("character_id", id)
+    .order("created_at", { ascending: true });
 
   if (!char) notFound();
 
@@ -247,6 +253,47 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           セッションログを見る →
+        </Link>
+      </div>
+
+      {/* 習得呪文サマリー */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles size={16} className="text-coc-muted" />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            習得呪文
+          </h2>
+          <span className="ml-auto text-xs text-coc-muted">{(spells ?? []).length}件</span>
+        </div>
+        {(spells ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">習得呪文なし</p>
+        ) : (
+          <ul className="space-y-2">
+            {(spells ?? []).map(
+              (s: { id: string; spell_name: string; mp_cost: number | null; san_cost: number | null }) => (
+                <li
+                  key={s.id}
+                  className="rounded-md border border-coc-border bg-coc-raised px-3 py-2 flex items-center justify-between"
+                >
+                  <span className="text-sm font-semibold text-coc-text">{s.spell_name}</span>
+                  <div className="flex gap-2">
+                    {s.mp_cost != null && (
+                      <span className="text-xs text-blue-300">MP {s.mp_cost}</span>
+                    )}
+                    {s.san_cost != null && (
+                      <span className="text-xs text-red-300">SAN {s.san_cost}</span>
+                    )}
+                  </div>
+                </li>
+              )
+            )}
+          </ul>
+        )}
+        <Link
+          href={`/characters/${id}/spells`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          呪文を管理 →
         </Link>
       </div>
 

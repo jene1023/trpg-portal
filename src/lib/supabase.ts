@@ -214,3 +214,15 @@ export type GrowthHistory = {
   grown_at: string | null;
   created_at: string;
 };
+
+export type CharacterSpell = {
+  id: string;
+  character_id: string;
+  spell_name: string;
+  mp_cost: number | null;
+  san_cost: number | null;
+  casting_time: string | null;
+  effect: string | null;
+  source_page: string | null;
+  created_at: string;
+};
