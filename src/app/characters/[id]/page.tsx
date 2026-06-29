@@ -12,6 +12,7 @@ import DerivedStatBar from "@/app/_components/DerivedStatBar";
 import SkillList from "@/app/_components/SkillList";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import DiceRoller from "@/app/_components/DiceRoller";
+import ExportButton from "@/app/_components/ExportButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -52,13 +53,16 @@ export default async function CharacterDetailPage({ params }: Props) {
           <ArrowLeft size={16} />
           一覧へ
         </Link>
-        <Link
-          href={`/characters/${id}/edit`}
-          className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
-        >
-          <Pencil size={14} />
-          編集
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportButton characterId={id} characterName={char.name} />
+          <Link
+            href={`/characters/${id}/edit`}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <Pencil size={14} />
+            編集
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">

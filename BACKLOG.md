@@ -59,7 +59,7 @@
 **実装ヒント:** Supabaseに`madness_records`テーブルを追加（id, character_id, madness_type: "temporary"|"indefinite", symptom, is_active: boolean, started_at, recovered_at, created_at）。`src/app/characters/[id]/madness/page.tsx` を新規作成（一覧＋追加フォーム）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）にSAN現在値が低い場合は警告バッジを表示し「狂気記録」リンクを追加。`src/lib/supabase.ts` に `MadnessRecord` 型を追加。
 **コミット:** `feat: madness state tracking per character`
 
-## [TODO] キャラクターJSONエクスポート — 優先度: 高
+## [DONE] キャラクターJSONエクスポート — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターデータ（ステータス・技能・セッションログ）をJSONファイルとしてダウンロードできる機能。セッション前後のバックアップやシート共有に使う。
 **実装ヒント:** `src/app/_components/ExportButton.tsx` を "use client" で新規作成。`supabase.from("characters").select("*, character_skills(*), sessions(*)")` で全データ取得し `JSON.stringify` + `Blob` + `URL.createObjectURL` でダウンロード。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンとして配置。
