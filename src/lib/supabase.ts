@@ -203,3 +203,14 @@ export type QuickNote = {
   content: string;
   created_at: string;
 };
+
+export type GrowthHistory = {
+  id: string;
+  character_id: string;
+  skill_name: string;
+  old_value: number;
+  new_value: number;
+  session_label: string | null;
+  grown_at: string | null;
+  created_at: string;
+};

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { supabase, isSupabaseConfigured, SessionLog } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, SessionLog, GrowthHistory } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -38,7 +38,20 @@ export default async function TimelinePage({ params }: Props) {
     .eq("character_id", id)
     .order("session_number", { ascending: true });
 
+  const { data: growthData } = await supabase
+    .from("growth_history")
+    .select("*")
+    .eq("character_id", id);
+
   const logs: SessionLog[] = sessions ?? [];
+  const growthRecords: GrowthHistory[] = growthData ?? [];
+
+  function growthForSession(log: SessionLog): GrowthHistory[] {
+    if (growthRecords.length === 0) return [];
+    return growthRecords.filter(
+      (g) => g.session_label && g.session_label === log.title
+    );
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -116,6 +129,21 @@ export default async function TimelinePage({ params }: Props) {
                     <p className="font-crimson text-coc-muted text-sm leading-relaxed whitespace-pre-wrap">
                       {log.summary}
                     </p>
+                  )}
+
+                  {growthForSession(log).length > 0 && (
+                    <div className="pt-1 flex flex-wrap gap-1.5">
+                      {growthForSession(log).map((g) => (
+                        <span
+                          key={g.id}
+                          className="inline-flex items-center gap-1 rounded border border-coc-gold/40 bg-coc-gold/5 px-2 py-0.5 text-xs text-coc-gold"
+                        >
+                          <span>{g.skill_name}</span>
+                          <span className="opacity-60">{g.old_value}→{g.new_value}</span>
+                          <span className="font-bold">+{g.new_value - g.old_value}</span>
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
               </li>

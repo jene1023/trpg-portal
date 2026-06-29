@@ -177,7 +177,7 @@
 **実装ヒント:** Supabaseに `quick_notes` テーブルを追加（id, character_id, content, created_at）。`src/app/characters/[id]/quick-notes/page.tsx` を "use client" で新規作成。`<textarea>` で内容を入力し「保存」「削除」ができるシンプルなUI（一覧はcreated_at降順、最新10件）。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも「メモ」ショートカットリンクを追加。`src/lib/supabase.ts` に `QuickNote` 型を追加。
 **コミット:** `feat: in-session quick note pad per character`
 
-## [TODO] キャラクター成長履歴 — 優先度: 中
+## [DONE] キャラクター成長履歴 — 優先度: 中
 **対象:** PL
 **概要:** 技能成長チェック後に実際に技能値が上がったとき、その変化を「どのセッション後にどの技能が何点上がったか」として記録する成長ログ。キャラクター成長の軌跡をセッション単位で振り返れる。
 **実装ヒント:** Supabaseに `growth_history` テーブルを追加（id, character_id, skill_name, old_value, new_value, session_label, grown_at, created_at）。`src/app/characters/[id]/growth/page.tsx` を新規作成（一覧＋成長記録追加フォーム）。SkillList.tsx の成長チェック解除フロー（`growth_checked: false` に戻す処理）の直前に「成長記録を追加しますか？」モーダルを挿入するか、独立したページとして実装。`src/lib/supabase.ts` に `GrowthHistory` 型を追加。キャラクタータイムライン（`src/app/characters/[id]/timeline/page.tsx`）の各セッションノードに成長情報を付記。
