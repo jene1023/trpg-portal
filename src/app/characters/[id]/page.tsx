@@ -240,6 +240,13 @@ export default async function CharacterDetailPage({ params }: Props) {
             <span className={char.san_current <= Math.floor(char.san_max / 5) ? "text-red-400" : "text-coc-gold"}>→</span>
           </Link>
           <Link
+            href={`/characters/${id}/inventory`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <span>武器・所持品</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
+          <Link
             href={`/characters/${id}/chat-palette`}
             className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
           >

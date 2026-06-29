@@ -84,7 +84,7 @@
 **実装ヒント:** `src/app/characters/[id]/chat-palette/page.tsx` を新規作成（"use client"）。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、技能ごとに `{技能名} 1D100<={現在値}` 形式のBCDiceコマンドを生成。テキストエリアに一覧表示し「クリップボードにコピー」ボタンを配置。キャラ詳細ページ（`src/app/characters/[id]/page.tsx`）にリンクを追加。
 **コミット:** `feat: BCDice chat palette generator for VTT tools`
 
-## [TODO] 武器・装備・所持品管理 — 優先度: 高
+## [DONE] 武器・装備・所持品管理 — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターが所持する武器（ダメージ・射程・装弾数）と一般アイテムをセッション中に参照・更新できるインベントリ管理機能。
 **リサーチ根拠:** Roll20・PrismScroll Cthulhu・公式シートを含む主要CoC管理ツールほぼ全てで実装されている定番機能であり、このポータルに明確に欠けている要素として確認された。

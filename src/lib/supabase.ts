@@ -134,3 +134,18 @@ export type Handout = {
   is_secret: boolean;
   created_at: string;
 };
+
+export type ItemType = "weapon" | "item";
+
+export type InventoryItem = {
+  id: string;
+  character_id: string;
+  item_type: ItemType;
+  name: string;
+  damage: string | null;
+  range: string | null;
+  ammo_current: number | null;
+  ammo_max: number | null;
+  notes: string | null;
+  created_at: string;
+};
