@@ -21,11 +21,18 @@ export default async function InventoryPage({ params }: Props) {
 
   if (!char) notFound();
 
-  const { data: items } = await supabase
-    .from("inventory_items")
-    .select("*")
-    .eq("character_id", id)
-    .order("created_at", { ascending: true });
+  const [{ data: items }, { data: skills }] = await Promise.all([
+    supabase
+      .from("inventory_items")
+      .select("*")
+      .eq("character_id", id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("character_skills")
+      .select("*")
+      .eq("character_id", id)
+      .order("skill_name", { ascending: true }),
+  ]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -43,7 +50,7 @@ export default async function InventoryPage({ params }: Props) {
         武器・所持品
       </h1>
 
-      <InventoryForm characterId={id} initialItems={items ?? []} />
+      <InventoryForm characterId={id} initialItems={items ?? []} skills={skills ?? []} />
     </div>
   );
 }

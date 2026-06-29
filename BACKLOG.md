@@ -189,7 +189,7 @@
 **実装ヒント:** Supabaseに `character_spells` テーブルを追加（id, character_id, spell_name, mp_cost, san_cost, casting_time, effect, source_page, created_at）。`src/app/characters/[id]/spells/page.tsx` を新規作成（一覧＋追加フォーム）。呪文カードは `spell_name`・`mp_cost`/`san_cost` バッジ・`effect` テキストを縦に並べる。`src/lib/supabase.ts` に `CharacterSpell` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「呪文」リンクを追加。セッション前チェックリスト（`preflight/page.tsx`）にも習得呪文サマリーを追記。
 **コミット:** `feat: character spell management for CoC magic system`
 
-## [TODO] 戦闘ロール統合（インベントリ武器からクイックロール） — 優先度: 高
+## [DONE] 戦闘ロール統合（インベントリ武器からクイックロール） — 優先度: 高
 **対象:** PL / 共通
 **概要:** インベントリの武器カードにロールボタンを追加し、対応する戦闘技能（格闘/拳銃/ライフル等）を自動選択して 1d100 判定を実行できる機能。現在は武器一覧とDiceRollerが独立しており、セッション中に技能リストを探す手間がある。
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` に "use client" コンポーネントを追加。各武器カードに「ロール」ボタンを配置し、`item_type === "weapon"` の場合は character_skills から `格闘技 (武器)`, `回避`, `拳銃`, `ライフル` 等を候補として表示するプルダウンを出す。判定後は `supabase.from("dice_rolls").insert(...)` に保存（dice_history と連携）。追加DBなし（既存 `inventory_items`, `character_skills`, `dice_rolls` を流用）。
