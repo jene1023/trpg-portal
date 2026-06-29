@@ -158,3 +158,27 @@
 **概要:** 複数キャラクターを管理するPLが「現在プレイ中のキャラ」をピン留めし、キャラクター一覧の先頭に固定表示できる機能。セッション開始時のキャラ選択を高速化する。
 **実装ヒント:** `characters` テーブルに `is_pinned: boolean DEFAULT false` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `is_pinned: boolean` を追加。`src/app/characters/page.tsx` のフィルタ処理でピン留めキャラを先頭ソート。`src/app/_components/CharacterCard.tsx` にピン留めトグルボタン（星アイコン等）を追加し `supabase.from("characters").update({is_pinned}).eq("id", id)` で更新。
 **コミット:** `feat: pin favorite characters to top of character list`
+
+## [TODO] ダイス判定統計ダッシュボード — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターのダイスロール履歴（`dice_rolls`テーブル）を集計し、技能別の成功率・ファンブル率・最多使用技能・総判定数をグラフ/表形式で可視化するダッシュボード。セッションをまたいだキャラクターの判定傾向が分かる。
+**実装ヒント:** `src/app/characters/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("dice_rolls").select("*").eq("character_id", id)` で全件取得し、技能名ごとにグループ化して成功数/総数を集計。追加DBなし（既存`dice_rolls`のみ使用）。グラフはCSSのみのバー表示（`width: calc(${rate}%)`）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「判定統計」リンクを追加。
+**コミット:** `feat: dice roll statistics dashboard per character`
+
+## [TODO] NPC詳細ページ＋クイックロール — 優先度: 中
+**対象:** KP
+**概要:** 現在NPCは一覧のみで詳細ページが存在しない。NPC個別詳細ページを追加し、拡張済みの能力値スタッツを確認しながら技能ロールをその場で実行できるKP専用ビュー。戦闘・対抗判定時の参照コストを大幅に下げる。
+**実装ヒント:** `src/app/npcs/[id]/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("npcs").select("*").eq("id", id)` でNPC取得。能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/DB）を StatBlock 風に表示。既存の `DiceRoller.tsx` を流用し、NPCの技能値を任意入力できるシンプルロールUIを配置。`src/app/npcs/page.tsx` の各NPCカードを `/npcs/[id]` へリンクするよう修正。追加DBなし。
+**コミット:** `feat: NPC detail page with quick dice roll for KP`
+
+## [TODO] セッション中クイックノート — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション中にキャラクター単位で走り書きメモを残せる軽量ノート機能。セッションログ（`sessions`テーブル）は終了後の記録用だが、こちらはセッション中のリアルタイムメモ用途（重要情報・KPの発言・思いついたこと）に特化する。
+**実装ヒント:** Supabaseに `quick_notes` テーブルを追加（id, character_id, content, created_at）。`src/app/characters/[id]/quick-notes/page.tsx` を "use client" で新規作成。`<textarea>` で内容を入力し「保存」「削除」ができるシンプルなUI（一覧はcreated_at降順、最新10件）。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも「メモ」ショートカットリンクを追加。`src/lib/supabase.ts` に `QuickNote` 型を追加。
+**コミット:** `feat: in-session quick note pad per character`
+
+## [TODO] キャラクター成長履歴 — 優先度: 中
+**対象:** PL
+**概要:** 技能成長チェック後に実際に技能値が上がったとき、その変化を「どのセッション後にどの技能が何点上がったか」として記録する成長ログ。キャラクター成長の軌跡をセッション単位で振り返れる。
+**実装ヒント:** Supabaseに `growth_history` テーブルを追加（id, character_id, skill_name, old_value, new_value, session_label, grown_at, created_at）。`src/app/characters/[id]/growth/page.tsx` を新規作成（一覧＋成長記録追加フォーム）。SkillList.tsx の成長チェック解除フロー（`growth_checked: false` に戻す処理）の直前に「成長記録を追加しますか？」モーダルを挿入するか、独立したページとして実装。`src/lib/supabase.ts` に `GrowthHistory` 型を追加。キャラクタータイムライン（`src/app/characters/[id]/timeline/page.tsx`）の各セッションノードに成長情報を付記。
+**コミット:** `feat: character skill growth history tracking`
