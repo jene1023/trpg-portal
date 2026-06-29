@@ -182,3 +182,27 @@
 **概要:** 技能成長チェック後に実際に技能値が上がったとき、その変化を「どのセッション後にどの技能が何点上がったか」として記録する成長ログ。キャラクター成長の軌跡をセッション単位で振り返れる。
 **実装ヒント:** Supabaseに `growth_history` テーブルを追加（id, character_id, skill_name, old_value, new_value, session_label, grown_at, created_at）。`src/app/characters/[id]/growth/page.tsx` を新規作成（一覧＋成長記録追加フォーム）。SkillList.tsx の成長チェック解除フロー（`growth_checked: false` に戻す処理）の直前に「成長記録を追加しますか？」モーダルを挿入するか、独立したページとして実装。`src/lib/supabase.ts` に `GrowthHistory` 型を追加。キャラクタータイムライン（`src/app/characters/[id]/timeline/page.tsx`）の各セッションノードに成長情報を付記。
 **コミット:** `feat: character skill growth history tracking`
+
+## [TODO] 呪文・魔術管理 — 優先度: 高
+**対象:** PL
+**概要:** CoC 7版の呪文（マジック）をキャラクター単位で管理できる機能。呪文名・MP消費・SAN消費・効果概要・ページ参照を記録し、セッション中に素早く参照できる。現在インベントリ・技能・狂気は管理できるが呪文機能が完全に欠落している。
+**実装ヒント:** Supabaseに `character_spells` テーブルを追加（id, character_id, spell_name, mp_cost, san_cost, casting_time, effect, source_page, created_at）。`src/app/characters/[id]/spells/page.tsx` を新規作成（一覧＋追加フォーム）。呪文カードは `spell_name`・`mp_cost`/`san_cost` バッジ・`effect` テキストを縦に並べる。`src/lib/supabase.ts` に `CharacterSpell` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「呪文」リンクを追加。セッション前チェックリスト（`preflight/page.tsx`）にも習得呪文サマリーを追記。
+**コミット:** `feat: character spell management for CoC magic system`
+
+## [TODO] 戦闘ロール統合（インベントリ武器からクイックロール） — 優先度: 高
+**対象:** PL / 共通
+**概要:** インベントリの武器カードにロールボタンを追加し、対応する戦闘技能（格闘/拳銃/ライフル等）を自動選択して 1d100 判定を実行できる機能。現在は武器一覧とDiceRollerが独立しており、セッション中に技能リストを探す手間がある。
+**実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` に "use client" コンポーネントを追加。各武器カードに「ロール」ボタンを配置し、`item_type === "weapon"` の場合は character_skills から `格闘技 (武器)`, `回避`, `拳銃`, `ライフル` 等を候補として表示するプルダウンを出す。判定後は `supabase.from("dice_rolls").insert(...)` に保存（dice_history と連携）。追加DBなし（既存 `inventory_items`, `character_skills`, `dice_rolls` を流用）。
+**コミット:** `feat: combat roll integration on inventory weapon cards`
+
+## [TODO] キャラクター複製機能 — 優先度: 中
+**対象:** PL / 共通
+**概要:** 既存キャラクターを1クリックで複製し、名前だけ変えた新キャラクターとして保存できる機能。別シナリオ用バリアント作成・過去シートの再利用・NPCのひな型作成を高速化する。
+**実装ヒント:** `src/app/characters/[id]/page.tsx` のヘッダーに「複製」ボタンを追加（"use client" コンポーネント）。ボタン押下で `supabase.from("characters").select("*, character_skills(*)")` で全データ取得し、name に「（コピー）」を付加して `characters` テーブルに INSERT、続いて `character_skills` を新IDで一括 INSERT。複製後は新キャラクターの詳細ページへリダイレクト。追加DBなし。スキルの `growth_checked` はすべて `false` にリセット。
+**コミット:** `feat: duplicate character with skills for quick character creation`
+
+## [TODO] KPハンドアウト共有URL — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPがシナリオのハンドアウトを選択し、有効期限付き閲覧専用URLを発行してPLに共有できる機能。現在ハンドアウトはKP画面内にしか存在せず、PLへの情報提供が口頭かコピペに限られている。
+**実装ヒント:** Supabaseに `share_tokens` テーブルを追加（id, handout_id, token: uuid, expires_at: timestamptz, created_at）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の各ハンドアウトカードに「共有リンク生成」ボタンを追加し、`supabase.from("share_tokens").insert({handout_id, token: crypto.randomUUID(), expires_at: +24h})` でトークン発行。`src/app/share/[token]/page.tsx` を新規作成（Server Component）。`supabase.from("share_tokens").select("*, handouts(*)").eq("token", token).gt("expires_at", now)` で取得し、is_secret でなければ本文を表示。`src/lib/supabase.ts` に `ShareToken` 型を追加。
+**コミット:** `feat: shareable handout URL with expiry for KP to PL distribution`
