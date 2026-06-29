@@ -134,3 +134,18 @@ create table if not exists scenario_participants (
 
 alter table scenario_participants enable row level security;
 create policy "allow all for anon" on scenario_participants for all using (true) with check (true);
+
+-- ダイスロール履歴テーブル (追加マイグレーション)
+create table if not exists dice_rolls (
+  id            uuid primary key default gen_random_uuid(),
+  character_id  uuid not null references characters(id) on delete cascade,
+  skill_name    text not null,
+  skill_value   integer not null,
+  roll_value    integer not null,
+  success_level text not null
+                check (success_level in ('critical_success', 'success', 'failure', 'fumble')),
+  rolled_at     timestamptz not null default now()
+);
+
+alter table dice_rolls enable row level security;
+create policy "allow all for anon" on dice_rolls for all using (true) with check (true);

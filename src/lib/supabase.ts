@@ -172,3 +172,15 @@ export type CharacterTrait = {
   content: string;
   created_at: string;
 };
+
+export type SuccessLevel = "critical_success" | "success" | "failure" | "fumble";
+
+export type DiceRoll = {
+  id: string;
+  character_id: string;
+  skill_name: string;
+  skill_value: number;
+  roll_value: number;
+  success_level: SuccessLevel;
+  rolled_at: string;
+};

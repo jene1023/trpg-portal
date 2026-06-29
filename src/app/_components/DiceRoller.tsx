@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CharacterSkill } from "@/lib/supabase";
+import { CharacterSkill, SuccessLevel, supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Dice6 } from "lucide-react";
 
 type SuccessDegree = "決定的成功" | "通常成功" | "失敗" | "致命的失敗";
@@ -23,9 +23,16 @@ const DEGREE_STYLE: Record<SuccessDegree, { border: string; text: string; bg: st
 
 type Result = { roll: number; degree: SuccessDegree; skillName: string; skillValue: number };
 
-type Props = { skills: CharacterSkill[] };
+const DEGREE_TO_LEVEL: Record<SuccessDegree, SuccessLevel> = {
+  "決定的成功": "critical_success",
+  "通常成功": "success",
+  "失敗": "failure",
+  "致命的失敗": "fumble",
+};
 
-export default function DiceRoller({ skills }: Props) {
+type Props = { skills: CharacterSkill[]; characterId?: string };
+
+export default function DiceRoller({ skills, characterId }: Props) {
   const [selectedId, setSelectedId] = useState<string>(skills[0]?.id ?? "");
   const [result, setResult] = useState<Result | null>(null);
   const [rolling, setRolling] = useState(false);
@@ -40,13 +47,25 @@ export default function DiceRoller({ skills }: Props) {
     setResult(null);
     setTimeout(() => {
       const rolled = Math.floor(Math.random() * 100) + 1;
+      const degree = judge(rolled, selected.current_value);
       setResult({
         roll: rolled,
-        degree: judge(rolled, selected.current_value),
+        degree,
         skillName: selected.skill_name,
         skillValue: selected.current_value,
       });
       setRolling(false);
+
+      if (characterId && isSupabaseConfigured) {
+        supabase.from("dice_rolls").insert({
+          character_id: characterId,
+          skill_name: selected.skill_name,
+          skill_value: selected.current_value,
+          roll_value: rolled,
+          success_level: DEGREE_TO_LEVEL[degree],
+          rolled_at: new Date().toISOString(),
+        });
+      }
     }, 350);
   }
 

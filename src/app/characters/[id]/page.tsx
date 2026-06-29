@@ -171,7 +171,7 @@ export default async function CharacterDetailPage({ params }: Props) {
             <h2 className={sectionTitle}>技能</h2>
             {(skills ?? []).length > 0 && (
               <>
-                <DiceRoller skills={skills ?? []} />
+                <DiceRoller skills={skills ?? []} characterId={id} />
                 <div className={divider} />
               </>
             )}
@@ -281,6 +281,13 @@ export default async function CharacterDetailPage({ params }: Props) {
             className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
           >
             <span>特質・重要情報</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
+          <Link
+            href={`/characters/${id}/dice-history`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <span>ダイスロール履歴</span>
             <span className="text-coc-gold">→</span>
           </Link>
         </div>

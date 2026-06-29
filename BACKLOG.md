@@ -141,7 +141,7 @@
 **実装ヒント:** `src/app/characters/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*), madness_records(*), sessions(*)")` でデータ一括取得。HP/MP/SAN の現在値をカラーコードで表示（残量50%以下で黄、25%以下で赤）。アクティブな狂気・所持武器・最新セッションサマリーを縦に並べる。追加DBなし。キャラクター詳細ページに「セッション前確認」リンクを追加。
 **コミット:** `feat: pre-session checklist for in-session readiness`
 
-## [TODO] ダイスロール履歴 — 優先度: 中
+## [DONE] ダイスロール履歴 — 優先度: 中
 **対象:** PL / 共通
 **概要:** DiceRollerで行ったロールを自動保存し、セッション中・後に「いつ・何の技能・何を振ったか・成功度」を一覧確認できる履歴機能。KPとの確認作業や振り返りに使う。
 **実装ヒント:** Supabaseに `dice_rolls` テーブルを追加（id, character_id, skill_name, skill_value, roll_value, success_level: "critical_success"|"success"|"failure"|"fumble", rolled_at）。`src/app/_components/DiceRoller.tsx` でロール後に `supabase.from("dice_rolls").insert(...)` を呼ぶ。`src/app/characters/[id]/dice-history/page.tsx` を新規作成（セッション日付でグループ表示、直近50件）。`src/lib/supabase.ts` に `DiceRoll` 型を追加。
