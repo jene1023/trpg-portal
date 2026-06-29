@@ -43,7 +43,7 @@ export default async function HomePage() {
   const configured = isSupabaseConfigured;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 space-y-12">
+    <div className="coc-page-enter mx-auto max-w-5xl px-4 py-12 space-y-12">
       {/* Supabase未設定バナー */}
       {!configured && (
         <div className="rounded-lg border border-coc-gold-dim bg-coc-raised px-4 py-3 text-sm text-coc-muted">

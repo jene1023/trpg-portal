@@ -40,11 +40,11 @@ export default async function CharacterDetailPage({ params }: Props) {
   const mov = calcMov(char.str, char.dex, char.siz);
 
   const sectionClass = "rounded-lg border border-coc-border bg-coc-surface p-4 space-y-4";
-  const sectionTitle = "font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
+  const sectionTitle = "coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
   const divider = "border-t border-coc-border my-2";
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="coc-page-enter mx-auto max-w-5xl px-4 py-8">
       {/* ブレッドクラム */}
       <div className="flex items-center justify-between mb-6">
         <Link
