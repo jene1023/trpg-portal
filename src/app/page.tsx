@@ -78,9 +78,9 @@ export default async function HomePage() {
           <Link
             key={href}
             href={href}
-            className={`group relative rounded-lg border bg-coc-surface p-5 space-y-3 transition-all duration-200 ${
+            className={`group relative rounded-lg border bg-coc-surface p-5 space-y-3 transition-all duration-300 ease-out ${
               available
-                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_0_12px_rgba(122,90,42,0.2)]"
+                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.25)] motion-safe:hover:-translate-y-0.5"
                 : "border-coc-border opacity-50 pointer-events-none"
             }`}
           >
@@ -97,7 +97,7 @@ export default async function HomePage() {
             {available && (
               <ChevronRight
                 size={16}
-                className="absolute bottom-4 right-4 text-coc-faint group-hover:text-coc-gold transition-colors"
+                className="absolute bottom-4 right-4 text-coc-faint group-hover:text-coc-gold transition-all duration-300 motion-safe:group-hover:translate-x-0.5"
               />
             )}
           </Link>

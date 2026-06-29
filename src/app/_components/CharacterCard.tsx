@@ -20,7 +20,7 @@ export default function CharacterCard({ character, skills = [] }: Props) {
 
   return (
     <Link href={`/characters/${character.id}`} className="group block">
-      <div className="rounded-lg border border-coc-border bg-coc-surface overflow-hidden transition-all duration-200 group-hover:border-coc-border-glow group-hover:shadow-[0_0_12px_rgba(122,90,42,0.25)]">
+      <div className="rounded-lg border border-coc-border bg-coc-surface overflow-hidden transition-all duration-300 ease-out group-hover:border-coc-border-glow group-hover:shadow-[0_4px_20px_rgba(201,133,58,0.30)] motion-safe:group-hover:-translate-y-1">
         {/* ポートレート */}
         <div className="relative aspect-[3/4] overflow-hidden">
           <PortraitImage
