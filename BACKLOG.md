@@ -159,7 +159,7 @@
 **実装ヒント:** `characters` テーブルに `is_pinned: boolean DEFAULT false` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `is_pinned: boolean` を追加。`src/app/characters/page.tsx` のフィルタ処理でピン留めキャラを先頭ソート。`src/app/_components/CharacterCard.tsx` にピン留めトグルボタン（星アイコン等）を追加し `supabase.from("characters").update({is_pinned}).eq("id", id)` で更新。
 **コミット:** `feat: pin favorite characters to top of character list`
 
-## [TODO] ダイス判定統計ダッシュボード — 優先度: 中
+## [DONE] ダイス判定統計ダッシュボード — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターのダイスロール履歴（`dice_rolls`テーブル）を集計し、技能別の成功率・ファンブル率・最多使用技能・総判定数をグラフ/表形式で可視化するダッシュボード。セッションをまたいだキャラクターの判定傾向が分かる。
 **実装ヒント:** `src/app/characters/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("dice_rolls").select("*").eq("character_id", id)` で全件取得し、技能名ごとにグループ化して成功数/総数を集計。追加DBなし（既存`dice_rolls`のみ使用）。グラフはCSSのみのバー表示（`width: calc(${rate}%)`）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「判定統計」リンクを追加。
