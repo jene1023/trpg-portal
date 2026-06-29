@@ -196,3 +196,10 @@ export type DiceRoll = {
   success_level: SuccessLevel;
   rolled_at: string;
 };
+
+export type QuickNote = {
+  id: string;
+  character_id: string;
+  content: string;
+  created_at: string;
+};

@@ -171,7 +171,7 @@
 **実装ヒント:** `src/app/npcs/[id]/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("npcs").select("*").eq("id", id)` でNPC取得。能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/DB）を StatBlock 風に表示。既存の `DiceRoller.tsx` を流用し、NPCの技能値を任意入力できるシンプルロールUIを配置。`src/app/npcs/page.tsx` の各NPCカードを `/npcs/[id]` へリンクするよう修正。追加DBなし。
 **コミット:** `feat: NPC detail page with quick dice roll for KP`
 
-## [TODO] セッション中クイックノート — 優先度: 高
+## [DONE] セッション中クイックノート — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション中にキャラクター単位で走り書きメモを残せる軽量ノート機能。セッションログ（`sessions`テーブル）は終了後の記録用だが、こちらはセッション中のリアルタイムメモ用途（重要情報・KPの発言・思いついたこと）に特化する。
 **実装ヒント:** Supabaseに `quick_notes` テーブルを追加（id, character_id, content, created_at）。`src/app/characters/[id]/quick-notes/page.tsx` を "use client" で新規作成。`<textarea>` で内容を入力し「保存」「削除」ができるシンプルなUI（一覧はcreated_at降順、最新10件）。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも「メモ」ショートカットリンクを追加。`src/lib/supabase.ts` に `QuickNote` 型を追加。
