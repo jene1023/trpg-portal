@@ -64,7 +64,7 @@ export default async function HomePage() {
         </h1>
         <div className="flex items-center justify-center gap-3 text-coc-faint text-lg">
           <span className="flex-1 border-t border-coc-border" />
-          <span className="text-coc-gold select-none">✦</span>
+          <span className="text-coc-gold select-none coc-star-twinkle">✦</span>
           <span className="flex-1 border-t border-coc-border" />
         </div>
         <p className="font-crimson text-coc-muted text-lg italic">

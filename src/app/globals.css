@@ -20,6 +20,10 @@
   --color-coc-gold:     #c9853a;
   --color-coc-gold-dim: #7a4f1e;
 
+  /* 血痕・残り火アクセント */
+  --color-coc-blood: #6b1515;
+  --color-coc-ember: #9a3010;
+
   /* ステータス */
   --color-coc-alive:   #1a5c35;
   --color-coc-dead:    #5c1515;
@@ -37,7 +41,14 @@
 }
 
 body {
-  background: var(--color-coc-bg);
+  background-color: var(--color-coc-bg);
+  /* 燭台からの環境光: ページ上部に温かい琥珀の光、周縁は虚無へ溶ける */
+  background-image: radial-gradient(
+    ellipse 160% 90% at 50% -15%,
+    #201508 0%,
+    transparent 58%
+  );
+  background-attachment: fixed;
   color: var(--color-coc-text);
 }
 
@@ -115,6 +126,19 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-coc-border-glow);
+}
+
+/* 星のゆらめき（燭台の炎） */
+@keyframes coc-star-twinkle {
+  0%, 100% { opacity: 1;    text-shadow: 0 0 6px  rgba(201, 133, 58, 0.45); }
+  40%       { opacity: 0.7;  text-shadow: 0 0 14px rgba(201, 133, 58, 0.85); }
+  70%       { opacity: 0.9;  text-shadow: 0 0 8px  rgba(201, 133, 58, 0.60); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-star-twinkle {
+    animation: coc-star-twinkle 4s ease-in-out infinite;
+  }
 }
 
 /* タイル シマーエフェクト（ホバー時の黄金の光） */
