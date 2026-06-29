@@ -123,7 +123,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/page.tsx` を新規作成（現在は未実装）。`supabase.from("scenarios").select("*").eq("id", id)` でシナリオ取得。同一ページ内で `npcs`（scenario_nameで絞り込み）と `handouts`（scenario_idで絞り込み）のカウントをサマリー表示。`src/app/scenarios/[id]/handouts/page.tsx` と `participants/page.tsx` へのカードリンクを配置。シナリオ一覧（`src/app/scenarios/page.tsx`）の各カードを `/scenarios/[id]` へリンクするよう修正。
 **コミット:** `feat: scenario detail dashboard with NPC, handout, and participant summary`
 
-## [TODO] キャラクタータイムライン（年表） — 優先度: 低
+## [DONE] キャラクタータイムライン（年表） — 優先度: 低
 **対象:** PL
 **概要:** セッションログを時系列で可視化し、キャラクターの成長・出来事・SAN喪失の流れを年表形式で振り返れるビュー。既存のSessionLogデータを流用するため追加DBなし。
 **実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` を新規作成。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number", {ascending: true})` でログ取得。各セッションを縦線上のノードとして表示（CSS border-leftで疑似タイムライン）。SAN喪失量に応じてノードの色を変える（例: san_loss >= 5 で赤、1-4 で黄）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「年表」リンクを追加。
