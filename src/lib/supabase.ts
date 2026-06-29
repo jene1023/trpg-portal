@@ -112,3 +112,15 @@ export type MadnessRecord = {
   recovered_at: string | null;
   created_at: string;
 };
+
+export type ScenarioStatus = "planning" | "ongoing" | "completed";
+
+export type Scenario = {
+  id: string;
+  title: string;
+  synopsis: string | null;
+  gm_notes: string | null;
+  status: ScenarioStatus;
+  played_at: string | null;
+  created_at: string;
+};

@@ -107,3 +107,18 @@ create table if not exists sessions (
 
 alter table sessions enable row level security;
 create policy "allow all for anon" on sessions for all using (true) with check (true);
+
+-- シナリオテーブル (追加マイグレーション)
+create table if not exists scenarios (
+  id         uuid primary key default gen_random_uuid(),
+  title      text not null,
+  synopsis   text,
+  gm_notes   text,
+  status     text not null default 'planning'
+             check (status in ('planning', 'ongoing', 'completed')),
+  played_at  date,
+  created_at timestamptz default now()
+);
+
+alter table scenarios enable row level security;
+create policy "allow all for anon" on scenarios for all using (true) with check (true);

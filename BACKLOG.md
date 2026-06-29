@@ -65,7 +65,7 @@
 **実装ヒント:** `src/app/_components/ExportButton.tsx` を "use client" で新規作成。`supabase.from("characters").select("*, character_skills(*), sessions(*)")` で全データ取得し `JSON.stringify` + `Blob` + `URL.createObjectURL` でダウンロード。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンとして配置。
 **コミット:** `feat: character JSON export for backup and sharing`
 
-## [TODO] シナリオ管理 — 優先度: 中
+## [DONE] シナリオ管理 — 優先度: 中
 **対象:** KP
 **概要:** KPがシナリオのタイトル・概要・GMメモ・進行状態（準備中/進行中/完了）を管理できるページ。NPCやセッションログと紐づけて参照できる。
 **実装ヒント:** Supabaseに`scenarios`テーブルを追加（id, title, synopsis, gm_notes, status: "planning"|"ongoing"|"completed", played_at, created_at）。`src/app/scenarios/page.tsx`（一覧・ステータスフィルタ付き）と `src/app/scenarios/new/page.tsx`（作成フォーム）を新規作成。`src/app/_components/NavBar.tsx` に「シナリオ」リンクを追加。`src/lib/supabase.ts` に `Scenario` 型を追加。
