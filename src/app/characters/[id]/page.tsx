@@ -13,6 +13,7 @@ import SkillList from "@/app/_components/SkillList";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import DiceRoller from "@/app/_components/DiceRoller";
 import ExportButton from "@/app/_components/ExportButton";
+import PdfExportButton from "@/app/_components/PdfExportButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -54,6 +55,7 @@ export default async function CharacterDetailPage({ params }: Props) {
           一覧へ
         </Link>
         <div className="flex items-center gap-2">
+          <PdfExportButton characterId={id} />
           <ExportButton characterId={id} characterName={char.name} />
           <Link
             href={`/characters/${id}/edit`}

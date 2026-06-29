@@ -91,7 +91,7 @@
 **実装ヒント:** Supabaseに `inventory_items` テーブルを追加（id, character_id, item_type: "weapon"|"item", name, damage, range, ammo_current, ammo_max, notes, created_at）。`src/app/characters/[id]/inventory/page.tsx` を新規作成（一覧＋インライン編集フォーム）。武器は damage/range/ammo を、アイテムは name/notes のみ表示するよう item_type で分岐。`src/app/_components/InventoryForm.tsx` を "use client" で作成。`src/lib/supabase.ts` に `InventoryItem` 型を追加。
 **コミット:** `feat: weapon and item inventory management`
 
-## [TODO] PDFシートエクスポート — 優先度: 中
+## [DONE] PDFシートエクスポート — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターシート全体（ステータス・技能・所持品）をA4 PDF形式でダウンロードできる機能。既存のJSONエクスポートを補完し、印刷・オフラインセッション用途に対応する。
 **リサーチ根拠:** Charaeno・PrismScroll Cthulhu・Roll20等の主要ツールが全てPDF出力をサポートしており、オフラインセッション・印刷需要がユーザーから継続的に挙げられている。
