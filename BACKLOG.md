@@ -104,3 +104,27 @@
 **リサーチ根拠:** Charaenoの「キャラ紹介」機能やいあキャラのプロフィールカードが人気を集めており、SNSでのキャラ共有・セッション募集時の自己紹介ニーズが高いことが確認された。
 **実装ヒント:** `src/app/characters/[id]/profile-card/page.tsx` を新規作成。`html2canvas` ライブラリでカードDOMをCanvas化し PNG ダウンロード。カードレイアウトはキャラ名・職業・外見テキスト・HP/SAN/能力値サマリを縦に配置する `src/app/_components/ProfileCard.tsx` で実装（"use client"）。OGP用途に `/api/characters/[id]/og` ルートも将来追加可能な構造にする。キャラクター詳細ページに「紹介カード」リンクを追加。
 **コミット:** `feat: character profile card for SNS sharing`
+
+## [TODO] シナリオ参加キャラクター管理 — 優先度: 高
+**対象:** KP / 共通
+**概要:** KPがシナリオに参加するキャラクターを登録し、セッションの参加者を一画面で把握できる機能。既存のシナリオ・キャラクター両データと連携する。
+**実装ヒント:** Supabaseに `scenario_participants` テーブルを追加（id, scenario_id, character_id, created_at）。`src/app/scenarios/[id]/participants/page.tsx` を新規作成（一覧＋キャラクター選択フォーム）。`src/lib/supabase.ts` に `ScenarioParticipant` 型を追加。シナリオ一覧ページ（`src/app/scenarios/page.tsx`）の各カードに参加者数バッジを追加。
+**コミット:** `feat: scenario participant management linking characters to scenarios`
+
+## [TODO] キャラクター一覧フィルタ・検索 — 優先度: 中
+**対象:** PL / 共通
+**概要:** 複数キャラクターを管理するプレイヤー向けに、名前・職業・ステータス（alive/dead/insane/retired）でリアルタイムフィルタできる検索UIをキャラ一覧ページに追加する。
+**実装ヒント:** `src/app/characters/page.tsx` を "use client" 化し、useState で `nameQuery`, `statusFilter`, `occupationQuery` を管理。`supabase.from("characters").select("*")` で全件取得後クライアントサイドでフィルタ（件数が多い場合は `.ilike()` クエリに切り替え可）。検索バー＋ステータスselectを既存 CharacterCard グリッドの上部に配置。追加DBなし。
+**コミット:** `feat: character list filter and search by name, occupation, status`
+
+## [TODO] シナリオ詳細ダッシュボード — 優先度: 中
+**対象:** KP
+**概要:** シナリオのNPC一覧・ハンドアウト・参加者・セッション概要を一画面で確認できるKP専用の詳細ページ。各データへのナビゲーションハブとして機能する。
+**実装ヒント:** `src/app/scenarios/[id]/page.tsx` を新規作成（現在は未実装）。`supabase.from("scenarios").select("*").eq("id", id)` でシナリオ取得。同一ページ内で `npcs`（scenario_nameで絞り込み）と `handouts`（scenario_idで絞り込み）のカウントをサマリー表示。`src/app/scenarios/[id]/handouts/page.tsx` と `participants/page.tsx` へのカードリンクを配置。シナリオ一覧（`src/app/scenarios/page.tsx`）の各カードを `/scenarios/[id]` へリンクするよう修正。
+**コミット:** `feat: scenario detail dashboard with NPC, handout, and participant summary`
+
+## [TODO] キャラクタータイムライン（年表） — 優先度: 低
+**対象:** PL
+**概要:** セッションログを時系列で可視化し、キャラクターの成長・出来事・SAN喪失の流れを年表形式で振り返れるビュー。既存のSessionLogデータを流用するため追加DBなし。
+**実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` を新規作成。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number", {ascending: true})` でログ取得。各セッションを縦線上のノードとして表示（CSS border-leftで疑似タイムライン）。SAN喪失量に応じてノードの色を変える（例: san_loss >= 5 で赤、1-4 で黄）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「年表」リンクを追加。
+**コミット:** `feat: character session timeline visualization`
