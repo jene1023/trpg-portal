@@ -156,3 +156,19 @@ export type ScenarioParticipant = {
   character_id: string;
   created_at: string;
 };
+
+export type TraitType =
+  | "person"
+  | "place"
+  | "treasure"
+  | "personality"
+  | "ideology"
+  | "wound";
+
+export type CharacterTrait = {
+  id: string;
+  character_id: string;
+  trait_type: TraitType;
+  content: string;
+  created_at: string;
+};

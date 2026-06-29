@@ -129,7 +129,7 @@
 **実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` を新規作成。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number", {ascending: true})` でログ取得。各セッションを縦線上のノードとして表示（CSS border-leftで疑似タイムライン）。SAN喪失量に応じてノードの色を変える（例: san_loss >= 5 で赤、1-4 で黄）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「年表」リンクを追加。
 **コミット:** `feat: character session timeline visualization`
 
-## [TODO] 探索者特質・重要情報管理 — 優先度: 高
+## [DONE] 探索者特質・重要情報管理 — 優先度: 高
 **対象:** PL
 **概要:** CoC7版キャラシートの「重要な人物」「重要な場所」「大切な宝物」「性格的特質」「イデオロギー/信念」を個別記録できる機能。現在のbackgroundフィールド（単一テキスト）では粒度が不足している。
 **実装ヒント:** Supabaseに `character_traits` テーブルを追加（id, character_id, trait_type: "person"|"place"|"treasure"|"personality"|"ideology"|"wound", content, created_at）。`src/app/characters/[id]/traits/page.tsx` を新規作成（trait_typeごとにセクション分けして一覧・追加・削除）。`src/lib/supabase.ts` に `TraitType` と `CharacterTrait` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「特質・重要情報」リンクを追加。
