@@ -206,3 +206,33 @@
 **概要:** KPがシナリオのハンドアウトを選択し、有効期限付き閲覧専用URLを発行してPLに共有できる機能。現在ハンドアウトはKP画面内にしか存在せず、PLへの情報提供が口頭かコピペに限られている。
 **実装ヒント:** Supabaseに `share_tokens` テーブルを追加（id, handout_id, token: uuid, expires_at: timestamptz, created_at）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の各ハンドアウトカードに「共有リンク生成」ボタンを追加し、`supabase.from("share_tokens").insert({handout_id, token: crypto.randomUUID(), expires_at: +24h})` でトークン発行。`src/app/share/[token]/page.tsx` を新規作成（Server Component）。`supabase.from("share_tokens").select("*, handouts(*)").eq("token", token).gt("expires_at", now)` で取得し、is_secret でなければ本文を表示。`src/lib/supabase.ts` に `ShareToken` 型を追加。
 **コミット:** `feat: shareable handout URL with expiry for KP to PL distribution`
+
+## [TODO] パーティービュー（シナリオ参加者HP/SAN一覧） — 優先度: 高
+**対象:** KP / 共通
+**概要:** シナリオに参加する全キャラクターのHP/MP/SANを一画面で確認できるビュー。セッション中のパーティー全体の状態把握・生死確認を一覧で行える。
+**実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各キャラのHP/MP/SANを残量に応じてカラーコード表示（50%以下→黄、25%以下→赤）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「パーティービュー」リンクを追加。追加DBなし。
+**コミット:** `feat: party view showing all participant HP/SAN for scenario`
+
+## [TODO] プッシュ/対抗ロールUI — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** CoC7版の「プッシュロール（失敗後の再挑戦）」と「対抗ロール（2者の技能値を同時判定）」を専用UIで実行できる機能。通常のDiceRollerでは再現できない重要ルールを補完する。
+**実装ヒント:** `src/app/_components/SpecialRoller.tsx` を新規作成（"use client"）。ロール種別タブ（通常/プッシュ/対抗）を切り替え。プッシュは前回ロール値を保持して再判定し成功度を表示。対抗ロールは2つの技能値入力欄を持ち双方のロール値と成功度を比較して勝敗を判定。判定結果は `supabase.from("dice_rolls").insert(...)` に保存（既存dice_historyと連携）。キャラクター詳細ページのダイスローラーセクションに「特殊ロール」ボタンとして追加。
+**コミット:** `feat: push roll and opposed roll UI for CoC7 special mechanics`
+
+## [TODO] キャラクターJSONインポート — 優先度: 中
+**対象:** PL / 共通
+**概要:** 既存エクスポート機能（ExportButton.tsx）で作成したJSONファイルを読み込み、キャラクター＋技能を一括復元・新規作成できる機能。バックアップからの復元・別環境への移行・テンプレートキャラ共有に対応する。
+**実装ヒント:** `src/app/characters/import/page.tsx` を新規作成（"use client"）。`<input type="file" accept=".json">` でファイル選択し `FileReader` でJSON解析。バリデーション後に `supabase.from("characters").insert(...)` でキャラ作成し、続いて `character_skills` を新IDで一括INSERT（nameに「（インポート）」付加でオリジナルと区別）。インポート後は新キャラクター詳細ページへリダイレクト。`src/app/characters/page.tsx` に「JSONからインポート」ボタンを追加。追加DBなし。
+**コミット:** `feat: character JSON import to restore from backup or share templates`
+
+## [TODO] シナリオ共有メモ（パーティーノート） — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオに紐づいた共有メモページ。KPとPL全員が確認できる「パーティーで共有すべき情報」（判明した手がかり・決定事項・次のアクション）をセッション中にリアルタイムで記録できる。
+**実装ヒント:** Supabaseに `scenario_notes` テーブルを追加（id, scenario_id, content, author_name, created_at）。`src/app/scenarios/[id]/notes/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、作成日時降順）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有メモ」リンクを追加。`src/lib/supabase.ts` に `ScenarioNote` 型を追加。
+**コミット:** `feat: shared scenario notes for party information tracking`
+
+## [TODO] 戦闘ラウンドカウンター — 優先度: 低
+**対象:** KP / 共通
+**概要:** セッション中の戦闘をラウンド単位で管理できるシンプルなカウンター。現在ラウンド数・各キャラクターのDEX順イニシアチブ・行動済みフラグをセッション中に追跡できる。
+**実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を "use client" で新規作成。useState でラウンド数・参加者リスト・行動済みフラグを管理（ページリロードで状態リセット）。参加者は `scenario_participants` から取得したキャラクターのDEXでソートしてイニシアチブ順を自動生成。行動済みキャラはチェックマークでトグル、全員完了で次ラウンドボタンを有効化。シナリオ詳細ダッシュボードに「戦闘管理」リンクを追加。追加DBなし（ローカル状態のみ）。
+**コミット:** `feat: combat round counter with DEX-based initiative tracking`
