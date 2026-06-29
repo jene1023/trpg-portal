@@ -153,7 +153,7 @@
 **実装ヒント:** Supabaseの `npcs` テーブルに `str`, `con`, `pow`, `dex`, `app`, `siz`, `int_stat`, `edu`, `hp`, `mp`, `db` (ダメージボーナス) カラムをNULL許容で追加（ALTER TABLE）。`src/app/npcs/new/page.tsx` と編集ページに「能力値」セクションを任意入力で追加。`src/app/_components/NpcForm.tsx` を更新。`src/lib/supabase.ts` の `Npc` 型に各カラムを追加。能力値未入力のNPCは従来通り外見・目的・メモのみ表示。
 **コミット:** `feat: NPC stats extension with ability scores and skills`
 
-## [TODO] お気に入りキャラクターのピン留め — 優先度: 低
+## [DONE] お気に入りキャラクターのピン留め — 優先度: 低
 **対象:** PL / 共通
 **概要:** 複数キャラクターを管理するPLが「現在プレイ中のキャラ」をピン留めし、キャラクター一覧の先頭に固定表示できる機能。セッション開始時のキャラ選択を高速化する。
 **実装ヒント:** `characters` テーブルに `is_pinned: boolean DEFAULT false` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `is_pinned: boolean` を追加。`src/app/characters/page.tsx` のフィルタ処理でピン留めキャラを先頭ソート。`src/app/_components/CharacterCard.tsx` にピン留めトグルボタン（星アイコン等）を追加し `supabase.from("characters").update({is_pinned}).eq("id", id)` で更新。

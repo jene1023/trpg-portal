@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { Character, CharacterSkill } from "@/lib/supabase";
+import { Star } from "lucide-react";
+import { Character, CharacterSkill, supabase, isSupabaseConfigured } from "@/lib/supabase";
 import StatusBadge from "./StatusBadge";
 import PortraitImage from "./PortraitImage";
 import DerivedStatBar from "./DerivedStatBar";
@@ -7,6 +10,7 @@ import DerivedStatBar from "./DerivedStatBar";
 type Props = {
   character: Character;
   skills?: CharacterSkill[];
+  onTogglePin?: (id: string, pinned: boolean) => void;
 };
 
 function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
@@ -15,8 +19,17 @@ function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
     .slice(0, 3);
 }
 
-export default function CharacterCard({ character, skills = [] }: Props) {
+export default function CharacterCard({ character, skills = [], onTogglePin }: Props) {
   const top = topSkills(skills);
+
+  async function handlePin(e: { preventDefault: () => void; stopPropagation: () => void }) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isSupabaseConfigured) return;
+    const newPinned = !character.is_pinned;
+    await supabase.from("characters").update({ is_pinned: newPinned }).eq("id", character.id);
+    onTogglePin?.(character.id, newPinned);
+  }
 
   return (
     <Link href={`/characters/${character.id}`} className="group block">
@@ -46,6 +59,18 @@ export default function CharacterCard({ character, skills = [] }: Props) {
           <div className="absolute top-2 right-2">
             <StatusBadge status={character.status} />
           </div>
+          {/* ピン留めボタン */}
+          <button
+            onClick={handlePin}
+            className={`absolute top-2 left-2 p-1 rounded-full transition-colors ${
+              character.is_pinned
+                ? "text-coc-gold bg-black/60"
+                : "text-white/50 bg-black/40 hover:text-coc-gold hover:bg-black/60"
+            }`}
+            title={character.is_pinned ? "ピン留め解除" : "ピン留め"}
+          >
+            <Star size={14} fill={character.is_pinned ? "currentColor" : "none"} />
+          </button>
         </div>
 
         {/* 下部テキストエリア */}

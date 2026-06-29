@@ -39,12 +39,22 @@ export default function CharactersPage() {
     load();
   }, []);
 
-  const filtered = characters.filter((c) => {
-    if (filter !== "all" && c.status !== filter) return false;
-    if (nameQuery && !c.name.toLowerCase().includes(nameQuery.toLowerCase())) return false;
-    if (occupationQuery && !(c.occupation ?? "").toLowerCase().includes(occupationQuery.toLowerCase())) return false;
-    return true;
-  });
+  const filtered = characters
+    .filter((c) => {
+      if (filter !== "all" && c.status !== filter) return false;
+      if (nameQuery && !c.name.toLowerCase().includes(nameQuery.toLowerCase())) return false;
+      if (occupationQuery && !(c.occupation ?? "").toLowerCase().includes(occupationQuery.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1;
+      if (!a.is_pinned && b.is_pinned) return 1;
+      return 0;
+    });
+
+  function handleTogglePin(id: string, pinned: boolean) {
+    setCharacters((prev) => prev.map((c) => (c.id === id ? { ...c, is_pinned: pinned } : c)));
+  }
 
   const hasActiveSearch = nameQuery !== "" || occupationQuery !== "";
 
@@ -154,6 +164,7 @@ export default function CharactersPage() {
               key={char.id}
               character={char}
               skills={char.character_skills}
+              onTogglePin={handleTogglePin}
             />
           ))}
         </div>

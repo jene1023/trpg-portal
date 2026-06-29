@@ -40,6 +40,7 @@ export type Character = {
   luck: number;
   background: string | null;
   notes: string | null;
+  is_pinned: boolean;
   created_at: string;
   updated_at: string;
 };
