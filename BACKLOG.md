@@ -111,7 +111,7 @@
 **実装ヒント:** Supabaseに `scenario_participants` テーブルを追加（id, scenario_id, character_id, created_at）。`src/app/scenarios/[id]/participants/page.tsx` を新規作成（一覧＋キャラクター選択フォーム）。`src/lib/supabase.ts` に `ScenarioParticipant` 型を追加。シナリオ一覧ページ（`src/app/scenarios/page.tsx`）の各カードに参加者数バッジを追加。
 **コミット:** `feat: scenario participant management linking characters to scenarios`
 
-## [TODO] キャラクター一覧フィルタ・検索 — 優先度: 中
+## [DONE] キャラクター一覧フィルタ・検索 — 優先度: 中
 **対象:** PL / 共通
 **概要:** 複数キャラクターを管理するプレイヤー向けに、名前・職業・ステータス（alive/dead/insane/retired）でリアルタイムフィルタできる検索UIをキャラ一覧ページに追加する。
 **実装ヒント:** `src/app/characters/page.tsx` を "use client" 化し、useState で `nameQuery`, `statusFilter`, `occupationQuery` を管理。`supabase.from("characters").select("*")` で全件取得後クライアントサイドでフィルタ（件数が多い場合は `.ilike()` クエリに切り替え可）。検索バー＋ステータスselectを既存 CharacterCard グリッドの上部に配置。追加DBなし。

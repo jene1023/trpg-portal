@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
 
@@ -19,6 +19,8 @@ type CharacterWithSkills = Character & { character_skills: CharacterSkill[] };
 export default function CharactersPage() {
   const [characters, setCharacters] = useState<CharacterWithSkills[]>([]);
   const [filter, setFilter] = useState<CharacterStatus | "all">("all");
+  const [nameQuery, setNameQuery] = useState("");
+  const [occupationQuery, setOccupationQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,8 +39,19 @@ export default function CharactersPage() {
     load();
   }, []);
 
-  const filtered =
-    filter === "all" ? characters : characters.filter((c) => c.status === filter);
+  const filtered = characters.filter((c) => {
+    if (filter !== "all" && c.status !== filter) return false;
+    if (nameQuery && !c.name.toLowerCase().includes(nameQuery.toLowerCase())) return false;
+    if (occupationQuery && !(c.occupation ?? "").toLowerCase().includes(occupationQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  const hasActiveSearch = nameQuery !== "" || occupationQuery !== "";
+
+  function clearSearch() {
+    setNameQuery("");
+    setOccupationQuery("");
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -54,6 +67,39 @@ export default function CharactersPage() {
           <Plus size={16} />
           新しいキャラクター
         </Link>
+      </div>
+
+      {/* 検索バー */}
+      <div className="flex gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
+          <input
+            type="text"
+            placeholder="名前で検索..."
+            value={nameQuery}
+            onChange={(e) => setNameQuery(e.target.value)}
+            className="w-full rounded-lg border border-coc-border bg-coc-surface pl-8 pr-3 py-2 text-sm text-coc-text placeholder-coc-muted focus:outline-none focus:border-coc-gold transition-colors"
+          />
+        </div>
+        <div className="relative flex-1">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
+          <input
+            type="text"
+            placeholder="職業で検索..."
+            value={occupationQuery}
+            onChange={(e) => setOccupationQuery(e.target.value)}
+            className="w-full rounded-lg border border-coc-border bg-coc-surface pl-8 pr-3 py-2 text-sm text-coc-text placeholder-coc-muted focus:outline-none focus:border-coc-gold transition-colors"
+          />
+        </div>
+        {hasActiveSearch && (
+          <button
+            onClick={clearSearch}
+            className="flex items-center gap-1 rounded-lg border border-coc-border bg-coc-surface px-3 py-2 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          >
+            <X size={14} />
+            クリア
+          </button>
+        )}
       </div>
 
       {/* フィルタータブ */}
@@ -85,11 +131,11 @@ export default function CharactersPage() {
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <span className="text-5xl text-coc-faint select-none">✦</span>
           <p className="text-coc-muted font-crimson text-lg italic text-center">
-            {filter === "all"
+            {characters.length === 0
               ? "まだキャラクターが登録されていません。\n新たな探索者を召喚せよ。"
-              : "該当するキャラクターがいません。"}
+              : "条件に一致するキャラクターがいません。"}
           </p>
-          {filter === "all" && (
+          {characters.length === 0 && (
             <Link
               href="/characters/new"
               className="mt-2 text-sm text-coc-gold hover:underline"
