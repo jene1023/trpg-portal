@@ -16,6 +16,7 @@ import SpecialRoller from "@/app/_components/SpecialRoller";
 import ExportButton from "@/app/_components/ExportButton";
 import PdfExportButton from "@/app/_components/PdfExportButton";
 import DuplicateButton from "@/app/_components/DuplicateButton";
+import SectionDivider from "@/app/_components/SectionDivider";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -43,7 +44,6 @@ export default async function CharacterDetailPage({ params }: Props) {
 
   const sectionClass = "rounded-lg border border-coc-border bg-coc-surface p-4 space-y-4";
   const sectionTitle = "coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
-  const divider = "border-t border-coc-border my-2";
 
   return (
     <div className="coc-page-enter mx-auto max-w-5xl px-4 py-8">
@@ -97,7 +97,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               </p>
             )}
 
-            <div className={divider} />
+            <SectionDivider className="my-2" />
 
             <dl className="space-y-1.5 text-sm">
               {char.age && (
@@ -144,7 +144,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               <DerivedStatBar label="MP マジックポイント" current={char.mp_current} max={char.mp_max} color="mp" />
               <DerivedStatBar label={`SAN 正気度（初期${char.san_start}）`} current={char.san_current} max={char.san_max} color="san" />
             </div>
-            <div className={divider} />
+            <SectionDivider className="my-2" />
             <QuickStatEditor
               characterId={char.id}
               hpCurrent={char.hp_current}
@@ -175,14 +175,14 @@ export default async function CharacterDetailPage({ params }: Props) {
             {(skills ?? []).length > 0 && (
               <>
                 <DiceRoller skills={skills ?? []} characterId={id} />
-                <div className={divider} />
+                <SectionDivider className="my-2" />
               </>
             )}
             <div>
               <p className="text-xs text-coc-muted font-semibold mb-2">特殊ロール（プッシュ／対抗）</p>
               <SpecialRoller skills={skills ?? []} characterId={id} />
             </div>
-            <div className={divider} />
+            <SectionDivider className="my-2" />
             <SkillList skills={skills ?? []} characterId={id} />
           </div>
 
