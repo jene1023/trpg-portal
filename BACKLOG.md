@@ -260,3 +260,27 @@
 **概要:** NPC詳細ページのクイックロール（`NpcQuickRoller.tsx`）はロール結果がページ離脱で消える一時表示のみ。判定結果をDBに保存し、戦闘・対抗判定の経緯を後から振り返れる履歴機能を追加する。
 **実装ヒント:** Supabaseに `npc_dice_rolls` テーブルを追加（id, npc_id, skill_name, skill_value, roll_value, success_level, rolled_at）。`src/app/_components/NpcQuickRoller.tsx`（`roll()`関数内、`setResult`の直後）でロール結果を `supabase.from("npc_dice_rolls").insert(...)` で保存するよう拡張（npcIdをpropsで追加受け取り）。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）に直近の判定履歴一覧（最新10件）を追加表示。`src/lib/supabase.ts` に `NpcDiceRoll` 型を追加。
 **コミット:** `feat: NPC dice roll history tracking`
+
+## [TODO] 能力値オートロール（キャラクター作成支援） — 優先度: 中
+**対象:** PL
+**概要:** キャラクター新規作成時に、CoC7版ルールに沿った能力値（STR/CON/POW/DEX/APP=3D6×5、SIZ/INT/EDU=2D6×5+6）を自動でロールし入力欄に反映できる機能。現在は能力値を手入力する必要があり、キャラ作成の手間とサイコロ計算ミスの原因になっている。
+**実装ヒント:** `src/app/_components/CharacterForm.tsx` に「能力値を振る」ボタンを追加（"use client"のまま）。クリック時に各能力値ごとに `Math.floor(Math.random()*6)+1` を3回または2回合計し倍率をかけた値をstateにセットしてフォームの該当input値を更新。手動修正も引き続き可能なように上書き可能なテキスト入力のままにする。追加DBなし。
+**コミット:** `feat: ability score auto-roll for character creation`
+
+## [TODO] シナリオ複製（NPC・ハンドアウトひな型流用） — 優先度: 中
+**対象:** KP
+**概要:** 既存シナリオをタイトルだけ変えて複製し、紐づくNPC・ハンドアウトも一緒にコピーできる機能。既存の「キャラクター複製機能」と同様のアプローチをシナリオ側にも提供し、類似シナリオ作成や過去シナリオの改変版作成を高速化する。
+**実装ヒント:** シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネントを新規作成（`src/app/_components/DuplicateButton.tsx` のシナリオ版として `ScenarioDuplicateButton.tsx` を新規作成）。`supabase.from("scenarios").select("*")` でシナリオ取得後、title に「（コピー）」を付加し status を `"planning"` にリセットして INSERT。続けて `npcs`（scenario_nameで紐づくもの）と `handouts`（scenario_idで紐づくもの）を新IDで一括INSERT。複製後は新シナリオの詳細ページへリダイレクト。追加DBなし。
+**コミット:** `feat: scenario duplication with linked NPCs and handouts`
+
+## [TODO] NPC複製機能 — 優先度: 低
+**対象:** KP
+**概要:** 既存NPC（特に能力値スタッツ込みの戦闘NPC）を1クリックで複製できる機能。同系統の雑魚NPCを複数体素早く用意したい場合の入力の手間を省く。
+**実装ヒント:** NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネント（`src/app/_components/NpcDuplicateButton.tsx`）を新規作成。`supabase.from("npcs").select("*")` で全カラム取得し、name に「（コピー）」を付加して `npcs` テーブルにINSERT（能力値・db等もそのまま複製）。複製後は新NPCの詳細ページへリダイレクト。追加DBなし。
+**コミット:** `feat: duplicate NPC for quickly preparing similar enemies`
+
+## [TODO] 職業技能テンプレート — 優先度: 中
+**対象:** PL
+**概要:** よく使う職業の初期技能セット（技能名と職業技能フラグ）をテンプレートとして保存し、新規キャラクター作成時に呼び出して技能を一括追加できる機能。毎回同じ職業の技能を手入力する手間を省く。
+**実装ヒント:** Supabaseに `skill_templates` テーブルを追加（id, occupation_name, skill_name, is_occupation, created_at）。キャラクター作成フォーム（`src/app/_components/CharacterForm.tsx`）に「テンプレートから技能を読み込む」select要素を追加し、選択した occupation_name に紐づく `skill_templates` 行を技能リストstateへ一括追加。テンプレート自体の管理（作成・編集）は `src/app/skill-templates/page.tsx` を新規作成し簡易CRUDを提供。`src/lib/supabase.ts` に `SkillTemplate` 型を追加。
+**コミット:** `feat: occupation skill template for quick character setup`
