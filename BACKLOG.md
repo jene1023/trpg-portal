@@ -273,7 +273,7 @@
 **実装ヒント:** シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネントを新規作成（`src/app/_components/DuplicateButton.tsx` のシナリオ版として `ScenarioDuplicateButton.tsx` を新規作成）。`supabase.from("scenarios").select("*")` でシナリオ取得後、title に「（コピー）」を付加し status を `"planning"` にリセットして INSERT。続けて `npcs`（scenario_nameで紐づくもの）と `handouts`（scenario_idで紐づくもの）を新IDで一括INSERT。複製後は新シナリオの詳細ページへリダイレクト。追加DBなし。
 **コミット:** `feat: scenario duplication with linked NPCs and handouts`
 
-## [TODO] NPC複製機能 — 優先度: 低
+## [DONE] NPC複製機能 — 優先度: 低
 **対象:** KP
 **概要:** 既存NPC（特に能力値スタッツ込みの戦闘NPC）を1クリックで複製できる機能。同系統の雑魚NPCを複数体素早く用意したい場合の入力の手間を省く。
 **実装ヒント:** NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネント（`src/app/_components/NpcDuplicateButton.tsx`）を新規作成。`supabase.from("npcs").select("*")` で全カラム取得し、name に「（コピー）」を付加して `npcs` テーブルにINSERT（能力値・db等もそのまま複製）。複製後は新NPCの詳細ページへリダイレクト。追加DBなし。

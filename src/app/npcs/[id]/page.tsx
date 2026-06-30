@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel } from "@/lib/supabase";
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
+import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
 
 const LEVEL_LABEL: Record<SuccessLevel, string> = {
   critical_success: "決定的成功",
@@ -93,13 +94,16 @@ export default async function NpcDetailPage({ params }: Props) {
       </div>
 
       {/* ヘッダー */}
-      <div className="mb-6">
-        <h1 className="font-cinzel text-2xl font-bold text-coc-text leading-tight">
-          {npc.name}
-        </h1>
-        {npc.scenario_name && (
-          <p className="text-sm text-coc-gold mt-1">{npc.scenario_name}</p>
-        )}
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-cinzel text-2xl font-bold text-coc-text leading-tight">
+            {npc.name}
+          </h1>
+          {npc.scenario_name && (
+            <p className="text-sm text-coc-gold mt-1">{npc.scenario_name}</p>
+          )}
+        </div>
+        <NpcDuplicateButton npcId={npc.id} />
       </div>
 
       <div className="space-y-4">
