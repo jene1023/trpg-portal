@@ -303,7 +303,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` をServer Component + "use client" 子コンポーネント（`src/app/_components/PartyStatAdjuster.tsx`）構成に変更。既存の `QuickStatEditor.tsx` の増減ロジックを参考に、各参加者カードへHP/MP/SANの+/-入力欄とボタンを追加し `supabase.from("characters").update({ hp_current/mp_current/san_current }).eq("id", char.id)` で更新後に再取得（router.refresh()等）。追加DBなし。
 **コミット:** `feat: apply damage and healing from party view`
 
-## [TODO] セッションログ・メモ全文検索（グローバル検索拡張） — 優先度: 中
+## [DONE] セッションログ・メモ全文検索（グローバル検索拡張） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** 現在のグローバル検索（`src/app/search/page.tsx`）はキャラクター名・NPC名・シナリオタイトルのみが対象で、セッションログの本文やクイックメモ・共有メモの内容は検索できない。これらの本文もキーワード検索対象に加え、過去の出来事やメモを素早く探せるようにする。
 **実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内に `supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`)`、`supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`)`、`supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`)` を `Promise.all` に追加。結果セクションに「セッションログ」「メモ」を追加し、各結果は紐づくキャラクター/シナリオの詳細ページへリンク。追加DBなし。

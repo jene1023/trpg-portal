@@ -4,7 +4,11 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, Npc, Scenario } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, QuickNote, ScenarioNote } from "@/lib/supabase";
+
+type SessionResult = SessionLog & { characters: { name: string } | null };
+type QuickNoteResult = QuickNote & { characters: { name: string } | null };
+type ScenarioNoteResult = ScenarioNote & { scenarios: { title: string } | null };
 
 function SearchPageInner() {
   const router = useRouter();
@@ -17,6 +21,9 @@ function SearchPageInner() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [npcs, setNpcs] = useState<Npc[]>([]);
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [sessions, setSessions] = useState<SessionResult[]>([]);
+  const [quickNotes, setQuickNotes] = useState<QuickNoteResult[]>([]);
+  const [scenarioNotes, setScenarioNotes] = useState<ScenarioNoteResult[]>([]);
 
   useEffect(() => {
     setInputValue(initialQuery);
@@ -24,6 +31,9 @@ function SearchPageInner() {
       setCharacters([]);
       setNpcs([]);
       setScenarios([]);
+      setSessions([]);
+      setQuickNotes([]);
+      setScenarioNotes([]);
       setSearched(false);
       return;
     }
@@ -37,14 +47,23 @@ function SearchPageInner() {
         { data: charactersData },
         { data: npcsData },
         { data: scenariosData },
+        { data: sessionsData },
+        { data: quickNotesData },
+        { data: scenarioNotesData },
       ] = await Promise.all([
         supabase.from("characters").select("*").ilike("name", `%${q}%`),
         supabase.from("npcs").select("*").ilike("name", `%${q}%`),
         supabase.from("scenarios").select("*").ilike("title", `%${q}%`),
+        supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`),
+        supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`),
+        supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`),
       ]);
       setCharacters((charactersData as Character[]) ?? []);
       setNpcs((npcsData as Npc[]) ?? []);
       setScenarios((scenariosData as Scenario[]) ?? []);
+      setSessions((sessionsData as SessionResult[]) ?? []);
+      setQuickNotes((quickNotesData as QuickNoteResult[]) ?? []);
+      setScenarioNotes((scenarioNotesData as ScenarioNoteResult[]) ?? []);
       setLoading(false);
       setSearched(true);
     }
@@ -59,7 +78,8 @@ function SearchPageInner() {
     }
   }
 
-  const totalResults = characters.length + npcs.length + scenarios.length;
+  const totalResults =
+    characters.length + npcs.length + scenarios.length + sessions.length + quickNotes.length + scenarioNotes.length;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -70,7 +90,7 @@ function SearchPageInner() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
           <input
             type="text"
-            placeholder="キャラクター・NPC・シナリオを検索..."
+            placeholder="キャラクター・NPC・シナリオ・ログ・メモを検索..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             className="w-full rounded-lg border border-coc-border bg-coc-surface pl-9 pr-3 py-2.5 text-sm text-coc-text placeholder-coc-muted focus:outline-none focus:border-coc-gold transition-colors"
@@ -162,6 +182,65 @@ function SearchPageInner() {
                     className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
                   >
                     <p className="text-sm font-medium text-coc-text">{s.title}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {sessions.length > 0 && (
+            <section>
+              <h2 className="font-cinzel text-sm font-semibold text-coc-gold mb-3">
+                セッションログ ({sessions.length})
+              </h2>
+              <div className="flex flex-col gap-2">
+                {sessions.map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/characters/${s.character_id}/sessions`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-sm font-medium text-coc-text">{s.title}</p>
+                    <p className="text-xs text-coc-muted mt-0.5">
+                      {s.characters?.name ?? "不明なキャラクター"}
+                    </p>
+                    {s.summary && (
+                      <p className="text-xs text-coc-muted mt-1 line-clamp-2">{s.summary}</p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(quickNotes.length > 0 || scenarioNotes.length > 0) && (
+            <section>
+              <h2 className="font-cinzel text-sm font-semibold text-coc-gold mb-3">
+                メモ ({quickNotes.length + scenarioNotes.length})
+              </h2>
+              <div className="flex flex-col gap-2">
+                {quickNotes.map((n) => (
+                  <Link
+                    key={`quick-${n.id}`}
+                    href={`/characters/${n.character_id}/quick-notes`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-xs text-coc-muted mb-0.5">
+                      {n.characters?.name ?? "不明なキャラクター"}のクイックメモ
+                    </p>
+                    <p className="text-sm text-coc-text line-clamp-2">{n.content}</p>
+                  </Link>
+                ))}
+                {scenarioNotes.map((n) => (
+                  <Link
+                    key={`scenario-note-${n.id}`}
+                    href={`/scenarios/${n.scenario_id}/notes`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-xs text-coc-muted mb-0.5">
+                      {n.scenarios?.title ?? "不明なシナリオ"}の共有メモ
+                    </p>
+                    <p className="text-sm text-coc-text line-clamp-2">{n.content}</p>
                   </Link>
                 ))}
               </div>
