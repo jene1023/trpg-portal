@@ -234,3 +234,15 @@ create table if not exists character_finances (
 
 alter table character_finances enable row level security;
 create policy "allow all for anon" on character_finances for all using (true) with check (true);
+
+-- NPC遭遇ログ（セッション×NPC紐付け） (追加マイグレーション)
+create table if not exists session_npc_encounters (
+  id          uuid primary key default gen_random_uuid(),
+  session_id  uuid not null references sessions(id) on delete cascade,
+  npc_id      uuid not null references npcs(id) on delete cascade,
+  created_at  timestamptz default now(),
+  unique (session_id, npc_id)
+);
+
+alter table session_npc_encounters enable row level security;
+create policy "allow all for anon" on session_npc_encounters for all using (true) with check (true);

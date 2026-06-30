@@ -3,13 +3,27 @@
 import { useState } from "react";
 import { SessionLog } from "@/lib/supabase";
 import SessionLogForm from "./SessionLogForm";
+import SessionNpcEncounters from "./SessionNpcEncounters";
+
+type EncounterEntry = {
+  id: string;
+  npc_id: string;
+  npc_name: string;
+};
 
 type Props = {
   characterId: string;
   initialLogs: SessionLog[];
+  allNpcs: { id: string; name: string }[];
+  encountersBySession: Record<string, EncounterEntry[]>;
 };
 
-export default function SessionLogList({ characterId, initialLogs }: Props) {
+export default function SessionLogList({
+  characterId,
+  initialLogs,
+  allNpcs,
+  encountersBySession,
+}: Props) {
   const [logs, setLogs] = useState<SessionLog[]>(initialLogs);
 
   const nextSessionNumber =
@@ -76,6 +90,12 @@ export default function SessionLogList({ characterId, initialLogs }: Props) {
                   {log.summary}
                 </p>
               )}
+
+              <SessionNpcEncounters
+                sessionId={log.id}
+                allNpcs={allNpcs}
+                initialEncounters={encountersBySession[log.id] ?? []}
+              />
             </div>
           ))}
         </div>

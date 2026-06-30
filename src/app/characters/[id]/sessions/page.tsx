@@ -27,6 +27,32 @@ export default async function SessionsPage({ params }: Props) {
     .eq("character_id", id)
     .order("session_number", { ascending: false });
 
+  const sessionIds = (logs ?? []).map((l) => l.id);
+
+  const [{ data: npcs }, { data: encounters }] = await Promise.all([
+    supabase.from("npcs").select("id, name").order("name"),
+    sessionIds.length > 0
+      ? supabase
+          .from("session_npc_encounters")
+          .select("id, session_id, npc_id, npcs(name)")
+          .in("session_id", sessionIds)
+      : Promise.resolve({ data: [] as never[] }),
+  ]);
+
+  const encountersBySession: Record<
+    string,
+    { id: string; npc_id: string; npc_name: string }[]
+  > = {};
+  for (const e of (encounters ?? []) as unknown as {
+    id: string;
+    session_id: string;
+    npc_id: string;
+    npcs: { name: string } | null;
+  }[]) {
+    const entry = { id: e.id, npc_id: e.npc_id, npc_name: e.npcs?.name ?? "（不明なNPC）" };
+    (encountersBySession[e.session_id] ??= []).push(entry);
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
@@ -43,7 +69,12 @@ export default async function SessionsPage({ params }: Props) {
         セッションログ
       </h1>
 
-      <SessionLogList characterId={id} initialLogs={logs ?? []} />
+      <SessionLogList
+        characterId={id}
+        initialLogs={logs ?? []}
+        allNpcs={npcs ?? []}
+        encountersBySession={encountersBySession}
+      />
     </div>
   );
 }

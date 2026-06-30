@@ -327,7 +327,7 @@
 **実装ヒント:** `scenario_participants` テーブルに `attendance_status: "unconfirmed"|"attending"|"absent"` カラムをALTER TABLEで追加（デフォルト `"unconfirmed"`）。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `attendance_status` を追加。`src/app/scenarios/[id]/participants/page.tsx` の各参加者行に出欠select要素を追加し `supabase.from("scenario_participants").update({ attendance_status }).eq("id", id)` で更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「参加○名/欠席○名/未定○名」のサマリーを表示。
 **コミット:** `feat: attendance tracking for next scenario session`
 
-## [TODO] NPC遭遇ログ（セッション×NPC紐付け） — 優先度: 低
+## [DONE] NPC遭遇ログ（セッション×NPC紐付け） — 優先度: 低
 **対象:** KP
 **概要:** どのセッションでどのNPCが登場したかを記録し、NPC詳細ページから「過去の登場セッション」を、セッションログからは「登場NPC」を相互に確認できる機能。長期キャンペーンでのNPC再登場時の記憶補助になる。
 **実装ヒント:** Supabaseに `session_npc_encounters` テーブルを追加（id, session_id, npc_id, created_at）。`src/app/characters/[id]/sessions/page.tsx` の各セッション項目に「登場NPC」選択・追加UIを実装（`supabase.from("npcs").select("id, name")` で候補取得）。`src/app/npcs/[id]/page.tsx` に紐づくセッション一覧（`session_npc_encounters` 経由で `sessions` をjoin取得）を表示するセクションを追加。`src/lib/supabase.ts` に `SessionNpcEncounter` 型を追加。

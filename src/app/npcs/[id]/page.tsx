@@ -80,6 +80,28 @@ export default async function NpcDetailPage({ params }: Props) {
 
   const rollHistory: NpcDiceRoll[] = rolls ?? [];
 
+  const { data: encounterRows } = await supabase
+    .from("session_npc_encounters")
+    .select("id, sessions(id, session_number, title, played_at, character_id, characters(name))")
+    .eq("npc_id", id)
+    .order("created_at", { ascending: false });
+
+  const encounterSessions = (
+    (encounterRows ?? []) as unknown as {
+      id: string;
+      sessions: {
+        id: string;
+        session_number: number;
+        title: string;
+        played_at: string | null;
+        character_id: string;
+        characters: { name: string } | null;
+      } | null;
+    }[]
+  )
+    .map((row) => row.sessions)
+    .filter((s): s is NonNullable<typeof s> => s !== null);
+
   return (
     <div className="coc-page-enter mx-auto max-w-3xl px-4 py-8">
       {/* ブレッドクラム */}
@@ -206,6 +228,42 @@ export default async function NpcDetailPage({ params }: Props) {
                 </li>
               ))}
             </ol>
+          </div>
+        )}
+
+        {/* 登場セッション */}
+        {encounterSessions.length > 0 && (
+          <div className="rounded-lg border border-coc-border bg-coc-surface p-4 space-y-3">
+            <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              登場セッション
+            </h2>
+            <ul className="space-y-2">
+              {encounterSessions.map((session) => (
+                <li key={session.id}>
+                  <Link
+                    href={`/characters/${session.character_id}/sessions`}
+                    className="flex items-center justify-between gap-3 rounded-md border border-coc-border bg-coc-raised px-3 py-2 text-sm hover:border-coc-border-glow transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <span className="text-xs text-coc-muted mr-2">
+                        Session {session.session_number}
+                      </span>
+                      <span className="text-coc-text truncate">{session.title}</span>
+                      {session.characters?.name && (
+                        <span className="text-coc-muted text-xs ml-2">
+                          （{session.characters.name}）
+                        </span>
+                      )}
+                    </div>
+                    {session.played_at && (
+                      <span className="text-xs text-coc-muted whitespace-nowrap shrink-0">
+                        {session.played_at}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

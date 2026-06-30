@@ -273,3 +273,10 @@ export type CharacterFinance = {
   recorded_at: string;
   created_at: string;
 };
+
+export type SessionNpcEncounter = {
+  id: string;
+  session_id: string;
+  npc_id: string;
+  created_at: string;
+};
