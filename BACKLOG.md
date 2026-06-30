@@ -219,7 +219,7 @@
 **実装ヒント:** `src/app/_components/SpecialRoller.tsx` を新規作成（"use client"）。ロール種別タブ（通常/プッシュ/対抗）を切り替え。プッシュは前回ロール値を保持して再判定し成功度を表示。対抗ロールは2つの技能値入力欄を持ち双方のロール値と成功度を比較して勝敗を判定。判定結果は `supabase.from("dice_rolls").insert(...)` に保存（既存dice_historyと連携）。キャラクター詳細ページのダイスローラーセクションに「特殊ロール」ボタンとして追加。
 **コミット:** `feat: push roll and opposed roll UI for CoC7 special mechanics`
 
-## [TODO] キャラクターJSONインポート — 優先度: 中
+## [DONE] キャラクターJSONインポート — 優先度: 中
 **対象:** PL / 共通
 **概要:** 既存エクスポート機能（ExportButton.tsx）で作成したJSONファイルを読み込み、キャラクター＋技能を一括復元・新規作成できる機能。バックアップからの復元・別環境への移行・テンプレートキャラ共有に対応する。
 **実装ヒント:** `src/app/characters/import/page.tsx` を新規作成（"use client"）。`<input type="file" accept=".json">` でファイル選択し `FileReader` でJSON解析。バリデーション後に `supabase.from("characters").insert(...)` でキャラ作成し、続いて `character_skills` を新IDで一括INSERT（nameに「（インポート）」付加でオリジナルと区別）。インポート後は新キャラクター詳細ページへリダイレクト。`src/app/characters/page.tsx` に「JSONからインポート」ボタンを追加。追加DBなし。

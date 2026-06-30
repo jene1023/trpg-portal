@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, Upload, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
 
@@ -70,13 +70,22 @@ export default function CharactersPage() {
         <h1 className="font-cinzel text-2xl font-bold text-coc-text">
           キャラクター一覧
         </h1>
-        <Link
-          href="/characters/new"
-          className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
-        >
-          <Plus size={16} />
-          新しいキャラクター
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/characters/import"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <Upload size={16} />
+            JSONからインポート
+          </Link>
+          <Link
+            href="/characters/new"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
+          >
+            <Plus size={16} />
+            新しいキャラクター
+          </Link>
+        </div>
       </div>
 
       {/* 検索バー */}
