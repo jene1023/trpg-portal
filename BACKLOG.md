@@ -267,7 +267,7 @@
 **実装ヒント:** `src/app/_components/CharacterForm.tsx` に「能力値を振る」ボタンを追加（"use client"のまま）。クリック時に各能力値ごとに `Math.floor(Math.random()*6)+1` を3回または2回合計し倍率をかけた値をstateにセットしてフォームの該当input値を更新。手動修正も引き続き可能なように上書き可能なテキスト入力のままにする。追加DBなし。
 **コミット:** `feat: ability score auto-roll for character creation`
 
-## [TODO] シナリオ複製（NPC・ハンドアウトひな型流用） — 優先度: 中
+## [DONE] シナリオ複製（NPC・ハンドアウトひな型流用） — 優先度: 中
 **対象:** KP
 **概要:** 既存シナリオをタイトルだけ変えて複製し、紐づくNPC・ハンドアウトも一緒にコピーできる機能。既存の「キャラクター複製機能」と同様のアプローチをシナリオ側にも提供し、類似シナリオ作成や過去シナリオの改変版作成を高速化する。
 **実装ヒント:** シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネントを新規作成（`src/app/_components/DuplicateButton.tsx` のシナリオ版として `ScenarioDuplicateButton.tsx` を新規作成）。`supabase.from("scenarios").select("*")` でシナリオ取得後、title に「（コピー）」を付加し status を `"planning"` にリセットして INSERT。続けて `npcs`（scenario_nameで紐づくもの）と `handouts`（scenario_idで紐づくもの）を新IDで一括INSERT。複製後は新シナリオの詳細ページへリダイレクト。追加DBなし。

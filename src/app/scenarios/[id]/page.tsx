@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus } from "@/lib/supabase";
+import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -44,7 +45,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href="/scenarios"
           className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-text transition-colors"
@@ -52,6 +53,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <ArrowLeft size={16} />
           シナリオ一覧
         </Link>
+        <ScenarioDuplicateButton scenarioId={id} />
       </div>
 
       <div className="mb-6">
