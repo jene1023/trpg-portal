@@ -285,6 +285,13 @@ export default async function CharacterDetailPage({ params }: Props) {
             <span className="text-coc-gold">→</span>
           </Link>
           <Link
+            href={`/characters/${id}/stats-graph`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <span>推移グラフ（HP/SAN）</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
+          <Link
             href={`/characters/${id}/traits`}
             className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
           >

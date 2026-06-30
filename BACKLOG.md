@@ -243,7 +243,7 @@
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。クエリパラメータ `?q=` を受け取り、`supabase.from("characters").select("*").ilike("name", `%${q}%`)`、`npcs`、`scenarios` の3テーブルに対して並行クエリ（`Promise.all`）を実行し、種別ごとにセクション分けして結果一覧表示。`src/app/_components/NavBar.tsx`（`src/app/_components/NavBar.tsx:8-14`の`navLinks`付近）に検索アイコン＋入力欄を追加し、Enterで `/search?q=...` に遷移。追加DBなし。
 **コミット:** `feat: global search across characters, NPCs, and scenarios`
 
-## [TODO] キャラクターHP/SAN推移グラフ — 優先度: 中
+## [DONE] キャラクターHP/SAN推移グラフ — 優先度: 中
 **対象:** PL
 **概要:** セッションログ（`sessions`テーブルの`san_loss`/`hp_loss`）を累積し、セッションを重ねるごとのHP・SANの減少傾向を視覚的に確認できるグラフビュー。既存のタイムライン（年表）は出来事の一覧表示のみで数値推移が分かりにくい点を補う。
 **実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` 内、または新規 `src/app/characters/[id]/stats-graph/page.tsx` に実装。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number")` でログ取得後、`san_max`/`hp_max` からの残量推移を session_number ごとに算出。依存ライブラリなしでCSSの `height: calc(${pct}%)` を使った縦棒グラフで表示（SAN用・HP用の2系統）。追加DBなし（既存`sessions`を流用）。キャラクター詳細ページに「推移グラフ」リンクを追加。
