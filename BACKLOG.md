@@ -291,7 +291,7 @@
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` を拡張し、ロール前に「通常/ボーナス/ペナルティ」のトグルを追加。ボーナス時は十の位用d10を2つ振り小さい方を、ペナルティ時は大きい方を採用し、一の位d10と組み合わせて100面ロール値を算出（00+0は100として扱う）。`SpecialRoller.tsx` の通常ロールにも同トグルを追加可能であれば併せて対応。`dice_rolls` への保存は既存のまま（roll_valueは最終算出値）。追加DBなし。
 **コミット:** `feat: bonus and penalty dice support for dice roller`
 
-## [TODO] SANチェック（正気度ロール） — 優先度: 高
+## [DONE] SANチェック（正気度ロール） — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターの現在SAN値に対して1d100判定を行い、失敗時に喪失SAN（例: 1d4/1d10など可変ダイス）を自動算出してsan_currentを即時更新できる専用ロールUI。既存のmadness_records・sessionsのsan_lossと連携し、CoCセッションの中核行為であるSANチェックを正式にサポートする。
 **実装ヒント:** `src/app/_components/SanCheckRoller.tsx` を新規作成（"use client"）。props: characterId, sanCurrent, sanMax。失敗時喪失ダイス式（例: "1d4", "1d10"）を成功時/失敗時で入力できるフォームを用意し、1d100判定後に該当ダイスを振ってsan_current から減算、`supabase.from("characters").update({ san_current })` で即時反映。SAN0到達時や1回で5以上喪失時は狂気記録（`madness_records`）への追加導線を表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のダイスローラーセクション付近に配置。追加DBなし（既存`characters`, `madness_records`を流用）。

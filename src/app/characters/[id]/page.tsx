@@ -13,6 +13,7 @@ import SkillList from "@/app/_components/SkillList";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import DiceRoller from "@/app/_components/DiceRoller";
 import SpecialRoller from "@/app/_components/SpecialRoller";
+import SanCheckRoller from "@/app/_components/SanCheckRoller";
 import ExportButton from "@/app/_components/ExportButton";
 import PdfExportButton from "@/app/_components/PdfExportButton";
 import DuplicateButton from "@/app/_components/DuplicateButton";
@@ -181,6 +182,11 @@ export default async function CharacterDetailPage({ params }: Props) {
             <div>
               <p className="text-xs text-coc-muted font-semibold mb-2">特殊ロール（プッシュ／対抗）</p>
               <SpecialRoller skills={skills ?? []} characterId={id} />
+            </div>
+            <SectionDivider className="my-2" />
+            <div>
+              <p className="text-xs text-coc-muted font-semibold mb-2">SANチェック（正気度ロール）</p>
+              <SanCheckRoller characterId={id} sanCurrent={char.san_current} sanMax={char.san_max} />
             </div>
             <SectionDivider className="my-2" />
             <SkillList skills={skills ?? []} characterId={id} />
