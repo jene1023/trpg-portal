@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus } from "@/lib/supabase";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
@@ -109,6 +109,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">ハンドアウト</p>
               <p className="text-xs text-coc-muted">情報カードの作成・管理</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/party`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Shield size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">パーティービュー</p>
+              <p className="text-xs text-coc-muted">参加者全員のHP/MP/SANを一覧確認</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>

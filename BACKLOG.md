@@ -207,7 +207,7 @@
 **実装ヒント:** Supabaseに `share_tokens` テーブルを追加（id, handout_id, token: uuid, expires_at: timestamptz, created_at）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の各ハンドアウトカードに「共有リンク生成」ボタンを追加し、`supabase.from("share_tokens").insert({handout_id, token: crypto.randomUUID(), expires_at: +24h})` でトークン発行。`src/app/share/[token]/page.tsx` を新規作成（Server Component）。`supabase.from("share_tokens").select("*, handouts(*)").eq("token", token).gt("expires_at", now)` で取得し、is_secret でなければ本文を表示。`src/lib/supabase.ts` に `ShareToken` 型を追加。
 **コミット:** `feat: shareable handout URL with expiry for KP to PL distribution`
 
-## [TODO] パーティービュー（シナリオ参加者HP/SAN一覧） — 優先度: 高
+## [DONE] パーティービュー（シナリオ参加者HP/SAN一覧） — 優先度: 高
 **対象:** KP / 共通
 **概要:** シナリオに参加する全キャラクターのHP/MP/SANを一画面で確認できるビュー。セッション中のパーティー全体の状態把握・生死確認を一覧で行える。
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各キャラのHP/MP/SANを残量に応じてカラーコード表示（50%以下→黄、25%以下→赤）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「パーティービュー」リンクを追加。追加DBなし。
