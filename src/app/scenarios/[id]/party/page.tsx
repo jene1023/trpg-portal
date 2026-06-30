@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
+import PartyStatAdjuster from "@/app/_components/PartyStatAdjuster";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character;
@@ -141,6 +142,16 @@ export default async function PartyViewPage({ params }: Props) {
                   <StatBar label="MP" current={char.mp_current} max={char.mp_max} />
                   <StatBar label="SAN" current={char.san_current} max={char.san_max} />
                 </div>
+
+                <PartyStatAdjuster
+                  characterId={char.id}
+                  hpCurrent={char.hp_current}
+                  hpMax={char.hp_max}
+                  mpCurrent={char.mp_current}
+                  mpMax={char.mp_max}
+                  sanCurrent={char.san_current}
+                  sanMax={char.san_max}
+                />
               </div>
             );
           })}

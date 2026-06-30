@@ -297,7 +297,7 @@
 **実装ヒント:** `src/app/_components/SanCheckRoller.tsx` を新規作成（"use client"）。props: characterId, sanCurrent, sanMax。失敗時喪失ダイス式（例: "1d4", "1d10"）を成功時/失敗時で入力できるフォームを用意し、1d100判定後に該当ダイスを振ってsan_current から減算、`supabase.from("characters").update({ san_current })` で即時反映。SAN0到達時や1回で5以上喪失時は狂気記録（`madness_records`）への追加導線を表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のダイスローラーセクション付近に配置。追加DBなし（既存`characters`, `madness_records`を流用）。
 **コミット:** `feat: sanity check roller with auto SAN deduction`
 
-## [TODO] パーティービューからのダメージ/回復適用 — 優先度: 高
+## [DONE] パーティービューからのダメージ/回復適用 — 優先度: 高
 **対象:** KP / 共通
 **概要:** 現在のパーティービュー（`scenario_participants`一覧）はHP/MP/SANの閲覧専用。KPが戦闘中にその場で参加者へダメージ/回復を入力し、各キャラクターのステータスへ即時反映できるようにする。戦闘管理ページ（ローカル状態のみ）と実データを橋渡しする。
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` をServer Component + "use client" 子コンポーネント（`src/app/_components/PartyStatAdjuster.tsx`）構成に変更。既存の `QuickStatEditor.tsx` の増減ロジックを参考に、各参加者カードへHP/MP/SANの+/-入力欄とボタンを追加し `supabase.from("characters").update({ hp_current/mp_current/san_current }).eq("id", char.id)` で更新後に再取得（router.refresh()等）。追加DBなし。
