@@ -154,6 +154,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               mpMax={char.mp_max}
               sanCurrent={char.san_current}
               sanMax={char.san_max}
+              con={char.con}
             />
             <div className="grid grid-cols-3 gap-2 pt-2">
               {[

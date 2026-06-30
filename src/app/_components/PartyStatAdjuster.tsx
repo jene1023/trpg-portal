@@ -26,6 +26,7 @@ type Props = {
   mpMax: number;
   sanCurrent: number;
   sanMax: number;
+  con?: number;
 };
 
 export default function PartyStatAdjuster({
@@ -36,10 +37,12 @@ export default function PartyStatAdjuster({
   mpMax,
   sanCurrent,
   sanMax,
+  con,
 }: Props) {
   const router = useRouter();
   const [amounts, setAmounts] = useState<Record<StatKey, string>>({ hp: "", mp: "", san: "" });
   const [saving, setSaving] = useState<StatKey | null>(null);
+  const [majorWound, setMajorWound] = useState(false);
 
   const currentMap: Record<StatKey, { current: number; max: number }> = {
     hp: { current: hpCurrent, max: hpMax },
@@ -54,6 +57,12 @@ export default function PartyStatAdjuster({
     const { current, max } = currentMap[key];
     const next = Math.min(max, Math.max(0, current + sign * raw));
     if (next === current) return;
+
+    if (key === "hp" && sign === -1 && raw >= Math.ceil(max / 2)) {
+      setMajorWound(true);
+    } else if (key === "hp") {
+      setMajorWound(false);
+    }
 
     if (!isSupabaseConfigured) return;
 
@@ -71,6 +80,26 @@ export default function PartyStatAdjuster({
 
   return (
     <div className="mt-3 flex flex-col gap-2 border-t border-coc-border pt-3">
+      {majorWound && (
+        <div className="rounded border border-red-700 bg-red-950/20 px-3 py-2 text-xs">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="font-semibold text-red-300">⚠ 重傷判定</p>
+              <p className="mt-0.5 text-red-400">最大HPの半分以上のダメージ。CONロールが必要です。</p>
+              {con !== undefined && (
+                <p className="mt-1 font-bold text-red-300">CON×5 = {con * 5}%</p>
+              )}
+            </div>
+            <button
+              onClick={() => setMajorWound(false)}
+              aria-label="警告を閉じる"
+              className="shrink-0 text-red-500 hover:text-red-300"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       {keys.map((key) => (
         <div key={key} className="flex items-center gap-2">
           <span className="w-9 text-xs font-semibold text-coc-muted">{labelMap[key]}</span>

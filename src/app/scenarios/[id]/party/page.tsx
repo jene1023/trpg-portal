@@ -151,6 +151,7 @@ export default async function PartyViewPage({ params }: Props) {
                   mpMax={char.mp_max}
                   sanCurrent={char.san_current}
                   sanMax={char.san_max}
+                  con={char.con}
                 />
               </div>
             );

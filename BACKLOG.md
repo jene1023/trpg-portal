@@ -333,7 +333,7 @@
 **実装ヒント:** Supabaseに `session_npc_encounters` テーブルを追加（id, session_id, npc_id, created_at）。`src/app/characters/[id]/sessions/page.tsx` の各セッション項目に「登場NPC」選択・追加UIを実装（`supabase.from("npcs").select("id, name")` で候補取得）。`src/app/npcs/[id]/page.tsx` に紐づくセッション一覧（`session_npc_encounters` 経由で `sessions` をjoin取得）を表示するセクションを追加。`src/lib/supabase.ts` に `SessionNpcEncounter` 型を追加。
 **コミット:** `feat: link NPCs to sessions for encounter history tracking`
 
-## [TODO] 重傷判定サポート（メジャーウウンド） — 優先度: 高
+## [DONE] 重傷判定サポート（メジャーウウンド） — 優先度: 高
 **対象:** PL / 共通
 **概要:** CoC7版の重要ルール「最大HPの半分以上を1度のダメージで失った場合は重傷となり、ショックで意識を失わないためCONロールが必要」を、HP減少操作時に自動検知して促すUI。現在のQuickStatEditor/PartyStatAdjusterはHP増減のみで重傷判定が未サポート。
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` の `adjust("hp", delta, max)` 内、delta が負かつ `Math.abs(delta) >= Math.ceil(hpMax / 2)` の場合に重傷警告バナーを表示し、`src/app/_components/SpecialRoller.tsx` のCONロール導線（技能値=con*5換算）へのショートカットボタンを出す。同様のチェックを `src/app/_components/PartyStatAdjuster.tsx`（`src/app/scenarios/[id]/party/page.tsx` から利用）にも追加。追加DBなし（既存`characters.con`を利用）。重傷フラグの永続化はせず、その場の警告表示のみ。
