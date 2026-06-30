@@ -350,3 +350,27 @@
 **概要:** PL向けの「セッション前チェックリスト」(`preflight/page.tsx`)のKP版。シナリオに紐づくNPC一覧・ハンドアウト準備状況・参加者の出欠（出欠管理実装後は`attendance_status`も含む）・次回セッション予定日を一画面でまとめて確認できるプリフライトUI。既存のシナリオ詳細ダッシュボードはナビゲーションハブだが、セッション当日の「準備漏れ確認」に特化したビューが存在しない。
 **実装ヒント:** `src/app/scenarios/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*)").eq("id", id)` と `npcs` を `scenario_name` で取得し一括表示。ハンドアウトは`is_secret`件数・配布先未設定件数を警告表示。参加者は出欠ステータスごとに人数サマリー（出欠管理TODO実装後に連携）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備確認」リンクを追加。追加DBなし。
 **コミット:** `feat: KP pre-session preparation checklist`
+
+## [TODO] キャラクター技能目標トラッカー — 優先度: 中
+**対象:** PL
+**概要:** 技能に「目標値」を設定し、現在値からの達成率をプログレスバーで可視化できる機能。長期キャンペーンでの育成方針を明確化し、セッションごとの成長チェックを目標達成にフォーカスできるようにする。既存の `growth_history` とも連携して「あと何点で目標達成か」を表示できる。
+**実装ヒント:** Supabaseに `skill_goals` テーブルを追加（id, character_id, skill_name, target_value, created_at）。`src/app/characters/[id]/skill-goals/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("character_skills").select("*")` で現在値を取得し、同じ `skill_name` の `skill_goals` 目標値と突合してプログレスバー（`width: calc(${current/target*100}%)`）を表示。目標達成済みスキルは緑ハイライト。`src/lib/supabase.ts` に `SkillGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能目標」リンクを追加。
+**コミット:** `feat: skill goal tracker with progress visualization`
+
+## [TODO] KPシナリオ振り返りノート — 優先度: 中
+**対象:** KP
+**概要:** シナリオ完了後にKPが「何がうまくいったか」「PLの反応」「次回改善点」「バランス評価（難易度・恐怖演出）」を記録できる振り返り機能。既存の `gm_notes` はセッション前の計画用メモだが、こちらは実施後の記録に特化する。KPとして複数シナリオを経験するうちに自身の傾向と改善点を蓄積できる。
+**実装ヒント:** Supabaseに `scenario_retrospectives` テーブルを追加（id, scenario_id, what_worked, what_to_improve, player_reactions, difficulty_rating: integer 1–5, horror_rating: integer 1–5, created_at）。`src/app/scenarios/[id]/retrospective/page.tsx` を新規作成（"use client"）。フォームは各フィールドを `<textarea>` で入力、難易度・恐怖演出は星選択UIで入力。`supabase.from("scenario_retrospectives").upsert(...)` でシナリオ1件につき1レコード管理（複数作成不可）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「振り返りノート」リンクを追加。`src/lib/supabase.ts` に `ScenarioRetrospective` 型を追加。
+**コミット:** `feat: KP scenario retrospective notes with rating`
+
+## [TODO] 次回セッションカレンダービュー — 優先度: 低
+**対象:** KP / 共通
+**概要:** 複数シナリオの `next_session_at` を月単位カレンダー形式で一覧表示するページ。シナリオ一覧は都度フィルタが必要だが、カレンダー表示なら複数卓の日程重複が一目で確認できる。`next_session_at` は既実装済みのため追加DBなし。
+**実装ヒント:** `src/app/calendar/page.tsx` を新規作成（"use client"）。`supabase.from("scenarios").select("id, title, status, next_session_at").not("next_session_at", "is", null)` で取得。useState で表示月（year/month）を管理し、前月/翌月ボタンで切り替え。該当月のカレンダーグリッド（7列×最大6行）を `Array.from` で生成し、各セルに一致するシナリオタイトルを表示してシナリオ詳細ページへリンク。`src/app/_components/NavBar.tsx` に「カレンダー」リンクを追加。追加DBなし。
+**コミット:** `feat: session calendar view showing upcoming scenario dates`
+
+## [TODO] シナリオ別SAN/HP喪失サマリー — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオに参加したキャラクター全員のセッションログ（`sessions`テーブル）を集計し、「セッション別・参加者別のSAN/HP喪失量」と「シナリオ全体の合計喪失量」をKPが俯瞰できるサマリービュー。シナリオのバランス評価・難易度確認・KP振り返りの補助に使う。既存テーブルのみ使用で追加DBなし。
+**実装ヒント:** `src/app/scenarios/[id]/damage-summary/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(id, name, san_max, hp_max)")` で参加者を取得後、各 `character_id` ごとに `supabase.from("sessions").select("*").eq("character_id", id)` でセッションログを取得（`Promise.all`）。セッション番号×参加者のマトリクス表として表示し、各セルに san_loss/hp_loss を表示。行末に参加者合計、列末にセッション合計を集計。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「喪失サマリー」リンクを追加。
+**コミット:** `feat: scenario SAN/HP loss summary matrix for KP review`
