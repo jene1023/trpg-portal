@@ -285,7 +285,7 @@
 **実装ヒント:** Supabaseに `skill_templates` テーブルを追加（id, occupation_name, skill_name, is_occupation, created_at）。キャラクター作成フォーム（`src/app/_components/CharacterForm.tsx`）に「テンプレートから技能を読み込む」select要素を追加し、選択した occupation_name に紐づく `skill_templates` 行を技能リストstateへ一括追加。テンプレート自体の管理（作成・編集）は `src/app/skill-templates/page.tsx` を新規作成し簡易CRUDを提供。`src/lib/supabase.ts` に `SkillTemplate` 型を追加。
 **コミット:** `feat: occupation skill template for quick character setup`
 
-## [TODO] ボーナス/ペナルティダイス対応ダイスローラー — 優先度: 高
+## [DONE] ボーナス/ペナルティダイス対応ダイスローラー — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** CoC7版の核心ルールであるボーナスダイス・ペナルティダイス（十の位d10を2つ振り有利/不利な方を採用）に現行のDiceRollerが未対応。判定種別（通常/ボーナス/ペナルティ）を選んでロールできるよう拡張する。
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` を拡張し、ロール前に「通常/ボーナス/ペナルティ」のトグルを追加。ボーナス時は十の位用d10を2つ振り小さい方を、ペナルティ時は大きい方を採用し、一の位d10と組み合わせて100面ロール値を算出（00+0は100として扱う）。`SpecialRoller.tsx` の通常ロールにも同トグルを追加可能であれば併せて対応。`dice_rolls` への保存は既存のまま（roll_valueは最終算出値）。追加DBなし。

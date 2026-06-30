@@ -6,6 +6,13 @@ import { Dice6 } from "lucide-react";
 
 type SuccessDegree = "決定的成功" | "通常成功" | "失敗" | "致命的失敗";
 type RollMode = "push" | "opposed";
+type DiceType = "normal" | "bonus" | "penalty";
+
+const DICE_TYPE_LABEL: Record<DiceType, string> = {
+  normal: "通常",
+  bonus: "ボーナス",
+  penalty: "ペナルティ",
+};
 
 function judge(roll: number, skillValue: number): SuccessDegree {
   const isFumble = skillValue < 50 ? roll >= 96 : roll === 100;
@@ -13,6 +20,18 @@ function judge(roll: number, skillValue: number): SuccessDegree {
   if (roll <= Math.floor(skillValue / 5)) return "決定的成功";
   if (roll <= skillValue) return "通常成功";
   return "失敗";
+}
+
+function rollD10(): number {
+  return Math.floor(Math.random() * 10);
+}
+
+function rollPercentile(diceType: DiceType): number {
+  const ones = rollD10();
+  const tensRolls = diceType === "normal" ? [rollD10()] : [rollD10(), rollD10()];
+  const tens = diceType === "penalty" ? Math.max(...tensRolls) : Math.min(...tensRolls);
+  const value = tens * 10 + ones;
+  return value === 0 ? 100 : value;
 }
 
 const DEGREE_ORDER: SuccessDegree[] = ["致命的失敗", "失敗", "通常成功", "決定的成功"];
@@ -60,6 +79,7 @@ function RollCard({ label, roll, degree }: { label: string; roll: number; degree
 
 function PushRoller({ skills, characterId }: Props) {
   const [selectedId, setSelectedId] = useState<string>(skills[0]?.id ?? "");
+  const [diceType, setDiceType] = useState<DiceType>("normal");
   const [firstRoll, setFirstRoll] = useState<{ roll: number; degree: SuccessDegree } | null>(null);
   const [pushRoll, setPushRoll] = useState<{ roll: number; degree: SuccessDegree } | null>(null);
   const [rolling, setRolling] = useState(false);
@@ -75,9 +95,10 @@ function PushRoller({ skills, characterId }: Props) {
       setPushRoll(null);
     }
     setTimeout(() => {
-      const rolled = Math.floor(Math.random() * 100) + 1;
+      const rolled = rollPercentile(diceType);
       const degree = judge(rolled, selected.current_value);
-      const label = isPush ? `${selected.skill_name}（プッシュ）` : selected.skill_name;
+      const diceLabel = diceType === "normal" ? "" : `（${DICE_TYPE_LABEL[diceType]}）`;
+      const label = isPush ? `${selected.skill_name}（プッシュ）${diceLabel}` : `${selected.skill_name}${diceLabel}`;
       saveRoll(characterId, label, selected.current_value, rolled, degree);
       if (isPush) {
         setPushRoll({ roll: rolled, degree });
@@ -96,6 +117,20 @@ function PushRoller({ skills, characterId }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-coc-muted">技能判定に失敗した後、一度だけ再挑戦できます。失敗すると悪化する可能性があります。</p>
+
+      <div className="flex rounded-md overflow-hidden border border-coc-border text-xs font-medium">
+        {(["normal", "bonus", "penalty"] as DiceType[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setDiceType(t)}
+            className={`flex-1 py-1.5 transition-colors ${
+              diceType === t ? "bg-coc-gold/10 text-coc-gold" : "text-coc-muted hover:text-coc-text"
+            }`}
+          >
+            {DICE_TYPE_LABEL[t]}
+          </button>
+        ))}
+      </div>
 
       <div className="flex gap-2 items-end">
         <div className="flex-1">
