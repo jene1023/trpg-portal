@@ -243,3 +243,13 @@ export type ScenarioNote = {
   author_name: string | null;
   created_at: string;
 };
+
+export type NpcDiceRoll = {
+  id: string;
+  npc_id: string;
+  skill_name: string;
+  skill_value: number;
+  roll_value: number;
+  success_level: SuccessLevel;
+  rolled_at: string;
+};

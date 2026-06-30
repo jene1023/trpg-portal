@@ -255,7 +255,7 @@
 **実装ヒント:** `scenarios` テーブルに `next_session_at: timestamptz | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `next_session_at: string | null` を追加。`src/app/_components/ScenarioForm.tsx` に日時入力フィールドを追加。シナリオ一覧（`src/app/scenarios/page.tsx`）で `status === "ongoing"` かつ `next_session_at` が直近7日以内のシナリオをカード上部に「次回予定」バッジで強調表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にも次回予定日を表示。
 **コミット:** `feat: scenario next session date and reminder display`
 
-## [TODO] NPC判定履歴記録 — 優先度: 低
+## [DONE] NPC判定履歴記録 — 優先度: 低
 **対象:** KP
 **概要:** NPC詳細ページのクイックロール（`NpcQuickRoller.tsx`）はロール結果がページ離脱で消える一時表示のみ。判定結果をDBに保存し、戦闘・対抗判定の経緯を後から振り返れる履歴機能を追加する。
 **実装ヒント:** Supabaseに `npc_dice_rolls` テーブルを追加（id, npc_id, skill_name, skill_value, roll_value, success_level, rolled_at）。`src/app/_components/NpcQuickRoller.tsx`（`roll()`関数内、`setResult`の直後）でロール結果を `supabase.from("npc_dice_rolls").insert(...)` で保存するよう拡張（npcIdをpropsで追加受け取り）。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）に直近の判定履歴一覧（最新10件）を追加表示。`src/lib/supabase.ts` に `NpcDiceRoll` 型を追加。

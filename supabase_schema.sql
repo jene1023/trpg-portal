@@ -189,3 +189,18 @@ create policy "allow all for anon" on scenario_notes for all using (true) with c
 
 -- シナリオ次回予定リマインド (追加マイグレーション)
 alter table scenarios add column if not exists next_session_at timestamptz;
+
+-- NPC判定履歴記録 (追加マイグレーション)
+create table if not exists npc_dice_rolls (
+  id            uuid primary key default gen_random_uuid(),
+  npc_id        uuid not null references npcs(id) on delete cascade,
+  skill_name    text not null,
+  skill_value   integer not null,
+  roll_value    integer not null,
+  success_level text not null
+                check (success_level in ('critical_success', 'success', 'failure', 'fumble')),
+  rolled_at     timestamptz not null default now()
+);
+
+alter table npc_dice_rolls enable row level security;
+create policy "allow all for anon" on npc_dice_rolls for all using (true) with check (true);

@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import { Dice6 } from "lucide-react";
+import { supabase, isSupabaseConfigured, SuccessLevel } from "@/lib/supabase";
 
 type SuccessDegree = "決定的成功" | "通常成功" | "失敗" | "致命的失敗";
+
+const DEGREE_TO_LEVEL: Record<SuccessDegree, SuccessLevel> = {
+  "決定的成功": "critical_success",
+  "通常成功": "success",
+  "失敗": "failure",
+  "致命的失敗": "fumble",
+};
 
 function judge(roll: number, skillValue: number): SuccessDegree {
   const isFumble = skillValue < 50 ? roll >= 96 : roll === 100;
@@ -24,9 +32,9 @@ type Result = { roll: number; degree: SuccessDegree; skillName: string; skillVal
 
 type PresetSkill = { name: string; value: number };
 
-type Props = { presetSkills?: PresetSkill[] };
+type Props = { presetSkills?: PresetSkill[]; npcId?: string };
 
-export default function NpcQuickRoller({ presetSkills = [] }: Props) {
+export default function NpcQuickRoller({ presetSkills = [], npcId }: Props) {
   const [skillName, setSkillName] = useState<string>(presetSkills[0]?.name ?? "");
   const [skillValue, setSkillValue] = useState<number>(presetSkills[0]?.value ?? 50);
   const [result, setResult] = useState<Result | null>(null);
@@ -53,6 +61,17 @@ export default function NpcQuickRoller({ presetSkills = [] }: Props) {
       const degree = judge(rolled, skillValue);
       setResult({ roll: rolled, degree, skillName, skillValue });
       setRolling(false);
+
+      if (npcId && isSupabaseConfigured) {
+        supabase.from("npc_dice_rolls").insert({
+          npc_id: npcId,
+          skill_name: skillName,
+          skill_value: skillValue,
+          roll_value: rolled,
+          success_level: DEGREE_TO_LEVEL[degree],
+          rolled_at: new Date().toISOString(),
+        });
+      }
     }, 350);
   }
 
