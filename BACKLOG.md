@@ -236,3 +236,27 @@
 **概要:** セッション中の戦闘をラウンド単位で管理できるシンプルなカウンター。現在ラウンド数・各キャラクターのDEX順イニシアチブ・行動済みフラグをセッション中に追跡できる。
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を "use client" で新規作成。useState でラウンド数・参加者リスト・行動済みフラグを管理（ページリロードで状態リセット）。参加者は `scenario_participants` から取得したキャラクターのDEXでソートしてイニシアチブ順を自動生成。行動済みキャラはチェックマークでトグル、全員完了で次ラウンドボタンを有効化。シナリオ詳細ダッシュボードに「戦闘管理」リンクを追加。追加DBなし（ローカル状態のみ）。
 **コミット:** `feat: combat round counter with DEX-based initiative tracking`
+
+## [TODO] グローバル横断検索 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** キャラクター・NPC・シナリオを名前やキーワードで横断検索できる検索ページ。複数キャラ・複数シナリオを管理するユーザーが目的のデータへすぐ辿り着けるようにする。
+**実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。クエリパラメータ `?q=` を受け取り、`supabase.from("characters").select("*").ilike("name", `%${q}%`)`、`npcs`、`scenarios` の3テーブルに対して並行クエリ（`Promise.all`）を実行し、種別ごとにセクション分けして結果一覧表示。`src/app/_components/NavBar.tsx`（`src/app/_components/NavBar.tsx:8-14`の`navLinks`付近）に検索アイコン＋入力欄を追加し、Enterで `/search?q=...` に遷移。追加DBなし。
+**コミット:** `feat: global search across characters, NPCs, and scenarios`
+
+## [TODO] キャラクターHP/SAN推移グラフ — 優先度: 中
+**対象:** PL
+**概要:** セッションログ（`sessions`テーブルの`san_loss`/`hp_loss`）を累積し、セッションを重ねるごとのHP・SANの減少傾向を視覚的に確認できるグラフビュー。既存のタイムライン（年表）は出来事の一覧表示のみで数値推移が分かりにくい点を補う。
+**実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` 内、または新規 `src/app/characters/[id]/stats-graph/page.tsx` に実装。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number")` でログ取得後、`san_max`/`hp_max` からの残量推移を session_number ごとに算出。依存ライブラリなしでCSSの `height: calc(${pct}%)` を使った縦棒グラフで表示（SAN用・HP用の2系統）。追加DBなし（既存`sessions`を流用）。キャラクター詳細ページに「推移グラフ」リンクを追加。
+**コミット:** `feat: HP/SAN trend graph across sessions`
+
+## [TODO] シナリオ次回予定リマインド — 優先度: 中
+**対象:** KP / 共通
+**概要:** 進行中のシナリオに「次回セッション予定日」を設定し、シナリオ一覧・ダッシュボードで直近の予定を分かりやすく表示できる機能。現在`played_at`は実施済み記録用のみで、未来の予定管理ができない。
+**実装ヒント:** `scenarios` テーブルに `next_session_at: timestamptz | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `next_session_at: string | null` を追加。`src/app/_components/ScenarioForm.tsx` に日時入力フィールドを追加。シナリオ一覧（`src/app/scenarios/page.tsx`）で `status === "ongoing"` かつ `next_session_at` が直近7日以内のシナリオをカード上部に「次回予定」バッジで強調表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にも次回予定日を表示。
+**コミット:** `feat: scenario next session date and reminder display`
+
+## [TODO] NPC判定履歴記録 — 優先度: 低
+**対象:** KP
+**概要:** NPC詳細ページのクイックロール（`NpcQuickRoller.tsx`）はロール結果がページ離脱で消える一時表示のみ。判定結果をDBに保存し、戦闘・対抗判定の経緯を後から振り返れる履歴機能を追加する。
+**実装ヒント:** Supabaseに `npc_dice_rolls` テーブルを追加（id, npc_id, skill_name, skill_value, roll_value, success_level, rolled_at）。`src/app/_components/NpcQuickRoller.tsx`（`roll()`関数内、`setResult`の直後）でロール結果を `supabase.from("npc_dice_rolls").insert(...)` で保存するよう拡張（npcIdをpropsで追加受け取り）。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）に直近の判定履歴一覧（最新10件）を追加表示。`src/lib/supabase.ts` に `NpcDiceRoll` 型を追加。
+**コミット:** `feat: NPC dice roll history tracking`
