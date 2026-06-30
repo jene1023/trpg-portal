@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock } from "lucide-react";
-import { supabase, isSupabaseConfigured, ScenarioStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
@@ -35,13 +35,18 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
   const [
     { count: handoutCount },
-    { count: participantCount },
+    { data: participantRows },
     { count: npcCount },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
-    supabase.from("scenario_participants").select("*", { count: "exact", head: true }).eq("scenario_id", id),
+    supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
     supabase.from("npcs").select("*", { count: "exact", head: true }).eq("scenario_name", scenario.title),
   ]);
+
+  const participantCount = participantRows?.length ?? 0;
+  const attendingCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length ?? 0;
+  const absentCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "absent").length ?? 0;
+  const unconfirmedCount = participantCount - attendingCount - absentCount;
 
   return (
     <div className="coc-page-enter mx-auto max-w-2xl px-4 py-8">
@@ -87,8 +92,18 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">
-          <p className="text-2xl font-bold text-coc-text">{participantCount ?? 0}</p>
+          <p className="text-2xl font-bold text-coc-text">{participantCount}</p>
           <p className="text-xs text-coc-muted mt-1">参加者</p>
+          {participantCount > 0 && (
+            <p className="text-xs mt-1 leading-tight">
+              <span className="text-green-400">{attendingCount}参加</span>
+              {" / "}
+              <span className="text-red-400">{absentCount}欠席</span>
+              {unconfirmedCount > 0 && (
+                <span className="text-coc-muted"> / {unconfirmedCount}未定</span>
+              )}
+            </p>
+          )}
         </div>
         <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">
           <p className="text-2xl font-bold text-coc-text">{handoutCount ?? 0}</p>

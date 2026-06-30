@@ -321,7 +321,7 @@
 **実装ヒント:** Supabaseに `character_finances` テーブルを追加（id, character_id, amount: integer（収入は正・出費は負）, reason, recorded_at, created_at）。`src/app/characters/[id]/finances/page.tsx` を新規作成（一覧＋追加フォーム、`amount`の合計を残高として上部表示）。`src/lib/supabase.ts` に `CharacterFinance` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「所持金」リンクを追加。
 **コミット:** `feat: character cash and expense tracking`
 
-## [TODO] 次回セッション出欠管理 — 優先度: 中
+## [DONE] 次回セッション出欠管理 — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオの次回セッション予定（`next_session_at`）に対し、参加者ごとの出欠（参加/欠席/未定）を記録・一覧できる機能。既存の参加者管理は参加可否を扱っておらず、KPが日程調整の状況を把握しづらい。
 **実装ヒント:** `scenario_participants` テーブルに `attendance_status: "unconfirmed"|"attending"|"absent"` カラムをALTER TABLEで追加（デフォルト `"unconfirmed"`）。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `attendance_status` を追加。`src/app/scenarios/[id]/participants/page.tsx` の各参加者行に出欠select要素を追加し `supabase.from("scenario_participants").update({ attendance_status }).eq("id", id)` で更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「参加○名/欠席○名/未定○名」のサマリーを表示。

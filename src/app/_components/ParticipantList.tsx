@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus } from "@/lib/supabase";
 
 type CharacterSummary = Pick<Character, "id" | "name" | "player_name" | "occupation">;
 
@@ -17,10 +17,23 @@ type Props = {
   allCharacters: CharacterSummary[];
 };
 
+const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
+  unconfirmed: "未定",
+  attending: "参加",
+  absent: "欠席",
+};
+
+const ATTENDANCE_COLORS: Record<AttendanceStatus, string> = {
+  unconfirmed: "text-coc-muted border-coc-border",
+  attending: "text-green-400 border-green-800",
+  absent: "text-red-400 border-red-900",
+};
+
 export default function ParticipantList({ scenarioId, initialParticipants, allCharacters }: Props) {
   const [participants, setParticipants] = useState<ParticipantWithCharacter[]>(initialParticipants);
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
   const [adding, setAdding] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const participantIds = new Set(participants.map((p) => p.character_id));
   const available = allCharacters.filter((c) => !participantIds.has(c.id));
@@ -47,6 +60,25 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
     await supabase.from("scenario_participants").delete().eq("id", participantId);
     setParticipants((prev) => prev.filter((p) => p.id !== participantId));
   }
+
+  async function handleAttendanceChange(participantId: string, status: AttendanceStatus) {
+    if (!isSupabaseConfigured) return;
+    setUpdatingId(participantId);
+    const { error } = await supabase
+      .from("scenario_participants")
+      .update({ attendance_status: status })
+      .eq("id", participantId);
+    if (!error) {
+      setParticipants((prev) =>
+        prev.map((p) => (p.id === participantId ? { ...p, attendance_status: status } : p))
+      );
+    }
+    setUpdatingId(null);
+  }
+
+  const attendingCount = participants.filter((p) => p.attendance_status === "attending").length;
+  const absentCount = participants.filter((p) => p.attendance_status === "absent").length;
+  const unconfirmedCount = participants.filter((p) => p.attendance_status === "unconfirmed").length;
 
   return (
     <div className="space-y-6">
@@ -86,10 +118,19 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
 
       {/* 参加者一覧 */}
       <div>
-        <h2 className="font-cinzel text-sm font-semibold text-coc-text mb-3">
-          参加キャラクター{" "}
-          <span className="text-coc-muted font-normal">({participants.length}名)</span>
-        </h2>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="font-cinzel text-sm font-semibold text-coc-text">
+            参加キャラクター{" "}
+            <span className="text-coc-muted font-normal">({participants.length}名)</span>
+          </h2>
+          {participants.length > 0 && (
+            <div className="flex gap-2 text-xs">
+              <span className="text-green-400">参加 {attendingCount}</span>
+              <span className="text-red-400">欠席 {absentCount}</span>
+              <span className="text-coc-muted">未定 {unconfirmedCount}</span>
+            </div>
+          )}
+        </div>
         {participants.length === 0 ? (
           <p className="text-center text-coc-muted text-sm py-8">
             参加キャラクターが登録されていません
@@ -99,9 +140,9 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
             {participants.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-4 py-3 gap-3"
               >
-                <div>
+                <div className="min-w-0 flex-1">
                   <Link
                     href={`/characters/${p.character_id}`}
                     className="font-cinzel font-semibold text-coc-text text-sm hover:text-coc-gold transition-colors"
@@ -116,13 +157,27 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => handleRemove(p.id)}
-                  className="text-coc-faint hover:text-red-400 transition-colors"
-                  title="参加者から除外"
-                >
-                  <X size={15} />
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <select
+                    value={p.attendance_status ?? "unconfirmed"}
+                    onChange={(e) => handleAttendanceChange(p.id, e.target.value as AttendanceStatus)}
+                    disabled={updatingId === p.id}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium bg-transparent focus:outline-none focus:border-coc-gold transition-colors disabled:opacity-50 ${ATTENDANCE_COLORS[p.attendance_status ?? "unconfirmed"]}`}
+                  >
+                    {(Object.keys(ATTENDANCE_LABELS) as AttendanceStatus[]).map((s) => (
+                      <option key={s} value={s}>
+                        {ATTENDANCE_LABELS[s]}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handleRemove(p.id)}
+                    className="text-coc-faint hover:text-red-400 transition-colors"
+                    title="参加者から除外"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

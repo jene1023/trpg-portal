@@ -135,6 +135,11 @@ create table if not exists scenario_participants (
 alter table scenario_participants enable row level security;
 create policy "allow all for anon" on scenario_participants for all using (true) with check (true);
 
+-- 出欠管理カラム追加 (追加マイグレーション)
+alter table scenario_participants
+  add column if not exists attendance_status text not null default 'unconfirmed'
+    check (attendance_status in ('unconfirmed', 'attending', 'absent'));
+
 -- ダイスロール履歴テーブル (追加マイグレーション)
 create table if not exists dice_rolls (
   id            uuid primary key default gen_random_uuid(),

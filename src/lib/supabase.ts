@@ -163,10 +163,13 @@ export type InventoryItem = {
   created_at: string;
 };
 
+export type AttendanceStatus = "unconfirmed" | "attending" | "absent";
+
 export type ScenarioParticipant = {
   id: string;
   scenario_id: string;
   character_id: string;
+  attendance_status: AttendanceStatus;
   created_at: string;
 };
 
