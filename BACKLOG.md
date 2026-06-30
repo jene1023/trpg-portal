@@ -309,7 +309,7 @@
 **実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内に `supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`)`、`supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`)`、`supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`)` を `Promise.all` に追加。結果セクションに「セッションログ」「メモ」を追加し、各結果は紐づくキャラクター/シナリオの詳細ページへリンク。追加DBなし。
 **コミット:** `feat: extend global search to session logs and notes content`
 
-## [TODO] 武器ダメージロール（ダメージボーナス込み） — 優先度: 高
+## [DONE] 武器ダメージロール（ダメージボーナス込み） — 優先度: 高
 **対象:** PL / 共通
 **概要:** インベントリの武器カードから命中判定だけでなく、ダメージダイス（例: "1d6+1D4"）をダメージボーナス(db)込みで解決できるロールボタンを追加する。現在は命中判定（戦闘ロール統合）のみで、命中後のダメージ算出をセッション中に手計算する必要がある。
 **実装ヒント:** `src/lib/diceExpression.ts` を新規作成し、"1d6+1D4+2" のようなダイス式文字列をパースして合計値を返すユーティリティを実装（`character.str + character.siz` からdb文字列を解決するロジックも含める）。`src/app/characters/[id]/inventory/page.tsx` の武器カード（`item_type === "weapon"`）に「ダメージロール」ボタンを追加し、`damage` フィールドの式 + `db` を加算してロール結果を表示。結果は `supabase.from("dice_rolls").insert({ skill_name: `ダメージ:${item.name}`, ... })` でdice_historyに保存（既存`dice_rolls`テーブルを流用、追加DBなし）。

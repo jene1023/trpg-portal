@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { computeDamageBonus } from "@/lib/diceExpression";
 import InventoryForm from "@/app/_components/InventoryForm";
 
 type Props = { params: Promise<{ id: string }> };
@@ -15,11 +16,13 @@ export default async function InventoryPage({ params }: Props) {
 
   const { data: char } = await supabase
     .from("characters")
-    .select("id, name")
+    .select("id, name, str, siz")
     .eq("id", id)
     .single();
 
   if (!char) notFound();
+
+  const damageBonus = computeDamageBonus(char.str, char.siz);
 
   const [{ data: items }, { data: skills }] = await Promise.all([
     supabase
@@ -50,7 +53,12 @@ export default async function InventoryPage({ params }: Props) {
         武器・所持品
       </h1>
 
-      <InventoryForm characterId={id} initialItems={items ?? []} skills={skills ?? []} />
+      <InventoryForm
+        characterId={id}
+        initialItems={items ?? []}
+        skills={skills ?? []}
+        damageBonus={damageBonus}
+      />
     </div>
   );
 }

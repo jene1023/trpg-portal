@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dice6 } from "lucide-react";
+import { Dice6, Flame } from "lucide-react";
 import {
   supabase,
   isSupabaseConfigured,
@@ -10,11 +10,13 @@ import {
   CharacterSkill,
   SuccessLevel,
 } from "@/lib/supabase";
+import { combineDamageExpression, evaluateDiceExpression } from "@/lib/diceExpression";
 
 type Props = {
   characterId: string;
   initialItems: InventoryItem[];
   skills: CharacterSkill[];
+  damageBonus: string;
 };
 
 type FormState = {
@@ -71,8 +73,9 @@ function isCombatSkill(name: string): boolean {
 }
 
 type RollResult = { roll: number; degree: SuccessDegree; skillName: string; skillValue: number };
+type DamageRollResult = { weaponId: string; expression: string; detail: string; total: number };
 
-export default function InventoryForm({ characterId, initialItems, skills }: Props) {
+export default function InventoryForm({ characterId, initialItems, skills, damageBonus }: Props) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -82,6 +85,8 @@ export default function InventoryForm({ characterId, initialItems, skills }: Pro
   const [rollSkillId, setRollSkillId] = useState<string>("");
   const [rollResult, setRollResult] = useState<RollResult | null>(null);
   const [rolling, setRolling] = useState(false);
+
+  const [damageResult, setDamageResult] = useState<DamageRollResult | null>(null);
 
   const sortedSkills = [...skills].sort((a, b) => {
     const aC = isCombatSkill(a.skill_name) ? 0 : 1;
@@ -132,6 +137,24 @@ export default function InventoryForm({ characterId, initialItems, skills }: Pro
     }, 350);
   }
 
+  function rollDamage(item: InventoryItem) {
+    if (!item.damage) return;
+    const expression = combineDamageExpression(item.damage, damageBonus);
+    const { total, detail } = evaluateDiceExpression(expression);
+    setDamageResult({ weaponId: item.id, expression, detail, total });
+
+    if (isSupabaseConfigured) {
+      supabase.from("dice_rolls").insert({
+        character_id: characterId,
+        skill_name: `ダメージ:${item.name}`,
+        skill_value: 0,
+        roll_value: total,
+        success_level: "success",
+        rolled_at: new Date().toISOString(),
+      });
+    }
+  }
+
   function change(field: keyof FormState, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
   }
@@ -172,6 +195,9 @@ export default function InventoryForm({ characterId, initialItems, skills }: Pro
     if (rollWeaponId === id) {
       setRollWeaponId(null);
       setRollResult(null);
+    }
+    if (damageResult?.weaponId === id) {
+      setDamageResult(null);
     }
   }
 
@@ -235,6 +261,15 @@ export default function InventoryForm({ characterId, initialItems, skills }: Pro
                       ロール
                     </button>
                   )}
+                  {item.damage && (
+                    <button
+                      onClick={() => rollDamage(item)}
+                      className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-coc-border text-coc-muted hover:border-orange-500 hover:text-orange-400 transition-colors"
+                    >
+                      <Flame size={12} />
+                      ダメージ
+                    </button>
+                  )}
                   <button
                     onClick={() => remove(item.id)}
                     className="text-coc-muted hover:text-red-400 text-xs transition-colors"
@@ -243,6 +278,26 @@ export default function InventoryForm({ characterId, initialItems, skills }: Pro
                   </button>
                 </div>
               </div>
+
+              {/* ダメージロール結果 */}
+              {damageResult?.weaponId === item.id && (
+                <div className="border-t border-coc-border bg-coc-raised px-3 py-3">
+                  <div className="rounded-md border border-orange-500 bg-orange-500/5 px-4 py-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-coc-muted mb-0.5">
+                        {damageResult.expression}（db: {damageBonus}）
+                      </p>
+                      <p className="font-bold text-base text-orange-400">{damageResult.detail}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-coc-muted mb-0.5">ダメージ</p>
+                      <p className="font-cinzel text-2xl font-bold text-orange-400">
+                        {damageResult.total}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 戦闘ロールパネル */}
               {rollWeaponId === item.id && (
