@@ -216,3 +216,16 @@ create table if not exists skill_templates (
 
 alter table skill_templates enable row level security;
 create policy "allow all for anon" on skill_templates for all using (true) with check (true);
+
+-- 所持金・出費管理 (追加マイグレーション)
+create table if not exists character_finances (
+  id            uuid primary key default gen_random_uuid(),
+  character_id  uuid not null references characters(id) on delete cascade,
+  amount        integer not null,
+  reason        text not null,
+  recorded_at   timestamptz not null default now(),
+  created_at    timestamptz default now()
+);
+
+alter table character_finances enable row level security;
+create policy "allow all for anon" on character_finances for all using (true) with check (true);

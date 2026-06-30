@@ -261,3 +261,12 @@ export type SkillTemplate = {
   is_occupation: boolean;
   created_at: string;
 };
+
+export type CharacterFinance = {
+  id: string;
+  character_id: string;
+  amount: number;
+  reason: string;
+  recorded_at: string;
+  created_at: string;
+};

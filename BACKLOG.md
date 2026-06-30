@@ -315,7 +315,7 @@
 **実装ヒント:** `src/lib/diceExpression.ts` を新規作成し、"1d6+1D4+2" のようなダイス式文字列をパースして合計値を返すユーティリティを実装（`character.str + character.siz` からdb文字列を解決するロジックも含める）。`src/app/characters/[id]/inventory/page.tsx` の武器カード（`item_type === "weapon"`）に「ダメージロール」ボタンを追加し、`damage` フィールドの式 + `db` を加算してロール結果を表示。結果は `supabase.from("dice_rolls").insert({ skill_name: `ダメージ:${item.name}`, ... })` でdice_historyに保存（既存`dice_rolls`テーブルを流用、追加DBなし）。
 **コミット:** `feat: weapon damage roll with damage bonus calculation`
 
-## [TODO] 所持金・出費管理 — 優先度: 中
+## [DONE] 所持金・出費管理 — 優先度: 中
 **対象:** PL
 **概要:** キャラクターの所持金を収入・出費のログとして記録し、現在の残高をキャラクター詳細ページで確認できる機能。セッション中の購入・報酬獲得を都度記録できる。
 **実装ヒント:** Supabaseに `character_finances` テーブルを追加（id, character_id, amount: integer（収入は正・出費は負）, reason, recorded_at, created_at）。`src/app/characters/[id]/finances/page.tsx` を新規作成（一覧＋追加フォーム、`amount`の合計を残高として上部表示）。`src/lib/supabase.ts` に `CharacterFinance` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「所持金」リンクを追加。
