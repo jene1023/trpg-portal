@@ -253,3 +253,11 @@ export type NpcDiceRoll = {
   success_level: SuccessLevel;
   rolled_at: string;
 };
+
+export type SkillTemplate = {
+  id: string;
+  occupation_name: string;
+  skill_name: string;
+  is_occupation: boolean;
+  created_at: string;
+};

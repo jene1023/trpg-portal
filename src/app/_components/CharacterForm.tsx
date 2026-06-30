@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
-import { Trash2, Plus, Upload, Dices } from "lucide-react";
+import { Trash2, Plus, Upload, Dices, Download } from "lucide-react";
 import Image from "next/image";
-import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, SkillTemplate } from "@/lib/supabase";
 import {
   calcHpMax,
   calcMpMax,
@@ -85,6 +86,43 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
       ? initialSkills.map((s) => ({ ...s, tempId: s.id }))
       : DEFAULT_SKILLS
   );
+
+  // --- 職業技能テンプレート ---
+  const [skillTemplates, setSkillTemplates] = useState<SkillTemplate[]>([]);
+  const [selectedTemplateOccupation, setSelectedTemplateOccupation] = useState("");
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase
+      .from("skill_templates")
+      .select("*")
+      .order("occupation_name", { ascending: true })
+      .then(({ data }) => {
+        if (data) setSkillTemplates(data as SkillTemplate[]);
+      });
+  }, []);
+
+  const templateOccupations = Array.from(
+    new Set(skillTemplates.map((t) => t.occupation_name))
+  );
+
+  function loadTemplateSkills() {
+    if (!selectedTemplateOccupation) return;
+    const rows = skillTemplates.filter(
+      (t) => t.occupation_name === selectedTemplateOccupation
+    );
+    setSkills((prev) => [
+      ...prev,
+      ...rows.map((t) => ({
+        tempId: uuidv4(),
+        skill_name: t.skill_name,
+        base_value: 0,
+        current_value: 0,
+        is_occupation: t.is_occupation,
+        growth_checked: false,
+      })),
+    ]);
+  }
 
   // --- 背景 ---
   const [background, setBackground] = useState(initialData?.background ?? "");
@@ -418,6 +456,36 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
           >
             <Plus size={14} /> 技能追加
           </button>
+        </div>
+
+        {/* テンプレートから技能を読み込む */}
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-coc-border bg-coc-void px-3 py-2">
+          <select
+            value={selectedTemplateOccupation}
+            onChange={(e) => setSelectedTemplateOccupation(e.target.value)}
+            className={`${inputClass} flex-1 min-w-[140px]`}
+          >
+            <option value="">テンプレートから技能を読み込む...</option>
+            {templateOccupations.map((occ) => (
+              <option key={occ} value={occ}>
+                {occ}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={loadTemplateSkills}
+            disabled={!selectedTemplateOccupation}
+            className="flex items-center gap-1 text-xs text-coc-gold hover:text-coc-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Download size={14} /> 読み込む
+          </button>
+          <Link
+            href="/skill-templates"
+            className="text-xs text-coc-muted hover:text-coc-text transition-colors ml-auto"
+          >
+            テンプレート管理
+          </Link>
         </div>
 
         <div className="space-y-2">

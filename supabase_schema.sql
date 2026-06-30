@@ -204,3 +204,15 @@ create table if not exists npc_dice_rolls (
 
 alter table npc_dice_rolls enable row level security;
 create policy "allow all for anon" on npc_dice_rolls for all using (true) with check (true);
+
+-- 職業技能テンプレート (追加マイグレーション)
+create table if not exists skill_templates (
+  id              uuid primary key default gen_random_uuid(),
+  occupation_name text not null,
+  skill_name      text not null,
+  is_occupation   boolean not null default true,
+  created_at      timestamptz default now()
+);
+
+alter table skill_templates enable row level security;
+create policy "allow all for anon" on skill_templates for all using (true) with check (true);

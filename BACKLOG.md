@@ -279,7 +279,7 @@
 **実装ヒント:** NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）のヘッダーに「複製」ボタンを持つ "use client" コンポーネント（`src/app/_components/NpcDuplicateButton.tsx`）を新規作成。`supabase.from("npcs").select("*")` で全カラム取得し、name に「（コピー）」を付加して `npcs` テーブルにINSERT（能力値・db等もそのまま複製）。複製後は新NPCの詳細ページへリダイレクト。追加DBなし。
 **コミット:** `feat: duplicate NPC for quickly preparing similar enemies`
 
-## [TODO] 職業技能テンプレート — 優先度: 中
+## [DONE] 職業技能テンプレート — 優先度: 中
 **対象:** PL
 **概要:** よく使う職業の初期技能セット（技能名と職業技能フラグ）をテンプレートとして保存し、新規キャラクター作成時に呼び出して技能を一括追加できる機能。毎回同じ職業の技能を手入力する手間を省く。
 **実装ヒント:** Supabaseに `skill_templates` テーブルを追加（id, occupation_name, skill_name, is_occupation, created_at）。キャラクター作成フォーム（`src/app/_components/CharacterForm.tsx`）に「テンプレートから技能を読み込む」select要素を追加し、選択した occupation_name に紐づく `skill_templates` 行を技能リストstateへ一括追加。テンプレート自体の管理（作成・編集）は `src/app/skill-templates/page.tsx` を新規作成し簡易CRUDを提供。`src/lib/supabase.ts` に `SkillTemplate` 型を追加。
