@@ -231,7 +231,7 @@
 **実装ヒント:** Supabaseに `scenario_notes` テーブルを追加（id, scenario_id, content, author_name, created_at）。`src/app/scenarios/[id]/notes/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、作成日時降順）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有メモ」リンクを追加。`src/lib/supabase.ts` に `ScenarioNote` 型を追加。
 **コミット:** `feat: shared scenario notes for party information tracking`
 
-## [TODO] 戦闘ラウンドカウンター — 優先度: 低
+## [DONE] 戦闘ラウンドカウンター — 優先度: 低
 **対象:** KP / 共通
 **概要:** セッション中の戦闘をラウンド単位で管理できるシンプルなカウンター。現在ラウンド数・各キャラクターのDEX順イニシアチブ・行動済みフラグをセッション中に追跡できる。
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を "use client" で新規作成。useState でラウンド数・参加者リスト・行動済みフラグを管理（ページリロードで状態リセット）。参加者は `scenario_participants` から取得したキャラクターのDEXでソートしてイニシアチブ順を自動生成。行動済みキャラはチェックマークでトグル、全員完了で次ラウンドボタンを有効化。シナリオ詳細ダッシュボードに「戦闘管理」リンクを追加。追加DBなし（ローカル状態のみ）。
