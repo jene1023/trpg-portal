@@ -174,3 +174,15 @@ create table if not exists share_tokens (
 
 alter table share_tokens enable row level security;
 create policy "allow all for anon" on share_tokens for all using (true) with check (true);
+
+-- シナリオ共有メモテーブル (追加マイグレーション)
+create table if not exists scenario_notes (
+  id          uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
+  content     text not null,
+  author_name text,
+  created_at  timestamptz default now()
+);
+
+alter table scenario_notes enable row level security;
+create policy "allow all for anon" on scenario_notes for all using (true) with check (true);

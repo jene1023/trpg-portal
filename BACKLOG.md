@@ -225,7 +225,7 @@
 **実装ヒント:** `src/app/characters/import/page.tsx` を新規作成（"use client"）。`<input type="file" accept=".json">` でファイル選択し `FileReader` でJSON解析。バリデーション後に `supabase.from("characters").insert(...)` でキャラ作成し、続いて `character_skills` を新IDで一括INSERT（nameに「（インポート）」付加でオリジナルと区別）。インポート後は新キャラクター詳細ページへリダイレクト。`src/app/characters/page.tsx` に「JSONからインポート」ボタンを追加。追加DBなし。
 **コミット:** `feat: character JSON import to restore from backup or share templates`
 
-## [TODO] シナリオ共有メモ（パーティーノート） — 優先度: 中
+## [DONE] シナリオ共有メモ（パーティーノート） — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに紐づいた共有メモページ。KPとPL全員が確認できる「パーティーで共有すべき情報」（判明した手がかり・決定事項・次のアクション）をセッション中にリアルタイムで記録できる。
 **実装ヒント:** Supabaseに `scenario_notes` テーブルを追加（id, scenario_id, content, author_name, created_at）。`src/app/scenarios/[id]/notes/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、作成日時降順）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有メモ」リンクを追加。`src/lib/supabase.ts` に `ScenarioNote` 型を追加。

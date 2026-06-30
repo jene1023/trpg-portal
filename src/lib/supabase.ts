@@ -234,3 +234,11 @@ export type ShareToken = {
   expires_at: string;
   created_at: string;
 };
+
+export type ScenarioNote = {
+  id: string;
+  scenario_id: string;
+  content: string;
+  author_name: string | null;
+  created_at: string;
+};
