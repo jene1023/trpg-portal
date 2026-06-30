@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Search, Upload, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
+import CharacterCardSkeleton from "@/app/_components/CharacterCardSkeleton";
 
 const FILTERS: { label: string; value: CharacterStatus | "all" }[] = [
   { label: "すべて",  value: "all"     },
@@ -140,8 +141,15 @@ export default function CharactersPage() {
 
       {/* ローディング */}
       {loading && (
-        <div className="flex justify-center items-center py-24 text-coc-muted font-crimson text-lg italic animate-pulse">
-          異界の扉を開いています...
+        <div className="space-y-6">
+          <p className="text-center text-coc-muted font-crimson text-sm italic">
+            異界の扉を開いています...
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <CharacterCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       )}
 

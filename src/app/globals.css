@@ -199,3 +199,20 @@ body {
     animation: coc-shimmer 0.7s ease-out forwards;
   }
 }
+
+/* ロードスケルトン: 燭台の灯のようにゆらめく光のパルス */
+@keyframes coc-skeleton-glow {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.95; }
+}
+
+.coc-skeleton {
+  background-color: var(--color-coc-raised);
+  border: 1px solid var(--color-coc-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-skeleton {
+    animation: coc-skeleton-glow 1.8s ease-in-out infinite;
+  }
+}
