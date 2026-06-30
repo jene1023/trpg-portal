@@ -213,7 +213,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各キャラのHP/MP/SANを残量に応じてカラーコード表示（50%以下→黄、25%以下→赤）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「パーティービュー」リンクを追加。追加DBなし。
 **コミット:** `feat: party view showing all participant HP/SAN for scenario`
 
-## [TODO] プッシュ/対抗ロールUI — 優先度: 高
+## [DONE] プッシュ/対抗ロールUI — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** CoC7版の「プッシュロール（失敗後の再挑戦）」と「対抗ロール（2者の技能値を同時判定）」を専用UIで実行できる機能。通常のDiceRollerでは再現できない重要ルールを補完する。
 **実装ヒント:** `src/app/_components/SpecialRoller.tsx` を新規作成（"use client"）。ロール種別タブ（通常/プッシュ/対抗）を切り替え。プッシュは前回ロール値を保持して再判定し成功度を表示。対抗ロールは2つの技能値入力欄を持ち双方のロール値と成功度を比較して勝敗を判定。判定結果は `supabase.from("dice_rolls").insert(...)` に保存（既存dice_historyと連携）。キャラクター詳細ページのダイスローラーセクションに「特殊ロール」ボタンとして追加。

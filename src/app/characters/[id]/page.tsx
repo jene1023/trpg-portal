@@ -12,6 +12,7 @@ import DerivedStatBar from "@/app/_components/DerivedStatBar";
 import SkillList from "@/app/_components/SkillList";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import DiceRoller from "@/app/_components/DiceRoller";
+import SpecialRoller from "@/app/_components/SpecialRoller";
 import ExportButton from "@/app/_components/ExportButton";
 import PdfExportButton from "@/app/_components/PdfExportButton";
 import DuplicateButton from "@/app/_components/DuplicateButton";
@@ -177,6 +178,11 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <div className={divider} />
               </>
             )}
+            <div>
+              <p className="text-xs text-coc-muted font-semibold mb-2">特殊ロール（プッシュ／対抗）</p>
+              <SpecialRoller skills={skills ?? []} characterId={id} />
+            </div>
+            <div className={divider} />
             <SkillList skills={skills ?? []} characterId={id} />
           </div>
 
