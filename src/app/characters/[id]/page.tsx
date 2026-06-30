@@ -63,7 +63,7 @@ export default async function CharacterDetailPage({ params }: Props) {
           <DuplicateButton characterId={id} />
           <Link
             href={`/characters/${id}/edit`}
-            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.97]"
           >
             <Pencil size={14} />
             編集
@@ -218,7 +218,7 @@ export default async function CharacterDetailPage({ params }: Props) {
           {/* セッション前確認（主要導線） */}
           <Link
             href={`/characters/${id}/preflight`}
-            className="flex items-center justify-between rounded-lg border border-coc-gold/40 bg-coc-gold/5 px-4 py-3 text-sm text-coc-text hover:border-coc-gold/70 hover:bg-coc-gold/10 transition-colors"
+            className="flex items-center justify-between rounded-lg border border-coc-gold/40 bg-coc-gold/5 px-4 py-3 text-sm text-coc-text hover:border-coc-gold/70 hover:bg-coc-gold/10 transition-colors motion-safe:active:scale-[0.98]"
           >
             <span className="font-semibold">セッション前確認</span>
             <span className="text-coc-gold">→</span>
@@ -230,28 +230,28 @@ export default async function CharacterDetailPage({ params }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <Link
                 href={`/characters/${id}/quick`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>クイックビュー（セッション中）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/sessions`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>セッションログ</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/relations`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>関係メモ</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/madness`}
-                className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors ${
+                className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors motion-safe:active:scale-[0.98] ${
                   char.san_current <= Math.floor(char.san_max / 5)
                     ? "border-red-800 bg-red-950/20 text-red-300 hover:text-red-200 hover:border-red-700"
                     : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
@@ -269,77 +269,77 @@ export default async function CharacterDetailPage({ params }: Props) {
               </Link>
               <Link
                 href={`/characters/${id}/inventory`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>武器・所持品</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/chat-palette`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>チャットパレット（VTT用）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/profile-card`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>紹介カード（SNS共有）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/timeline`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>年表（セッション時系列）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/stats-graph`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>推移グラフ（HP/SAN）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/traits`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>特質・重要情報</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/dice-history`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>ダイスロール履歴</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/dice-stats`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>判定統計</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/quick-notes`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>クイックノート（セッション中メモ）</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/growth`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>技能成長履歴</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/spells`}
-                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>呪文・魔術</span>
                 <span className="text-coc-gold">→</span>
