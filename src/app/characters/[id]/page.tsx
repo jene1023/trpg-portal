@@ -162,9 +162,12 @@ export default async function CharacterDetailPage({ params }: Props) {
                 { label: "ビルド", value: build },
                 { label: "移動力", value: mov },
               ].map(({ label, value }) => (
-                <div key={label} className="rounded-md bg-coc-raised border border-coc-border p-2 text-center">
-                  <p className="text-xs text-coc-muted">{label}</p>
-                  <p className="text-lg font-bold text-coc-text">{value}</p>
+                <div
+                  key={label}
+                  className="group rounded-md bg-coc-raised border border-coc-border p-2 text-center transition-colors duration-200 hover:border-coc-border-glow"
+                >
+                  <p className="text-xs text-coc-muted group-hover:text-coc-gold transition-colors duration-200">{label}</p>
+                  <p className="text-lg font-bold text-coc-text tabular-nums">{value}</p>
                 </div>
               ))}
             </div>
