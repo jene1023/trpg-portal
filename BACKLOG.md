@@ -237,7 +237,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を "use client" で新規作成。useState でラウンド数・参加者リスト・行動済みフラグを管理（ページリロードで状態リセット）。参加者は `scenario_participants` から取得したキャラクターのDEXでソートしてイニシアチブ順を自動生成。行動済みキャラはチェックマークでトグル、全員完了で次ラウンドボタンを有効化。シナリオ詳細ダッシュボードに「戦闘管理」リンクを追加。追加DBなし（ローカル状態のみ）。
 **コミット:** `feat: combat round counter with DEX-based initiative tracking`
 
-## [TODO] グローバル横断検索 — 優先度: 中
+## [DONE] グローバル横断検索 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** キャラクター・NPC・シナリオを名前やキーワードで横断検索できる検索ページ。複数キャラ・複数シナリオを管理するユーザーが目的のデータへすぐ辿り着けるようにする。
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。クエリパラメータ `?q=` を受け取り、`supabase.from("characters").select("*").ilike("name", `%${q}%`)`、`npcs`、`scenarios` の3テーブルに対して並行クエリ（`Promise.all`）を実行し、種別ごとにセクション分けして結果一覧表示。`src/app/_components/NavBar.tsx`（`src/app/_components/NavBar.tsx:8-14`の`navLinks`付近）に検索アイコン＋入力欄を追加し、Enterで `/search?q=...` に遷移。追加DBなし。
