@@ -339,7 +339,7 @@
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` の `adjust("hp", delta, max)` 内、delta が負かつ `Math.abs(delta) >= Math.ceil(hpMax / 2)` の場合に重傷警告バナーを表示し、`src/app/_components/SpecialRoller.tsx` のCONロール導線（技能値=con*5換算）へのショートカットボタンを出す。同様のチェックを `src/app/_components/PartyStatAdjuster.tsx`（`src/app/scenarios/[id]/party/page.tsx` から利用）にも追加。追加DBなし（既存`characters.con`を利用）。重傷フラグの永続化はせず、その場の警告表示のみ。
 **コミット:** `feat: major wound detection on large HP loss`
 
-## [TODO] クトゥルフ神話技能とSAN上限自動連動 — 優先度: 中
+## [DONE] クトゥルフ神話技能とSAN上限自動連動 — 優先度: 中
 **対象:** PL
 **概要:** CoC7版ルールでは「クトゥルフ神話」技能値が上がるとSAN最大値が `99 - クトゥルフ神話技能値` に減少する。現在SkillListで技能値を更新してもsan_maxへの連動がなく手動計算が必要。
 **実装ヒント:** `src/app/_components/SkillList.tsx` の技能値更新処理で `skill_name === "クトゥルフ神話技能"` の更新時に、新しい current_value を基に `san_max = 99 - current_value` を算出し `supabase.from("characters").update({ san_max })` を同時実行。san_currentがsan_maxを超えていれば併せて切り下げる。キャラクター詳細ページのSANセクションに「神話技能連動済み」の小さな注記を表示。追加DBなし。

@@ -43,6 +43,8 @@ export default async function CharacterDetailPage({ params }: Props) {
   const build = calcBuild(char.str, char.siz);
   const mov = calcMov(char.str, char.dex, char.siz);
 
+  const mythosSkill = (skills ?? []).find((s) => s.skill_name.startsWith("クトゥルフ神話"));
+
   const sectionClass = "rounded-lg border border-coc-border bg-coc-surface p-4 space-y-4";
   const sectionTitle = "coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
 
@@ -144,6 +146,11 @@ export default async function CharacterDetailPage({ params }: Props) {
               <DerivedStatBar label="HP 耐久力" current={char.hp_current} max={char.hp_max} color="hp" />
               <DerivedStatBar label="MP マジックポイント" current={char.mp_current} max={char.mp_max} color="mp" />
               <DerivedStatBar label={`SAN 正気度（初期${char.san_start}）`} current={char.san_current} max={char.san_max} color="san" />
+              {mythosSkill && (
+                <p className="text-xs text-purple-400/80 -mt-1">
+                  ※ 神話技能連動済み — 技能値({mythosSkill.current_value}) → SAN上限 {99 - mythosSkill.current_value}
+                </p>
+              )}
             </div>
             <SectionDivider className="my-2" />
             <QuickStatEditor
@@ -193,7 +200,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               <SanCheckRoller characterId={id} sanCurrent={char.san_current} sanMax={char.san_max} />
             </div>
             <SectionDivider className="my-2" />
-            <SkillList skills={skills ?? []} characterId={id} />
+            <SkillList skills={skills ?? []} characterId={id} sanCurrent={char.san_current} />
           </div>
 
           {/* 背景・メモ */}

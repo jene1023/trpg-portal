@@ -22,9 +22,9 @@ function categorize(skillName: string): string {
   return "その他";
 }
 
-type Props = { skills: CharacterSkill[]; characterId: string };
+type Props = { skills: CharacterSkill[]; characterId: string; sanCurrent?: number };
 
-export default function SkillList({ skills, characterId }: Props) {
+export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   const cats = [...new Set(skills.map((s) => categorize(s.skill_name)))].sort(
     (a, b) =>
       Object.keys(CATEGORIES).indexOf(a) - Object.keys(CATEGORIES).indexOf(b)
@@ -34,7 +34,45 @@ export default function SkillList({ skills, characterId }: Props) {
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>(
     () => Object.fromEntries(skills.map((s) => [s.id, s.growth_checked ?? false]))
   );
+  const [valueMap, setValueMap] = useState<Record<string, number>>(
+    () => Object.fromEntries(skills.map((s) => [s.id, s.current_value]))
+  );
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editStr, setEditStr] = useState<string>("");
   const [savingId, setSavingId] = useState<string | null>(null);
+
+  function startEdit(skill: CharacterSkill) {
+    setEditingId(skill.id);
+    setEditStr(String(valueMap[skill.id] ?? skill.current_value));
+  }
+
+  async function commitEdit(skill: CharacterSkill) {
+    const newVal = parseInt(editStr, 10);
+    setEditingId(null);
+    if (isNaN(newVal) || newVal < 0 || newVal > 100) return;
+    const prev = valueMap[skill.id] ?? skill.current_value;
+    if (newVal === prev) return;
+
+    setValueMap((m) => ({ ...m, [skill.id]: newVal }));
+    if (!isSupabaseConfigured) return;
+
+    setSavingId(skill.id);
+    await supabase
+      .from("character_skills")
+      .update({ current_value: newVal })
+      .eq("id", skill.id);
+
+    if (skill.skill_name.startsWith("クトゥルフ神話")) {
+      const newSanMax = Math.max(0, 99 - newVal);
+      const updates: Record<string, number> = { san_max: newSanMax };
+      if (sanCurrent !== undefined && sanCurrent > newSanMax) {
+        updates.san_current = newSanMax;
+      }
+      await supabase.from("characters").update(updates).eq("id", characterId);
+    }
+
+    setSavingId(null);
+  }
 
   async function toggleGrowth(skillId: string) {
     const next = !checkedMap[skillId];
@@ -115,9 +153,34 @@ export default function SkillList({ skills, characterId }: Props) {
                 <span className="text-xs text-coc-muted tabular-nums">
                   基{skill.base_value}
                 </span>
-                <span className="text-sm font-bold text-coc-text tabular-nums">
-                  {skill.current_value}%
-                </span>
+                {editingId === skill.id ? (
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={editStr}
+                    onChange={(e) => setEditStr(e.target.value)}
+                    onBlur={() => commitEdit(skill)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") commitEdit(skill);
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    autoFocus
+                    className="w-14 text-sm font-bold text-center rounded border border-coc-gold bg-coc-raised text-coc-text tabular-nums focus:outline-none focus:ring-1 focus:ring-coc-gold px-1"
+                  />
+                ) : (
+                  <button
+                    onClick={() => startEdit(skill)}
+                    title="クリックして値を編集"
+                    className={`text-sm font-bold tabular-nums hover:text-coc-gold transition-colors ${
+                      skill.skill_name.startsWith("クトゥルフ神話")
+                        ? "text-purple-400"
+                        : "text-coc-text"
+                    }`}
+                  >
+                    {valueMap[skill.id] ?? skill.current_value}%
+                  </button>
+                )}
                 {/* 成長チェックボックス */}
                 <button
                   onClick={() => toggleGrowth(skill.id)}
