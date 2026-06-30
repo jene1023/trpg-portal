@@ -129,6 +129,18 @@ body {
   );
 }
 
+/* 残量わずかなステータスバーの警告グロー（HP/MP/SAN） */
+@keyframes coc-stat-low-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.4); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-stat-low-pulse {
+    animation: coc-stat-low-pulse 1.5s ease-in-out infinite;
+  }
+}
+
 /* スクロールバー */
 ::-webkit-scrollbar {
   width: 6px;
