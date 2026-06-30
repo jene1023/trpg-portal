@@ -345,7 +345,7 @@
 **実装ヒント:** `src/app/_components/SkillList.tsx` の技能値更新処理で `skill_name === "クトゥルフ神話技能"` の更新時に、新しい current_value を基に `san_max = 99 - current_value` を算出し `supabase.from("characters").update({ san_max })` を同時実行。san_currentがsan_maxを超えていれば併せて切り下げる。キャラクター詳細ページのSANセクションに「神話技能連動済み」の小さな注記を表示。追加DBなし。
 **コミット:** `feat: auto-adjust SAN max based on Cthulhu Mythos skill`
 
-## [TODO] KPセッション準備チェックリスト — 優先度: 高
+## [DONE] KPセッション準備チェックリスト — 優先度: 高
 **対象:** KP
 **概要:** PL向けの「セッション前チェックリスト」(`preflight/page.tsx`)のKP版。シナリオに紐づくNPC一覧・ハンドアウト準備状況・参加者の出欠（出欠管理実装後は`attendance_status`も含む）・次回セッション予定日を一画面でまとめて確認できるプリフライトUI。既存のシナリオ詳細ダッシュボードはナビゲーションハブだが、セッション当日の「準備漏れ確認」に特化したビューが存在しない。
 **実装ヒント:** `src/app/scenarios/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*)").eq("id", id)` と `npcs` を `scenario_name` で取得し一括表示。ハンドアウトは`is_secret`件数・配布先未設定件数を警告表示。参加者は出欠ステータスごとに人数サマリー（出欠管理TODO実装後に連携）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備確認」リンクを追加。追加DBなし。
