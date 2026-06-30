@@ -261,7 +261,7 @@
 **実装ヒント:** Supabaseに `npc_dice_rolls` テーブルを追加（id, npc_id, skill_name, skill_value, roll_value, success_level, rolled_at）。`src/app/_components/NpcQuickRoller.tsx`（`roll()`関数内、`setResult`の直後）でロール結果を `supabase.from("npc_dice_rolls").insert(...)` で保存するよう拡張（npcIdをpropsで追加受け取り）。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）に直近の判定履歴一覧（最新10件）を追加表示。`src/lib/supabase.ts` に `NpcDiceRoll` 型を追加。
 **コミット:** `feat: NPC dice roll history tracking`
 
-## [TODO] 能力値オートロール（キャラクター作成支援） — 優先度: 中
+## [DONE] 能力値オートロール（キャラクター作成支援） — 優先度: 中
 **対象:** PL
 **概要:** キャラクター新規作成時に、CoC7版ルールに沿った能力値（STR/CON/POW/DEX/APP=3D6×5、SIZ/INT/EDU=2D6×5+6）を自動でロールし入力欄に反映できる機能。現在は能力値を手入力する必要があり、キャラ作成の手間とサイコロ計算ミスの原因になっている。
 **実装ヒント:** `src/app/_components/CharacterForm.tsx` に「能力値を振る」ボタンを追加（"use client"のまま）。クリック時に各能力値ごとに `Math.floor(Math.random()*6)+1` を3回または2回合計し倍率をかけた値をstateにセットしてフォームの該当input値を更新。手動修正も引き続き可能なように上書き可能なテキスト入力のままにする。追加DBなし。

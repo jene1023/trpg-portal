@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { Trash2, Plus, Upload } from "lucide-react";
+import { Trash2, Plus, Upload, Dices } from "lucide-react";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
 import {
@@ -116,6 +116,25 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
       setSanCurrent(newSanStart);
     }
   }, [con, pow, siz, isEdit]);
+
+  // 能力値オートロール（CoC7版: STR/CON/POW/DEX/APP=3D6×5, SIZ/INT/EDU=2D6×5+6）
+  function rollDice(count: number, sides: number) {
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+      total += Math.floor(Math.random() * sides) + 1;
+    }
+    return total;
+  }
+  function rollAbilityScores() {
+    setStr(rollDice(3, 6) * 5);
+    setCon(rollDice(3, 6) * 5);
+    setPow(rollDice(3, 6) * 5);
+    setDex(rollDice(3, 6) * 5);
+    setApp(rollDice(3, 6) * 5);
+    setSiz(rollDice(2, 6) * 5 + 6);
+    setIntStat(rollDice(2, 6) * 5 + 6);
+    setEdu(rollDice(2, 6) * 5 + 6);
+  }
 
   // ポートレートファイル選択
   const handlePortraitChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -326,7 +345,16 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
 
       {/* === 能力値 === */}
       <div className={sectionClass}>
-        <h2 className={sectionTitle}>能力値</h2>
+        <div className="flex items-center justify-between">
+          <h2 className={sectionTitle}>能力値</h2>
+          <button
+            type="button"
+            onClick={rollAbilityScores}
+            className="flex items-center gap-1 text-xs text-coc-gold hover:text-coc-text transition-colors"
+          >
+            <Dices size={14} /> 能力値を振る
+          </button>
+        </div>
         <div className="grid grid-cols-4 gap-3">
           {statField("STR", str, setStr)}
           {statField("CON", con, setCon)}
