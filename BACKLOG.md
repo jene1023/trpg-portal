@@ -284,3 +284,27 @@
 **概要:** よく使う職業の初期技能セット（技能名と職業技能フラグ）をテンプレートとして保存し、新規キャラクター作成時に呼び出して技能を一括追加できる機能。毎回同じ職業の技能を手入力する手間を省く。
 **実装ヒント:** Supabaseに `skill_templates` テーブルを追加（id, occupation_name, skill_name, is_occupation, created_at）。キャラクター作成フォーム（`src/app/_components/CharacterForm.tsx`）に「テンプレートから技能を読み込む」select要素を追加し、選択した occupation_name に紐づく `skill_templates` 行を技能リストstateへ一括追加。テンプレート自体の管理（作成・編集）は `src/app/skill-templates/page.tsx` を新規作成し簡易CRUDを提供。`src/lib/supabase.ts` に `SkillTemplate` 型を追加。
 **コミット:** `feat: occupation skill template for quick character setup`
+
+## [TODO] ボーナス/ペナルティダイス対応ダイスローラー — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** CoC7版の核心ルールであるボーナスダイス・ペナルティダイス（十の位d10を2つ振り有利/不利な方を採用）に現行のDiceRollerが未対応。判定種別（通常/ボーナス/ペナルティ）を選んでロールできるよう拡張する。
+**実装ヒント:** `src/app/_components/DiceRoller.tsx` を拡張し、ロール前に「通常/ボーナス/ペナルティ」のトグルを追加。ボーナス時は十の位用d10を2つ振り小さい方を、ペナルティ時は大きい方を採用し、一の位d10と組み合わせて100面ロール値を算出（00+0は100として扱う）。`SpecialRoller.tsx` の通常ロールにも同トグルを追加可能であれば併せて対応。`dice_rolls` への保存は既存のまま（roll_valueは最終算出値）。追加DBなし。
+**コミット:** `feat: bonus and penalty dice support for dice roller`
+
+## [TODO] SANチェック（正気度ロール） — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターの現在SAN値に対して1d100判定を行い、失敗時に喪失SAN（例: 1d4/1d10など可変ダイス）を自動算出してsan_currentを即時更新できる専用ロールUI。既存のmadness_records・sessionsのsan_lossと連携し、CoCセッションの中核行為であるSANチェックを正式にサポートする。
+**実装ヒント:** `src/app/_components/SanCheckRoller.tsx` を新規作成（"use client"）。props: characterId, sanCurrent, sanMax。失敗時喪失ダイス式（例: "1d4", "1d10"）を成功時/失敗時で入力できるフォームを用意し、1d100判定後に該当ダイスを振ってsan_current から減算、`supabase.from("characters").update({ san_current })` で即時反映。SAN0到達時や1回で5以上喪失時は狂気記録（`madness_records`）への追加導線を表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のダイスローラーセクション付近に配置。追加DBなし（既存`characters`, `madness_records`を流用）。
+**コミット:** `feat: sanity check roller with auto SAN deduction`
+
+## [TODO] パーティービューからのダメージ/回復適用 — 優先度: 高
+**対象:** KP / 共通
+**概要:** 現在のパーティービュー（`scenario_participants`一覧）はHP/MP/SANの閲覧専用。KPが戦闘中にその場で参加者へダメージ/回復を入力し、各キャラクターのステータスへ即時反映できるようにする。戦闘管理ページ（ローカル状態のみ）と実データを橋渡しする。
+**実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` をServer Component + "use client" 子コンポーネント（`src/app/_components/PartyStatAdjuster.tsx`）構成に変更。既存の `QuickStatEditor.tsx` の増減ロジックを参考に、各参加者カードへHP/MP/SANの+/-入力欄とボタンを追加し `supabase.from("characters").update({ hp_current/mp_current/san_current }).eq("id", char.id)` で更新後に再取得（router.refresh()等）。追加DBなし。
+**コミット:** `feat: apply damage and healing from party view`
+
+## [TODO] セッションログ・メモ全文検索（グローバル検索拡張） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** 現在のグローバル検索（`src/app/search/page.tsx`）はキャラクター名・NPC名・シナリオタイトルのみが対象で、セッションログの本文やクイックメモ・共有メモの内容は検索できない。これらの本文もキーワード検索対象に加え、過去の出来事やメモを素早く探せるようにする。
+**実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内に `supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`)`、`supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`)`、`supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`)` を `Promise.all` に追加。結果セクションに「セッションログ」「メモ」を追加し、各結果は紐づくキャラクター/シナリオの詳細ページへリンク。追加DBなし。
+**コミット:** `feat: extend global search to session logs and notes content`
