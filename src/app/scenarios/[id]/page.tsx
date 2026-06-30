@@ -44,7 +44,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
   ]);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="coc-page-enter mx-auto max-w-2xl px-4 py-8">
       <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href="/scenarios"
@@ -188,14 +188,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
       {scenario.synopsis && (
         <div className="mb-4 rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
-          <p className="text-xs font-medium text-coc-muted mb-2">概要</p>
+          <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-2">概要</p>
           <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.synopsis}</p>
         </div>
       )}
 
       {scenario.gm_notes && (
         <div className="rounded-xl border border-coc-border bg-coc-raised px-5 py-4">
-          <p className="text-xs font-medium text-coc-muted mb-2">GM メモ</p>
+          <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-2">GM メモ</p>
           <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
         </div>
       )}
