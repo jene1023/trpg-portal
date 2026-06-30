@@ -108,7 +108,7 @@ export default async function HomePage() {
       {recent && recent.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+            <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
               最近のキャラクター
             </h2>
             <Link href="/characters" className="text-xs text-coc-gold hover:underline">

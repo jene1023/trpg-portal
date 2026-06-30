@@ -103,13 +103,30 @@ body {
   }
 }
 
-/* セクション見出し装飾（◆プレフィックス） */
+/* セクション見出し装飾（◆プレフィックス + 右フェードライン） */
+.coc-section-title {
+  display: flex;
+  align-items: center;
+}
+
 .coc-section-title::before {
   content: '◆';
+  flex-shrink: 0;
   margin-right: 0.45rem;
   color: var(--color-coc-gold-dim);
   font-size: 0.6em;
-  vertical-align: middle;
+}
+
+.coc-section-title::after {
+  content: '';
+  flex: 1;
+  margin-left: 0.6rem;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-coc-border) 0%,
+    transparent 100%
+  );
 }
 
 /* スクロールバー */
