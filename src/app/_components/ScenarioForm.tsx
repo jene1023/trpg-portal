@@ -15,6 +15,7 @@ export default function ScenarioForm() {
     gm_notes: "",
     status: "planning" as ScenarioStatus,
     played_at: "",
+    next_session_at: "",
   });
 
   function handleChange(
@@ -41,6 +42,9 @@ export default function ScenarioForm() {
       gm_notes: form.gm_notes.trim() || null,
       status: form.status,
       played_at: form.played_at || null,
+      next_session_at: form.next_session_at
+        ? new Date(form.next_session_at).toISOString()
+        : null,
     });
     if (err) {
       setError(err.message);
@@ -104,6 +108,20 @@ export default function ScenarioForm() {
           name="played_at"
           type="date"
           value={form.played_at}
+          onChange={handleChange}
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="next_session_at" className={labelClass}>
+          次回セッション予定日時
+        </label>
+        <input
+          id="next_session_at"
+          name="next_session_at"
+          type="datetime-local"
+          value={form.next_session_at}
           onChange={handleChange}
           className={fieldClass}
         />

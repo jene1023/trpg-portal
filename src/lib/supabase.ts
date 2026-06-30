@@ -134,6 +134,7 @@ export type Scenario = {
   gm_notes: string | null;
   status: ScenarioStatus;
   played_at: string | null;
+  next_session_at: string | null;
   created_at: string;
 };
 

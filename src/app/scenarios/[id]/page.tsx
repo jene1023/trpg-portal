@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus } from "@/lib/supabase";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
@@ -67,6 +67,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </div>
         {scenario.played_at && (
           <p className="text-xs text-coc-muted">プレイ日: {scenario.played_at}</p>
+        )}
+        {scenario.next_session_at && (
+          <div className="mt-3 flex items-center gap-1.5 w-fit rounded-full border border-coc-gold-dim bg-coc-raised px-3 py-1 text-xs font-medium text-coc-gold">
+            <CalendarClock size={13} />
+            次回セッション予定:{" "}
+            {new Date(scenario.next_session_at).toLocaleString("ja-JP", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </div>
         )}
       </div>
 

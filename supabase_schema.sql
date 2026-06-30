@@ -186,3 +186,6 @@ create table if not exists scenario_notes (
 
 alter table scenario_notes enable row level security;
 create policy "allow all for anon" on scenario_notes for all using (true) with check (true);
+
+-- シナリオ次回予定リマインド (追加マイグレーション)
+alter table scenarios add column if not exists next_session_at timestamptz;

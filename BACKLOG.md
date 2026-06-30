@@ -249,7 +249,7 @@
 **実装ヒント:** `src/app/characters/[id]/timeline/page.tsx` 内、または新規 `src/app/characters/[id]/stats-graph/page.tsx` に実装。`supabase.from("sessions").select("*").eq("character_id", id).order("session_number")` でログ取得後、`san_max`/`hp_max` からの残量推移を session_number ごとに算出。依存ライブラリなしでCSSの `height: calc(${pct}%)` を使った縦棒グラフで表示（SAN用・HP用の2系統）。追加DBなし（既存`sessions`を流用）。キャラクター詳細ページに「推移グラフ」リンクを追加。
 **コミット:** `feat: HP/SAN trend graph across sessions`
 
-## [TODO] シナリオ次回予定リマインド — 優先度: 中
+## [DONE] シナリオ次回予定リマインド — 優先度: 中
 **対象:** KP / 共通
 **概要:** 進行中のシナリオに「次回セッション予定日」を設定し、シナリオ一覧・ダッシュボードで直近の予定を分かりやすく表示できる機能。現在`played_at`は実施済み記録用のみで、未来の予定管理ができない。
 **実装ヒント:** `scenarios` テーブルに `next_session_at: timestamptz | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `next_session_at: string | null` を追加。`src/app/_components/ScenarioForm.tsx` に日時入力フィールドを追加。シナリオ一覧（`src/app/scenarios/page.tsx`）で `status === "ongoing"` かつ `next_session_at` が直近7日以内のシナリオをカード上部に「次回予定」バッジで強調表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にも次回予定日を表示。

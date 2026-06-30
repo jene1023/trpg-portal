@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, CalendarClock } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
@@ -16,6 +16,21 @@ const STATUS_COLORS: Record<ScenarioStatus, string> = {
   ongoing: "text-coc-gold border-coc-gold-dim",
   completed: "text-green-400 border-green-800",
 };
+
+function isUpcomingSoon(scenario: Scenario): boolean {
+  if (scenario.status !== "ongoing" || !scenario.next_session_at) return false;
+  const diff = new Date(scenario.next_session_at).getTime() - Date.now();
+  return diff >= 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+}
+
+function formatNextSession(value: string): string {
+  return new Date(value).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function ScenariosPage() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
@@ -103,6 +118,13 @@ export default function ScenariosPage() {
               key={scenario.id}
               className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4"
             >
+              {isUpcomingSoon(scenario) && (
+                <div className="flex items-center gap-1.5 mb-3 w-fit rounded-full border border-coc-gold-dim bg-coc-raised px-2.5 py-1 text-xs font-medium text-coc-gold">
+                  <CalendarClock size={12} />
+                  次回予定: {formatNextSession(scenario.next_session_at as string)}
+                </div>
+              )}
+
               <div className="flex items-start justify-between gap-4 mb-2">
                 <Link
                   href={`/scenarios/${scenario.id}`}
@@ -128,6 +150,12 @@ export default function ScenariosPage() {
               {scenario.played_at && (
                 <p className="text-xs text-coc-muted mb-2">
                   プレイ日: {scenario.played_at}
+                </p>
+              )}
+
+              {scenario.next_session_at && !isUpcomingSoon(scenario) && (
+                <p className="text-xs text-coc-muted mb-2">
+                  次回予定: {formatNextSession(scenario.next_session_at)}
                 </p>
               )}
 
