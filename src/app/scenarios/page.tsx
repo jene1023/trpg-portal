@@ -67,7 +67,7 @@ export default function ScenariosPage() {
       : scenarios.filter((s) => s.status === statusFilter);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="coc-page-enter mx-auto max-w-4xl px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cinzel text-2xl font-bold text-coc-text">シナリオ一覧</h1>
         <Link
