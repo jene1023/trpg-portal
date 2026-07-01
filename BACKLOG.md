@@ -422,7 +422,7 @@
 **実装ヒント:** `src/app/_components/PortraitUploader.tsx` を "use client" で新規作成。`<input type="file" accept="image/*">` で画像を受け取り `supabase.storage.from("portraits").upload(`{characterId}/{uuid}`, file)` でアップロード後、`supabase.storage.from("portraits").getPublicUrl(path)` で公開URLを取得し `supabase.from("characters").update({ portrait_url })` で更新。Supabase Storageに `portraits` バケットを public で作成する必要あり。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレート欄と、編集ページ（`src/app/characters/[id]/edit/page.tsx`）に配置。`src/app/_components/PortraitImage.tsx` は既存のため流用可能。
 **コミット:** `feat: portrait image upload to Supabase Storage`
 
-## [TODO] キャラクター参加シナリオ履歴 — 優先度: 中
+## [DONE] キャラクター参加シナリオ履歴 — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターが参加した全シナリオを時系列で一覧表示するページ。現在 `scenario_participants` テーブルでキャラ×シナリオが紐づいているが、キャラ側から参加履歴を辿るページが存在しない。長期プレイヤーが「このキャラでどのシナリオを遊んだか」を振り返るのに使う。
 **実装ヒント:** `src/app/characters/[id]/scenario-history/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, scenarios(*)").eq("character_id", id).order("created_at", {ascending: false})` で参加シナリオを取得し、シナリオタイトル・ステータス・next_session_at を一覧表示。各シナリオは `/scenarios/[id]` へリンク。追加DBなし（既存 `scenario_participants`, `scenarios` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「参加シナリオ」リンクを追加。
