@@ -396,7 +396,7 @@
 **実装ヒント:** `src/app/characters/[id]/relation-graph/page.tsx` を新規作成（"use client"）。`supabase.from("character_relations").select("*").eq("character_id", id)` で関係データ取得。SVG要素で中心ノード（現キャラ）を中央に配置し、関係先ノードを円周上に等間隔配置、線でつなぐ（三角関数で座標計算）。ノードの色は `relation_type` で分岐（友人=緑・ライバル=橙・恩人=青・要注意=赤・その他=灰）。エッジに `relation_type` ラベルを表示。`src/app/characters/[id]/relations/page.tsx` のヘッダーに「相関図を見る」リンクを追加。
 **コミット:** `feat: character relation graph visualization with SVG`
 
-## [TODO] シナリオエリア・地点メモ（KP用） — 優先度: 中
+## [DONE] シナリオエリア・地点メモ（KP用） — 優先度: 中
 **対象:** KP
 **概要:** シナリオに紐づいた地点/エリア単位のメモ機能。現在の `gm_notes` は単一テキストだが、「図書館」「古い屋敷」「港」など場所ごとに説明・GMメモを独立して管理できる構造化ノートを提供する。長期キャンペーンや複数ロケーションシナリオでの準備効率を上げる。
 **リサーチ根拠:** PrismScroll CthulhuのJournal機能（NPC・ロケーション別の詳細ノート）がKP向け機能として高評価を受けており、「場所ごとの情報を整理できる仕組み」がKPユーザーの主要要望として海外レビューにも多く挙がっていた。

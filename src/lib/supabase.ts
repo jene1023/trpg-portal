@@ -301,3 +301,13 @@ export type ScenarioRetrospective = {
   horror_rating: number | null;
   created_at: string;
 };
+
+export type ScenarioArea = {
+  id: string;
+  scenario_id: string;
+  name: string;
+  description: string | null;
+  gm_notes: string | null;
+  order_index: number;
+  created_at: string;
+};
