@@ -347,3 +347,14 @@ export type Creature = {
   notes: string | null;
   created_at: string;
 };
+
+export type BgmCue = {
+  id: string;
+  scenario_id: string;
+  order_index: number;
+  label: string;
+  bgm_url: string | null;
+  mood: string | null;
+  direction_notes: string | null;
+  created_at: string;
+};

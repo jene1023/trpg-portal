@@ -446,7 +446,7 @@
 **実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id: nullable, name, mythos_background: text | null, san_loss_success: string | null, san_loss_failure: string | null, str: int | null, con: int | null, pow: int | null, dex: int | null, siz: int | null, hp: int | null, mp: int | null, armor: string | null, attacks: text | null, can_use_spells: boolean DEFAULT false, notes: text | null, created_at）。`src/app/creatures/page.tsx`（一覧・シナリオフィルタ）と `src/app/creatures/new/page.tsx`（作成フォーム）、`src/app/creatures/[id]/page.tsx`（StatBlock＋SAN喪失式表示）を新規作成。`src/app/_components/NavBar.tsx` に「クリーチャー」リンクを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にシナリオ別クリーチャー数バッジを追加。`src/lib/supabase.ts` に `Creature` 型を追加。
 **コミット:** `feat: mythical creature management for KP scenarios`
 
-## [TODO] 場面BGM・演出キューリスト（KP向け） — 優先度: 中
+## [DONE] 場面BGM・演出キューリスト（KP向け） — 優先度: 中
 **対象:** KP
 **概要:** シナリオに紐づいた場面別のBGMリンク（YouTube/Spotify等）と演出メモ（照明・SE・演出タイミング）をリスト管理できる機能。既存のシナリオエリアメモ（`scenario_areas`/DONE済み）はロケーション情報向けだが、こちらはセッション当日のタイムライン的な演出指示書として機能する。
 **実装ヒント:** Supabaseに `bgm_cues` テーブルを追加（id, scenario_id, order_index: integer, label: text（例: "導入シーン"）, bgm_url: text | null, mood: text | null, direction_notes: text | null, created_at）。`src/app/scenarios/[id]/bgm/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、▲▼ボタンで `order_index` を swap して並び替え）。`bgm_url` があれば `<a href={bgm_url} target="_blank">` でリンク表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「BGM・演出」リンクを追加。`src/lib/supabase.ts` に `BgmCue` 型を追加。
