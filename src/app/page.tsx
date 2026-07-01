@@ -67,8 +67,16 @@ export default async function HomePage() {
           <span className="text-coc-gold select-none coc-star-twinkle">✦</span>
           <span className="flex-1 border-t border-coc-border" />
         </div>
-        <p className="font-crimson text-coc-muted text-lg italic">
+        <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-wide">
+          <span
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative -top-1 mr-1 opacity-40 select-none"
+            aria-hidden="true"
+          >&ldquo;</span>
           深淵をのぞき込むとき、深淵もまたのぞき込んでいる
+          <span
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative top-2 ml-1 opacity-40 select-none"
+            aria-hidden="true"
+          >&rdquo;</span>
         </p>
       </div>
 
