@@ -175,7 +175,7 @@ export default function CharactersPage() {
 
       {/* キャラクターグリッド */}
       {!loading && filtered.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 coc-stagger-grid">
           {filtered.map((char) => (
             <CharacterCard
               key={char.id}

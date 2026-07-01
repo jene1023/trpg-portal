@@ -139,7 +139,7 @@ export default async function HomePage() {
       </div>
 
       {/* タイル */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 coc-stagger-grid">
         {tiles.map(({ href, icon: Icon, title, desc, available }) => (
           <Link
             key={href}
@@ -220,7 +220,7 @@ export default async function HomePage() {
               すべて表示
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 coc-stagger-grid">
             {pinned.map((char) => (
               <CharacterCard
                 key={char.id}
@@ -288,7 +288,7 @@ export default async function HomePage() {
               すべて表示
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 coc-stagger-grid">
             {recent.map((char) => (
               <CharacterCard
                 key={char.id}
