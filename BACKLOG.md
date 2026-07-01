@@ -369,7 +369,7 @@
 **実装ヒント:** `src/app/calendar/page.tsx` を新規作成（"use client"）。`supabase.from("scenarios").select("id, title, status, next_session_at").not("next_session_at", "is", null)` で取得。useState で表示月（year/month）を管理し、前月/翌月ボタンで切り替え。該当月のカレンダーグリッド（7列×最大6行）を `Array.from` で生成し、各セルに一致するシナリオタイトルを表示してシナリオ詳細ページへリンク。`src/app/_components/NavBar.tsx` に「カレンダー」リンクを追加。追加DBなし。
 **コミット:** `feat: session calendar view showing upcoming scenario dates`
 
-## [TODO] シナリオ別SAN/HP喪失サマリー — 優先度: 中
+## [DONE] シナリオ別SAN/HP喪失サマリー — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに参加したキャラクター全員のセッションログ（`sessions`テーブル）を集計し、「セッション別・参加者別のSAN/HP喪失量」と「シナリオ全体の合計喪失量」をKPが俯瞰できるサマリービュー。シナリオのバランス評価・難易度確認・KP振り返りの補助に使う。既存テーブルのみ使用で追加DBなし。
 **実装ヒント:** `src/app/scenarios/[id]/damage-summary/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(id, name, san_max, hp_max)")` で参加者を取得後、各 `character_id` ごとに `supabase.from("sessions").select("*").eq("character_id", id)` でセッションログを取得（`Promise.all`）。セッション番号×参加者のマトリクス表として表示し、各セルに san_loss/hp_loss を表示。行末に参加者合計、列末にセッション合計を集計。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「喪失サマリー」リンクを追加。
