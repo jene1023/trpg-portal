@@ -403,6 +403,29 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <span>技能ポイント割り振り</span>
                 <span className="text-coc-gold">→</span>
               </Link>
+              {(() => {
+                const growthPending = (skills ?? []).filter((s) => s.growth_checked);
+                return (
+                  <Link
+                    href={`/characters/${id}/growth-roll`}
+                    className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors motion-safe:active:scale-[0.98] ${
+                      growthPending.length > 0
+                        ? "border-coc-gold/60 bg-coc-gold/10 text-coc-gold hover:bg-coc-gold/20"
+                        : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      成長判定
+                      {growthPending.length > 0 && (
+                        <span className="rounded bg-coc-gold/20 border border-coc-gold/50 px-1.5 py-0.5 text-xs font-semibold">
+                          {growthPending.length}件
+                        </span>
+                      )}
+                    </span>
+                    <span className={growthPending.length > 0 ? "text-coc-gold" : "text-coc-gold"}>→</span>
+                  </Link>
+                );
+              })()}
             </div>
           </div>
 

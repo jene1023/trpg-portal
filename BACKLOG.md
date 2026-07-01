@@ -464,7 +464,7 @@
 **実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, scene_order: integer, title, notes, is_done: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成。場面一覧は `scene_order` 昇順で表示し、各場面に「完了」トグル（`supabase.from("scenario_scenes").update({is_done})`）と削除ボタンを配置。▲▼ボタンで並び替え（`scene_order` を swap）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「アジェンダ」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。
 **コミット:** `feat: KP session agenda with scene-by-scene planner`
 
-## [TODO] 技能成長判定ロールUI — 優先度: 高
+## [DONE] 技能成長判定ロールUI — 優先度: 高
 **対象:** PL
 **概要:** `growth_checked: true` の技能に対してセッション後に成長判定ロール（1d100 > 現在値なら1d10加算）を実行し、成功時に技能値を自動更新して成長履歴へ登録できるUI。現在、成長チェックフラグ設定（`SkillList.tsx`）と成長履歴記録（`growth_history`テーブル）の間のフローが完全に欠落している。
 **実装ヒント:** `src/app/characters/[id]/growth-roll/page.tsx` を "use client" で新規作成。`supabase.from("character_skills").select("*").eq("character_id", id).eq("growth_checked", true)` で対象技能を取得し一覧表示。各技能に「成長ロール」ボタンを配置し、`Math.floor(Math.random()*100)+1 > current_value` の場合に `Math.floor(Math.random()*10)+1` を加算して `supabase.from("character_skills").update({current_value, growth_checked: false}).eq("id", skillId)` で更新。同時に `supabase.from("growth_history").insert({skill_name, old_value, new_value, session_label})` で成長ログを記録。追加DBなし（既存 `character_skills`, `growth_history` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「成長判定」リンクを追加（growth_checked な技能がある場合にバッジ表示）。
