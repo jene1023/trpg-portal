@@ -375,7 +375,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/damage-summary/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(id, name, san_max, hp_max)")` で参加者を取得後、各 `character_id` ごとに `supabase.from("sessions").select("*").eq("character_id", id)` でセッションログを取得（`Promise.all`）。セッション番号×参加者のマトリクス表として表示し、各セルに san_loss/hp_loss を表示。行末に参加者合計、列末にセッション合計を集計。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「喪失サマリー」リンクを追加。
 **コミット:** `feat: scenario SAN/HP loss summary matrix for KP review`
 
-## [TODO] ここフォリアキャラコマJSON出力（VTT連携強化） — 優先度: 高
+## [DONE] ここフォリアキャラコマJSON出力（VTT連携強化） — 優先度: 高
 **対象:** PL / 共通
 **概要:** ここフォリア（Cocofolia）で使えるキャラクターコマJSONを自動生成してダウンロードできる機能。現在のチャットパレットはBCDiceコマンドのみだが、コマデータ（ステータス表示・チャットパレット統合）を丸ごとインポートできるJSONにすることで、VTT上での手入力を完全に排除する。
 **リサーチ根拠:** Charaenoの最大の差別化機能がここフォリアへのコマ出力で、PLが「Charaenoを使う理由はこれ一択」と評価するほど需要が高く、ユーザーの一般的なワークフローに組み込まれている。
