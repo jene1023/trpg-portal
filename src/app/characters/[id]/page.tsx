@@ -6,7 +6,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { calcDamageBonus, calcBuild, calcMov } from "@/lib/coc-calc";
 import StatusBadge from "@/app/_components/StatusBadge";
-import PortraitImage from "@/app/_components/PortraitImage";
+import PortraitUploader from "@/app/_components/PortraitUploader";
 import StatBlock from "@/app/_components/StatBlock";
 import DerivedStatBar from "@/app/_components/DerivedStatBar";
 import SkillList from "@/app/_components/SkillList";
@@ -79,7 +79,11 @@ export default async function CharacterDetailPage({ params }: Props) {
         {/* 左カラム: ポートレート + 基本情報 */}
         <div className="space-y-4">
           <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-coc-border">
-            <PortraitImage url={char.portrait_url} name={char.name} />
+            <PortraitUploader
+              characterId={char.id}
+              portraitUrl={char.portrait_url}
+              characterName={char.name}
+            />
             <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           </div>
 

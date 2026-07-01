@@ -416,7 +416,7 @@
 **実装ヒント:** `src/app/page.tsx` を拡張（Server Component のまま）。`supabase.from("characters").select("*").eq("is_pinned", true)` でピン留めキャラ取得。`supabase.from("scenarios").select("*").eq("status", "ongoing")` で進行中シナリオ取得。`next_session_at` が直近7日のシナリオを「今週の予定」セクションで強調表示。タイルは `/scenarios`, `/npcs`, `/search`, `/calendar` も追加し "available: true" に設定。追加DBなし。
 **コミット:** `feat: enrich home dashboard with pinned chars, upcoming sessions, and active scenarios`
 
-## [TODO] 探索者ポートレートファイルアップロード（Supabase Storage連携） — 優先度: 高
+## [DONE] 探索者ポートレートファイルアップロード（Supabase Storage連携） — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターに `portrait_url` フィールドはあるが、現在はURL手入力のみ対応。Supabase StorageにPNG/JPGをアップロードし公開URLを自動取得してキャラクターに紐づけられる専用UIを追加する。立ち絵・アイコン設定をポータル内で完結させる。
 **実装ヒント:** `src/app/_components/PortraitUploader.tsx` を "use client" で新規作成。`<input type="file" accept="image/*">` で画像を受け取り `supabase.storage.from("portraits").upload(`{characterId}/{uuid}`, file)` でアップロード後、`supabase.storage.from("portraits").getPublicUrl(path)` で公開URLを取得し `supabase.from("characters").update({ portrait_url })` で更新。Supabase Storageに `portraits` バケットを public で作成する必要あり。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレート欄と、編集ページ（`src/app/characters/[id]/edit/page.tsx`）に配置。`src/app/_components/PortraitImage.tsx` は既存のため流用可能。
