@@ -41,6 +41,8 @@ export type Character = {
   background: string | null;
   notes: string | null;
   is_pinned: boolean;
+  is_public: boolean;
+  public_slug: string | null;
   created_at: string;
   updated_at: string;
 };

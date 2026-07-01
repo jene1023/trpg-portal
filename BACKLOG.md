@@ -382,7 +382,7 @@
 **実装ヒント:** `src/app/characters/[id]/cocofolia-piece/page.tsx` を新規作成（"use client"）。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、ここフォリアのpiece JSON形式（`name`, `initiative`, `width`, `height`, `color`, `text`（HP/MP/SAN表示文字列）, `commands`（BCDiceコマンド配列））を生成。`Blob` + `URL.createObjectURL` で `{キャラ名}_piece.json` としてダウンロード。既存のチャットパレット生成ロジック（`src/app/characters/[id]/chat-palette/page.tsx`）の `commands` 配列を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コマ出力」リンクを追加。
 **コミット:** `feat: Cocofolia character piece JSON export for VTT integration`
 
-## [TODO] 探索者公開プロフィールページ（URLシェア） — 優先度: 高
+## [DONE] 探索者公開プロフィールページ（URLシェア） — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターに公開用スラッグURLを発行し、ログイン不要で誰でも閲覧できる公開プロフィールページを提供する機能。セッション募集時のキャラ紹介・卓外での共有・PLへのキャラ確認依頼に使う。現在のプロフィールカードは画像ダウンロードのみで、リンク共有には対応していない。
 **リサーチ根拠:** CharaXiv・Charaeno・きゃらはぶいずれも「URLで共有できる公開キャラクターページ」をコアバリューとして提供しており、TRPG界隈でキャラシートをリンク共有するワークフローが定着していることが確認された。

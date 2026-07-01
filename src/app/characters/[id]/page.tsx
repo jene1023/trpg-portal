@@ -18,6 +18,7 @@ import ExportButton from "@/app/_components/ExportButton";
 import PdfExportButton from "@/app/_components/PdfExportButton";
 import DuplicateButton from "@/app/_components/DuplicateButton";
 import SectionDivider from "@/app/_components/SectionDivider";
+import PublicShareToggle from "@/app/_components/PublicShareToggle";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -60,6 +61,7 @@ export default async function CharacterDetailPage({ params }: Props) {
           一覧へ
         </Link>
         <div className="flex items-center gap-2">
+          <PublicShareToggle characterId={id} isPublic={char.is_public ?? false} publicSlug={char.public_slug ?? null} />
           <PdfExportButton characterId={id} />
           <ExportButton characterId={id} characterName={char.name} />
           <DuplicateButton characterId={id} />
