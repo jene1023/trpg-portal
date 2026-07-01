@@ -363,7 +363,7 @@
 **実装ヒント:** Supabaseに `scenario_retrospectives` テーブルを追加（id, scenario_id, what_worked, what_to_improve, player_reactions, difficulty_rating: integer 1–5, horror_rating: integer 1–5, created_at）。`src/app/scenarios/[id]/retrospective/page.tsx` を新規作成（"use client"）。フォームは各フィールドを `<textarea>` で入力、難易度・恐怖演出は星選択UIで入力。`supabase.from("scenario_retrospectives").upsert(...)` でシナリオ1件につき1レコード管理（複数作成不可）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「振り返りノート」リンクを追加。`src/lib/supabase.ts` に `ScenarioRetrospective` 型を追加。
 **コミット:** `feat: KP scenario retrospective notes with rating`
 
-## [TODO] 次回セッションカレンダービュー — 優先度: 低
+## [DONE] 次回セッションカレンダービュー — 優先度: 低
 **対象:** KP / 共通
 **概要:** 複数シナリオの `next_session_at` を月単位カレンダー形式で一覧表示するページ。シナリオ一覧は都度フィルタが必要だが、カレンダー表示なら複数卓の日程重複が一目で確認できる。`next_session_at` は既実装済みのため追加DBなし。
 **実装ヒント:** `src/app/calendar/page.tsx` を新規作成（"use client"）。`supabase.from("scenarios").select("id, title, status, next_session_at").not("next_session_at", "is", null)` で取得。useState で表示月（year/month）を管理し、前月/翌月ボタンで切り替え。該当月のカレンダーグリッド（7列×最大6行）を `Array.from` で生成し、各セルに一致するシナリオタイトルを表示してシナリオ詳細ページへリンク。`src/app/_components/NavBar.tsx` に「カレンダー」リンクを追加。追加DBなし。
