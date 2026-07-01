@@ -360,3 +360,13 @@ export type BgmCue = {
   direction_notes: string | null;
   created_at: string;
 };
+
+export type ScenarioScene = {
+  id: string;
+  scenario_id: string;
+  scene_order: number;
+  title: string;
+  notes: string | null;
+  is_done: boolean;
+  created_at: string;
+};

@@ -458,7 +458,7 @@
 **実装ヒント:** `characters` テーブルに `farewell_scene: text | null`（最後のシーン説明）と `farewell_message: text | null`（PLからの一言）カラムをALTER TABLEで追加。`src/app/characters/[id]/farewell/page.tsx` を "use client" で新規作成（フォーム＋表示の切り替え、`supabase.from("characters").update({ farewell_scene, farewell_message }).eq("id", id)` で保存）。`src/lib/supabase.ts` の `Character` 型に両カラムを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）で `status !== "alive"` の場合のみ「最終章を記録」リンクを表示。`src/app/characters/page.tsx` の退場済みキャラカードに追悼バッジ（黒帯アイコン等）を表示。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: character farewell page for deceased or retired characters`
 
-## [TODO] KPセッションアジェンダ（場面別プランナー） — 優先度: 中
+## [DONE] KPセッションアジェンダ（場面別プランナー） — 優先度: 中
 **対象:** KP
 **概要:** シナリオの各セッションを「場面1: 導入」「場面2: 調査」のように場面単位で構造化できるプランナー。既存の `gm_notes`（単一テキスト）や `scenario_notes`（共有パーティーノート）とは異なり、KP専用の事前計画ノートとして機能する。セッション当日に「次の場面」をチェックしながら進行できる。
 **実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, scene_order: integer, title, notes, is_done: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成。場面一覧は `scene_order` 昇順で表示し、各場面に「完了」トグル（`supabase.from("scenario_scenes").update({is_done})`）と削除ボタンを配置。▲▼ボタンで並び替え（`scene_order` を swap）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「アジェンダ」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。
