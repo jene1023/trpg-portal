@@ -409,3 +409,33 @@
 **リサーチ根拠:** TRPGセッション日程調整の外部ツール（LINEアンケート・伸ばせるくん等）への依存はTRPGユーザーの長年の課題として繰り返し言及されており、複数のTRPGコミュニティ記事で「卓内ツールに日程調整があれば便利」という声が確認された。
 **実装ヒント:** Supabaseに `schedule_proposals` テーブル（id, scenario_id, proposed_at: timestamptz, created_at）と `schedule_votes` テーブル（id, proposal_id, voter_name, is_available: boolean, created_at）を追加。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成。KPは候補日時を複数追加でき、参加者は voter_name を入力して各日程に○/×を投票（upsertで上書き可能）。集計結果は「○N人/×M人」でリアルタイム表示。最多○の日程に「確定」ボタンを配置し、クリックで `scenarios.next_session_at` を更新。`src/lib/supabase.ts` に `ScheduleProposal`, `ScheduleVote` 型を追加。シナリオ詳細ダッシュボードに「日程調整」リンクを追加。
 **コミット:** `feat: session scheduling poll for party date coordination`
+
+## [TODO] ホームダッシュボード強化（ピン留め・次回予定・進行中シナリオ統合） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** 現在のトップページはタイルが3つ（うち2つが「準備中」）と最近のキャラクター一覧のみ。ピン留めキャラクター・直近7日以内の次回セッション予定・進行中シナリオを並べた実用的なダッシュボードへ強化する。NavBarの全主要ページへのクイックリンクも整備。
+**実装ヒント:** `src/app/page.tsx` を拡張（Server Component のまま）。`supabase.from("characters").select("*").eq("is_pinned", true)` でピン留めキャラ取得。`supabase.from("scenarios").select("*").eq("status", "ongoing")` で進行中シナリオ取得。`next_session_at` が直近7日のシナリオを「今週の予定」セクションで強調表示。タイルは `/scenarios`, `/npcs`, `/search`, `/calendar` も追加し "available: true" に設定。追加DBなし。
+**コミット:** `feat: enrich home dashboard with pinned chars, upcoming sessions, and active scenarios`
+
+## [TODO] 探索者ポートレートファイルアップロード（Supabase Storage連携） — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターに `portrait_url` フィールドはあるが、現在はURL手入力のみ対応。Supabase StorageにPNG/JPGをアップロードし公開URLを自動取得してキャラクターに紐づけられる専用UIを追加する。立ち絵・アイコン設定をポータル内で完結させる。
+**実装ヒント:** `src/app/_components/PortraitUploader.tsx` を "use client" で新規作成。`<input type="file" accept="image/*">` で画像を受け取り `supabase.storage.from("portraits").upload(`{characterId}/{uuid}`, file)` でアップロード後、`supabase.storage.from("portraits").getPublicUrl(path)` で公開URLを取得し `supabase.from("characters").update({ portrait_url })` で更新。Supabase Storageに `portraits` バケットを public で作成する必要あり。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレート欄と、編集ページ（`src/app/characters/[id]/edit/page.tsx`）に配置。`src/app/_components/PortraitImage.tsx` は既存のため流用可能。
+**コミット:** `feat: portrait image upload to Supabase Storage`
+
+## [TODO] キャラクター参加シナリオ履歴 — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターが参加した全シナリオを時系列で一覧表示するページ。現在 `scenario_participants` テーブルでキャラ×シナリオが紐づいているが、キャラ側から参加履歴を辿るページが存在しない。長期プレイヤーが「このキャラでどのシナリオを遊んだか」を振り返るのに使う。
+**実装ヒント:** `src/app/characters/[id]/scenario-history/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, scenarios(*)").eq("character_id", id).order("created_at", {ascending: false})` で参加シナリオを取得し、シナリオタイトル・ステータス・next_session_at を一覧表示。各シナリオは `/scenarios/[id]` へリンク。追加DBなし（既存 `scenario_participants`, `scenarios` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「参加シナリオ」リンクを追加。
+**コミット:** `feat: character scenario participation history page`
+
+## [TODO] 呪文カタログ（CoC7版マスターリスト参照・キャラへ一括追加） — 優先度: 中
+**対象:** PL / 共通
+**概要:** CoC7版に掲載される主要呪文（接触・召喚・変容・防護系など）を静的カタログとして参照できるページ。各呪文のMP消費・SAN消費・効果概要を確認しながら、ボタン1クリックでキャラクターの呪文リストへ追加できる。毎回呪文名やコストを手入力する手間を省く。
+**実装ヒント:** `src/app/spells/page.tsx` を新規作成（"use client"）。CoC7版の代表的呪文データ（呪文名・mp_cost・san_cost・effect）を `src/lib/spellCatalog.ts` に静的配列で定義。`?characterId=` クエリパラメータを受け取り、呪文カードの「追加」ボタンで `supabase.from("character_spells").insert(...)` を実行し指定キャラへ登録。キャラクター詳細ページの呪文セクション（`src/app/characters/[id]/spells/page.tsx`）に「カタログから追加」リンクを追加。`src/app/_components/NavBar.tsx` には追加しなくてよい（キャラ詳細からのみアクセス）。追加DBなし。
+**コミット:** `feat: CoC7 spell catalog with one-click add to character`
+
+## [TODO] KPセッションアジェンダ（場面別プランナー） — 優先度: 中
+**対象:** KP
+**概要:** シナリオの各セッションを「場面1: 導入」「場面2: 調査」のように場面単位で構造化できるプランナー。既存の `gm_notes`（単一テキスト）や `scenario_notes`（共有パーティーノート）とは異なり、KP専用の事前計画ノートとして機能する。セッション当日に「次の場面」をチェックしながら進行できる。
+**実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, scene_order: integer, title, notes, is_done: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成。場面一覧は `scene_order` 昇順で表示し、各場面に「完了」トグル（`supabase.from("scenario_scenes").update({is_done})`）と削除ボタンを配置。▲▼ボタンで並び替え（`scene_order` を swap）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「アジェンダ」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。
+**コミット:** `feat: KP session agenda with scene-by-scene planner`
