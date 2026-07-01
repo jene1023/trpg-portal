@@ -45,7 +45,7 @@ export default async function CharacterDetailPage({ params }: Props) {
 
   const mythosSkill = (skills ?? []).find((s) => s.skill_name.startsWith("クトゥルフ神話"));
 
-  const sectionClass = "rounded-lg border border-coc-border bg-coc-surface p-4 space-y-4";
+  const sectionClass = "rounded-lg border border-coc-border coc-card-bg p-4 space-y-4";
   const sectionTitle = "coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
 
   return (
