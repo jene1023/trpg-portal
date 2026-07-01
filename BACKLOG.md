@@ -434,7 +434,7 @@
 **実装ヒント:** `src/app/spells/page.tsx` を新規作成（"use client"）。CoC7版の代表的呪文データ（呪文名・mp_cost・san_cost・effect）を `src/lib/spellCatalog.ts` に静的配列で定義。`?characterId=` クエリパラメータを受け取り、呪文カードの「追加」ボタンで `supabase.from("character_spells").insert(...)` を実行し指定キャラへ登録。キャラクター詳細ページの呪文セクション（`src/app/characters/[id]/spells/page.tsx`）に「カタログから追加」リンクを追加。`src/app/_components/NavBar.tsx` には追加しなくてよい（キャラ詳細からのみアクセス）。追加DBなし。
 **コミット:** `feat: CoC7 spell catalog with one-click add to character`
 
-## [TODO] CoC7版職業技能ポイント計算UI — 優先度: 高
+## [DONE] CoC7版職業技能ポイント計算UI — 優先度: 高
 **対象:** PL
 **概要:** キャラクター作成/編集時に職業を選ぶと職業技能ポイント（例: 探偵=EDU×4+INT×2）と趣味技能ポイント（INT×2）を自動計算してUI上に表示し、技能に割り振りながら残りポイントをリアルタイム確認できる機能。能力値オートロール（DONE済み）の次のステップとして、CoCキャラ作成で最も手間のかかるフローを補完する。
 **実装ヒント:** `src/lib/occupationData.ts` を新規作成し、職業名とポイント計算式（`edu * 4`, `edu * 2 + dex * 2` 等）を静的配列で定義。`src/app/characters/[id]/skill-builder/page.tsx` を "use client" で新規作成し、職業select → ポイント上限表示 → 各技能の `current_value - base_value` 差分を合計してリアルタイム残ポイントを表示。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能を取得し、変更後は `supabase.from("character_skills").update({ current_value }).eq("id", skillId)` で保存。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能ポイント割り振り」リンクを追加。追加DBなし。
