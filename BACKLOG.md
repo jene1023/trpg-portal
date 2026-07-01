@@ -470,7 +470,7 @@
 **実装ヒント:** `src/app/characters/[id]/growth-roll/page.tsx` を "use client" で新規作成。`supabase.from("character_skills").select("*").eq("character_id", id).eq("growth_checked", true)` で対象技能を取得し一覧表示。各技能に「成長ロール」ボタンを配置し、`Math.floor(Math.random()*100)+1 > current_value` の場合に `Math.floor(Math.random()*10)+1` を加算して `supabase.from("character_skills").update({current_value, growth_checked: false}).eq("id", skillId)` で更新。同時に `supabase.from("growth_history").insert({skill_name, old_value, new_value, session_label})` で成長ログを記録。追加DBなし（既存 `character_skills`, `growth_history` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「成長判定」リンクを追加（growth_checked な技能がある場合にバッジ表示）。
 **コミット:** `feat: skill growth roll UI to resolve checked skills after session`
 
-## [TODO] PLシナリオ感想投票（4軸評価） — 優先度: 中
+## [DONE] PLシナリオ感想投票（4軸評価） — 優先度: 中
 **対象:** PL / 共通
 **概要:** シナリオ終了後にPLが「楽しさ・恐怖演出・謎解き・キャラクター活躍度」の4軸を1〜5で匿名評価できる投票機能。既存の `scenario_retrospectives`（KP振り返りノート）はKP視点のみで、参加者からのフィードバックを収集できない。平均スコアをシナリオ詳細ダッシュボードに表示し、KPの改善サイクルを補完する。
 **実装ヒント:** Supabaseに `scenario_player_ratings` テーブルを追加（id, scenario_id, voter_name, fun_rating: integer 1-5, horror_rating: integer 1-5, mystery_rating: integer 1-5, character_rating: integer 1-5, comment: text | null, created_at）。`src/app/scenarios/[id]/ratings/page.tsx` を "use client" で新規作成（投票フォーム＋集計結果表示）。voter_name が同一の場合は upsert で上書き可能。集計は `fun_rating` 等の平均を算出してスター表示（CSS で `★` を rating 数だけ塗る）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に平均スコアサマリーと「感想を投票する」リンクを追加。`src/lib/supabase.ts` に `ScenarioPlayerRating` 型を追加。

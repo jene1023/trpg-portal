@@ -370,3 +370,15 @@ export type ScenarioScene = {
   is_done: boolean;
   created_at: string;
 };
+
+export type ScenarioPlayerRating = {
+  id: string;
+  scenario_id: string;
+  voter_name: string;
+  fun_rating: number;
+  horror_rating: number;
+  mystery_rating: number;
+  character_rating: number;
+  comment: string | null;
+  created_at: string;
+};

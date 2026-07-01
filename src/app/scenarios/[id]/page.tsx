@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
@@ -38,12 +38,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { data: participantRows },
     { count: npcCount },
     { count: creatureCount },
+    { data: ratingRows },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
     supabase.from("npcs").select("*", { count: "exact", head: true }).eq("scenario_name", scenario.title),
     supabase.from("creatures").select("*", { count: "exact", head: true }).eq("scenario_id", id),
+    supabase.from("scenario_player_ratings").select("fun_rating, horror_rating, mystery_rating, character_rating").eq("scenario_id", id),
   ]);
+
+  const ratingCount = ratingRows?.length ?? 0;
+  const avgFun = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.fun_rating, 0) / ratingCount) : null;
+  const avgHorror = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.horror_rating, 0) / ratingCount) : null;
+  const avgMystery = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.mystery_rating, 0) / ratingCount) : null;
+  const avgCharacter = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.character_rating, 0) / ratingCount) : null;
 
   const participantCount = participantRows?.length ?? 0;
   const attendingCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length ?? 0;
@@ -313,6 +321,24 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">アジェンダ</p>
               <p className="text-xs text-coc-muted">場面別プランナーでセッションの流れを事前計画</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/ratings`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Star size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">感想投票</p>
+              <p className="text-xs text-coc-muted">
+                {ratingCount > 0
+                  ? `${ratingCount}件の評価 ★${((avgFun! + avgHorror! + avgMystery! + avgCharacter!) / 4).toFixed(1)}`
+                  : "楽しさ・恐怖演出・謎解き・キャラ活躍度を4軸評価"}
+              </p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
