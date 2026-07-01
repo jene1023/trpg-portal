@@ -482,7 +482,7 @@
 **実装ヒント:** `src/lib/creatureCatalog.ts` を新規作成し、神話生物データ（name, san_loss_success, san_loss_failure, str, con, pow, dex, siz, hp, mp, armor, attacks, can_use_spells, notes）を静的配列で定義（15〜20種程度）。`src/app/creatures/catalog/page.tsx` を "use client" で新規作成。`?scenarioId=` クエリパラメータを受け取り、カタログカードの「追加」ボタンで `supabase.from("creatures").insert({...entry, scenario_id})` を実行。クリーチャー一覧ページ（`src/app/creatures/page.tsx`）に「カタログから追加」リンクを追加。追加DBなし（既存 `creatures` テーブルを流用）。
 **コミット:** `feat: creature catalog with one-click add from CoC7 bestiary`
 
-## [TODO] シナリオ真相タイムライン（KP用事件経緯メモ） — 優先度: 低
+## [DONE] シナリオ真相タイムライン（KP用事件経緯メモ） — 優先度: 低
 **対象:** KP
 **概要:** シナリオの「真相側の時系列」（いつ・何が起きたか・登場人物の行動経緯）をKPが構造化して記録できるページ。既存の `scenario_areas`（場所メモ）・`bgm_cues`（演出キュー）・`gm_notes`（単一メモ）とは異なり、謎の根拠となる過去の事件経緯を時間軸で整理するKP専用ノート。長編や複雑なシナリオでKPが真相を忘れずセッションを進行できるようにする。
 **実装ヒント:** Supabaseに `scenario_timeline_events` テーブルを追加（id, scenario_id, event_date: text（「1920年3月15日」等の任意書式）, event_order: integer, title, description: text | null, is_revealed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/truth-timeline/page.tsx` を "use client" で新規作成。`event_order` 昇順で縦線タイムライン（CSS `border-left`）表示。`is_revealed` トグルで「PLに明かされた真相」をマーク。▲▼で `event_order` を swap して並び替え。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「真相タイムライン」リンクを追加。`src/lib/supabase.ts` に `ScenarioTimelineEvent` 型を追加。

@@ -382,3 +382,14 @@ export type ScenarioPlayerRating = {
   comment: string | null;
   created_at: string;
 };
+
+export type ScenarioTimelineEvent = {
+  id: string;
+  scenario_id: string;
+  event_date: string | null;
+  event_order: number;
+  title: string;
+  description: string | null;
+  is_revealed: boolean;
+  created_at: string;
+};
