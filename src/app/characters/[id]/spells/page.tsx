@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import SpellForm from "@/app/_components/SpellForm";
 
@@ -39,9 +39,18 @@ export default async function SpellsPage({ params }: Props) {
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 mb-1">
-        <Sparkles size={20} className="text-coc-gold" />
-        <h1 className="font-cinzel text-xl font-bold text-coc-text">呪文・魔術</h1>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <Sparkles size={20} className="text-coc-gold" />
+          <h1 className="font-cinzel text-xl font-bold text-coc-text">呪文・魔術</h1>
+        </div>
+        <Link
+          href={`/spells?characterId=${id}`}
+          className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+        >
+          <BookOpen size={13} />
+          カタログから追加
+        </Link>
       </div>
       <p className="text-sm text-coc-muted mb-6">
         習得した呪文を管理します。MP・SAN消費・効果をセッション中に素早く参照できます。

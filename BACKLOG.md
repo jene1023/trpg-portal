@@ -428,7 +428,7 @@
 **実装ヒント:** `src/app/characters/[id]/scenario-history/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, scenarios(*)").eq("character_id", id).order("created_at", {ascending: false})` で参加シナリオを取得し、シナリオタイトル・ステータス・next_session_at を一覧表示。各シナリオは `/scenarios/[id]` へリンク。追加DBなし（既存 `scenario_participants`, `scenarios` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「参加シナリオ」リンクを追加。
 **コミット:** `feat: character scenario participation history page`
 
-## [TODO] 呪文カタログ（CoC7版マスターリスト参照・キャラへ一括追加） — 優先度: 中
+## [DONE] 呪文カタログ（CoC7版マスターリスト参照・キャラへ一括追加） — 優先度: 中
 **対象:** PL / 共通
 **概要:** CoC7版に掲載される主要呪文（接触・召喚・変容・防護系など）を静的カタログとして参照できるページ。各呪文のMP消費・SAN消費・効果概要を確認しながら、ボタン1クリックでキャラクターの呪文リストへ追加できる。毎回呪文名やコストを手入力する手間を省く。
 **実装ヒント:** `src/app/spells/page.tsx` を新規作成（"use client"）。CoC7版の代表的呪文データ（呪文名・mp_cost・san_cost・effect）を `src/lib/spellCatalog.ts` に静的配列で定義。`?characterId=` クエリパラメータを受け取り、呪文カードの「追加」ボタンで `supabase.from("character_spells").insert(...)` を実行し指定キャラへ登録。キャラクター詳細ページの呪文セクション（`src/app/characters/[id]/spells/page.tsx`）に「カタログから追加」リンクを追加。`src/app/_components/NavBar.tsx` には追加しなくてよい（キャラ詳細からのみアクセス）。追加DBなし。
