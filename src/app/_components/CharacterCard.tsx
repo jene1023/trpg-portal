@@ -89,7 +89,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin }: P
         <div className="px-3 py-3 space-y-2">
           {/* キャッチフレーズ */}
           {character.catchphrase && (
-            <p className="text-xs italic text-coc-gold font-crimson leading-snug line-clamp-2">
+            <p className="text-xs italic text-coc-gold font-crimson leading-snug line-clamp-2 pl-2 border-l-2 border-coc-gold-dim">
               &ldquo;{character.catchphrase}&rdquo;
             </p>
           )}
@@ -125,10 +125,10 @@ export default function CharacterCard({ character, skills = [], onTogglePin }: P
               {top.map((skill) => (
                 <span
                   key={skill.id}
-                  className={`rounded-full px-2 py-0.5 text-xs border border-coc-border ${
+                  className={`rounded-full px-2 py-0.5 text-xs border transition-all duration-200 ${
                     skill.is_occupation
-                      ? "text-coc-gold border-coc-gold-dim bg-coc-void"
-                      : "text-coc-muted bg-coc-void"
+                      ? "text-coc-gold border-coc-gold-dim bg-coc-void hover:border-coc-gold hover:shadow-[0_0_8px_rgba(201,133,58,0.45)]"
+                      : "text-coc-muted border-coc-border bg-coc-void hover:text-coc-text hover:border-coc-border-glow"
                   }`}
                 >
                   {skill.skill_name} {skill.current_value}%
