@@ -389,7 +389,7 @@
 **実装ヒント:** `characters` テーブルに `is_public: boolean DEFAULT false` と `public_slug: text UNIQUE` カラムをALTER TABLEで追加。`src/app/public/[slug]/page.tsx` を新規作成（Server Component、認証不要）。`supabase.from("characters").select("*, character_skills(*)").eq("public_slug", slug).eq("is_public", true)` でデータ取得し、名前・職業・能力値・技能・背景を表示。`src/app/_components/PublicShareToggle.tsx` を "use client" で作成し、スラッグ自動生成（`crypto.randomUUID().slice(0,8)`）とコピーボタンを実装。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに「公開設定」ボタンを追加。`src/lib/supabase.ts` の `Character` 型に `is_public`・`public_slug` を追加。
 **コミット:** `feat: public character profile page with shareable URL`
 
-## [TODO] キャラクター相関図（グラフ可視化） — 優先度: 中
+## [DONE] キャラクター相関図（グラフ可視化） — 優先度: 中
 **対象:** PL
 **概要:** 既存の `character_relations` データを元に、中心キャラクターと関係人物をSVGグラフで可視化するページ。テキスト一覧では把握しにくい複数の関係性の全体像を視覚的に確認できる。追加DBなし（既存 `character_relations` テーブルを流用）。
 **リサーチ根拠:** きゃらはぶ・CharaXivの「キャラクター相関図」機能はSNS拡散・セッション自己紹介での利用が多く、単なる関係リストよりも大幅にエンゲージメントが高いことが複数のレビューで確認された。

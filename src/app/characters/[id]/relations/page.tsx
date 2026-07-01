@@ -39,9 +39,17 @@ export default async function RelationsPage({ params }: Props) {
         </Link>
       </div>
 
-      <h1 className="font-cinzel text-xl font-bold text-coc-text mb-6">
-        関係メモ
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-cinzel text-xl font-bold text-coc-text">
+          関係メモ
+        </h1>
+        <Link
+          href={`/characters/${id}/relation-graph`}
+          className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+        >
+          相関図を見る →
+        </Link>
+      </div>
 
       <RelationList characterId={id} initialRelations={relations ?? []} />
     </div>
