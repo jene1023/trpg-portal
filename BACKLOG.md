@@ -494,7 +494,7 @@
 **実装ヒント:** Supabaseに `character_ability_growths` テーブルを追加（id, character_id, ability_name: text, old_value: integer, new_value: integer, grown_at: timestamptz | null, created_at）。`src/app/characters/[id]/ability-growth/page.tsx` を "use client" で新規作成。対象能力値（主にEDU、任意でPOWも選択可）をselectで選び「成長チェック」ボタンで `Math.floor(Math.random()*100)+1 > currentValue` を判定。成功時に `Math.floor(Math.random()*10)+1` を加算し `supabase.from("characters").update({edu: newValue})` で更新、同時に `character_ability_growths` へ挿入。過去の成長ログを一覧表示。`src/lib/supabase.ts` に `CharacterAbilityGrowth` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「能力値成長」リンクを追加。
 **コミット:** `feat: ability score growth check for EDU and other stats`
 
-## [TODO] キャラクター比較ビュー（能力値・技能の横並び比較） — 優先度: 中
+## [DONE] キャラクター比較ビュー（能力値・技能の横並び比較） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** 複数のキャラクターの能力値・代表技能を横並びで比較できるページ。パーティー編成時の役割分担確認・NPC vs PC の能力差把握・複数キャラを持つPLの使い分け判断に使う。現在は各キャラ詳細を個別に開かなければ比較できない。
 **実装ヒント:** `src/app/characters/compare/page.tsx` を "use client" で新規作成。`?ids=id1,id2,id3` クエリパラメータで最大4キャラ指定し `supabase.from("characters").select("*, character_skills(*)").in("id", ids)` で一括取得。STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/SANの能力値を行、キャラ名を列にした表形式で表示。各セルは最高値を緑ハイライト。技能は「全キャラが共通で持つ技能」のみ比較行として追加表示。キャラクター一覧ページ（`src/app/characters/page.tsx`）に各キャラカードの「比較に追加」ボタン（チェックボックス）を追加し、選択後「比較する」ボタンで `/characters/compare?ids=...` に遷移。追加DBなし。

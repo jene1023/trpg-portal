@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Upload, X } from "lucide-react";
+import { Plus, Search, Upload, X, GitCompare } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
 import CharacterCardSkeleton from "@/app/_components/CharacterCardSkeleton";
@@ -23,6 +23,7 @@ export default function CharactersPage() {
   const [nameQuery, setNameQuery] = useState("");
   const [occupationQuery, setOccupationQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -55,6 +56,18 @@ export default function CharactersPage() {
 
   function handleTogglePin(id: string, pinned: boolean) {
     setCharacters((prev) => prev.map((c) => (c.id === id ? { ...c, is_pinned: pinned } : c)));
+  }
+
+  function toggleCompare(id: string) {
+    setCompareIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 4) {
+        next.add(id);
+      }
+      return next;
+    });
   }
 
   const hasActiveSearch = nameQuery !== "" || occupationQuery !== "";
@@ -182,8 +195,57 @@ export default function CharactersPage() {
               character={char}
               skills={char.character_skills}
               onTogglePin={handleTogglePin}
+              isCompared={compareIds.has(char.id)}
+              onToggleCompare={toggleCompare}
             />
           ))}
+        </div>
+      )}
+
+      {/* 比較スティッキーバー */}
+      {compareIds.size >= 1 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center gap-2 rounded-xl border border-coc-gold/40 bg-coc-void/95 backdrop-blur-sm px-4 py-3 shadow-lg shadow-black/40 max-w-lg w-[calc(100vw-2rem)]">
+          <div className="flex items-center gap-1.5 text-coc-muted">
+            <GitCompare size={14} />
+            <span className="text-xs font-medium">{compareIds.size}体選択中</span>
+          </div>
+          <div className="flex flex-wrap gap-1 flex-1">
+            {Array.from(compareIds).map((id) => {
+              const char = characters.find((c) => c.id === id);
+              return char ? (
+                <span
+                  key={id}
+                  className="flex items-center gap-1 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-text"
+                >
+                  {char.name}
+                  <button
+                    onClick={() => toggleCompare(id)}
+                    className="text-coc-muted hover:text-coc-text"
+                  >
+                    ×
+                  </button>
+                </span>
+              ) : null;
+            })}
+          </div>
+          {compareIds.size >= 2 ? (
+            <Link
+              href={`/characters/compare?ids=${Array.from(compareIds).join(",")}`}
+              className="rounded-lg border border-coc-gold bg-coc-gold/20 px-3 py-1.5 text-sm text-coc-gold hover:bg-coc-gold/30 transition-colors font-medium whitespace-nowrap"
+            >
+              比較する →
+            </Link>
+          ) : (
+            <span className="text-xs text-coc-muted whitespace-nowrap">
+              あと{2 - compareIds.size}体追加
+            </span>
+          )}
+          <button
+            onClick={() => setCompareIds(new Set())}
+            className="text-xs text-coc-muted hover:text-coc-text"
+          >
+            クリア
+          </button>
         </div>
       )}
     </div>

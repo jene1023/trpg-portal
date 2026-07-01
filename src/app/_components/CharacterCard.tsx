@@ -11,6 +11,8 @@ type Props = {
   character: Character;
   skills?: CharacterSkill[];
   onTogglePin?: (id: string, pinned: boolean) => void;
+  isCompared?: boolean;
+  onToggleCompare?: (id: string) => void;
 };
 
 function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
@@ -19,7 +21,7 @@ function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
     .slice(0, 3);
 }
 
-export default function CharacterCard({ character, skills = [], onTogglePin }: Props) {
+export default function CharacterCard({ character, skills = [], onTogglePin, isCompared, onToggleCompare }: Props) {
   const top = topSkills(skills);
 
   async function handlePin(e: { preventDefault: () => void; stopPropagation: () => void }) {
@@ -135,6 +137,24 @@ export default function CharacterCard({ character, skills = [], onTogglePin }: P
                 </span>
               ))}
             </div>
+          )}
+
+          {/* 比較ボタン */}
+          {onToggleCompare && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleCompare(character.id);
+              }}
+              className={`w-full rounded py-1 text-xs border transition-colors ${
+                isCompared
+                  ? "border-coc-gold text-coc-gold bg-coc-gold/10 hover:bg-coc-gold/20"
+                  : "border-coc-border/60 text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+              }`}
+            >
+              {isCompared ? "✓ 比較中" : "+ 比較に追加"}
+            </button>
           )}
         </div>
       </div>
