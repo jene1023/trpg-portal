@@ -39,7 +39,7 @@ export default function NavBar() {
           href="/"
           className="flex items-center gap-2 font-cinzel text-lg font-bold text-coc-text hover:text-coc-gold transition-colors"
         >
-          <span className="text-coc-gold text-xl select-none">✦</span>
+          <span className="text-coc-gold text-xl select-none coc-star-twinkle">✦</span>
           CoC Portal
         </Link>
 
@@ -87,7 +87,7 @@ export default function NavBar() {
       </nav>
 
       {/* グラデーションボーダーライン */}
-      <div className="h-px bg-gradient-to-r from-transparent via-coc-border to-transparent" />
+      <div className="h-px bg-gradient-to-r from-transparent via-coc-border-glow to-transparent opacity-60" />
 
       {/* モバイルドロワー */}
       {open && (
