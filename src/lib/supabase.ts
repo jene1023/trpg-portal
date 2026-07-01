@@ -280,3 +280,11 @@ export type SessionNpcEncounter = {
   npc_id: string;
   created_at: string;
 };
+
+export type SkillGoal = {
+  id: string;
+  character_id: string;
+  skill_name: string;
+  target_value: number;
+  created_at: string;
+};

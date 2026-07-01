@@ -351,7 +351,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/preflight/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*)").eq("id", id)` と `npcs` を `scenario_name` で取得し一括表示。ハンドアウトは`is_secret`件数・配布先未設定件数を警告表示。参加者は出欠ステータスごとに人数サマリー（出欠管理TODO実装後に連携）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備確認」リンクを追加。追加DBなし。
 **コミット:** `feat: KP pre-session preparation checklist`
 
-## [TODO] キャラクター技能目標トラッカー — 優先度: 中
+## [DONE] キャラクター技能目標トラッカー — 優先度: 中
 **対象:** PL
 **概要:** 技能に「目標値」を設定し、現在値からの達成率をプログレスバーで可視化できる機能。長期キャンペーンでの育成方針を明確化し、セッションごとの成長チェックを目標達成にフォーカスできるようにする。既存の `growth_history` とも連携して「あと何点で目標達成か」を表示できる。
 **実装ヒント:** Supabaseに `skill_goals` テーブルを追加（id, character_id, skill_name, target_value, created_at）。`src/app/characters/[id]/skill-goals/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("character_skills").select("*")` で現在値を取得し、同じ `skill_name` の `skill_goals` 目標値と突合してプログレスバー（`width: calc(${current/target*100}%)`）を表示。目標達成済みスキルは緑ハイライト。`src/lib/supabase.ts` に `SkillGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能目標」リンクを追加。
