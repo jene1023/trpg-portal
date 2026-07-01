@@ -374,3 +374,38 @@
 **概要:** シナリオに参加したキャラクター全員のセッションログ（`sessions`テーブル）を集計し、「セッション別・参加者別のSAN/HP喪失量」と「シナリオ全体の合計喪失量」をKPが俯瞰できるサマリービュー。シナリオのバランス評価・難易度確認・KP振り返りの補助に使う。既存テーブルのみ使用で追加DBなし。
 **実装ヒント:** `src/app/scenarios/[id]/damage-summary/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(id, name, san_max, hp_max)")` で参加者を取得後、各 `character_id` ごとに `supabase.from("sessions").select("*").eq("character_id", id)` でセッションログを取得（`Promise.all`）。セッション番号×参加者のマトリクス表として表示し、各セルに san_loss/hp_loss を表示。行末に参加者合計、列末にセッション合計を集計。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「喪失サマリー」リンクを追加。
 **コミット:** `feat: scenario SAN/HP loss summary matrix for KP review`
+
+## [TODO] ここフォリアキャラコマJSON出力（VTT連携強化） — 優先度: 高
+**対象:** PL / 共通
+**概要:** ここフォリア（Cocofolia）で使えるキャラクターコマJSONを自動生成してダウンロードできる機能。現在のチャットパレットはBCDiceコマンドのみだが、コマデータ（ステータス表示・チャットパレット統合）を丸ごとインポートできるJSONにすることで、VTT上での手入力を完全に排除する。
+**リサーチ根拠:** Charaenoの最大の差別化機能がここフォリアへのコマ出力で、PLが「Charaenoを使う理由はこれ一択」と評価するほど需要が高く、ユーザーの一般的なワークフローに組み込まれている。
+**実装ヒント:** `src/app/characters/[id]/cocofolia-piece/page.tsx` を新規作成（"use client"）。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、ここフォリアのpiece JSON形式（`name`, `initiative`, `width`, `height`, `color`, `text`（HP/MP/SAN表示文字列）, `commands`（BCDiceコマンド配列））を生成。`Blob` + `URL.createObjectURL` で `{キャラ名}_piece.json` としてダウンロード。既存のチャットパレット生成ロジック（`src/app/characters/[id]/chat-palette/page.tsx`）の `commands` 配列を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コマ出力」リンクを追加。
+**コミット:** `feat: Cocofolia character piece JSON export for VTT integration`
+
+## [TODO] 探索者公開プロフィールページ（URLシェア） — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターに公開用スラッグURLを発行し、ログイン不要で誰でも閲覧できる公開プロフィールページを提供する機能。セッション募集時のキャラ紹介・卓外での共有・PLへのキャラ確認依頼に使う。現在のプロフィールカードは画像ダウンロードのみで、リンク共有には対応していない。
+**リサーチ根拠:** CharaXiv・Charaeno・きゃらはぶいずれも「URLで共有できる公開キャラクターページ」をコアバリューとして提供しており、TRPG界隈でキャラシートをリンク共有するワークフローが定着していることが確認された。
+**実装ヒント:** `characters` テーブルに `is_public: boolean DEFAULT false` と `public_slug: text UNIQUE` カラムをALTER TABLEで追加。`src/app/public/[slug]/page.tsx` を新規作成（Server Component、認証不要）。`supabase.from("characters").select("*, character_skills(*)").eq("public_slug", slug).eq("is_public", true)` でデータ取得し、名前・職業・能力値・技能・背景を表示。`src/app/_components/PublicShareToggle.tsx` を "use client" で作成し、スラッグ自動生成（`crypto.randomUUID().slice(0,8)`）とコピーボタンを実装。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに「公開設定」ボタンを追加。`src/lib/supabase.ts` の `Character` 型に `is_public`・`public_slug` を追加。
+**コミット:** `feat: public character profile page with shareable URL`
+
+## [TODO] キャラクター相関図（グラフ可視化） — 優先度: 中
+**対象:** PL
+**概要:** 既存の `character_relations` データを元に、中心キャラクターと関係人物をSVGグラフで可視化するページ。テキスト一覧では把握しにくい複数の関係性の全体像を視覚的に確認できる。追加DBなし（既存 `character_relations` テーブルを流用）。
+**リサーチ根拠:** きゃらはぶ・CharaXivの「キャラクター相関図」機能はSNS拡散・セッション自己紹介での利用が多く、単なる関係リストよりも大幅にエンゲージメントが高いことが複数のレビューで確認された。
+**実装ヒント:** `src/app/characters/[id]/relation-graph/page.tsx` を新規作成（"use client"）。`supabase.from("character_relations").select("*").eq("character_id", id)` で関係データ取得。SVG要素で中心ノード（現キャラ）を中央に配置し、関係先ノードを円周上に等間隔配置、線でつなぐ（三角関数で座標計算）。ノードの色は `relation_type` で分岐（友人=緑・ライバル=橙・恩人=青・要注意=赤・その他=灰）。エッジに `relation_type` ラベルを表示。`src/app/characters/[id]/relations/page.tsx` のヘッダーに「相関図を見る」リンクを追加。
+**コミット:** `feat: character relation graph visualization with SVG`
+
+## [TODO] シナリオエリア・地点メモ（KP用） — 優先度: 中
+**対象:** KP
+**概要:** シナリオに紐づいた地点/エリア単位のメモ機能。現在の `gm_notes` は単一テキストだが、「図書館」「古い屋敷」「港」など場所ごとに説明・GMメモを独立して管理できる構造化ノートを提供する。長期キャンペーンや複数ロケーションシナリオでの準備効率を上げる。
+**リサーチ根拠:** PrismScroll CthulhuのJournal機能（NPC・ロケーション別の詳細ノート）がKP向け機能として高評価を受けており、「場所ごとの情報を整理できる仕組み」がKPユーザーの主要要望として海外レビューにも多く挙がっていた。
+**実装ヒント:** Supabaseに `scenario_areas` テーブルを追加（id, scenario_id, name, description, gm_notes, order_index: integer, created_at）。`src/app/scenarios/[id]/areas/page.tsx` を新規作成（Server Component + "use client" フォーム）。一覧は `order_index` 昇順で表示し、▲▼ボタンで並び替え（`supabase.from("scenario_areas").update({order_index})`）。各エリアカードは `<details>` 要素でgm_notesを折りたたみ表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「エリアメモ」リンクを追加。`src/lib/supabase.ts` に `ScenarioArea` 型を追加。
+**コミット:** `feat: scenario area notes for structured KP location management`
+
+## [TODO] セッション日程調整（簡易投票） — 優先度: 低
+**対象:** KP / 共通
+**概要:** KPが候補日程を複数提示し、参加者が○/×で回答できる簡易スケジュール調整機能。現在は `next_session_at` をKPが単独で設定するだけで、日程候補に対する参加者の可否投票ができない。LINEや外部ツールへの依存をなくし、ポータル内で日程決定まで完結できるようにする。
+**リサーチ根拠:** TRPGセッション日程調整の外部ツール（LINEアンケート・伸ばせるくん等）への依存はTRPGユーザーの長年の課題として繰り返し言及されており、複数のTRPGコミュニティ記事で「卓内ツールに日程調整があれば便利」という声が確認された。
+**実装ヒント:** Supabaseに `schedule_proposals` テーブル（id, scenario_id, proposed_at: timestamptz, created_at）と `schedule_votes` テーブル（id, proposal_id, voter_name, is_available: boolean, created_at）を追加。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成。KPは候補日時を複数追加でき、参加者は voter_name を入力して各日程に○/×を投票（upsertで上書き可能）。集計結果は「○N人/×M人」でリアルタイム表示。最多○の日程に「確定」ボタンを配置し、クリックで `scenarios.next_session_at` を更新。`src/lib/supabase.ts` に `ScheduleProposal`, `ScheduleVote` 型を追加。シナリオ詳細ダッシュボードに「日程調整」リンクを追加。
+**コミット:** `feat: session scheduling poll for party date coordination`
