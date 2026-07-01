@@ -463,3 +463,27 @@
 **概要:** シナリオの各セッションを「場面1: 導入」「場面2: 調査」のように場面単位で構造化できるプランナー。既存の `gm_notes`（単一テキスト）や `scenario_notes`（共有パーティーノート）とは異なり、KP専用の事前計画ノートとして機能する。セッション当日に「次の場面」をチェックしながら進行できる。
 **実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, scene_order: integer, title, notes, is_done: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成。場面一覧は `scene_order` 昇順で表示し、各場面に「完了」トグル（`supabase.from("scenario_scenes").update({is_done})`）と削除ボタンを配置。▲▼ボタンで並び替え（`scene_order` を swap）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「アジェンダ」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。
 **コミット:** `feat: KP session agenda with scene-by-scene planner`
+
+## [TODO] 技能成長判定ロールUI — 優先度: 高
+**対象:** PL
+**概要:** `growth_checked: true` の技能に対してセッション後に成長判定ロール（1d100 > 現在値なら1d10加算）を実行し、成功時に技能値を自動更新して成長履歴へ登録できるUI。現在、成長チェックフラグ設定（`SkillList.tsx`）と成長履歴記録（`growth_history`テーブル）の間のフローが完全に欠落している。
+**実装ヒント:** `src/app/characters/[id]/growth-roll/page.tsx` を "use client" で新規作成。`supabase.from("character_skills").select("*").eq("character_id", id).eq("growth_checked", true)` で対象技能を取得し一覧表示。各技能に「成長ロール」ボタンを配置し、`Math.floor(Math.random()*100)+1 > current_value` の場合に `Math.floor(Math.random()*10)+1` を加算して `supabase.from("character_skills").update({current_value, growth_checked: false}).eq("id", skillId)` で更新。同時に `supabase.from("growth_history").insert({skill_name, old_value, new_value, session_label})` で成長ログを記録。追加DBなし（既存 `character_skills`, `growth_history` を流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「成長判定」リンクを追加（growth_checked な技能がある場合にバッジ表示）。
+**コミット:** `feat: skill growth roll UI to resolve checked skills after session`
+
+## [TODO] PLシナリオ感想投票（4軸評価） — 優先度: 中
+**対象:** PL / 共通
+**概要:** シナリオ終了後にPLが「楽しさ・恐怖演出・謎解き・キャラクター活躍度」の4軸を1〜5で匿名評価できる投票機能。既存の `scenario_retrospectives`（KP振り返りノート）はKP視点のみで、参加者からのフィードバックを収集できない。平均スコアをシナリオ詳細ダッシュボードに表示し、KPの改善サイクルを補完する。
+**実装ヒント:** Supabaseに `scenario_player_ratings` テーブルを追加（id, scenario_id, voter_name, fun_rating: integer 1-5, horror_rating: integer 1-5, mystery_rating: integer 1-5, character_rating: integer 1-5, comment: text | null, created_at）。`src/app/scenarios/[id]/ratings/page.tsx` を "use client" で新規作成（投票フォーム＋集計結果表示）。voter_name が同一の場合は upsert で上書き可能。集計は `fun_rating` 等の平均を算出してスター表示（CSS で `★` を rating 数だけ塗る）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に平均スコアサマリーと「感想を投票する」リンクを追加。`src/lib/supabase.ts` に `ScenarioPlayerRating` 型を追加。
+**コミット:** `feat: player scenario rating with 4-axis feedback`
+
+## [TODO] 神話生物カタログ（静的参照・クリーチャー一括追加） — 優先度: 中
+**対象:** KP
+**概要:** CoC7版代表的神話生物（ディープワン・ショゴス・ハウンド・バイアクヘー等）を静的カタログとして参照でき、ボタン1クリックでシナリオのクリーチャーとして追加できる機能。既存の神話的クリーチャー管理（`creatures`テーブル/DONE）は自作クリーチャー向けで、定番モンスターを都度手入力する手間がある。呪文カタログ（DONE）・職業技能テンプレート（DONE）と同じパターン。
+**実装ヒント:** `src/lib/creatureCatalog.ts` を新規作成し、神話生物データ（name, san_loss_success, san_loss_failure, str, con, pow, dex, siz, hp, mp, armor, attacks, can_use_spells, notes）を静的配列で定義（15〜20種程度）。`src/app/creatures/catalog/page.tsx` を "use client" で新規作成。`?scenarioId=` クエリパラメータを受け取り、カタログカードの「追加」ボタンで `supabase.from("creatures").insert({...entry, scenario_id})` を実行。クリーチャー一覧ページ（`src/app/creatures/page.tsx`）に「カタログから追加」リンクを追加。追加DBなし（既存 `creatures` テーブルを流用）。
+**コミット:** `feat: creature catalog with one-click add from CoC7 bestiary`
+
+## [TODO] シナリオ真相タイムライン（KP用事件経緯メモ） — 優先度: 低
+**対象:** KP
+**概要:** シナリオの「真相側の時系列」（いつ・何が起きたか・登場人物の行動経緯）をKPが構造化して記録できるページ。既存の `scenario_areas`（場所メモ）・`bgm_cues`（演出キュー）・`gm_notes`（単一メモ）とは異なり、謎の根拠となる過去の事件経緯を時間軸で整理するKP専用ノート。長編や複雑なシナリオでKPが真相を忘れずセッションを進行できるようにする。
+**実装ヒント:** Supabaseに `scenario_timeline_events` テーブルを追加（id, scenario_id, event_date: text（「1920年3月15日」等の任意書式）, event_order: integer, title, description: text | null, is_revealed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/truth-timeline/page.tsx` を "use client" で新規作成。`event_order` 昇順で縦線タイムライン（CSS `border-left`）表示。`is_revealed` トグルで「PLに明かされた真相」をマーク。▲▼で `event_order` を swap して並び替え。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「真相タイムライン」リンクを追加。`src/lib/supabase.ts` に `ScenarioTimelineEvent` 型を追加。
+**コミット:** `feat: scenario truth timeline for KP to organize mystery backstory`
