@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured, Creature, Scenario } from "@/lib/supabase";
 
 const STAT_DISPLAY: { key: keyof Creature; label: string }[] = [
@@ -58,13 +58,22 @@ export default function CreaturesPage() {
     <div className="coc-page-enter mx-auto max-w-4xl px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cinzel text-2xl font-bold text-coc-text">クリーチャー一覧</h1>
-        <Link
-          href="/creatures/new"
-          className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
-        >
-          <Plus size={16} />
-          クリーチャーを追加
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/creatures/catalog${scenarioFilter !== "all" && scenarioFilter !== "none" ? `?scenarioId=${scenarioFilter}` : ""}`}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          >
+            <BookOpen size={16} />
+            カタログから追加
+          </Link>
+          <Link
+            href="/creatures/new"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
+          >
+            <Plus size={16} />
+            クリーチャーを追加
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6">

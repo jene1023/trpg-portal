@@ -476,7 +476,7 @@
 **実装ヒント:** Supabaseに `scenario_player_ratings` テーブルを追加（id, scenario_id, voter_name, fun_rating: integer 1-5, horror_rating: integer 1-5, mystery_rating: integer 1-5, character_rating: integer 1-5, comment: text | null, created_at）。`src/app/scenarios/[id]/ratings/page.tsx` を "use client" で新規作成（投票フォーム＋集計結果表示）。voter_name が同一の場合は upsert で上書き可能。集計は `fun_rating` 等の平均を算出してスター表示（CSS で `★` を rating 数だけ塗る）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に平均スコアサマリーと「感想を投票する」リンクを追加。`src/lib/supabase.ts` に `ScenarioPlayerRating` 型を追加。
 **コミット:** `feat: player scenario rating with 4-axis feedback`
 
-## [TODO] 神話生物カタログ（静的参照・クリーチャー一括追加） — 優先度: 中
+## [DONE] 神話生物カタログ（静的参照・クリーチャー一括追加） — 優先度: 中
 **対象:** KP
 **概要:** CoC7版代表的神話生物（ディープワン・ショゴス・ハウンド・バイアクヘー等）を静的カタログとして参照でき、ボタン1クリックでシナリオのクリーチャーとして追加できる機能。既存の神話的クリーチャー管理（`creatures`テーブル/DONE）は自作クリーチャー向けで、定番モンスターを都度手入力する手間がある。呪文カタログ（DONE）・職業技能テンプレート（DONE）と同じパターン。
 **実装ヒント:** `src/lib/creatureCatalog.ts` を新規作成し、神話生物データ（name, san_loss_success, san_loss_failure, str, con, pow, dex, siz, hp, mp, armor, attacks, can_use_spells, notes）を静的配列で定義（15〜20種程度）。`src/app/creatures/catalog/page.tsx` を "use client" で新規作成。`?scenarioId=` クエリパラメータを受け取り、カタログカードの「追加」ボタンで `supabase.from("creatures").insert({...entry, scenario_id})` を実行。クリーチャー一覧ページ（`src/app/creatures/page.tsx`）に「カタログから追加」リンクを追加。追加DBなし（既存 `creatures` テーブルを流用）。
