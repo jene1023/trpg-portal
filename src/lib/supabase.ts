@@ -311,3 +311,18 @@ export type ScenarioArea = {
   order_index: number;
   created_at: string;
 };
+
+export type ScheduleProposal = {
+  id: string;
+  scenario_id: string;
+  proposed_at: string;
+  created_at: string;
+};
+
+export type ScheduleVote = {
+  id: string;
+  proposal_id: string;
+  voter_name: string;
+  is_available: boolean;
+  created_at: string;
+};

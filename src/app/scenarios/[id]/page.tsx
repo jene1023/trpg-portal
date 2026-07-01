@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
@@ -251,6 +251,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">エリアメモ</p>
               <p className="text-xs text-coc-muted">地点・場所ごとの説明とGMメモを管理</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/schedule`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Vote size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">日程調整</p>
+              <p className="text-xs text-coc-muted">候補日程の投票・集計・次回予定の確定</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>

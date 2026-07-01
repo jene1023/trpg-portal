@@ -403,7 +403,7 @@
 **実装ヒント:** Supabaseに `scenario_areas` テーブルを追加（id, scenario_id, name, description, gm_notes, order_index: integer, created_at）。`src/app/scenarios/[id]/areas/page.tsx` を新規作成（Server Component + "use client" フォーム）。一覧は `order_index` 昇順で表示し、▲▼ボタンで並び替え（`supabase.from("scenario_areas").update({order_index})`）。各エリアカードは `<details>` 要素でgm_notesを折りたたみ表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「エリアメモ」リンクを追加。`src/lib/supabase.ts` に `ScenarioArea` 型を追加。
 **コミット:** `feat: scenario area notes for structured KP location management`
 
-## [TODO] セッション日程調整（簡易投票） — 優先度: 低
+## [DONE] セッション日程調整（簡易投票） — 優先度: 低
 **対象:** KP / 共通
 **概要:** KPが候補日程を複数提示し、参加者が○/×で回答できる簡易スケジュール調整機能。現在は `next_session_at` をKPが単独で設定するだけで、日程候補に対する参加者の可否投票ができない。LINEや外部ツールへの依存をなくし、ポータル内で日程決定まで完結できるようにする。
 **リサーチ根拠:** TRPGセッション日程調整の外部ツール（LINEアンケート・伸ばせるくん等）への依存はTRPGユーザーの長年の課題として繰り返し言及されており、複数のTRPGコミュニティ記事で「卓内ツールに日程調整があれば便利」という声が確認された。
