@@ -410,7 +410,7 @@
 **実装ヒント:** Supabaseに `schedule_proposals` テーブル（id, scenario_id, proposed_at: timestamptz, created_at）と `schedule_votes` テーブル（id, proposal_id, voter_name, is_available: boolean, created_at）を追加。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成。KPは候補日時を複数追加でき、参加者は voter_name を入力して各日程に○/×を投票（upsertで上書き可能）。集計結果は「○N人/×M人」でリアルタイム表示。最多○の日程に「確定」ボタンを配置し、クリックで `scenarios.next_session_at` を更新。`src/lib/supabase.ts` に `ScheduleProposal`, `ScheduleVote` 型を追加。シナリオ詳細ダッシュボードに「日程調整」リンクを追加。
 **コミット:** `feat: session scheduling poll for party date coordination`
 
-## [TODO] ホームダッシュボード強化（ピン留め・次回予定・進行中シナリオ統合） — 優先度: 高
+## [DONE] ホームダッシュボード強化（ピン留め・次回予定・進行中シナリオ統合） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** 現在のトップページはタイルが3つ（うち2つが「準備中」）と最近のキャラクター一覧のみ。ピン留めキャラクター・直近7日以内の次回セッション予定・進行中シナリオを並べた実用的なダッシュボードへ強化する。NavBarの全主要ページへのクイックリンクも整備。
 **実装ヒント:** `src/app/page.tsx` を拡張（Server Component のまま）。`supabase.from("characters").select("*").eq("is_pinned", true)` でピン留めキャラ取得。`supabase.from("scenarios").select("*").eq("status", "ongoing")` で進行中シナリオ取得。`next_session_at` が直近7日のシナリオを「今週の予定」セクションで強調表示。タイルは `/scenarios`, `/npcs`, `/search`, `/calendar` も追加し "available: true" に設定。追加DBなし。

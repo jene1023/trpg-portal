@@ -1,8 +1,18 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Users, BookOpen, Image, ChevronRight } from "lucide-react";
-import { supabase, isSupabaseConfigured, CharacterWithSkills } from "@/lib/supabase";
+import {
+  Users,
+  BookOpen,
+  ChevronRight,
+  Scroll,
+  Ghost,
+  Search,
+  Calendar,
+  Pin,
+  Clock,
+} from "lucide-react";
+import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario } from "@/lib/supabase";
 import CharacterCard from "./_components/CharacterCard";
 
 const tiles = [
@@ -14,33 +24,81 @@ const tiles = [
     available: true,
   },
   {
+    href: "/scenarios",
+    icon: Scroll,
+    title: "シナリオ",
+    desc: "シナリオと参加者を管理する",
+    available: true,
+  },
+  {
+    href: "/npcs",
+    icon: Ghost,
+    title: "NPC",
+    desc: "登場人物を記録する",
+    available: true,
+  },
+  {
     href: "/rules",
     icon: BookOpen,
     title: "ルールリファレンス",
     desc: "技能・判定・戦闘ルールを確認する",
-    available: false,
+    available: true,
   },
   {
-    href: "/materials",
-    icon: Image,
-    title: "素材ライブラリ",
-    desc: "立ち絵・背景素材を管理する",
-    available: false,
+    href: "/search",
+    icon: Search,
+    title: "検索",
+    desc: "キャラ・NPC・シナリオを横断検索する",
+    available: true,
+  },
+  {
+    href: "/calendar",
+    icon: Calendar,
+    title: "カレンダー",
+    desc: "次回セッション予定を月表示で確認する",
+    available: true,
   },
 ];
 
 export default async function HomePage() {
   let recent: CharacterWithSkills[] | null = null;
+  let pinned: CharacterWithSkills[] | null = null;
+  let ongoingScenarios: Scenario[] | null = null;
+
+  const now = new Date();
+  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const nowIso = now.toISOString();
+  const weekFromNowIso = weekFromNow.toISOString();
+
   if (isSupabaseConfigured) {
-    const { data } = await supabase
-      .from("characters")
-      .select("*, character_skills(*)")
-      .order("updated_at", { ascending: false })
-      .limit(5);
-    recent = data as CharacterWithSkills[];
+    const [recentRes, pinnedRes, ongoingRes] = await Promise.all([
+      supabase
+        .from("characters")
+        .select("*, character_skills(*)")
+        .order("updated_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("characters")
+        .select("*, character_skills(*)")
+        .eq("is_pinned", true)
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("scenarios")
+        .select("*")
+        .eq("status", "ongoing")
+        .order("next_session_at", { ascending: true }),
+    ]);
+    recent = recentRes.data as CharacterWithSkills[];
+    pinned = pinnedRes.data as CharacterWithSkills[];
+    ongoingScenarios = ongoingRes.data as Scenario[];
   }
 
   const configured = isSupabaseConfigured;
+
+  const upcomingSessions = ongoingScenarios?.filter((s) => {
+    if (!s.next_session_at) return false;
+    return s.next_session_at >= nowIso && s.next_session_at <= weekFromNowIso;
+  }) ?? [];
 
   return (
     <div className="coc-page-enter mx-auto max-w-5xl px-4 py-12 space-y-12">
@@ -81,7 +139,7 @@ export default async function HomePage() {
       </div>
 
       {/* タイル */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {tiles.map(({ href, icon: Icon, title, desc, available }) => (
           <Link
             key={href}
@@ -111,6 +169,113 @@ export default async function HomePage() {
           </Link>
         ))}
       </div>
+
+      {/* 今週の予定 */}
+      {upcomingSessions.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Clock size={14} className="text-coc-gold" />
+            <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              今週の予定
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {upcomingSessions.map((scenario) => {
+              const date = scenario.next_session_at
+                ? new Date(scenario.next_session_at).toLocaleDateString("ja-JP", {
+                    month: "long",
+                    day: "numeric",
+                    weekday: "short",
+                  })
+                : "";
+              return (
+                <Link
+                  key={scenario.id}
+                  href={`/scenarios/${scenario.id}`}
+                  className="flex items-center justify-between rounded-lg border border-coc-gold-dim bg-coc-raised px-4 py-3 hover:border-coc-gold transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-coc-text">{scenario.title}</p>
+                    <p className="text-xs text-coc-muted mt-0.5">{date}</p>
+                  </div>
+                  <ChevronRight size={14} className="text-coc-faint" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ピン留めキャラクター */}
+      {pinned && pinned.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pin size={14} className="text-coc-gold" />
+              <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+                ピン留めキャラクター
+              </h2>
+            </div>
+            <Link href="/characters" className="text-xs text-coc-gold hover:underline">
+              すべて表示
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {pinned.map((char) => (
+              <CharacterCard
+                key={char.id}
+                character={char}
+                skills={char.character_skills}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 進行中シナリオ */}
+      {ongoingScenarios && ongoingScenarios.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Scroll size={14} className="text-coc-gold" />
+              <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+                進行中シナリオ
+              </h2>
+            </div>
+            <Link href="/scenarios" className="text-xs text-coc-gold hover:underline">
+              すべて表示
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {ongoingScenarios.map((scenario) => {
+              const nextDate = scenario.next_session_at
+                ? new Date(scenario.next_session_at).toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : null;
+              return (
+                <Link
+                  key={scenario.id}
+                  href={`/scenarios/${scenario.id}`}
+                  className="group rounded-lg border border-coc-border coc-card-bg p-4 space-y-2 hover:border-coc-border-glow transition-colors"
+                >
+                  <p className="font-cinzel text-sm font-semibold text-coc-text group-hover:text-coc-gold transition-colors">
+                    {scenario.title}
+                  </p>
+                  {scenario.synopsis && (
+                    <p className="text-xs text-coc-muted line-clamp-2">{scenario.synopsis}</p>
+                  )}
+                  {nextDate && (
+                    <p className="text-xs text-coc-gold">次回: {nextDate}</p>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 最近のキャラクター */}
       {recent && recent.length > 0 && (
