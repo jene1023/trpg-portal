@@ -246,3 +246,19 @@ create table if not exists session_npc_encounters (
 
 alter table session_npc_encounters enable row level security;
 create policy "allow all for anon" on session_npc_encounters for all using (true) with check (true);
+
+-- KPシナリオ振り返りノート (追加マイグレーション)
+create table if not exists scenario_retrospectives (
+  id                uuid primary key default gen_random_uuid(),
+  scenario_id       uuid not null references scenarios(id) on delete cascade,
+  what_worked       text,
+  what_to_improve   text,
+  player_reactions  text,
+  difficulty_rating integer check (difficulty_rating between 1 and 5),
+  horror_rating     integer check (horror_rating between 1 and 5),
+  created_at        timestamptz default now(),
+  unique (scenario_id)
+);
+
+alter table scenario_retrospectives enable row level security;
+create policy "allow all for anon" on scenario_retrospectives for all using (true) with check (true);

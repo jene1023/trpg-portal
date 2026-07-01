@@ -288,3 +288,14 @@ export type SkillGoal = {
   target_value: number;
   created_at: string;
 };
+
+export type ScenarioRetrospective = {
+  id: string;
+  scenario_id: string;
+  what_worked: string | null;
+  what_to_improve: string | null;
+  player_reactions: string | null;
+  difficulty_rating: number | null;
+  horror_rating: number | null;
+  created_at: string;
+};

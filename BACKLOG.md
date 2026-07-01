@@ -357,7 +357,7 @@
 **実装ヒント:** Supabaseに `skill_goals` テーブルを追加（id, character_id, skill_name, target_value, created_at）。`src/app/characters/[id]/skill-goals/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("character_skills").select("*")` で現在値を取得し、同じ `skill_name` の `skill_goals` 目標値と突合してプログレスバー（`width: calc(${current/target*100}%)`）を表示。目標達成済みスキルは緑ハイライト。`src/lib/supabase.ts` に `SkillGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能目標」リンクを追加。
 **コミット:** `feat: skill goal tracker with progress visualization`
 
-## [TODO] KPシナリオ振り返りノート — 優先度: 中
+## [DONE] KPシナリオ振り返りノート — 優先度: 中
 **対象:** KP
 **概要:** シナリオ完了後にKPが「何がうまくいったか」「PLの反応」「次回改善点」「バランス評価（難易度・恐怖演出）」を記録できる振り返り機能。既存の `gm_notes` はセッション前の計画用メモだが、こちらは実施後の記録に特化する。KPとして複数シナリオを経験するうちに自身の傾向と改善点を蓄積できる。
 **実装ヒント:** Supabaseに `scenario_retrospectives` テーブルを追加（id, scenario_id, what_worked, what_to_improve, player_reactions, difficulty_rating: integer 1–5, horror_rating: integer 1–5, created_at）。`src/app/scenarios/[id]/retrospective/page.tsx` を新規作成（"use client"）。フォームは各フィールドを `<textarea>` で入力、難易度・恐怖演出は星選択UIで入力。`supabase.from("scenario_retrospectives").upsert(...)` でシナリオ1件につき1レコード管理（複数作成不可）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「振り返りノート」リンクを追加。`src/lib/supabase.ts` に `ScenarioRetrospective` 型を追加。
