@@ -393,3 +393,13 @@ export type ScenarioTimelineEvent = {
   is_revealed: boolean;
   created_at: string;
 };
+
+export type CharacterAbilityGrowth = {
+  id: string;
+  character_id: string;
+  ability_name: string;
+  old_value: number;
+  new_value: number;
+  grown_at: string | null;
+  created_at: string;
+};

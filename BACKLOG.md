@@ -488,7 +488,7 @@
 **実装ヒント:** Supabaseに `scenario_timeline_events` テーブルを追加（id, scenario_id, event_date: text（「1920年3月15日」等の任意書式）, event_order: integer, title, description: text | null, is_revealed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/truth-timeline/page.tsx` を "use client" で新規作成。`event_order` 昇順で縦線タイムライン（CSS `border-left`）表示。`is_revealed` トグルで「PLに明かされた真相」をマーク。▲▼で `event_order` を swap して並び替え。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「真相タイムライン」リンクを追加。`src/lib/supabase.ts` に `ScenarioTimelineEvent` 型を追加。
 **コミット:** `feat: scenario truth timeline for KP to organize mystery backstory`
 
-## [TODO] キャラクター能力値成長記録（EDU成長チェック） — 優先度: 高
+## [DONE] キャラクター能力値成長記録（EDU成長チェック） — 優先度: 高
 **対象:** PL
 **概要:** CoC7版ルールでEDU成長チェック（1d100 > EDU なら1d10加算）が実施できるUI。技能成長判定ロール（growth-roll/DONE）と同様の仕組みを能力値へ拡張し、成功時に能力値を自動更新して成長履歴を記録する。現在は技能成長のみ対応で能力値成長が完全に欠落している。
 **実装ヒント:** Supabaseに `character_ability_growths` テーブルを追加（id, character_id, ability_name: text, old_value: integer, new_value: integer, grown_at: timestamptz | null, created_at）。`src/app/characters/[id]/ability-growth/page.tsx` を "use client" で新規作成。対象能力値（主にEDU、任意でPOWも選択可）をselectで選び「成長チェック」ボタンで `Math.floor(Math.random()*100)+1 > currentValue` を判定。成功時に `Math.floor(Math.random()*10)+1` を加算し `supabase.from("characters").update({edu: newValue})` で更新、同時に `character_ability_growths` へ挿入。過去の成長ログを一覧表示。`src/lib/supabase.ts` に `CharacterAbilityGrowth` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「能力値成長」リンクを追加。

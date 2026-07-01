@@ -262,3 +262,17 @@ create table if not exists scenario_retrospectives (
 
 alter table scenario_retrospectives enable row level security;
 create policy "allow all for anon" on scenario_retrospectives for all using (true) with check (true);
+
+-- 能力値成長記録（EDU成長チェック） (追加マイグレーション)
+create table if not exists character_ability_growths (
+  id            uuid primary key default gen_random_uuid(),
+  character_id  uuid not null references characters(id) on delete cascade,
+  ability_name  text not null,
+  old_value     integer not null,
+  new_value     integer not null,
+  grown_at      timestamptz,
+  created_at    timestamptz default now()
+);
+
+alter table character_ability_growths enable row level security;
+create policy "allow all for anon" on character_ability_growths for all using (true) with check (true);
