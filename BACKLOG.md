@@ -487,3 +487,27 @@
 **概要:** シナリオの「真相側の時系列」（いつ・何が起きたか・登場人物の行動経緯）をKPが構造化して記録できるページ。既存の `scenario_areas`（場所メモ）・`bgm_cues`（演出キュー）・`gm_notes`（単一メモ）とは異なり、謎の根拠となる過去の事件経緯を時間軸で整理するKP専用ノート。長編や複雑なシナリオでKPが真相を忘れずセッションを進行できるようにする。
 **実装ヒント:** Supabaseに `scenario_timeline_events` テーブルを追加（id, scenario_id, event_date: text（「1920年3月15日」等の任意書式）, event_order: integer, title, description: text | null, is_revealed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/truth-timeline/page.tsx` を "use client" で新規作成。`event_order` 昇順で縦線タイムライン（CSS `border-left`）表示。`is_revealed` トグルで「PLに明かされた真相」をマーク。▲▼で `event_order` を swap して並び替え。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「真相タイムライン」リンクを追加。`src/lib/supabase.ts` に `ScenarioTimelineEvent` 型を追加。
 **コミット:** `feat: scenario truth timeline for KP to organize mystery backstory`
+
+## [TODO] キャラクター能力値成長記録（EDU成長チェック） — 優先度: 高
+**対象:** PL
+**概要:** CoC7版ルールでEDU成長チェック（1d100 > EDU なら1d10加算）が実施できるUI。技能成長判定ロール（growth-roll/DONE）と同様の仕組みを能力値へ拡張し、成功時に能力値を自動更新して成長履歴を記録する。現在は技能成長のみ対応で能力値成長が完全に欠落している。
+**実装ヒント:** Supabaseに `character_ability_growths` テーブルを追加（id, character_id, ability_name: text, old_value: integer, new_value: integer, grown_at: timestamptz | null, created_at）。`src/app/characters/[id]/ability-growth/page.tsx` を "use client" で新規作成。対象能力値（主にEDU、任意でPOWも選択可）をselectで選び「成長チェック」ボタンで `Math.floor(Math.random()*100)+1 > currentValue` を判定。成功時に `Math.floor(Math.random()*10)+1` を加算し `supabase.from("characters").update({edu: newValue})` で更新、同時に `character_ability_growths` へ挿入。過去の成長ログを一覧表示。`src/lib/supabase.ts` に `CharacterAbilityGrowth` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「能力値成長」リンクを追加。
+**コミット:** `feat: ability score growth check for EDU and other stats`
+
+## [TODO] キャラクター比較ビュー（能力値・技能の横並び比較） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** 複数のキャラクターの能力値・代表技能を横並びで比較できるページ。パーティー編成時の役割分担確認・NPC vs PC の能力差把握・複数キャラを持つPLの使い分け判断に使う。現在は各キャラ詳細を個別に開かなければ比較できない。
+**実装ヒント:** `src/app/characters/compare/page.tsx` を "use client" で新規作成。`?ids=id1,id2,id3` クエリパラメータで最大4キャラ指定し `supabase.from("characters").select("*, character_skills(*)").in("id", ids)` で一括取得。STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/SANの能力値を行、キャラ名を列にした表形式で表示。各セルは最高値を緑ハイライト。技能は「全キャラが共通で持つ技能」のみ比較行として追加表示。キャラクター一覧ページ（`src/app/characters/page.tsx`）に各キャラカードの「比較に追加」ボタン（チェックボックス）を追加し、選択後「比較する」ボタンで `/characters/compare?ids=...` に遷移。追加DBなし。
+**コミット:** `feat: character comparison view for side-by-side stat and skill analysis`
+
+## [TODO] NPC陣営・組織タグ管理 — 優先度: 中
+**対象:** KP
+**概要:** NPCに「陣営/組織名」タグを付与してフィルタ・グループ表示できる機能。現在NPC一覧は `scenario_name` 絞り込みのみで、「敵対/中立/友好」や「アーカムPD/カルト教団/一般市民」などの組織別整理ができない。長期キャンペーンや多数NPC登場シナリオでの情報整理を改善する。
+**実装ヒント:** `npcs` テーブルに `faction: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に `faction: string | null` を追加。`src/app/npcs/page.tsx` の一覧フィルタに `faction` の select 要素を追加し、クライアントサイドでフィルタ（`.filter(n => !factionFilter || n.faction === factionFilter)`）。`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` のフォームに `faction` 入力欄を追加（`src/app/_components/NpcForm.tsx` を更新）。フィルタのオプション候補は既存NPCから動的取得（`.map(n => n.faction).filter(Boolean).unique()`）。
+**コミット:** `feat: NPC faction/organization tag for group filtering`
+
+## [TODO] 卓URLリンク管理（VTT・通話ツール連携） — 優先度: 中
+**対象:** KP / 共通
+**概要:** Roll20・ユドナリウム・ここフォリア・Discord・Zoomなど、シナリオで使うVTTや通話ツールのURLをシナリオに紐づけて保存し、セッション開始時にワンクリックで各ツールに飛べる機能。現在KPはURLをLINEやDiscordで毎回共有しなければならず、ポータル内で完結しない。
+**実装ヒント:** `scenarios` テーブルに `vtt_url: text | null`（卓URL）と `vtt_type: text | null`（"ユドナリウム"|"ここフォリア"|"Roll20"|"Discord"|"Zoom"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/ScenarioForm.tsx` に `vtt_type` select と `vtt_url` 入力欄を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓に入る」ボタンを表示（`<a href={vtt_url} target="_blank" rel="noopener">`）。セッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも卓URLの設定状態を確認項目として追加。
+**コミット:** `feat: VTT and call tool URL management per scenario`
