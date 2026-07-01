@@ -326,3 +326,24 @@ export type ScheduleVote = {
   is_available: boolean;
   created_at: string;
 };
+
+export type Creature = {
+  id: string;
+  scenario_id: string | null;
+  name: string;
+  mythos_background: string | null;
+  san_loss_success: string | null;
+  san_loss_failure: string | null;
+  str: number | null;
+  con: number | null;
+  pow: number | null;
+  dex: number | null;
+  siz: number | null;
+  hp: number | null;
+  mp: number | null;
+  armor: string | null;
+  attacks: string | null;
+  can_use_spells: boolean;
+  notes: string | null;
+  created_at: string;
+};

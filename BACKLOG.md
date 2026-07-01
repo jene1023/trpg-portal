@@ -440,7 +440,7 @@
 **実装ヒント:** `src/lib/occupationData.ts` を新規作成し、職業名とポイント計算式（`edu * 4`, `edu * 2 + dex * 2` 等）を静的配列で定義。`src/app/characters/[id]/skill-builder/page.tsx` を "use client" で新規作成し、職業select → ポイント上限表示 → 各技能の `current_value - base_value` 差分を合計してリアルタイム残ポイントを表示。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能を取得し、変更後は `supabase.from("character_skills").update({ current_value }).eq("id", skillId)` で保存。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能ポイント割り振り」リンクを追加。追加DBなし。
 **コミット:** `feat: occupation skill point calculator for CoC character creation`
 
-## [TODO] 神話的クリーチャー管理（KP向け） — 優先度: 中
+## [DONE] 神話的クリーチャー管理（KP向け） — 優先度: 中
 **対象:** KP
 **概要:** CoC特有の神話的クリーチャー（深きものども・神格等）をNPCとは別のテーブルで管理する機能。SAN喪失式・戦闘能力・呪文使用可否・神話的背景を記録し、シナリオに紐づけて参照できる。NPCは人間型に適した構造のため、異形の存在向けに専用の管理画面を提供する。
 **実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id: nullable, name, mythos_background: text | null, san_loss_success: string | null, san_loss_failure: string | null, str: int | null, con: int | null, pow: int | null, dex: int | null, siz: int | null, hp: int | null, mp: int | null, armor: string | null, attacks: text | null, can_use_spells: boolean DEFAULT false, notes: text | null, created_at）。`src/app/creatures/page.tsx`（一覧・シナリオフィルタ）と `src/app/creatures/new/page.tsx`（作成フォーム）、`src/app/creatures/[id]/page.tsx`（StatBlock＋SAN喪失式表示）を新規作成。`src/app/_components/NavBar.tsx` に「クリーチャー」リンクを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にシナリオ別クリーチャー数バッジを追加。`src/lib/supabase.ts` に `Creature` 型を追加。

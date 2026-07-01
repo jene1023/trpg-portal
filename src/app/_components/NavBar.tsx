@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/characters", label: "キャラクター" },
   { href: "/scenarios", label: "シナリオ" },
   { href: "/npcs", label: "NPC" },
+  { href: "/creatures", label: "クリーチャー" },
   { href: "/rules", label: "ルール" },
   { href: "/calendar", label: "カレンダー" },
   { href: "/materials", label: "素材" },

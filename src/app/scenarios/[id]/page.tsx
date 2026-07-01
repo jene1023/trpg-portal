@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
@@ -37,10 +37,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { count: handoutCount },
     { data: participantRows },
     { count: npcCount },
+    { count: creatureCount },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
     supabase.from("npcs").select("*", { count: "exact", head: true }).eq("scenario_name", scenario.title),
+    supabase.from("creatures").select("*", { count: "exact", head: true }).eq("scenario_id", id),
   ]);
 
   const participantCount = participantRows?.length ?? 0;
@@ -90,7 +92,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
         <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">
           <p className="text-2xl font-bold text-coc-text">{participantCount}</p>
           <p className="text-xs text-coc-muted mt-1">参加者</p>
@@ -112,6 +114,10 @@ export default async function ScenarioDetailPage({ params }: Props) {
         <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">
           <p className="text-2xl font-bold text-coc-text">{npcCount ?? 0}</p>
           <p className="text-xs text-coc-muted mt-1">NPC</p>
+        </div>
+        <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">
+          <p className="text-2xl font-bold text-coc-text">{creatureCount ?? 0}</p>
+          <p className="text-xs text-coc-muted mt-1">クリーチャー</p>
         </div>
       </div>
 
@@ -265,6 +271,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">日程調整</p>
               <p className="text-xs text-coc-muted">候補日程の投票・集計・次回予定の確定</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/creatures?scenario=${id}`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Bug size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">クリーチャー</p>
+              <p className="text-xs text-coc-muted">神話的クリーチャーのSAN喪失・能力値を管理</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
