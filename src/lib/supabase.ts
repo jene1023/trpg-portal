@@ -43,6 +43,8 @@ export type Character = {
   is_pinned: boolean;
   is_public: boolean;
   public_slug: string | null;
+  farewell_scene: string | null;
+  farewell_message: string | null;
   created_at: string;
   updated_at: string;
 };

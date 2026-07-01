@@ -405,6 +405,20 @@ export default async function CharacterDetailPage({ params }: Props) {
               </Link>
             </div>
           </div>
+
+          {/* 最終章（死亡・引退のみ） */}
+          {char.status !== "alive" && (
+            <Link
+              href={`/characters/${id}/farewell`}
+              className="flex items-center justify-between rounded-lg border border-coc-border/60 bg-coc-void/40 px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border transition-colors motion-safe:active:scale-[0.98]"
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-lg leading-none">✦</span>
+                最終章を記録する
+              </span>
+              <span className="text-coc-gold">→</span>
+            </Link>
+          )}
         </div>
       </div>
     </div>

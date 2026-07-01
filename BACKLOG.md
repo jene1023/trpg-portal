@@ -452,7 +452,7 @@
 **実装ヒント:** Supabaseに `bgm_cues` テーブルを追加（id, scenario_id, order_index: integer, label: text（例: "導入シーン"）, bgm_url: text | null, mood: text | null, direction_notes: text | null, created_at）。`src/app/scenarios/[id]/bgm/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、▲▼ボタンで `order_index` を swap して並び替え）。`bgm_url` があれば `<a href={bgm_url} target="_blank">` でリンク表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「BGM・演出」リンクを追加。`src/lib/supabase.ts` に `BgmCue` 型を追加。
 **コミット:** `feat: scenario BGM and direction cue list for KP`
 
-## [TODO] キャラクター最終章ページ（死亡/退場記念） — 優先度: 低
+## [DONE] キャラクター最終章ページ（死亡/退場記念） — 優先度: 低
 **対象:** PL / 共通
 **概要:** `status === "dead" | "retired"` のキャラクターに向けた「最後のシーン」と「PLからのひとこと」を記録できる追悼ページ。長期プレイでキャラが退場した際に最終セッション・死因/退場理由・思い出のエピソードをまとめて保存でき、キャラクター一覧でも追悼バッジとして表示される。
 **実装ヒント:** `characters` テーブルに `farewell_scene: text | null`（最後のシーン説明）と `farewell_message: text | null`（PLからの一言）カラムをALTER TABLEで追加。`src/app/characters/[id]/farewell/page.tsx` を "use client" で新規作成（フォーム＋表示の切り替え、`supabase.from("characters").update({ farewell_scene, farewell_message }).eq("id", id)` で保存）。`src/lib/supabase.ts` の `Character` 型に両カラムを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）で `status !== "alive"` の場合のみ「最終章を記録」リンクを表示。`src/app/characters/page.tsx` の退場済みキャラカードに追悼バッジ（黒帯アイコン等）を表示。追加DBカラムのみ、新テーブルなし。

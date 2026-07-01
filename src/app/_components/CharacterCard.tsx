@@ -59,6 +59,18 @@ export default function CharacterCard({ character, skills = [], onTogglePin }: P
           <div className="absolute top-2 right-2">
             <StatusBadge status={character.status} />
           </div>
+          {/* 追悼バッジ（死亡・引退で最終章記録済みの場合） */}
+          {(character.status === "dead" || character.status === "retired") &&
+            (character.farewell_scene || character.farewell_message) && (
+              <div className="absolute bottom-2 right-2">
+                <span
+                  className="rounded-full bg-black/70 border border-white/20 px-1.5 py-0.5 text-[10px] text-white/60 font-cinzel"
+                  title="最終章が記録されています"
+                >
+                  ✦ 最終章
+                </span>
+              </div>
+            )}
           {/* ピン留めボタン */}
           <button
             onClick={handlePin}
