@@ -434,6 +434,30 @@
 **実装ヒント:** `src/app/spells/page.tsx` を新規作成（"use client"）。CoC7版の代表的呪文データ（呪文名・mp_cost・san_cost・effect）を `src/lib/spellCatalog.ts` に静的配列で定義。`?characterId=` クエリパラメータを受け取り、呪文カードの「追加」ボタンで `supabase.from("character_spells").insert(...)` を実行し指定キャラへ登録。キャラクター詳細ページの呪文セクション（`src/app/characters/[id]/spells/page.tsx`）に「カタログから追加」リンクを追加。`src/app/_components/NavBar.tsx` には追加しなくてよい（キャラ詳細からのみアクセス）。追加DBなし。
 **コミット:** `feat: CoC7 spell catalog with one-click add to character`
 
+## [TODO] CoC7版職業技能ポイント計算UI — 優先度: 高
+**対象:** PL
+**概要:** キャラクター作成/編集時に職業を選ぶと職業技能ポイント（例: 探偵=EDU×4+INT×2）と趣味技能ポイント（INT×2）を自動計算してUI上に表示し、技能に割り振りながら残りポイントをリアルタイム確認できる機能。能力値オートロール（DONE済み）の次のステップとして、CoCキャラ作成で最も手間のかかるフローを補完する。
+**実装ヒント:** `src/lib/occupationData.ts` を新規作成し、職業名とポイント計算式（`edu * 4`, `edu * 2 + dex * 2` 等）を静的配列で定義。`src/app/characters/[id]/skill-builder/page.tsx` を "use client" で新規作成し、職業select → ポイント上限表示 → 各技能の `current_value - base_value` 差分を合計してリアルタイム残ポイントを表示。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能を取得し、変更後は `supabase.from("character_skills").update({ current_value }).eq("id", skillId)` で保存。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能ポイント割り振り」リンクを追加。追加DBなし。
+**コミット:** `feat: occupation skill point calculator for CoC character creation`
+
+## [TODO] 神話的クリーチャー管理（KP向け） — 優先度: 中
+**対象:** KP
+**概要:** CoC特有の神話的クリーチャー（深きものども・神格等）をNPCとは別のテーブルで管理する機能。SAN喪失式・戦闘能力・呪文使用可否・神話的背景を記録し、シナリオに紐づけて参照できる。NPCは人間型に適した構造のため、異形の存在向けに専用の管理画面を提供する。
+**実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id: nullable, name, mythos_background: text | null, san_loss_success: string | null, san_loss_failure: string | null, str: int | null, con: int | null, pow: int | null, dex: int | null, siz: int | null, hp: int | null, mp: int | null, armor: string | null, attacks: text | null, can_use_spells: boolean DEFAULT false, notes: text | null, created_at）。`src/app/creatures/page.tsx`（一覧・シナリオフィルタ）と `src/app/creatures/new/page.tsx`（作成フォーム）、`src/app/creatures/[id]/page.tsx`（StatBlock＋SAN喪失式表示）を新規作成。`src/app/_components/NavBar.tsx` に「クリーチャー」リンクを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）にシナリオ別クリーチャー数バッジを追加。`src/lib/supabase.ts` に `Creature` 型を追加。
+**コミット:** `feat: mythical creature management for KP scenarios`
+
+## [TODO] 場面BGM・演出キューリスト（KP向け） — 優先度: 中
+**対象:** KP
+**概要:** シナリオに紐づいた場面別のBGMリンク（YouTube/Spotify等）と演出メモ（照明・SE・演出タイミング）をリスト管理できる機能。既存のシナリオエリアメモ（`scenario_areas`/DONE済み）はロケーション情報向けだが、こちらはセッション当日のタイムライン的な演出指示書として機能する。
+**実装ヒント:** Supabaseに `bgm_cues` テーブルを追加（id, scenario_id, order_index: integer, label: text（例: "導入シーン"）, bgm_url: text | null, mood: text | null, direction_notes: text | null, created_at）。`src/app/scenarios/[id]/bgm/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、▲▼ボタンで `order_index` を swap して並び替え）。`bgm_url` があれば `<a href={bgm_url} target="_blank">` でリンク表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「BGM・演出」リンクを追加。`src/lib/supabase.ts` に `BgmCue` 型を追加。
+**コミット:** `feat: scenario BGM and direction cue list for KP`
+
+## [TODO] キャラクター最終章ページ（死亡/退場記念） — 優先度: 低
+**対象:** PL / 共通
+**概要:** `status === "dead" | "retired"` のキャラクターに向けた「最後のシーン」と「PLからのひとこと」を記録できる追悼ページ。長期プレイでキャラが退場した際に最終セッション・死因/退場理由・思い出のエピソードをまとめて保存でき、キャラクター一覧でも追悼バッジとして表示される。
+**実装ヒント:** `characters` テーブルに `farewell_scene: text | null`（最後のシーン説明）と `farewell_message: text | null`（PLからの一言）カラムをALTER TABLEで追加。`src/app/characters/[id]/farewell/page.tsx` を "use client" で新規作成（フォーム＋表示の切り替え、`supabase.from("characters").update({ farewell_scene, farewell_message }).eq("id", id)` で保存）。`src/lib/supabase.ts` の `Character` 型に両カラムを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）で `status !== "alive"` の場合のみ「最終章を記録」リンクを表示。`src/app/characters/page.tsx` の退場済みキャラカードに追悼バッジ（黒帯アイコン等）を表示。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: character farewell page for deceased or retired characters`
+
 ## [TODO] KPセッションアジェンダ（場面別プランナー） — 優先度: 中
 **対象:** KP
 **概要:** シナリオの各セッションを「場面1: 導入」「場面2: 調査」のように場面単位で構造化できるプランナー。既存の `gm_notes`（単一テキスト）や `scenario_notes`（共有パーティーノート）とは異なり、KP専用の事前計画ノートとして機能する。セッション当日に「次の場面」をチェックしながら進行できる。
