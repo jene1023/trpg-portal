@@ -301,3 +301,6 @@ alter table share_tokens alter column handout_id drop not null;
 alter table share_tokens add column if not exists target_type text not null default 'handout'
   check (target_type in ('handout', 'session_pack'));
 alter table share_tokens add column if not exists scenario_id uuid references scenarios(id) on delete cascade;
+
+-- 技能カテゴリ別フィルタ (追加マイグレーション)
+alter table character_skills add column if not exists category text;

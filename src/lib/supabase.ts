@@ -59,6 +59,7 @@ export type CharacterSkill = {
   is_occupation: boolean;
   growth_checked: boolean;
   is_favorite: boolean;
+  category: string | null;
 };
 
 export type Material = {

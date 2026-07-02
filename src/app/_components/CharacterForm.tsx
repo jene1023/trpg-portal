@@ -18,6 +18,8 @@ import {
 
 type SkillRow = Omit<CharacterSkill, "id" | "character_id"> & { tempId: string };
 
+const SKILL_CATEGORIES = ["戦闘", "探索", "対人", "知識", "移動", "芸術", "言語", "その他"] as const;
+
 type Props = {
   initialData?: Character;
   initialSkills?: CharacterSkill[];
@@ -31,12 +33,12 @@ const STATUS_OPTIONS: { value: CharacterStatus; label: string }[] = [
 ];
 
 const DEFAULT_SKILLS: SkillRow[] = [
-  { tempId: uuidv4(), skill_name: "目星",   base_value: 25, current_value: 25, is_occupation: false, growth_checked: false },
-  { tempId: uuidv4(), skill_name: "聞き耳", base_value: 20, current_value: 20, is_occupation: false, growth_checked: false },
-  { tempId: uuidv4(), skill_name: "図書館", base_value: 25, current_value: 25, is_occupation: false, growth_checked: false },
-  { tempId: uuidv4(), skill_name: "回避",   base_value: 0,  current_value: 0,  is_occupation: false, growth_checked: false },
-  { tempId: uuidv4(), skill_name: "心理学", base_value: 10, current_value: 10, is_occupation: false, growth_checked: false },
-  { tempId: uuidv4(), skill_name: "説得",   base_value: 10, current_value: 10, is_occupation: false, growth_checked: false },
+  { tempId: uuidv4(), skill_name: "目星",   base_value: 25, current_value: 25, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
+  { tempId: uuidv4(), skill_name: "聞き耳", base_value: 20, current_value: 20, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
+  { tempId: uuidv4(), skill_name: "図書館", base_value: 25, current_value: 25, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
+  { tempId: uuidv4(), skill_name: "回避",   base_value: 0,  current_value: 0,  is_occupation: false, growth_checked: false, is_favorite: false, category: null },
+  { tempId: uuidv4(), skill_name: "心理学", base_value: 10, current_value: 10, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
+  { tempId: uuidv4(), skill_name: "説得",   base_value: 10, current_value: 10, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
 ];
 
 const inputClass =
@@ -120,6 +122,8 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         current_value: 0,
         is_occupation: t.is_occupation,
         growth_checked: false,
+        is_favorite: false,
+        category: null as string | null,
       })),
     ]);
   }
@@ -191,7 +195,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   function addSkill() {
     setSkills((prev) => [
       ...prev,
-      { tempId: uuidv4(), skill_name: "", base_value: 0, current_value: 0, is_occupation: false, growth_checked: false },
+      { tempId: uuidv4(), skill_name: "", base_value: 0, current_value: 0, is_occupation: false, growth_checked: false, is_favorite: false, category: null },
     ]);
   }
 
@@ -271,6 +275,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
             base_value: s.base_value,
             current_value: s.current_value,
             is_occupation: s.is_occupation,
+            category: s.category || null,
           }))
         );
         if (skillErr) throw skillErr;
@@ -491,15 +496,16 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         </div>
 
         <div className="space-y-2">
-          <div className="grid grid-cols-[1fr_60px_60px_auto_auto] gap-2 text-xs text-coc-muted px-1">
+          <div className="grid grid-cols-[1fr_60px_60px_80px_auto_auto] gap-2 text-xs text-coc-muted px-1">
             <span>技能名</span>
             <span className="text-center">基本値</span>
             <span className="text-center">現在値</span>
+            <span className="text-center">カテゴリ</span>
             <span className="text-center">職業</span>
             <span />
           </div>
           {skills.map((skill) => (
-            <div key={skill.tempId} className="grid grid-cols-[1fr_60px_60px_auto_auto] gap-2 items-center">
+            <div key={skill.tempId} className="grid grid-cols-[1fr_60px_60px_80px_auto_auto] gap-2 items-center">
               <input
                 value={skill.skill_name}
                 onChange={(e) => updateSkill(skill.tempId, { skill_name: e.target.value })}
@@ -522,6 +528,17 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
                 onChange={(e) => updateSkill(skill.tempId, { current_value: parseInt(e.target.value) || 0 })}
                 className={`${inputClass} text-center px-1`}
               />
+              <select
+                value={skill.category ?? ""}
+                onChange={(e) => updateSkill(skill.tempId, { category: e.target.value || null })}
+                className={`${inputClass} text-xs px-1`}
+                title="カテゴリ（空欄=自動判定）"
+              >
+                <option value="">自動</option>
+                {SKILL_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
               <input
                 type="checkbox"
                 checked={skill.is_occupation}

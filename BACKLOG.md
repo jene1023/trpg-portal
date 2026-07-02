@@ -578,7 +578,7 @@
 **実装ヒント:** `src/app/characters/[id]/skill-import/page.tsx` を "use client" で新規作成。`<textarea>` に「技能名 数値」形式（スペース/カンマ/タブ区切り）のテキストを貼り付けると、正規表現 `/([^\d,、\n\t]+?)\s*(\d+)/g` でパースして技能名・値のペアを抽出しプレビュー表示。確認後「一括登録」ボタンで `supabase.from("character_skills").upsert(...)` で既存技能は更新、新規は追加（skill_name をキーに upsert）。`src/lib/skillNormalizer.ts` を新規作成し、表記ゆれ（「目星」「目星（ものを見つける）」）を正規化するマッピングを定義。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能を一括入力」リンクを追加。追加DBなし。
 **コミット:** `feat: bulk skill value import from text for migration from other tools`
 
-## [TODO] 技能カテゴリ別フィルタ・タブ表示 — 優先度: 低
+## [DONE] 技能カテゴリ別フィルタ・タブ表示 — 優先度: 低
 **対象:** PL / 共通
 **概要:** 現在の技能リストは全技能を一覧表示するのみ。CoC7版の技能カテゴリ（戦闘系・調査系・対人系・知識系・移動系）別にタブまたはドロップダウンフィルタで絞り込み表示できるようにし、技能の多いキャラクターでの参照速度を上げる。
 **実装ヒント:** `character_skills` テーブルに `category: text | null`（例: "戦闘"|"調査"|"対人"|"知識"|"移動"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `category: string | null` を追加。`src/app/_components/SkillList.tsx` にカテゴリタブ（CSS border-bottom active スタイル）を追加し `useState` でアクティブカテゴリを管理してフィルタ表示。既存の技能は `category: null`（＝「すべて」タブに表示）。新規技能追加フォームに category の select 要素を追加。追加DBカラムのみ。

@@ -22,10 +22,14 @@ function categorize(skillName: string): string {
   return "その他";
 }
 
+function getSkillCategory(skill: CharacterSkill): string {
+  return skill.category || categorize(skill.skill_name);
+}
+
 type Props = { skills: CharacterSkill[]; characterId: string; sanCurrent?: number };
 
 export default function SkillList({ skills, characterId, sanCurrent }: Props) {
-  const cats = [...new Set(skills.map((s) => categorize(s.skill_name)))].sort(
+  const cats = [...new Set(skills.map((s) => getSkillCategory(s)))].sort(
     (a, b) =>
       Object.keys(CATEGORIES).indexOf(a) - Object.keys(CATEGORIES).indexOf(b)
   );
@@ -102,7 +106,7 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   }
 
   const visible = skills
-    .filter((s) => categorize(s.skill_name) === active)
+    .filter((s) => getSkillCategory(s) === active)
     .sort((a, b) => b.current_value - a.current_value);
 
   if (skills.length === 0) {
