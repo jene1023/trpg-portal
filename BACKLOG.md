@@ -530,7 +530,7 @@
 **実装ヒント:** `scenarios` テーブルに `vtt_url: text | null`（卓URL）と `vtt_type: text | null`（"ユドナリウム"|"ここフォリア"|"Roll20"|"Discord"|"Zoom"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/ScenarioForm.tsx` に `vtt_type` select と `vtt_url` 入力欄を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓に入る」ボタンを表示（`<a href={vtt_url} target="_blank" rel="noopener">`）。セッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも卓URLの設定状態を確認項目として追加。
 **コミット:** `feat: VTT and call tool URL management per scenario`
 
-## [TODO] キャラクターお気に入り技能ピン留め（クイックロール強化）— 優先度: 高
+## [DONE] キャラクターお気に入り技能ピン留め（クイックロール強化）— 優先度: 高
 **対象:** PL / 共通
 **概要:** 「回避」「目星」「聞き耳」など頻繁に使う技能を3〜5件ピン留めし、モバイルクイックダッシュボードとDiceRollerの先頭に固定表示してセッション中に即座にロールできるようにする。
 **実装ヒント:** `character_skills` テーブルに `is_favorite: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `is_favorite: boolean` を追加。`src/app/_components/SkillList.tsx` の各技能行にスター/ピンアイコンを追加し `supabase.from("character_skills").update({ is_favorite }).eq("id", id)` でトグル。`src/app/_components/DiceRoller.tsx` にお気に入り技能を先頭グループとして表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にお気に入り技能ショートカットセクションを追加。追加DBカラムのみ、新テーブルなし。

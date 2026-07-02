@@ -28,6 +28,8 @@ export default async function QuickDashboardPage({ params }: Props) {
     .select("*")
     .eq("character_id", id);
 
+  const favoriteSkills = (skills ?? []).filter((s) => s.is_favorite);
+
   return (
     <div className="mx-auto max-w-md px-4 py-6 space-y-6">
       {/* ヘッダー */}
@@ -67,13 +69,23 @@ export default async function QuickDashboardPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ダイスローラー */}
+      {/* お気に入り技能クイックロール */}
+      {favoriteSkills.length > 0 && (
+        <div className="rounded-lg border border-yellow-400/30 bg-coc-surface p-4">
+          <h2 className="font-cinzel text-sm font-semibold text-yellow-400 uppercase tracking-widest mb-3">
+            ★ お気に入り技能
+          </h2>
+          <DiceRoller skills={favoriteSkills} characterId={char.id} />
+        </div>
+      )}
+
+      {/* ダイスローラー（全技能） */}
       {(skills ?? []).length > 0 && (
         <div className="rounded-lg border border-coc-border bg-coc-surface p-4">
           <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest mb-3">
             ダイスロール
           </h2>
-          <DiceRoller skills={skills ?? []} />
+          <DiceRoller skills={skills ?? []} characterId={char.id} />
         </div>
       )}
 

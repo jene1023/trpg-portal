@@ -34,6 +34,9 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>(
     () => Object.fromEntries(skills.map((s) => [s.id, s.growth_checked ?? false]))
   );
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(skills.map((s) => [s.id, s.is_favorite ?? false]))
+  );
   const [valueMap, setValueMap] = useState<Record<string, number>>(
     () => Object.fromEntries(skills.map((s) => [s.id, s.current_value]))
   );
@@ -87,6 +90,17 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
     setSavingId(null);
   }
 
+  async function toggleFavorite(skillId: string) {
+    const next = !favoriteMap[skillId];
+    setFavoriteMap((m) => ({ ...m, [skillId]: next }));
+    if (!isSupabaseConfigured) return;
+    await supabase
+      .from("character_skills")
+      .update({ is_favorite: next })
+      .eq("id", skillId)
+      .eq("character_id", characterId);
+  }
+
   const visible = skills
     .filter((s) => categorize(s.skill_name) === active)
     .sort((a, b) => b.current_value - a.current_value);
@@ -98,9 +112,16 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   }
 
   const checkedCount = Object.values(checkedMap).filter(Boolean).length;
+  const favoriteCount = Object.values(favoriteMap).filter(Boolean).length;
 
   return (
     <div>
+      {/* お気に入り件数バッジ */}
+      {favoriteCount > 0 && (
+        <p className="text-xs text-yellow-400 mb-1">
+          ★ お気に入り: {favoriteCount}件 — ダイスローラーとクイックビューの先頭に表示されます
+        </p>
+      )}
       {/* 成長チェック数バッジ */}
       {checkedCount > 0 && (
         <p className="text-xs text-coc-gold mb-3">
@@ -150,6 +171,19 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
                 {skill.skill_name}
               </span>
               <div className="flex items-center gap-2 ml-2 shrink-0">
+                {/* お気に入りトグル */}
+                <button
+                  onClick={() => toggleFavorite(skill.id)}
+                  aria-label={`${skill.skill_name} お気に入り`}
+                  title="お気に入りに追加/解除"
+                  className={`text-base leading-none transition-colors ${
+                    favoriteMap[skill.id]
+                      ? "text-yellow-400"
+                      : "text-coc-muted hover:text-yellow-400/60"
+                  }`}
+                >
+                  ☆
+                </button>
                 <span className="text-xs text-coc-muted tabular-nums">
                   基{skill.base_value}
                 </span>
@@ -202,7 +236,7 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
       </div>
 
       <p className="text-xs text-coc-muted mt-3">
-        ✓ = 成長チェック（セッション後に技能判定に失敗した技能にチェック）
+        ☆ = お気に入り（クイックロール先頭表示）　✓ = 成長チェック（セッション後に技能判定に失敗した技能にチェック）
       </p>
     </div>
   );

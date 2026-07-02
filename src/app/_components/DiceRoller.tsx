@@ -116,13 +116,32 @@ export default function DiceRoller({ skills, characterId }: Props) {
             }}
             className="w-full rounded-md border border-coc-border bg-coc-raised text-coc-text text-sm px-2 py-1.5 focus:outline-none focus:border-coc-gold"
           >
-            {[...skills]
-              .sort((a, b) => a.skill_name.localeCompare(b.skill_name, "ja"))
-              .map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.skill_name}（{s.current_value}%）
-                </option>
-              ))}
+            {(() => {
+              const favorites = skills.filter((s) => s.is_favorite);
+              const others = [...skills]
+                .filter((s) => !s.is_favorite)
+                .sort((a, b) => a.skill_name.localeCompare(b.skill_name, "ja"));
+              return (
+                <>
+                  {favorites.length > 0 && (
+                    <optgroup label="★ お気に入り">
+                      {favorites.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.skill_name}（{s.current_value}%）
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  <optgroup label={favorites.length > 0 ? "すべて" : "技能"}>
+                    {others.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.skill_name}（{s.current_value}%）
+                      </option>
+                    ))}
+                  </optgroup>
+                </>
+              );
+            })()}
           </select>
         </div>
 
