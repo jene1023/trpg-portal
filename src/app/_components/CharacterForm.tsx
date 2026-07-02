@@ -127,6 +127,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   // --- 背景 ---
   const [background, setBackground] = useState(initialData?.background ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
+  const [speechStyle, setSpeechStyle] = useState(initialData?.speech_style ?? "");
 
   // --- ポートレート ---
   const [portraitFile, setPortraitFile] = useState<File | null>(null);
@@ -247,6 +248,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         luck,
         background: background.trim() || null,
         notes: notes.trim() || null,
+        speech_style: speechStyle.trim() || null,
       };
 
       if (isEdit) {
@@ -560,6 +562,16 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
             rows={3}
             className={`${inputClass} resize-y font-crimson text-[15px] leading-relaxed`}
             placeholder="セッション中のメモ、発見したアイテム、出会ったNPCなど..."
+          />
+        </div>
+        <div>
+          <label className={labelClass}>口調・ロールプレイメモ</label>
+          <textarea
+            value={speechStyle}
+            onChange={(e) => setSpeechStyle(e.target.value)}
+            rows={3}
+            className={`${inputClass} resize-y font-crimson text-[15px] leading-relaxed`}
+            placeholder="一人称: 俺。語尾に「だぜ」が多い。仲間には砕けた口調。..."
           />
         </div>
       </div>

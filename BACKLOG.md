@@ -518,7 +518,7 @@
 **実装ヒント:** `src/app/characters/[id]/session-end/page.tsx` を "use client" で新規作成。`useState` でステップ番号（0〜3）を管理し、「次へ」ボタンでステップを進める。Step0: `supabase.from("sessions").insert(...)` でセッションログ入力フォーム（SessionLogFormを流用）。Step1: `growth_checked: true` の技能一覧と成長ロールボタン（growth-roll/page.txの入力ロジックを再利用）。Step2: アクティブな狂気記録一覧と回復/継続トグル（madness/page.tsxから流用）。Step3: シナリオ一覧selectで `next_session_at` を設定。追加DBなし（既存テーブルのみ利用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション終了処理」ボタンを追加。
 **コミット:** `feat: post-session end wizard guiding log, growth roll, madness, and next date`
 
-## [TODO] キャラクター口調・ロールプレイメモ — 優先度: 中
+## [DONE] キャラクター口調・ロールプレイメモ — 優先度: 中
 **対象:** PL
 **概要:** キャラクターの一人称・語尾・口癖・話し方の特徴をセッション中に素早く参照できる専用フィールド。現在は `background` や `notes` に混在させるしかなく、ロールプレイ中に探しにくい。モバイルクイックダッシュボードにも表示して口調ブレを防ぐ。
 **実装ヒント:** `characters` テーブルに `speech_style: text | null`（例: "一人称: 俺。語尾に「だぜ」が多い。仲間には砕けた口調」）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `speech_style: string | null` を追加。`src/app/_components/CharacterForm.tsx` と `src/app/characters/[id]/edit/page.tsx` に `<textarea>` フィールドを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の基本情報セクションに表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にも折りたたみ表示で追加し、セッション中の口調確認に使えるようにする。

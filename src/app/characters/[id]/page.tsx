@@ -209,6 +209,16 @@ export default async function CharacterDetailPage({ params }: Props) {
             <SkillList skills={skills ?? []} characterId={id} sanCurrent={char.san_current} />
           </div>
 
+          {/* 口調・ロールプレイメモ */}
+          {char.speech_style && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>口調・ロールプレイ</h2>
+              <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
+                {char.speech_style}
+              </p>
+            </div>
+          )}
+
           {/* 背景・メモ */}
           {(char.background || char.notes) && (
             <div className={sectionClass}>

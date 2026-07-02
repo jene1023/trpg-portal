@@ -45,6 +45,7 @@ export type Character = {
   public_slug: string | null;
   farewell_scene: string | null;
   farewell_message: string | null;
+  speech_style: string | null;
   created_at: string;
   updated_at: string;
 };

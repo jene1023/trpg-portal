@@ -77,6 +77,20 @@ export default async function QuickDashboardPage({ params }: Props) {
         </div>
       )}
 
+      {/* 口調・ロールプレイメモ */}
+      {char.speech_style && (
+        <details className="rounded-lg border border-coc-border bg-coc-surface">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-coc-muted hover:text-coc-text select-none">
+            口調・ロールプレイメモ
+          </summary>
+          <div className="px-4 pb-4 pt-1">
+            <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
+              {char.speech_style}
+            </p>
+          </div>
+        </details>
+      )}
+
       {/* クイックノートへのショートカット */}
       <Link
         href={`/characters/${id}/quick-notes`}
