@@ -572,7 +572,7 @@
 **実装ヒント:** `share_tokens` テーブルに `target_type: "handout"|"session_pack"` と `scenario_id: uuid | null` カラムをALTER TABLEで追加（既存handout共有と同テーブルに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「情報パックを共有」ボタン（"use client" コンポーネント `SessionPackShareButton.tsx`）を追加し、`supabase.from("share_tokens").insert({ scenario_id, target_type: "session_pack", token: crypto.randomUUID(), expires_at: +72h })` でトークン発行。`src/app/share/[token]/page.tsx`（既存）を target_type 分岐に対応させ、session_pack 時は `supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), sessions(*)")` でデータ取得して表示（is_secret=true のハンドアウトは除外）。`src/lib/supabase.ts` の `ShareToken` 型に両カラムを追加。
 **コミット:** `feat: session info pack share URL for KP to distribute to players`
 
-## [TODO] 技能値テキスト一括インポート（他ツールからの移行支援） — 優先度: 低
+## [DONE] 技能値テキスト一括インポート（他ツールからの移行支援） — 優先度: 低
 **対象:** PL
 **概要:** 「目星50、聞き耳40、図書館75」のようなカンマ区切りテキストや、公式キャラクターシートからコピペした技能値をパースしてキャラクターの技能に一括登録できる機能。既存JSONインポートはポータル独自形式のみ対応で、他ツールや紙シートからの移行に使えない。
 **実装ヒント:** `src/app/characters/[id]/skill-import/page.tsx` を "use client" で新規作成。`<textarea>` に「技能名 数値」形式（スペース/カンマ/タブ区切り）のテキストを貼り付けると、正規表現 `/([^\d,、\n\t]+?)\s*(\d+)/g` でパースして技能名・値のペアを抽出しプレビュー表示。確認後「一括登録」ボタンで `supabase.from("character_skills").upsert(...)` で既存技能は更新、新規は追加（skill_name をキーに upsert）。`src/lib/skillNormalizer.ts` を新規作成し、表記ゆれ（「目星」「目星（ものを見つける）」）を正規化するマッピングを定義。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能を一括入力」リンクを追加。追加DBなし。
