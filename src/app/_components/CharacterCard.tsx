@@ -43,6 +43,11 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
             name={character.name}
             className="transition-transform duration-300 group-hover:scale-105"
           />
+          {/* 燭台ホバーグロー: ポートレート上部から降り注ぐ暖色の光 */}
+          <div
+            className="absolute inset-0 pointer-events-none coc-portrait-amber-glow opacity-0 motion-safe:group-hover:opacity-100 transition-opacity duration-500"
+            aria-hidden="true"
+          />
           {/* ビネット */}
           <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           {/* グラデーションオーバーレイ: 名前・職業 */}
