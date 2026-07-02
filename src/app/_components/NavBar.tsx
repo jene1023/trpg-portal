@@ -87,7 +87,7 @@ export default function NavBar() {
       </nav>
 
       {/* グラデーションボーダーライン */}
-      <div className="h-px bg-gradient-to-r from-transparent via-coc-border-glow to-transparent opacity-60" />
+      <div className="coc-nav-border" aria-hidden="true" />
 
       {/* モバイルドロワー */}
       {open && (

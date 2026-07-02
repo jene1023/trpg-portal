@@ -202,12 +202,14 @@ body {
 
 /* 燭台光カード背景: 左上から暖かい環境光が差し込む奥行き表現 */
 .coc-card-bg {
-  background: linear-gradient(
-    145deg,
-    var(--color-coc-raised) 0%,
-    var(--color-coc-surface) 52%,
-    var(--color-coc-bg) 100%
-  );
+  background:
+    radial-gradient(ellipse 90% 55% at 12% 0%, rgba(201, 133, 58, 0.045) 0%, transparent 60%),
+    linear-gradient(
+      145deg,
+      var(--color-coc-raised) 0%,
+      var(--color-coc-surface) 52%,
+      var(--color-coc-bg) 100%
+    );
 }
 
 /* スタガーグリッド: 各子要素を順次フェードイン（燭台に一つずつ火が灯るように） */
@@ -241,6 +243,31 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .coc-skeleton {
     animation: coc-skeleton-glow 1.8s ease-in-out infinite;
+  }
+}
+
+/* ナビゲーション下ボーダー: 燭台の炎のように脈打つ光の帯 */
+@keyframes coc-nav-ember {
+  0%, 100% { opacity: 0.40; }
+  50%       { opacity: 0.85; }
+}
+
+.coc-nav-border {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--color-coc-border) 20%,
+    var(--color-coc-border-glow) 50%,
+    var(--color-coc-border) 80%,
+    transparent 100%
+  );
+  opacity: 0.40;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-nav-border {
+    animation: coc-nav-ember 5s ease-in-out infinite;
   }
 }
 
