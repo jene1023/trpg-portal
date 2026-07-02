@@ -506,6 +506,24 @@
 **実装ヒント:** `npcs` テーブルに `faction: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に `faction: string | null` を追加。`src/app/npcs/page.tsx` の一覧フィルタに `faction` の select 要素を追加し、クライアントサイドでフィルタ（`.filter(n => !factionFilter || n.faction === factionFilter)`）。`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` のフォームに `faction` 入力欄を追加（`src/app/_components/NpcForm.tsx` を更新）。フィルタのオプション候補は既存NPCから動的取得（`.map(n => n.faction).filter(Boolean).unique()`）。
 **コミット:** `feat: NPC faction/organization tag for group filtering`
 
+## [TODO] Supabase Realtimeセッション中HP/SAN同期 — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッション中にQuickStatEditorやPartyStatAdjusterでHP/MP/SANを変更すると、同じキャラクターを開いている全クライアントに即時反映されるリアルタイム同期機能。現在はrouter.refresh()による手動更新のみで、KPとPLが別々の画面で同じデータを操作すると表示がずれる。
+**実装ヒント:** `src/app/_components/QuickStatEditor.tsx` と `src/app/scenarios/[id]/party/page.tsx`（`PartyStatAdjuster.tsx`）に `supabase.channel('character-stats').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'characters' }, payload => { /* stateを更新 */ }).subscribe()` を追加し、DB更新と同時にリアルタイムイベントを受信してUIを再描画。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）でも同様に subscribe してHP/MP/SANを自動更新。追加DBなし。
+**コミット:** `feat: realtime HP/SAN sync across clients via Supabase Realtime`
+
+## [TODO] セッション終了ウィザード（一括処理フロー） — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション終了時に「①セッションログ記入 → ②成長チェック技能の成長判定ロール → ③狂気状態の更新 → ④次回セッション予定の設定」を4ステップで順番にガイドするウィザードUI。各機能は個別ページとして実装済みだが横断フローが存在せず、セッション後の処理を忘れがちな課題を解消する。
+**実装ヒント:** `src/app/characters/[id]/session-end/page.tsx` を "use client" で新規作成。`useState` でステップ番号（0〜3）を管理し、「次へ」ボタンでステップを進める。Step0: `supabase.from("sessions").insert(...)` でセッションログ入力フォーム（SessionLogFormを流用）。Step1: `growth_checked: true` の技能一覧と成長ロールボタン（growth-roll/page.txの入力ロジックを再利用）。Step2: アクティブな狂気記録一覧と回復/継続トグル（madness/page.tsxから流用）。Step3: シナリオ一覧selectで `next_session_at` を設定。追加DBなし（既存テーブルのみ利用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション終了処理」ボタンを追加。
+**コミット:** `feat: post-session end wizard guiding log, growth roll, madness, and next date`
+
+## [TODO] キャラクター口調・ロールプレイメモ — 優先度: 中
+**対象:** PL
+**概要:** キャラクターの一人称・語尾・口癖・話し方の特徴をセッション中に素早く参照できる専用フィールド。現在は `background` や `notes` に混在させるしかなく、ロールプレイ中に探しにくい。モバイルクイックダッシュボードにも表示して口調ブレを防ぐ。
+**実装ヒント:** `characters` テーブルに `speech_style: text | null`（例: "一人称: 俺。語尾に「だぜ」が多い。仲間には砕けた口調」）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `speech_style: string | null` を追加。`src/app/_components/CharacterForm.tsx` と `src/app/characters/[id]/edit/page.tsx` に `<textarea>` フィールドを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の基本情報セクションに表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にも折りたたみ表示で追加し、セッション中の口調確認に使えるようにする。
+**コミット:** `feat: character speech style memo for roleplay reference`
+
 ## [TODO] 卓URLリンク管理（VTT・通話ツール連携） — 優先度: 中
 **対象:** KP / 共通
 **概要:** Roll20・ユドナリウム・ここフォリア・Discord・Zoomなど、シナリオで使うVTTや通話ツールのURLをシナリオに紐づけて保存し、セッション開始時にワンクリックで各ツールに飛べる機能。現在KPはURLをLINEやDiscordで毎回共有しなければならず、ポータル内で完結しない。
