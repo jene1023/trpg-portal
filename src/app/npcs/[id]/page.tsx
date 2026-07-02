@@ -169,6 +169,31 @@ export default async function NpcDetailPage({ params }: Props) {
           </div>
         )}
 
+        {/* ロールプレイメモ（口調・セリフ例） */}
+        {((npc as Npc).speech_style || (npc as Npc).sample_quotes) && (
+          <details className="rounded-lg border border-coc-border bg-coc-surface overflow-hidden group">
+            <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-semibold text-coc-muted uppercase tracking-widest font-cinzel hover:bg-coc-raised transition-colors select-none">
+              <span>ロールプレイメモ</span>
+              <span className="text-xs normal-case font-normal text-coc-faint group-open:hidden">▶ 展開</span>
+              <span className="text-xs normal-case font-normal text-coc-faint hidden group-open:inline">▼ 閉じる</span>
+            </summary>
+            <div className="px-4 pb-4 pt-3 border-t border-coc-border space-y-3">
+              {(npc as Npc).speech_style && (
+                <div>
+                  <p className="text-xs font-medium text-coc-muted mb-0.5">口調・一人称</p>
+                  <p className="text-sm text-coc-text whitespace-pre-wrap">{(npc as Npc).speech_style}</p>
+                </div>
+              )}
+              {(npc as Npc).sample_quotes && (
+                <div>
+                  <p className="text-xs font-medium text-coc-muted mb-0.5">セリフ例・口癖</p>
+                  <p className="text-sm text-coc-text whitespace-pre-wrap">{(npc as Npc).sample_quotes}</p>
+                </div>
+              )}
+            </div>
+          </details>
+        )}
+
         {/* 能力値 */}
         {hasStats(npc as Npc) && (
           <div className="rounded-lg border border-coc-border bg-coc-surface p-4 space-y-3">

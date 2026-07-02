@@ -33,6 +33,8 @@ export default function NpcForm() {
     appearance: "",
     purpose: "",
     notes: "",
+    speech_style: "",
+    sample_quotes: "",
   });
 
   const [stats, setStats] = useState<Record<StatKey, string>>({
@@ -86,6 +88,8 @@ export default function NpcForm() {
       appearance: form.appearance.trim() || null,
       purpose: form.purpose.trim() || null,
       notes: form.notes.trim() || null,
+      speech_style: form.speech_style.trim() || null,
+      sample_quotes: form.sample_quotes.trim() || null,
       ...statPayload,
     });
     if (err) {
@@ -194,6 +198,36 @@ export default function NpcForm() {
           value={form.notes}
           onChange={handleChange}
           placeholder="KP用の秘密メモ"
+          rows={4}
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="speech_style" className={labelClass}>
+          口調・一人称
+        </label>
+        <textarea
+          id="speech_style"
+          name="speech_style"
+          value={form.speech_style}
+          onChange={handleChange}
+          placeholder="例: 一人称は「わし」。老人特有のゆっくりとした話し方。語尾に「じゃよ」が多い。"
+          rows={3}
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="sample_quotes" className={labelClass}>
+          セリフ例・口癖
+        </label>
+        <textarea
+          id="sample_quotes"
+          name="sample_quotes"
+          value={form.sample_quotes}
+          onChange={handleChange}
+          placeholder="例: 「お前さんたち、海のことは知らん方がよい…」「昔は皆、海と共に生きておったんじゃよ」"
           rows={4}
           className={fieldClass}
         />

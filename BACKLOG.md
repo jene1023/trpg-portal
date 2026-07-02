@@ -614,7 +614,7 @@
 **実装ヒント:** Supabaseに `character_gallery_images` テーブルを追加（id, character_id, image_url: text, caption: text | null, is_main: boolean DEFAULT false, order_index: integer DEFAULT 0, created_at）。`src/app/characters/[id]/gallery/page.tsx` を "use client" で新規作成（グリッド表示＋URL入力フォームで追加）。「メインに設定」ボタンで `supabase.from("characters").update({ portrait_url })` にも反映（`is_main` フラグと連動）。▲▼ボタンで `order_index` を swap して並び替え可能。`src/lib/supabase.ts` に `CharacterGalleryImage` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレートセクションに「ギャラリーを見る」リンクを追加（画像数バッジ付き）。
 **コミット:** `feat: character portrait gallery for managing multiple reference images`
 
-## [TODO] NPCロールプレイメモ（口調・セリフ支援） — 優先度: 中
+## [DONE] NPCロールプレイメモ（口調・セリフ支援） — 優先度: 中
 **対象:** KP
 **概要:** NPC個別に「口調」「よく使うセリフ例」「行動パターン」を記録し、NPC詳細ページからセッション中に即参照できる機能。既存のキャラクター `speech_style` フィールドと同様のアプローチをNPCに適用し、KPの演技ブレとNPC個性の忘却を防ぐ。
 **実装ヒント:** `npcs` テーブルに `speech_style: text | null`（口調・一人称）と `sample_quotes: text | null`（セリフ例・口癖）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に両カラムを追加。`src/app/_components/NpcForm.tsx` に `<textarea>` フィールドを2つ追加（`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` に自動反映）。`src/app/npcs/[id]/page.tsx` の「セリフ例」セクションはデフォルト折りたたみ（`<details>`）で表示しセッション中の参照コストを下げる。追加DBカラムのみ、新テーブルなし。

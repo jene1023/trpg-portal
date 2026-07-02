@@ -95,6 +95,8 @@ export type Npc = {
   purpose: string | null;
   notes: string | null;
   faction: string | null;
+  speech_style: string | null;
+  sample_quotes: string | null;
   str: number | null;
   con: number | null;
   pow: number | null;
