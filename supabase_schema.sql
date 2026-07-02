@@ -295,3 +295,9 @@ alter table players enable row level security;
 create policy "allow all for anon" on players for all using (true) with check (true);
 
 alter table scenario_participants add column if not exists player_id uuid references players(id);
+
+-- セッション情報パック配布 (追加マイグレーション)
+alter table share_tokens alter column handout_id drop not null;
+alter table share_tokens add column if not exists target_type text not null default 'handout'
+  check (target_type in ('handout', 'session_pack'));
+alter table share_tokens add column if not exists scenario_id uuid references scenarios(id) on delete cascade;

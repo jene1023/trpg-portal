@@ -566,7 +566,7 @@
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` のロール後処理で `supabase.channel('dice-broadcast-{scenarioId}').send({ type: 'broadcast', event: 'dice_roll', payload: { characterName, skillName, rollValue, successLevel } })` を追加。`src/app/scenarios/[id]/party/page.tsx` または新規 `src/app/scenarios/[id]/roll-feed/page.tsx` で同チャンネルをsubscribeし、直近のロール結果を最新10件フィードとして表示。scenarioIdはURLパラメータかlocalStorageで保持。追加DBなし（Realtime broadcast は揮発性のため永続化不要）。シナリオ詳細ダッシュボードに「ロールフィード」リンクを追加。
 **コミット:** `feat: realtime dice roll broadcast to all players in the same scenario`
 
-## [TODO] セッション情報パック配布（KP→PL閲覧専用URL） — 優先度: 中
+## [DONE] セッション情報パック配布（KP→PL閲覧専用URL） — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPがシナリオ概要・参加者一覧・前回セッションあらすじ・配布済みハンドアウトをまとめた閲覧専用ページのURLをワンボタン発行し、PLに共有できる機能。LINEやDiscordで毎回手動まとめる手間をなくし、ポータル内で情報共有を完結させる。
 **実装ヒント:** `share_tokens` テーブルに `target_type: "handout"|"session_pack"` と `scenario_id: uuid | null` カラムをALTER TABLEで追加（既存handout共有と同テーブルに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「情報パックを共有」ボタン（"use client" コンポーネント `SessionPackShareButton.tsx`）を追加し、`supabase.from("share_tokens").insert({ scenario_id, target_type: "session_pack", token: crypto.randomUUID(), expires_at: +72h })` でトークン発行。`src/app/share/[token]/page.tsx`（既存）を target_type 分岐に対応させ、session_pack 時は `supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), sessions(*)")` でデータ取得して表示（is_secret=true のハンドアウトは除外）。`src/lib/supabase.ts` の `ShareToken` 型に両カラムを追加。

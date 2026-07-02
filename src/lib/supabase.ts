@@ -254,7 +254,9 @@ export type CharacterSpell = {
 
 export type ShareToken = {
   id: string;
-  handout_id: string;
+  handout_id: string | null;
+  scenario_id: string | null;
+  target_type: "handout" | "session_pack";
   token: string;
   expires_at: string;
   created_at: string;

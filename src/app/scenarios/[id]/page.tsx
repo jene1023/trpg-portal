@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
+import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -412,6 +413,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
           </div>
           <span className="text-coc-muted">→</span>
         </Link>
+
+        <div className="rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4">
+          <div className="flex items-center gap-3 mb-3">
+            <Radio size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">情報パックをPLと共有</p>
+              <p className="text-xs text-coc-muted">
+                シナリオ概要・参加者・配布済みハンドアウトをまとめた閲覧専用URL（72時間有効）を発行
+              </p>
+            </div>
+          </div>
+          <SessionPackShareButton scenarioId={id} />
+        </div>
       </div>
 
       {scenario.synopsis && (
