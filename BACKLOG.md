@@ -554,6 +554,30 @@
 **実装ヒント:** `handouts` テーブルに `is_distributed: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `is_distributed: boolean` を追加。`src/app/scenarios/[id]/handouts/page.tsx`（`src/app/_components/HandoutList.tsx`）の各ハンドアウトカードに「配布済み」チェックボックスを追加し `supabase.from("handouts").update({ is_distributed }).eq("id", id)` でトグル。`src/app/scenarios/[id]/preflight/page.tsx`（KPセッション準備チェックリスト/DONE済み）の「ハンドアウト準備状況」セクションに未配布件数を警告バッジで追加。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: handout distribution tracking to prevent forgotten handouts`
 
+## [TODO] GMスクリーン（KP用セッション中統合ビュー） — 優先度: 高
+**対象:** KP
+**概要:** シナリオに紐づくNPC能力値・クリーチャーSAN喪失式・パーティーHP/SAN・ハンドアウト配布状況を1画面に集約したKP専用ビュー。セッション中に複数ページを行き来する手間を省き、KPの進行をスムーズにする。
+**実装ヒント:** `src/app/scenarios/[id]/gm-screen/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), npcs(*), creatures(*)")` で関連データを一括取得。NPCはStatBlock風に（STR/DEX/HP/MPを2列グリッド）、クリーチャーはSAN喪失式をバッジ表示、パーティーはHP/SANをカラーバー表示、ハンドアウトは`is_distributed`フラグ付きリスト表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「GMスクリーン」リンクを追加。追加DBなし。
+**コミット:** `feat: KP GM screen with NPC, creature, party, and handout overview`
+
+## [TODO] ダイスロール結果リアルタイム共有（卓内ブロードキャスト） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** DiceRollerでロールした結果をSupabase Realtimeで同じシナリオの他クライアントに即時ブロードキャストする機能。現在のHP/SAN同期（Realtime実装済み）に続く第二のリアルタイム機能で、「誰が・何を・いくつ振ったか」をテーブル全員が見えるようにする。
+**実装ヒント:** `src/app/_components/DiceRoller.tsx` のロール後処理で `supabase.channel('dice-broadcast-{scenarioId}').send({ type: 'broadcast', event: 'dice_roll', payload: { characterName, skillName, rollValue, successLevel } })` を追加。`src/app/scenarios/[id]/party/page.tsx` または新規 `src/app/scenarios/[id]/roll-feed/page.tsx` で同チャンネルをsubscribeし、直近のロール結果を最新10件フィードとして表示。scenarioIdはURLパラメータかlocalStorageで保持。追加DBなし（Realtime broadcast は揮発性のため永続化不要）。シナリオ詳細ダッシュボードに「ロールフィード」リンクを追加。
+**コミット:** `feat: realtime dice roll broadcast to all players in the same scenario`
+
+## [TODO] セッション情報パック配布（KP→PL閲覧専用URL） — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPがシナリオ概要・参加者一覧・前回セッションあらすじ・配布済みハンドアウトをまとめた閲覧専用ページのURLをワンボタン発行し、PLに共有できる機能。LINEやDiscordで毎回手動まとめる手間をなくし、ポータル内で情報共有を完結させる。
+**実装ヒント:** `share_tokens` テーブルに `target_type: "handout"|"session_pack"` と `scenario_id: uuid | null` カラムをALTER TABLEで追加（既存handout共有と同テーブルに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「情報パックを共有」ボタン（"use client" コンポーネント `SessionPackShareButton.tsx`）を追加し、`supabase.from("share_tokens").insert({ scenario_id, target_type: "session_pack", token: crypto.randomUUID(), expires_at: +72h })` でトークン発行。`src/app/share/[token]/page.tsx`（既存）を target_type 分岐に対応させ、session_pack 時は `supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), sessions(*)")` でデータ取得して表示（is_secret=true のハンドアウトは除外）。`src/lib/supabase.ts` の `ShareToken` 型に両カラムを追加。
+**コミット:** `feat: session info pack share URL for KP to distribute to players`
+
+## [TODO] 技能値テキスト一括インポート（他ツールからの移行支援） — 優先度: 低
+**対象:** PL
+**概要:** 「目星50、聞き耳40、図書館75」のようなカンマ区切りテキストや、公式キャラクターシートからコピペした技能値をパースしてキャラクターの技能に一括登録できる機能。既存JSONインポートはポータル独自形式のみ対応で、他ツールや紙シートからの移行に使えない。
+**実装ヒント:** `src/app/characters/[id]/skill-import/page.tsx` を "use client" で新規作成。`<textarea>` に「技能名 数値」形式（スペース/カンマ/タブ区切り）のテキストを貼り付けると、正規表現 `/([^\d,、\n\t]+?)\s*(\d+)/g` でパースして技能名・値のペアを抽出しプレビュー表示。確認後「一括登録」ボタンで `supabase.from("character_skills").upsert(...)` で既存技能は更新、新規は追加（skill_name をキーに upsert）。`src/lib/skillNormalizer.ts` を新規作成し、表記ゆれ（「目星」「目星（ものを見つける）」）を正規化するマッピングを定義。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「技能を一括入力」リンクを追加。追加DBなし。
+**コミット:** `feat: bulk skill value import from text for migration from other tools`
+
 ## [TODO] 技能カテゴリ別フィルタ・タブ表示 — 優先度: 低
 **対象:** PL / 共通
 **概要:** 現在の技能リストは全技能を一覧表示するのみ。CoC7版の技能カテゴリ（戦闘系・調査系・対人系・知識系・移動系）別にタブまたはドロップダウンフィルタで絞り込み表示できるようにし、技能の多いキャラクターでの参照速度を上げる。
