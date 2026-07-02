@@ -49,7 +49,7 @@ export default async function ScenarioPreflightPage({ params }: Props) {
 
   const participants: Array<{ id: string; attendance_status: string; characters: { id: string; name: string; player_name: string | null } }> =
     scenario.scenario_participants ?? [];
-  const handouts: Array<{ id: string; title: string; is_secret: boolean; recipient_name: string | null }> =
+  const handouts: Array<{ id: string; title: string; is_secret: boolean; recipient_name: string | null; is_distributed: boolean }> =
     scenario.handouts ?? [];
   const npcList: Array<{ id: string; name: string; purpose: string | null }> = npcs ?? [];
 
@@ -59,6 +59,7 @@ export default async function ScenarioPreflightPage({ params }: Props) {
 
   const secretCount = handouts.filter((h) => h.is_secret).length;
   const noRecipientCount = handouts.filter((h) => !h.recipient_name).length;
+  const undistributedCount = handouts.filter((h) => !h.is_distributed).length;
 
   const sectionClass = "rounded-lg border bg-coc-surface p-4";
 
@@ -81,6 +82,16 @@ export default async function ScenarioPreflightPage({ params }: Props) {
           ? "ハンドアウトなし"
           : noRecipientCount > 0
           ? `${noRecipientCount}件未設定`
+          : undefined,
+    },
+    {
+      ok: handouts.length === 0 || undistributedCount === 0,
+      label: "ハンドアウト配布済み確認",
+      warn:
+        handouts.length === 0
+          ? "ハンドアウトなし"
+          : undistributedCount > 0
+          ? `未配布 ${undistributedCount}件`
           : undefined,
     },
     {
@@ -317,14 +328,33 @@ export default async function ScenarioPreflightPage({ params }: Props) {
           </p>
         ) : (
           <div className="mb-3 space-y-2">
-            <div className="flex gap-3 text-sm">
+            <div className="flex gap-3 text-sm flex-wrap">
               <span className="text-coc-text">{handouts.length}件作成済み</span>
+              <span className="text-green-400 text-xs self-end">
+                配布済み {handouts.length - undistributedCount}件
+              </span>
+              {undistributedCount > 0 && (
+                <span className="text-yellow-400 text-xs self-end">
+                  未配布 {undistributedCount}件
+                </span>
+              )}
               {secretCount > 0 && (
                 <span className="text-coc-muted text-xs self-end">
                   （秘匿 {secretCount}件）
                 </span>
               )}
             </div>
+            {undistributedCount > 0 && (
+              <div className="flex items-center gap-1.5 rounded-md border border-yellow-800 bg-yellow-950/20 px-3 py-2">
+                <AlertTriangle
+                  size={14}
+                  className="text-yellow-400 flex-shrink-0"
+                />
+                <p className="text-xs text-yellow-300">
+                  未配布のハンドアウトが {undistributedCount}件あります
+                </p>
+              </div>
+            )}
             {noRecipientCount > 0 && (
               <div className="flex items-center gap-1.5 rounded-md border border-yellow-800 bg-yellow-950/20 px-3 py-2">
                 <AlertTriangle

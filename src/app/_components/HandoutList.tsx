@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Link as LinkIcon, Plus, X } from "lucide-react";
+import { CheckSquare, Eye, EyeOff, Link as LinkIcon, Plus, Square, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Handout } from "@/lib/supabase";
 
 type Props = {
@@ -62,6 +62,15 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
     if (!isSupabaseConfigured) return;
     await supabase.from("handouts").delete().eq("id", id);
     setHandouts((prev) => prev.filter((h) => h.id !== id));
+  }
+
+  async function handleToggleDistributed(id: string, current: boolean) {
+    if (!isSupabaseConfigured) return;
+    const next = !current;
+    await supabase.from("handouts").update({ is_distributed: next }).eq("id", id);
+    setHandouts((prev) =>
+      prev.map((h) => (h.id === id ? { ...h, is_distributed: next } : h))
+    );
   }
 
   async function handleGenerateShareLink(handoutId: string) {
@@ -198,8 +207,20 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
                         秘匿
                       </span>
                     )}
+                    {h.is_distributed && (
+                      <span className="rounded-full border border-green-700 bg-green-900/30 px-2 py-0.5 text-xs text-green-400">
+                        配布済み
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleToggleDistributed(h.id, h.is_distributed)}
+                      className={h.is_distributed ? "text-green-400 hover:text-green-300 transition-colors" : "text-coc-muted hover:text-green-400 transition-colors"}
+                      title={h.is_distributed ? "配布済み（クリックで取消）" : "配布済みにする"}
+                    >
+                      {h.is_distributed ? <CheckSquare size={15} /> : <Square size={15} />}
+                    </button>
                     {h.is_secret && (
                       <button
                         onClick={() => toggleReveal(h.id)}

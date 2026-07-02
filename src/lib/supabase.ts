@@ -154,6 +154,7 @@ export type Handout = {
   content: string | null;
   recipient_name: string | null;
   is_secret: boolean;
+  is_distributed: boolean;
   created_at: string;
 };
 

@@ -548,7 +548,7 @@
 **実装ヒント:** Supabaseに `players` テーブルを追加（id, display_name, contact_discord: text | null, contact_other: text | null, preferred_genre: text | null, notes: text | null, created_at）。`src/app/players/page.tsx`（一覧）と `src/app/players/new/page.tsx`（作成フォーム）を新規作成。`scenario_participants` テーブルに `player_id: uuid | null REFERENCES players(id)` カラムをALTER TABLEで追加し、KPが参加者にプレイヤーを紐づけできるよう `src/app/scenarios/[id]/participants/page.tsx` を更新。`src/lib/supabase.ts` に `Player` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のサイドリンクとして配置。
 **コミット:** `feat: player info management for KP group coordination`
 
-## [TODO] ハンドアウト配布済みトラッキング — 優先度: 中
+## [DONE] ハンドアウト配布済みトラッキング — 優先度: 中
 **対象:** KP / 共通
 **概要:** ハンドアウトをPLへ渡したかどうかを「配布済み」フラグで管理し、未配布ハンドアウトをセッション準備チェックリストで警告表示できる機能。セッション中の「渡し忘れ」防止に特化する。
 **実装ヒント:** `handouts` テーブルに `is_distributed: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `is_distributed: boolean` を追加。`src/app/scenarios/[id]/handouts/page.tsx`（`src/app/_components/HandoutList.tsx`）の各ハンドアウトカードに「配布済み」チェックボックスを追加し `supabase.from("handouts").update({ is_distributed }).eq("id", id)` でトグル。`src/app/scenarios/[id]/preflight/page.tsx`（KPセッション準備チェックリスト/DONE済み）の「ハンドアウト準備状況」セクションに未配布件数を警告バッジで追加。追加DBカラムのみ、新テーブルなし。
