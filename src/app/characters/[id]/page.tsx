@@ -47,6 +47,11 @@ export default async function CharacterDetailPage({ params }: Props) {
     .eq("character_id", id)
     .order("created_at", { ascending: true });
 
+  const { count: galleryCount } = await supabase
+    .from("character_gallery_images")
+    .select("id", { count: "exact", head: true })
+    .eq("character_id", id);
+
   const db = calcDamageBonus(char.str, char.siz);
   const build = calcBuild(char.str, char.siz);
   const mov = calcMov(char.str, char.dex, char.siz);
@@ -93,6 +98,21 @@ export default async function CharacterDetailPage({ params }: Props) {
             />
             <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           </div>
+
+          <Link
+            href={`/characters/${id}/gallery`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+          >
+            <span>ギャラリーを見る</span>
+            <span className="flex items-center gap-1.5">
+              {(galleryCount ?? 0) > 0 && (
+                <span className="rounded bg-coc-raised border border-coc-border px-1.5 py-0.5 text-xs">
+                  {galleryCount}枚
+                </span>
+              )}
+              <span className="text-coc-gold">→</span>
+            </span>
+          </Link>
 
           <div className={sectionClass}>
             <div>

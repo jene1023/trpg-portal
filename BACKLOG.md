@@ -608,7 +608,7 @@
 **実装ヒント:** Supabaseに `character_conditions` テーブルを追加（id, character_id, condition_name: text, color: text | null（例: "red"|"yellow"|"blue"）, is_active: boolean DEFAULT true, notes: text | null, created_at）。`src/app/_components/ConditionBadgeEditor.tsx` を "use client" で新規作成（プリセット: "負傷"|"毒"|"拘束"|"盲目"|"硬直"|"出血"|"疲弊"|"その他"、またはカスタム入力）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のHP/SANセクション付近にバッジとして表示し、クリックで追加/解除トグル。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも表示。`src/app/characters/[id]/preflight/page.tsx` のチェックリストにアクティブ状態異常を追加。`src/lib/supabase.ts` に `CharacterCondition` 型を追加。
 **コミット:** `feat: character condition tags for physical status effects`
 
-## [TODO] ポートレートギャラリー（複数参考画像管理） — 優先度: 低
+## [DONE] ポートレートギャラリー（複数参考画像管理） — 優先度: 低
 **対象:** PL / 共通
 **概要:** キャラクターに複数の参考画像URL（立ち絵・衣装違い・雰囲気画像）を登録しギャラリー表示できる機能。現在の `portrait_url` は1枚のメイン画像のみで、複数のビジュアルコンセプトやSNS共有用バリアントを管理する手段がない。
 **実装ヒント:** Supabaseに `character_gallery_images` テーブルを追加（id, character_id, image_url: text, caption: text | null, is_main: boolean DEFAULT false, order_index: integer DEFAULT 0, created_at）。`src/app/characters/[id]/gallery/page.tsx` を "use client" で新規作成（グリッド表示＋URL入力フォームで追加）。「メインに設定」ボタンで `supabase.from("characters").update({ portrait_url })` にも反映（`is_main` フラグと連動）。▲▼ボタンで `order_index` を swap して並び替え可能。`src/lib/supabase.ts` に `CharacterGalleryImage` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレートセクションに「ギャラリーを見る」リンクを追加（画像数バッジ付き）。

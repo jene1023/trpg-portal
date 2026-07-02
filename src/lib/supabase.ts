@@ -457,3 +457,13 @@ export type CharacterCondition = {
   notes: string | null;
   created_at: string;
 };
+
+export type CharacterGalleryImage = {
+  id: string;
+  character_id: string;
+  image_url: string;
+  caption: string | null;
+  is_main: boolean;
+  order_index: number;
+  created_at: string;
+};
