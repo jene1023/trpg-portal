@@ -560,7 +560,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/gm-screen/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), npcs(*), creatures(*)")` で関連データを一括取得。NPCはStatBlock風に（STR/DEX/HP/MPを2列グリッド）、クリーチャーはSAN喪失式をバッジ表示、パーティーはHP/SANをカラーバー表示、ハンドアウトは`is_distributed`フラグ付きリスト表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「GMスクリーン」リンクを追加。追加DBなし。
 **コミット:** `feat: KP GM screen with NPC, creature, party, and handout overview`
 
-## [TODO] ダイスロール結果リアルタイム共有（卓内ブロードキャスト） — 優先度: 中
+## [DONE] ダイスロール結果リアルタイム共有（卓内ブロードキャスト） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** DiceRollerでロールした結果をSupabase Realtimeで同じシナリオの他クライアントに即時ブロードキャストする機能。現在のHP/SAN同期（Realtime実装済み）に続く第二のリアルタイム機能で、「誰が・何を・いくつ振ったか」をテーブル全員が見えるようにする。
 **実装ヒント:** `src/app/_components/DiceRoller.tsx` のロール後処理で `supabase.channel('dice-broadcast-{scenarioId}').send({ type: 'broadcast', event: 'dice_roll', payload: { characterName, skillName, rollValue, successLevel } })` を追加。`src/app/scenarios/[id]/party/page.tsx` または新規 `src/app/scenarios/[id]/roll-feed/page.tsx` で同チャンネルをsubscribeし、直近のロール結果を最新10件フィードとして表示。scenarioIdはURLパラメータかlocalStorageで保持。追加DBなし（Realtime broadcast は揮発性のため永続化不要）。シナリオ詳細ダッシュボードに「ロールフィード」リンクを追加。

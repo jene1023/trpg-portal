@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CharacterSkill, SuccessLevel, supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Dice6 } from "lucide-react";
 
@@ -49,13 +49,28 @@ const DEGREE_TO_LEVEL: Record<SuccessDegree, SuccessLevel> = {
   "致命的失敗": "fumble",
 };
 
-type Props = { skills: CharacterSkill[]; characterId?: string };
+type Props = { skills: CharacterSkill[]; characterId?: string; scenarioId?: string; characterName?: string };
 
-export default function DiceRoller({ skills, characterId }: Props) {
+export default function DiceRoller({ skills, characterId, scenarioId, characterName }: Props) {
   const [selectedId, setSelectedId] = useState<string>(skills[0]?.id ?? "");
   const [rollType, setRollType] = useState<RollType>("normal");
   const [result, setResult] = useState<Result | null>(null);
   const [rolling, setRolling] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const channelRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const effectiveId = scenarioId ?? (typeof window !== "undefined" ? localStorage.getItem("coc_active_scenario") : null);
+    if (!effectiveId) return;
+    const ch = supabase.channel(`dice-broadcast-${effectiveId}`);
+    ch.subscribe();
+    channelRef.current = ch;
+    return () => {
+      supabase.removeChannel(ch);
+      channelRef.current = null;
+    };
+  }, [scenarioId]);
 
   if (skills.length === 0) return null;
 
@@ -84,6 +99,19 @@ export default function DiceRoller({ skills, characterId }: Props) {
           roll_value: rolled,
           success_level: DEGREE_TO_LEVEL[degree],
           rolled_at: new Date().toISOString(),
+        });
+      }
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "dice_roll",
+          payload: {
+            characterName: characterName ?? "探索者",
+            skillName: rollType === "normal" ? selected.skill_name : `${selected.skill_name}（${ROLL_TYPE_LABEL[rollType]}）`,
+            skillValue: selected.current_value,
+            rollValue: rolled,
+            degree,
+          },
         });
       }
     }, 350);
