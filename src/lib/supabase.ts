@@ -423,3 +423,15 @@ export type CharacterAbilityGrowth = {
   grown_at: string | null;
   created_at: string;
 };
+
+export type ClueStatus = "found" | "investigating" | "resolved";
+
+export type ScenarioClue = {
+  id: string;
+  scenario_id: string | null;
+  character_id: string;
+  title: string;
+  content: string | null;
+  status: ClueStatus;
+  created_at: string;
+};

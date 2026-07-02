@@ -584,7 +584,7 @@
 **実装ヒント:** `character_skills` テーブルに `category: text | null`（例: "戦闘"|"調査"|"対人"|"知識"|"移動"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `category: string | null` を追加。`src/app/_components/SkillList.tsx` にカテゴリタブ（CSS border-bottom active スタイル）を追加し `useState` でアクティブカテゴリを管理してフィルタ表示。既存の技能は `category: null`（＝「すべて」タブに表示）。新規技能追加フォームに category の select 要素を追加。追加DBカラムのみ。
 **コミット:** `feat: skill category filter tabs on character skill list`
 
-## [TODO] 探索手がかりボード（シナリオ×PL用クルーメモ） — 優先度: 高
+## [DONE] 探索手がかりボード（シナリオ×PL用クルーメモ） — 優先度: 高
 **対象:** PL / 共通
 **概要:** PLがシナリオ中に発見した手がかり・情報を「発見済み」「調査中」「解決済み」のステータスで構造化管理できるカンバン風ボード。既存のクイックノート（`quick_notes`）は散文メモだが、こちらはCoCの謎解きフローに特化した手がかり整理ツール。長期シナリオでの情報整理と伏線回収に使う。
 **実装ヒント:** Supabaseに `scenario_clues` テーブルを追加（id, scenario_id, character_id, title, content: text | null, status: "found"|"investigating"|"resolved", created_at）。`src/app/characters/[id]/clues/page.tsx` を "use client" で新規作成（シナリオselect＋ステータス列ごとのカード表示）。カード追加フォームはモーダルまたはインライン入力で実装。`supabase.from("scenario_clues").update({ status })` でドラッグ不要のボタントグルによりステータス変更。`src/lib/supabase.ts` に `ScenarioClue` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「手がかりボード」リンクを追加。
