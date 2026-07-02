@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type StatKey = "hp_current" | "mp_current" | "san_current";
@@ -50,6 +50,23 @@ export default function QuickStatEditor({
     san: sanCurrent,
   });
   const [saving, setSaving] = useState<StatKey | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const channel = supabase
+      .channel(`qse-${characterId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "characters", filter: `id=eq.${characterId}` },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          const p = payload.new as { hp_current: number; mp_current: number; san_current: number };
+          setStats({ hp: p.hp_current, mp: p.mp_current, san: p.san_current });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [characterId]);
   const [hpBurstDamage, setHpBurstDamage] = useState(0);
   const [majorWound, setMajorWound] = useState(false);
 

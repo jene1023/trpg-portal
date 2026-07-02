@@ -4,45 +4,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
-import PartyStatAdjuster from "@/app/_components/PartyStatAdjuster";
+import PartyMemberCard from "@/app/_components/PartyMemberCard";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character;
 };
 
 type Props = { params: Promise<{ id: string }> };
-
-function statColor(current: number, max: number): string {
-  if (max <= 0) return "text-coc-muted";
-  const ratio = current / max;
-  if (ratio <= 0.25) return "text-red-400";
-  if (ratio <= 0.5) return "text-yellow-400";
-  return "text-green-400";
-}
-
-function StatBar({ label, current, max }: { label: string; current: number; max: number }) {
-  const ratio = max > 0 ? Math.max(0, Math.min(1, current / max)) : 0;
-  const barColor =
-    ratio <= 0.25 ? "bg-red-500" : ratio <= 0.5 ? "bg-yellow-500" : "bg-green-500";
-
-  return (
-    <div className="flex-1 min-w-0">
-      <div className="flex items-baseline justify-between mb-1">
-        <span className="text-xs text-coc-muted">{label}</span>
-        <span className={`text-sm font-bold tabular-nums ${statColor(current, max)}`}>
-          {current}
-          <span className="text-xs text-coc-muted font-normal">/{max}</span>
-        </span>
-      </div>
-      <div className="h-1.5 rounded-full bg-coc-border overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${barColor}`}
-          style={{ width: `${ratio * 100}%` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 export default async function PartyViewPage({ params }: Props) {
   const { id } = await params;
@@ -95,67 +63,9 @@ export default async function PartyViewPage({ params }: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {list.map(({ characters: char }) => {
-            const isDead = char.status === "dead";
-            const isInsane = char.status === "insane";
-
-            return (
-              <div
-                key={char.id}
-                className={`rounded-xl border bg-coc-surface px-5 py-4 ${
-                  isDead
-                    ? "border-red-900 opacity-60"
-                    : isInsane
-                    ? "border-purple-700"
-                    : "border-coc-border"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-medium text-coc-text">{char.name}</p>
-                    {char.player_name && (
-                      <p className="text-xs text-coc-muted">PL: {char.player_name}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isDead && (
-                      <span className="rounded-full border border-red-800 px-2 py-0.5 text-xs text-red-400">
-                        死亡
-                      </span>
-                    )}
-                    {isInsane && (
-                      <span className="rounded-full border border-purple-700 px-2 py-0.5 text-xs text-purple-400">
-                        狂気
-                      </span>
-                    )}
-                    <Link
-                      href={`/characters/${char.id}`}
-                      className="text-xs text-coc-gold hover:underline"
-                    >
-                      詳細 →
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 flex-wrap">
-                  <StatBar label="HP" current={char.hp_current} max={char.hp_max} />
-                  <StatBar label="MP" current={char.mp_current} max={char.mp_max} />
-                  <StatBar label="SAN" current={char.san_current} max={char.san_max} />
-                </div>
-
-                <PartyStatAdjuster
-                  characterId={char.id}
-                  hpCurrent={char.hp_current}
-                  hpMax={char.hp_max}
-                  mpCurrent={char.mp_current}
-                  mpMax={char.mp_max}
-                  sanCurrent={char.san_current}
-                  sanMax={char.san_max}
-                  con={char.con}
-                />
-              </div>
-            );
-          })}
+          {list.map(({ characters: char }) => (
+            <PartyMemberCard key={char.id} char={char} />
+          ))}
         </div>
       )}
 

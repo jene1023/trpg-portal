@@ -5,15 +5,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
+import QuickStatsDisplay from "@/app/_components/QuickStatsDisplay";
 import DiceRoller from "@/app/_components/DiceRoller";
 
 type Props = { params: Promise<{ id: string }> };
-
-const colorClass: Record<string, string> = {
-  hp: "text-[var(--color-coc-hp)]",
-  mp: "text-[var(--color-coc-mp)]",
-  san: "text-[var(--color-coc-san)]",
-};
 
 export default async function QuickDashboardPage({ params }: Props) {
   const { id } = await params;
@@ -33,12 +28,6 @@ export default async function QuickDashboardPage({ params }: Props) {
     .select("*")
     .eq("character_id", id);
 
-  const stats = [
-    { key: "hp", label: "HP", current: char.hp_current, max: char.hp_max },
-    { key: "mp", label: "MP", current: char.mp_current, max: char.mp_max },
-    { key: "san", label: "SAN", current: char.san_current, max: char.san_max },
-  ];
-
   return (
     <div className="mx-auto max-w-md px-4 py-6 space-y-6">
       {/* ヘッダー */}
@@ -55,19 +44,15 @@ export default async function QuickDashboardPage({ params }: Props) {
 
       {/* HP / MP / SAN 大表示 */}
       <div className="rounded-lg border border-coc-border bg-coc-surface p-4">
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          {stats.map(({ key, label, current, max }) => (
-            <div key={key} className="flex flex-col items-center gap-1">
-              <span className={`text-xs font-semibold tracking-widest ${colorClass[key]}`}>
-                {label}
-              </span>
-              <span className={`text-5xl font-bold tabular-nums leading-none ${colorClass[key]}`}>
-                {current}
-              </span>
-              <span className="text-sm text-coc-muted">/{max}</span>
-            </div>
-          ))}
-        </div>
+        <QuickStatsDisplay
+          characterId={char.id}
+          hpCurrent={char.hp_current}
+          hpMax={char.hp_max}
+          mpCurrent={char.mp_current}
+          mpMax={char.mp_max}
+          sanCurrent={char.san_current}
+          sanMax={char.san_max}
+        />
 
         <div className="border-t border-coc-border pt-4">
           <QuickStatEditor

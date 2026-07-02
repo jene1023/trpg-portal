@@ -254,7 +254,7 @@ function SearchPageInner() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="flex items-center justify-center py-16 text-sm text-coc-muted">読み込み中...</div>}>
       <SearchPageInner />
     </Suspense>
   );

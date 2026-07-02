@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Search, Plus, Check } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { SPELL_CATALOG, SPELL_CATEGORIES, SpellEntry } from "@/lib/spellCatalog";
 
-export default function SpellCatalogPage() {
+function SpellsContent() {
   const searchParams = useSearchParams();
   const characterId = searchParams.get("characterId");
 
@@ -220,5 +220,13 @@ export default function SpellCatalogPage() {
         {filtered.length} / {SPELL_CATALOG.length} 件表示
       </p>
     </div>
+  );
+}
+
+export default function SpellCatalogPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-16 text-sm text-coc-muted">読み込み中...</div>}>
+      <SpellsContent />
+    </Suspense>
   );
 }

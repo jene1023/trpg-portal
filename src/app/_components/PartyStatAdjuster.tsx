@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type StatKey = "hp" | "mp" | "san";
@@ -39,7 +38,6 @@ export default function PartyStatAdjuster({
   sanMax,
   con,
 }: Props) {
-  const router = useRouter();
   const [amounts, setAmounts] = useState<Record<StatKey, string>>({ hp: "", mp: "", san: "" });
   const [saving, setSaving] = useState<StatKey | null>(null);
   const [majorWound, setMajorWound] = useState(false);
@@ -73,7 +71,6 @@ export default function PartyStatAdjuster({
       .eq("id", characterId);
     setSaving(null);
     setAmounts((a) => ({ ...a, [key]: "" }));
-    router.refresh();
   }
 
   const keys: StatKey[] = ["hp", "mp", "san"];

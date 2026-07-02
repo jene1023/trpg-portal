@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Search, Plus, Check } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { CREATURE_CATALOG, CREATURE_CATEGORIES, CreatureEntry } from "@/lib/creatureCatalog";
 
-export default function CreatureCatalogPage() {
+function CreatureCatalogContent() {
   const searchParams = useSearchParams();
   const scenarioId = searchParams.get("scenarioId");
 
@@ -272,5 +272,13 @@ export default function CreatureCatalogPage() {
         {filtered.length} / {CREATURE_CATALOG.length} 件表示
       </p>
     </div>
+  );
+}
+
+export default function CreatureCatalogPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-2xl px-4 py-8 text-coc-muted text-sm">読み込み中...</div>}>
+      <CreatureCatalogContent />
+    </Suspense>
   );
 }

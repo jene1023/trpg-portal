@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, BookOpen } from "lucide-react";
@@ -20,7 +20,7 @@ function hasStats(creature: Creature): boolean {
   return STAT_DISPLAY.some(({ key }) => creature[key] !== null);
 }
 
-export default function CreaturesPage() {
+function CreaturesContent() {
   const searchParams = useSearchParams();
   const initialScenario = searchParams.get("scenario") ?? "all";
   const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -180,5 +180,13 @@ export default function CreaturesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CreaturesPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center py-24 text-coc-muted text-sm">読み込み中...</div>}>
+      <CreaturesContent />
+    </Suspense>
   );
 }

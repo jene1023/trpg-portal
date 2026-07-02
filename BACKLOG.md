@@ -506,7 +506,7 @@
 **実装ヒント:** `npcs` テーブルに `faction: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に `faction: string | null` を追加。`src/app/npcs/page.tsx` の一覧フィルタに `faction` の select 要素を追加し、クライアントサイドでフィルタ（`.filter(n => !factionFilter || n.faction === factionFilter)`）。`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` のフォームに `faction` 入力欄を追加（`src/app/_components/NpcForm.tsx` を更新）。フィルタのオプション候補は既存NPCから動的取得（`.map(n => n.faction).filter(Boolean).unique()`）。
 **コミット:** `feat: NPC faction/organization tag for group filtering`
 
-## [TODO] Supabase Realtimeセッション中HP/SAN同期 — 優先度: 高
+## [DONE] Supabase Realtimeセッション中HP/SAN同期 — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッション中にQuickStatEditorやPartyStatAdjusterでHP/MP/SANを変更すると、同じキャラクターを開いている全クライアントに即時反映されるリアルタイム同期機能。現在はrouter.refresh()による手動更新のみで、KPとPLが別々の画面で同じデータを操作すると表示がずれる。
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` と `src/app/scenarios/[id]/party/page.tsx`（`PartyStatAdjuster.tsx`）に `supabase.channel('character-stats').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'characters' }, payload => { /* stateを更新 */ }).subscribe()` を追加し、DB更新と同時にリアルタイムイベントを受信してUIを再描画。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）でも同様に subscribe してHP/MP/SANを自動更新。追加DBなし。
