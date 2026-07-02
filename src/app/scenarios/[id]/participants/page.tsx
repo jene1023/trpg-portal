@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, Player } from "@/lib/supabase";
 import ParticipantList from "@/app/_components/ParticipantList";
 
 type CharacterSummary = Pick<Character, "id" | "name" | "player_name" | "occupation">;
@@ -27,16 +27,22 @@ export default async function ParticipantsPage({ params }: Props) {
 
   if (!scenario) notFound();
 
-  const { data: participants } = await supabase
-    .from("scenario_participants")
-    .select("*, characters(id, name, player_name, occupation)")
-    .eq("scenario_id", id)
-    .order("created_at", { ascending: true });
-
-  const { data: allCharacters } = await supabase
-    .from("characters")
-    .select("id, name, player_name, occupation")
-    .order("name", { ascending: true });
+  const [{ data: participants }, { data: allCharacters }, { data: allPlayers }] =
+    await Promise.all([
+      supabase
+        .from("scenario_participants")
+        .select("*, characters(id, name, player_name, occupation)")
+        .eq("scenario_id", id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("characters")
+        .select("id, name, player_name, occupation")
+        .order("name", { ascending: true }),
+      supabase
+        .from("players")
+        .select("*")
+        .order("display_name", { ascending: true }),
+    ]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -61,6 +67,7 @@ export default async function ParticipantsPage({ params }: Props) {
         scenarioId={id}
         initialParticipants={(participants ?? []) as ParticipantWithCharacter[]}
         allCharacters={(allCharacters ?? []) as CharacterSummary[]}
+        allPlayers={(allPlayers ?? []) as Player[]}
       />
     </div>
   );

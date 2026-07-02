@@ -279,3 +279,19 @@ create policy "allow all for anon" on character_ability_growths for all using (t
 
 -- NPC陣営・組織タグ (追加マイグレーション)
 alter table npcs add column if not exists faction text;
+
+-- プレイヤー情報管理 (追加マイグレーション)
+create table if not exists players (
+  id                uuid primary key default gen_random_uuid(),
+  display_name      text not null,
+  contact_discord   text,
+  contact_other     text,
+  preferred_genre   text,
+  notes             text,
+  created_at        timestamptz default now()
+);
+
+alter table players enable row level security;
+create policy "allow all for anon" on players for all using (true) with check (true);
+
+alter table scenario_participants add column if not exists player_id uuid references players(id);

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
@@ -366,6 +366,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">真相タイムライン</p>
               <p className="text-xs text-coc-muted">事件経緯をKP専用の時系列ノートで整理</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href="/players"
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <UserCheck size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">プレイヤー管理</p>
+              <p className="text-xs text-coc-muted">卓メンバーの連絡先・好みのシナリオ傾向を管理</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>

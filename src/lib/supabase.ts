@@ -179,6 +179,17 @@ export type ScenarioParticipant = {
   scenario_id: string;
   character_id: string;
   attendance_status: AttendanceStatus;
+  player_id: string | null;
+  created_at: string;
+};
+
+export type Player = {
+  id: string;
+  display_name: string;
+  contact_discord: string | null;
+  contact_other: string | null;
+  preferred_genre: string | null;
+  notes: string | null;
   created_at: string;
 };
 

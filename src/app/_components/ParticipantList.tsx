@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, X } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus, Player } from "@/lib/supabase";
 
 type CharacterSummary = Pick<Character, "id" | "name" | "player_name" | "occupation">;
 
@@ -15,6 +15,7 @@ type Props = {
   scenarioId: string;
   initialParticipants: ParticipantWithCharacter[];
   allCharacters: CharacterSummary[];
+  allPlayers: Player[];
 };
 
 const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
@@ -29,7 +30,7 @@ const ATTENDANCE_COLORS: Record<AttendanceStatus, string> = {
   absent: "text-red-400 border-red-900",
 };
 
-export default function ParticipantList({ scenarioId, initialParticipants, allCharacters }: Props) {
+export default function ParticipantList({ scenarioId, initialParticipants, allCharacters, allPlayers }: Props) {
   const [participants, setParticipants] = useState<ParticipantWithCharacter[]>(initialParticipants);
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
   const [adding, setAdding] = useState(false);
@@ -71,6 +72,22 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
     if (!error) {
       setParticipants((prev) =>
         prev.map((p) => (p.id === participantId ? { ...p, attendance_status: status } : p))
+      );
+    }
+    setUpdatingId(null);
+  }
+
+  async function handlePlayerChange(participantId: string, playerId: string) {
+    if (!isSupabaseConfigured) return;
+    setUpdatingId(participantId);
+    const value = playerId || null;
+    const { error } = await supabase
+      .from("scenario_participants")
+      .update({ player_id: value })
+      .eq("id", participantId);
+    if (!error) {
+      setParticipants((prev) =>
+        prev.map((p) => (p.id === participantId ? { ...p, player_id: value } : p))
       );
     }
     setUpdatingId(null);
@@ -137,52 +154,93 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
           </p>
         ) : (
           <div className="space-y-2">
-            {participants.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-4 py-3 gap-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/characters/${p.character_id}`}
-                    className="font-cinzel font-semibold text-coc-text text-sm hover:text-coc-gold transition-colors"
-                  >
-                    {p.characters.name}
-                  </Link>
-                  {(p.characters.player_name || p.characters.occupation) && (
-                    <p className="text-xs text-coc-muted mt-0.5">
-                      {[p.characters.player_name, p.characters.occupation]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </p>
+            {participants.map((p) => {
+              const linkedPlayer = allPlayers.find((pl) => pl.id === p.player_id);
+              return (
+                <div
+                  key={p.id}
+                  className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 gap-3"
+                >
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/characters/${p.character_id}`}
+                        className="font-cinzel font-semibold text-coc-text text-sm hover:text-coc-gold transition-colors"
+                      >
+                        {p.characters.name}
+                      </Link>
+                      {(p.characters.player_name || p.characters.occupation) && (
+                        <p className="text-xs text-coc-muted mt-0.5">
+                          {[p.characters.player_name, p.characters.occupation]
+                            .filter(Boolean)
+                            .join(" / ")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <select
+                        value={p.attendance_status ?? "unconfirmed"}
+                        onChange={(e) => handleAttendanceChange(p.id, e.target.value as AttendanceStatus)}
+                        disabled={updatingId === p.id}
+                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium bg-transparent focus:outline-none focus:border-coc-gold transition-colors disabled:opacity-50 ${ATTENDANCE_COLORS[p.attendance_status ?? "unconfirmed"]}`}
+                      >
+                        {(Object.keys(ATTENDANCE_LABELS) as AttendanceStatus[]).map((s) => (
+                          <option key={s} value={s}>
+                            {ATTENDANCE_LABELS[s]}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleRemove(p.id)}
+                        className="text-coc-faint hover:text-red-400 transition-colors"
+                        title="参加者から除外"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  </div>
+                  {/* プレイヤー紐付け */}
+                  {allPlayers.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-coc-muted shrink-0">PL:</span>
+                      <select
+                        value={p.player_id ?? ""}
+                        onChange={(e) => handlePlayerChange(p.id, e.target.value)}
+                        disabled={updatingId === p.id}
+                        className="flex-1 rounded-md border border-coc-border bg-coc-raised px-2 py-0.5 text-xs text-coc-text focus:outline-none focus:border-coc-gold transition-colors disabled:opacity-50"
+                      >
+                        <option value="">プレイヤー未設定</option>
+                        {allPlayers.map((pl) => (
+                          <option key={pl.id} value={pl.id}>
+                            {pl.display_name}
+                          </option>
+                        ))}
+                      </select>
+                      {linkedPlayer && (
+                        <Link
+                          href="/players"
+                          className="text-xs text-coc-gold hover:underline shrink-0"
+                        >
+                          詳細
+                        </Link>
+                      )}
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <select
-                    value={p.attendance_status ?? "unconfirmed"}
-                    onChange={(e) => handleAttendanceChange(p.id, e.target.value as AttendanceStatus)}
-                    disabled={updatingId === p.id}
-                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium bg-transparent focus:outline-none focus:border-coc-gold transition-colors disabled:opacity-50 ${ATTENDANCE_COLORS[p.attendance_status ?? "unconfirmed"]}`}
-                  >
-                    {(Object.keys(ATTENDANCE_LABELS) as AttendanceStatus[]).map((s) => (
-                      <option key={s} value={s}>
-                        {ATTENDANCE_LABELS[s]}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => handleRemove(p.id)}
-                    className="text-coc-faint hover:text-red-400 transition-colors"
-                    title="参加者から除外"
-                  >
-                    <X size={15} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {allPlayers.length === 0 && (
+        <p className="text-xs text-coc-muted text-center">
+          <Link href="/players/new" className="text-coc-gold hover:underline">
+            プレイヤーを登録
+          </Link>
+          するとキャラクターに紐づけられます
+        </p>
+      )}
     </div>
   );
 }

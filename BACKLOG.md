@@ -542,7 +542,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` に「一括SANチェック」ボタンを持つ "use client" セクションを追加。成功時喪失ダイス式と失敗時喪失ダイス式を入力し、ボタン押下で全参加者ごとに 1d100判定（`Math.floor(Math.random()*100)+1`）を実行してsanの現在値を自動更新。各キャラの結果（成功/失敗・喪失量）を結果テーブルで表示し `supabase.from("characters").update({ san_current }).eq("id", id)` で一括反映。SAN喪失5以上のキャラクターには狂気記録（`madness_records`）追加導線を表示。追加DBなし（既存 `scenario_participants`, `characters` を流用）。
 **コミット:** `feat: party-wide SAN check trigger from scenario party view`
 
-## [TODO] プレイヤー情報管理（卓メンバーメモ）— 優先度: 中
+## [DONE] プレイヤー情報管理（卓メンバーメモ）— 優先度: 中
 **対象:** KP
 **概要:** 一緒に遊ぶプレイヤー（人）の名前・Discord/TwitterID・好みのシナリオ傾向・特記事項をポータル内で管理できるページ。シナリオごとのメンバーアサインや長期グループ運営に役立てる。
 **実装ヒント:** Supabaseに `players` テーブルを追加（id, display_name, contact_discord: text | null, contact_other: text | null, preferred_genre: text | null, notes: text | null, created_at）。`src/app/players/page.tsx`（一覧）と `src/app/players/new/page.tsx`（作成フォーム）を新規作成。`scenario_participants` テーブルに `player_id: uuid | null REFERENCES players(id)` カラムをALTER TABLEで追加し、KPが参加者にプレイヤーを紐づけできるよう `src/app/scenarios/[id]/participants/page.tsx` を更新。`src/lib/supabase.ts` に `Player` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のサイドリンクとして配置。
