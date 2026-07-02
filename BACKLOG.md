@@ -529,3 +529,33 @@
 **概要:** Roll20・ユドナリウム・ここフォリア・Discord・Zoomなど、シナリオで使うVTTや通話ツールのURLをシナリオに紐づけて保存し、セッション開始時にワンクリックで各ツールに飛べる機能。現在KPはURLをLINEやDiscordで毎回共有しなければならず、ポータル内で完結しない。
 **実装ヒント:** `scenarios` テーブルに `vtt_url: text | null`（卓URL）と `vtt_type: text | null`（"ユドナリウム"|"ここフォリア"|"Roll20"|"Discord"|"Zoom"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/ScenarioForm.tsx` に `vtt_type` select と `vtt_url` 入力欄を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓に入る」ボタンを表示（`<a href={vtt_url} target="_blank" rel="noopener">`）。セッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも卓URLの設定状態を確認項目として追加。
 **コミット:** `feat: VTT and call tool URL management per scenario`
+
+## [TODO] キャラクターお気に入り技能ピン留め（クイックロール強化）— 優先度: 高
+**対象:** PL / 共通
+**概要:** 「回避」「目星」「聞き耳」など頻繁に使う技能を3〜5件ピン留めし、モバイルクイックダッシュボードとDiceRollerの先頭に固定表示してセッション中に即座にロールできるようにする。
+**実装ヒント:** `character_skills` テーブルに `is_favorite: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `is_favorite: boolean` を追加。`src/app/_components/SkillList.tsx` の各技能行にスター/ピンアイコンを追加し `supabase.from("character_skills").update({ is_favorite }).eq("id", id)` でトグル。`src/app/_components/DiceRoller.tsx` にお気に入り技能を先頭グループとして表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にお気に入り技能ショートカットセクションを追加。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: favorite skill pinning for quick roll access during sessions`
+
+## [TODO] パーティー一括SANチェック（恐怖イベント対応）— 優先度: 高
+**対象:** KP / 共通
+**概要:** 神話生物遭遇時など全員が同じSAN喪失判定を行う場面で、KPがシナリオのパーティービューから「一括SANチェック」をトリガーし、参加者全員のSAN値を自動更新できるUI。既存のSanCheckRollerとPartyStatAdjusterの組み合わせを強化する。
+**実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` に「一括SANチェック」ボタンを持つ "use client" セクションを追加。成功時喪失ダイス式と失敗時喪失ダイス式を入力し、ボタン押下で全参加者ごとに 1d100判定（`Math.floor(Math.random()*100)+1`）を実行してsanの現在値を自動更新。各キャラの結果（成功/失敗・喪失量）を結果テーブルで表示し `supabase.from("characters").update({ san_current }).eq("id", id)` で一括反映。SAN喪失5以上のキャラクターには狂気記録（`madness_records`）追加導線を表示。追加DBなし（既存 `scenario_participants`, `characters` を流用）。
+**コミット:** `feat: party-wide SAN check trigger from scenario party view`
+
+## [TODO] プレイヤー情報管理（卓メンバーメモ）— 優先度: 中
+**対象:** KP
+**概要:** 一緒に遊ぶプレイヤー（人）の名前・Discord/TwitterID・好みのシナリオ傾向・特記事項をポータル内で管理できるページ。シナリオごとのメンバーアサインや長期グループ運営に役立てる。
+**実装ヒント:** Supabaseに `players` テーブルを追加（id, display_name, contact_discord: text | null, contact_other: text | null, preferred_genre: text | null, notes: text | null, created_at）。`src/app/players/page.tsx`（一覧）と `src/app/players/new/page.tsx`（作成フォーム）を新規作成。`scenario_participants` テーブルに `player_id: uuid | null REFERENCES players(id)` カラムをALTER TABLEで追加し、KPが参加者にプレイヤーを紐づけできるよう `src/app/scenarios/[id]/participants/page.tsx` を更新。`src/lib/supabase.ts` に `Player` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のサイドリンクとして配置。
+**コミット:** `feat: player info management for KP group coordination`
+
+## [TODO] ハンドアウト配布済みトラッキング — 優先度: 中
+**対象:** KP / 共通
+**概要:** ハンドアウトをPLへ渡したかどうかを「配布済み」フラグで管理し、未配布ハンドアウトをセッション準備チェックリストで警告表示できる機能。セッション中の「渡し忘れ」防止に特化する。
+**実装ヒント:** `handouts` テーブルに `is_distributed: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `is_distributed: boolean` を追加。`src/app/scenarios/[id]/handouts/page.tsx`（`src/app/_components/HandoutList.tsx`）の各ハンドアウトカードに「配布済み」チェックボックスを追加し `supabase.from("handouts").update({ is_distributed }).eq("id", id)` でトグル。`src/app/scenarios/[id]/preflight/page.tsx`（KPセッション準備チェックリスト/DONE済み）の「ハンドアウト準備状況」セクションに未配布件数を警告バッジで追加。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: handout distribution tracking to prevent forgotten handouts`
+
+## [TODO] 技能カテゴリ別フィルタ・タブ表示 — 優先度: 低
+**対象:** PL / 共通
+**概要:** 現在の技能リストは全技能を一覧表示するのみ。CoC7版の技能カテゴリ（戦闘系・調査系・対人系・知識系・移動系）別にタブまたはドロップダウンフィルタで絞り込み表示できるようにし、技能の多いキャラクターでの参照速度を上げる。
+**実装ヒント:** `character_skills` テーブルに `category: text | null`（例: "戦闘"|"調査"|"対人"|"知識"|"移動"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `category: string | null` を追加。`src/app/_components/SkillList.tsx` にカテゴリタブ（CSS border-bottom active スタイル）を追加し `useState` でアクティブカテゴリを管理してフィルタ表示。既存の技能は `category: null`（＝「すべて」タブに表示）。新規技能追加フォームに category の select 要素を追加。追加DBカラムのみ。
+**コミット:** `feat: skill category filter tabs on character skill list`
