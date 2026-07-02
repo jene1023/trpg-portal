@@ -613,3 +613,27 @@
 **概要:** キャラクターに複数の参考画像URL（立ち絵・衣装違い・雰囲気画像）を登録しギャラリー表示できる機能。現在の `portrait_url` は1枚のメイン画像のみで、複数のビジュアルコンセプトやSNS共有用バリアントを管理する手段がない。
 **実装ヒント:** Supabaseに `character_gallery_images` テーブルを追加（id, character_id, image_url: text, caption: text | null, is_main: boolean DEFAULT false, order_index: integer DEFAULT 0, created_at）。`src/app/characters/[id]/gallery/page.tsx` を "use client" で新規作成（グリッド表示＋URL入力フォームで追加）。「メインに設定」ボタンで `supabase.from("characters").update({ portrait_url })` にも反映（`is_main` フラグと連動）。▲▼ボタンで `order_index` を swap して並び替え可能。`src/lib/supabase.ts` に `CharacterGalleryImage` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレートセクションに「ギャラリーを見る」リンクを追加（画像数バッジ付き）。
 **コミット:** `feat: character portrait gallery for managing multiple reference images`
+
+## [TODO] NPCロールプレイメモ（口調・セリフ支援） — 優先度: 中
+**対象:** KP
+**概要:** NPC個別に「口調」「よく使うセリフ例」「行動パターン」を記録し、NPC詳細ページからセッション中に即参照できる機能。既存のキャラクター `speech_style` フィールドと同様のアプローチをNPCに適用し、KPの演技ブレとNPC個性の忘却を防ぐ。
+**実装ヒント:** `npcs` テーブルに `speech_style: text | null`（口調・一人称）と `sample_quotes: text | null`（セリフ例・口癖）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に両カラムを追加。`src/app/_components/NpcForm.tsx` に `<textarea>` フィールドを2つ追加（`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` に自動反映）。`src/app/npcs/[id]/page.tsx` の「セリフ例」セクションはデフォルト折りたたみ（`<details>`）で表示しセッション中の参照コストを下げる。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: NPC roleplay memo with speech style and sample quotes for KP`
+
+## [TODO] シナリオ物証・道具管理（KP向けプロップ管理） — 優先度: 中
+**対象:** KP
+**概要:** シナリオ中に登場する物証・道具・アイテム（手紙・鍵・古地図・血染めの日記等）を名前・説明・入手条件・配布済みフラグで管理できる機能。ハンドアウト（`handouts`テーブル）は「情報カード」の管理に特化しているのに対し、こちらは「物理的な道具・証拠品」の管理に特化し、KPのプロップ渡し忘れを防ぐ。
+**実装ヒント:** Supabaseに `scenario_props` テーブルを追加（id, scenario_id, name, description: text | null, acquisition_condition: text | null, is_distributed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/props/page.tsx` を "use client" で新規作成（一覧＋インライン追加フォーム、配布済みチェックボックスで `supabase.from("scenario_props").update({is_distributed})` トグル）。`src/lib/supabase.ts` に `ScenarioProp` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「物証・道具」リンクと未配布件数バッジを追加。KPセッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも未配布プロップの確認項目を追加。
+**コミット:** `feat: scenario prop and evidence management for KP`
+
+## [TODO] ランダムイベントテーブル（KP向けランダム抽選） — 優先度: 低
+**対象:** KP
+**概要:** シナリオに紐づいたランダムイベント候補リストを作成し、ボタン1クリックで重み付き抽選できる機能。探索中の偶発的展開や、セッション進行に詰まった際の補助ツール。KPが事前に候補を登録しておけば即座に使える。
+**実装ヒント:** Supabaseに `scenario_random_events` テーブルを追加（id, scenario_id, weight: integer DEFAULT 1, title, description: text | null, created_at）。`src/app/scenarios/[id]/random-events/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。「抽選する」ボタン押下で各イベントの `weight` 合計に対する累積比率で `Math.random()` を使い1件を選出してモーダル表示。`src/lib/supabase.ts` に `ScenarioRandomEvent` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ランダムイベント」リンクを追加。追加DBテーブルのみ。
+**コミット:** `feat: scenario random event table with weighted draw for KP`
+
+## [TODO] セッション後合同フィードバック（KP・PL共同振り返り） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッションログ単位でKP・PL双方が「印象に残った場面・良かった演出・次回への期待・改善提案」を自由記述で投稿し合える共同振り返りページ。既存の `scenario_retrospectives`（KP専用の構造化ノート）と `scenario_player_ratings`（PL評価）とは異なり、セッション単位の自由記述フィードバックに特化し、参加者全員の声を一か所に集約する。
+**実装ヒント:** Supabaseに `session_reflections` テーブルを追加（id, session_id, author_name, role: "kp"|"pl"|"other", content: text, created_at）。`src/app/scenarios/[id]/reflections/page.tsx` を "use client" で新規作成（シナリオ内のセッションログを select で選び、投稿フォーム＋created_at降順の一覧表示）。`role` は select（KP/PL/その他）で入力。`src/lib/supabase.ts` に `SessionReflection` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「合同振り返り」リンクを追加。`session_id` は `sessions` テーブルの `id` を参照（外部キー推奨）。
+**コミット:** `feat: shared session reflection notes for KP and PL post-game feedback`
