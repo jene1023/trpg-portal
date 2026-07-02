@@ -500,7 +500,7 @@
 **実装ヒント:** `src/app/characters/compare/page.tsx` を "use client" で新規作成。`?ids=id1,id2,id3` クエリパラメータで最大4キャラ指定し `supabase.from("characters").select("*, character_skills(*)").in("id", ids)` で一括取得。STR/CON/POW/DEX/APP/SIZ/INT/EDU/HP/MP/SANの能力値を行、キャラ名を列にした表形式で表示。各セルは最高値を緑ハイライト。技能は「全キャラが共通で持つ技能」のみ比較行として追加表示。キャラクター一覧ページ（`src/app/characters/page.tsx`）に各キャラカードの「比較に追加」ボタン（チェックボックス）を追加し、選択後「比較する」ボタンで `/characters/compare?ids=...` に遷移。追加DBなし。
 **コミット:** `feat: character comparison view for side-by-side stat and skill analysis`
 
-## [TODO] NPC陣営・組織タグ管理 — 優先度: 中
+## [DONE] NPC陣営・組織タグ管理 — 優先度: 中
 **対象:** KP
 **概要:** NPCに「陣営/組織名」タグを付与してフィルタ・グループ表示できる機能。現在NPC一覧は `scenario_name` 絞り込みのみで、「敵対/中立/友好」や「アーカムPD/カルト教団/一般市民」などの組織別整理ができない。長期キャンペーンや多数NPC登場シナリオでの情報整理を改善する。
 **実装ヒント:** `npcs` テーブルに `faction: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に `faction: string | null` を追加。`src/app/npcs/page.tsx` の一覧フィルタに `faction` の select 要素を追加し、クライアントサイドでフィルタ（`.filter(n => !factionFilter || n.faction === factionFilter)`）。`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` のフォームに `faction` 入力欄を追加（`src/app/_components/NpcForm.tsx` を更新）。フィルタのオプション候補は既存NPCから動的取得（`.map(n => n.faction).filter(Boolean).unique()`）。

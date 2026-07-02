@@ -29,6 +29,7 @@ export default function NpcForm() {
   const [form, setForm] = useState({
     scenario_name: "",
     name: "",
+    faction: "",
     appearance: "",
     purpose: "",
     notes: "",
@@ -81,6 +82,7 @@ export default function NpcForm() {
     const { error: err } = await supabase.from("npcs").insert({
       scenario_name: form.scenario_name.trim() || null,
       name: form.name.trim(),
+      faction: form.faction.trim() || null,
       appearance: form.appearance.trim() || null,
       purpose: form.purpose.trim() || null,
       notes: form.notes.trim() || null,
@@ -119,6 +121,20 @@ export default function NpcForm() {
           value={form.scenario_name}
           onChange={handleChange}
           placeholder="例: インスマスを覆う影"
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="faction" className={labelClass}>
+          陣営 / 組織
+        </label>
+        <input
+          id="faction"
+          name="faction"
+          value={form.faction}
+          onChange={handleChange}
+          placeholder="例: アーカムPD, カルト教団, 一般市民"
           className={fieldClass}
         />
       </div>

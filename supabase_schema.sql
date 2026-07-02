@@ -276,3 +276,6 @@ create table if not exists character_ability_growths (
 
 alter table character_ability_growths enable row level security;
 create policy "allow all for anon" on character_ability_growths for all using (true) with check (true);
+
+-- NPC陣営・組織タグ (追加マイグレーション)
+alter table npcs add column if not exists faction text;

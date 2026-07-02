@@ -121,20 +121,33 @@ export default async function NpcDetailPage({ params }: Props) {
           <h1 className="font-cinzel text-2xl font-bold text-coc-text leading-tight">
             {npc.name}
           </h1>
-          {npc.scenario_name && (
-            <p className="text-sm text-coc-gold mt-1">{npc.scenario_name}</p>
-          )}
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            {npc.scenario_name && (
+              <p className="text-sm text-coc-gold">{npc.scenario_name}</p>
+            )}
+            {npc.faction && (
+              <span className="inline-block rounded-full border border-coc-border bg-coc-raised px-2.5 py-0.5 text-xs text-coc-muted">
+                {npc.faction}
+              </span>
+            )}
+          </div>
         </div>
         <NpcDuplicateButton npcId={npc.id} />
       </div>
 
       <div className="space-y-4">
         {/* 外見・目的・メモ */}
-        {(npc.appearance || npc.purpose || npc.notes) && (
+        {(npc.faction || npc.appearance || npc.purpose || npc.notes) && (
           <div className="rounded-lg border border-coc-border bg-coc-surface p-4 space-y-3">
             <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
               基本情報
             </h2>
+            {npc.faction && (
+              <div>
+                <p className="text-xs font-medium text-coc-muted mb-0.5">陣営 / 組織</p>
+                <p className="text-sm text-coc-text">{npc.faction}</p>
+              </div>
+            )}
             {npc.appearance && (
               <div>
                 <p className="text-xs font-medium text-coc-muted mb-0.5">外見</p>

@@ -26,6 +26,7 @@ export default function NpcsPage() {
   const [npcs, setNpcs] = useState<Npc[]>([]);
   const [loading, setLoading] = useState(true);
   const [scenarioFilter, setScenarioFilter] = useState<string>("all");
+  const [factionFilter, setFactionFilter] = useState<string>("all");
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -47,10 +48,13 @@ export default function NpcsPage() {
     new Set(npcs.map((n) => n.scenario_name ?? "").filter(Boolean))
   ).sort();
 
-  const filtered =
-    scenarioFilter === "all"
-      ? npcs
-      : npcs.filter((n) => (n.scenario_name ?? "") === scenarioFilter);
+  const factions = Array.from(
+    new Set(npcs.map((n) => n.faction ?? "").filter(Boolean))
+  ).sort();
+
+  const filtered = npcs
+    .filter((n) => scenarioFilter === "all" || (n.scenario_name ?? "") === scenarioFilter)
+    .filter((n) => factionFilter === "all" || (n.faction ?? "") === factionFilter);
 
   return (
     <div className="coc-page-enter mx-auto max-w-4xl px-4 py-8">
@@ -65,8 +69,8 @@ export default function NpcsPage() {
         </Link>
       </div>
 
-      {/* シナリオフィルタ */}
-      <div className="mb-6">
+      {/* フィルタ */}
+      <div className="mb-6 flex flex-wrap gap-3">
         <select
           value={scenarioFilter}
           onChange={(e) => setScenarioFilter(e.target.value)}
@@ -76,6 +80,18 @@ export default function NpcsPage() {
           {scenarios.map((s) => (
             <option key={s} value={s}>
               {s}
+            </option>
+          ))}
+        </select>
+        <select
+          value={factionFilter}
+          onChange={(e) => setFactionFilter(e.target.value)}
+          className="rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+        >
+          <option value="all">すべての陣営</option>
+          {factions.map((f) => (
+            <option key={f} value={f}>
+              {f}
             </option>
           ))}
         </select>
@@ -114,9 +130,16 @@ export default function NpcsPage() {
                   >
                     {npc.name}
                   </Link>
-                  {npc.scenario_name && (
-                    <p className="text-xs text-coc-gold mt-0.5">{npc.scenario_name}</p>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                    {npc.scenario_name && (
+                      <p className="text-xs text-coc-gold">{npc.scenario_name}</p>
+                    )}
+                    {npc.faction && (
+                      <span className="inline-block rounded-full border border-coc-border bg-coc-raised px-2 py-0.5 text-xs text-coc-muted">
+                        {npc.faction}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <Link
                   href={`/npcs/${npc.id}`}
