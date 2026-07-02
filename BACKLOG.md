@@ -583,3 +583,33 @@
 **概要:** 現在の技能リストは全技能を一覧表示するのみ。CoC7版の技能カテゴリ（戦闘系・調査系・対人系・知識系・移動系）別にタブまたはドロップダウンフィルタで絞り込み表示できるようにし、技能の多いキャラクターでの参照速度を上げる。
 **実装ヒント:** `character_skills` テーブルに `category: text | null`（例: "戦闘"|"調査"|"対人"|"知識"|"移動"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `category: string | null` を追加。`src/app/_components/SkillList.tsx` にカテゴリタブ（CSS border-bottom active スタイル）を追加し `useState` でアクティブカテゴリを管理してフィルタ表示。既存の技能は `category: null`（＝「すべて」タブに表示）。新規技能追加フォームに category の select 要素を追加。追加DBカラムのみ。
 **コミット:** `feat: skill category filter tabs on character skill list`
+
+## [TODO] 探索手がかりボード（シナリオ×PL用クルーメモ） — 優先度: 高
+**対象:** PL / 共通
+**概要:** PLがシナリオ中に発見した手がかり・情報を「発見済み」「調査中」「解決済み」のステータスで構造化管理できるカンバン風ボード。既存のクイックノート（`quick_notes`）は散文メモだが、こちらはCoCの謎解きフローに特化した手がかり整理ツール。長期シナリオでの情報整理と伏線回収に使う。
+**実装ヒント:** Supabaseに `scenario_clues` テーブルを追加（id, scenario_id, character_id, title, content: text | null, status: "found"|"investigating"|"resolved", created_at）。`src/app/characters/[id]/clues/page.tsx` を "use client" で新規作成（シナリオselect＋ステータス列ごとのカード表示）。カード追加フォームはモーダルまたはインライン入力で実装。`supabase.from("scenario_clues").update({ status })` でドラッグ不要のボタントグルによりステータス変更。`src/lib/supabase.ts` に `ScenarioClue` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「手がかりボード」リンクを追加。
+**コミット:** `feat: scenario clue board for PL investigation tracking`
+
+## [TODO] 戦闘中敵HPトラッカー（セッション中ウィジェット） — 優先度: 高
+**対象:** KP / 共通
+**概要:** セッション中に遭遇した敵（NPC/クリーチャー）のHPをその場でトラッキングできるウィジェット。既存の「戦闘ラウンドカウンター」（`scenario_participants`ベース）はPC側のDEX/イニシアチブ管理のみで、敵のHP追跡が欠落している。複数体の雑魚が登場する戦闘でのダメージ管理を大幅に効率化する。
+**実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を拡張（または `src/app/scenarios/[id]/enemy-tracker/page.tsx` を新規作成）し "use client" で実装。useState で「敵リスト（名前・HP最大・HP現在）」を管理（ページリロードでリセット、ローカル状態のみ・追加DBなし）。「敵を追加」フォームで名前と最大HPを入力し敵カードを生成。各カードに+/-ボタンでHP増減し 0以下で「倒れた」バッジ表示。既存の `src/app/creatures/[id]/page.tsx` からクリーチャーを「敵として追加」するボタンも配置し、HPを初期値として取り込む。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加（既存「戦闘管理」と統合または並置）。
+**コミット:** `feat: enemy HP tracker widget for in-session combat management`
+
+## [TODO] 探索者の誓約・長期目標管理 — 優先度: 中
+**対象:** PL
+**概要:** キャラクターがセッションをまたいで追い求める「大きな目標」（例: カルトの壊滅・行方不明の兄の真相究明・呪われた家の謎解き）を記録し、達成/失敗/放棄の決着をつけられる機能。既存の「技能目標トラッカー」（`skill_goals`）は数値的な技能値目標のみで、物語的・キャラクター的な誓約を管理する手段が存在しない。
+**実装ヒント:** Supabaseに `character_vows` テーブルを追加（id, character_id, title, description: text | null, status: "active"|"fulfilled"|"failed"|"abandoned", resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/vows/page.tsx` を新規作成（Server Component + "use client" フォーム）。アクティブ誓約はカード上部に、解決済みはアーカイブとして下部に表示。各カードに「達成」「失敗」「放棄」ボタンを配置し `supabase.from("character_vows").update({ status, resolved_at })` で更新。`src/lib/supabase.ts` に `CharacterVow` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「誓約・目標」リンクを追加。
+**コミット:** `feat: character vow and long-term goal tracking`
+
+## [TODO] 状態異常タグ管理（負傷・毒・拘束等） — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッション中に発生する一時的な身体状態異常（負傷、毒、拘束、盲目、恐怖硬直等）をキャラクターにタグとして付与・解除できる機能。既存の「狂気状態管理」（`madness_records`）は精神的状態専用で、物理的状態異常のトラッキング手段が欠落している。セッション前チェックリスト（`preflight/page.tsx`）や戦闘時に確認できる。
+**実装ヒント:** Supabaseに `character_conditions` テーブルを追加（id, character_id, condition_name: text, color: text | null（例: "red"|"yellow"|"blue"）, is_active: boolean DEFAULT true, notes: text | null, created_at）。`src/app/_components/ConditionBadgeEditor.tsx` を "use client" で新規作成（プリセット: "負傷"|"毒"|"拘束"|"盲目"|"硬直"|"出血"|"疲弊"|"その他"、またはカスタム入力）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のHP/SANセクション付近にバッジとして表示し、クリックで追加/解除トグル。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも表示。`src/app/characters/[id]/preflight/page.tsx` のチェックリストにアクティブ状態異常を追加。`src/lib/supabase.ts` に `CharacterCondition` 型を追加。
+**コミット:** `feat: character condition tags for physical status effects`
+
+## [TODO] ポートレートギャラリー（複数参考画像管理） — 優先度: 低
+**対象:** PL / 共通
+**概要:** キャラクターに複数の参考画像URL（立ち絵・衣装違い・雰囲気画像）を登録しギャラリー表示できる機能。現在の `portrait_url` は1枚のメイン画像のみで、複数のビジュアルコンセプトやSNS共有用バリアントを管理する手段がない。
+**実装ヒント:** Supabaseに `character_gallery_images` テーブルを追加（id, character_id, image_url: text, caption: text | null, is_main: boolean DEFAULT false, order_index: integer DEFAULT 0, created_at）。`src/app/characters/[id]/gallery/page.tsx` を "use client" で新規作成（グリッド表示＋URL入力フォームで追加）。「メインに設定」ボタンで `supabase.from("characters").update({ portrait_url })` にも反映（`is_main` フラグと連動）。▲▼ボタンで `order_index` を swap して並び替え可能。`src/lib/supabase.ts` に `CharacterGalleryImage` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のポートレートセクションに「ギャラリーを見る」リンクを追加（画像数バッジ付き）。
+**コミット:** `feat: character portrait gallery for managing multiple reference images`
