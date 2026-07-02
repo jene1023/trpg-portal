@@ -289,6 +289,34 @@ body {
   );
 }
 
+/* タイルアイコン: グループホバー時に燭台の炎が灯るようなドロップシャドウ */
+.coc-icon-glow {
+  transition: filter 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .group:hover .coc-icon-glow,
+  .group:focus-within .coc-icon-glow {
+    filter: drop-shadow(0 0 7px rgba(201, 133, 58, 0.72));
+  }
+}
+
+/* キャラクター名（詳細ページ）: 古い羊皮紙に記された名前に灯る微光 */
+@keyframes coc-name-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(201, 133, 58, 0.10), 0 0 28px rgba(201, 133, 58, 0.04); }
+  50%       { text-shadow: 0 0 18px rgba(201, 133, 58, 0.22), 0 0 42px rgba(201, 133, 58, 0.09); }
+}
+
+.coc-name-glow {
+  text-shadow: 0 0 10px rgba(201, 133, 58, 0.10);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-name-glow {
+    animation: coc-name-glow 5s ease-in-out infinite;
+  }
+}
+
 /* ヒーロータイトル: 燭台の光を受けて揺れる金色の光輪 */
 @keyframes coc-title-glow {
   0%, 100% { text-shadow: 0 0 22px rgba(201, 133, 58, 0.18), 0 0 50px rgba(201, 133, 58, 0.07); }

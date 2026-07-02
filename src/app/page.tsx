@@ -155,7 +155,7 @@ export default async function HomePage() {
                 準備中
               </span>
             )}
-            <Icon size={24} className={available ? "text-coc-gold" : "text-coc-faint"} />
+            <Icon size={24} className={available ? "text-coc-gold coc-icon-glow" : "text-coc-faint"} />
             <div>
               <p className="font-cinzel text-sm font-semibold text-coc-text">{title}</p>
               <p className="text-xs text-coc-muted mt-1 leading-relaxed">{desc}</p>
