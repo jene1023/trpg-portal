@@ -602,7 +602,7 @@
 **実装ヒント:** Supabaseに `character_vows` テーブルを追加（id, character_id, title, description: text | null, status: "active"|"fulfilled"|"failed"|"abandoned", resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/vows/page.tsx` を新規作成（Server Component + "use client" フォーム）。アクティブ誓約はカード上部に、解決済みはアーカイブとして下部に表示。各カードに「達成」「失敗」「放棄」ボタンを配置し `supabase.from("character_vows").update({ status, resolved_at })` で更新。`src/lib/supabase.ts` に `CharacterVow` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「誓約・目標」リンクを追加。
 **コミット:** `feat: character vow and long-term goal tracking`
 
-## [TODO] 状態異常タグ管理（負傷・毒・拘束等） — 優先度: 中
+## [DONE] 状態異常タグ管理（負傷・毒・拘束等） — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッション中に発生する一時的な身体状態異常（負傷、毒、拘束、盲目、恐怖硬直等）をキャラクターにタグとして付与・解除できる機能。既存の「狂気状態管理」（`madness_records`）は精神的状態専用で、物理的状態異常のトラッキング手段が欠落している。セッション前チェックリスト（`preflight/page.tsx`）や戦闘時に確認できる。
 **実装ヒント:** Supabaseに `character_conditions` テーブルを追加（id, character_id, condition_name: text, color: text | null（例: "red"|"yellow"|"blue"）, is_active: boolean DEFAULT true, notes: text | null, created_at）。`src/app/_components/ConditionBadgeEditor.tsx` を "use client" で新規作成（プリセット: "負傷"|"毒"|"拘束"|"盲目"|"硬直"|"出血"|"疲弊"|"その他"、またはカスタム入力）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のHP/SANセクション付近にバッジとして表示し、クリックで追加/解除トグル。モバイルクイックダッシュボード（`src/app/characters/[id]/quick/page.tsx`）にも表示。`src/app/characters/[id]/preflight/page.tsx` のチェックリストにアクティブ状態異常を追加。`src/lib/supabase.ts` に `CharacterCondition` 型を追加。

@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import QuickStatsDisplay from "@/app/_components/QuickStatsDisplay";
 import DiceRoller from "@/app/_components/DiceRoller";
+import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -29,6 +30,12 @@ export default async function QuickDashboardPage({ params }: Props) {
     .eq("character_id", id);
 
   const favoriteSkills = (skills ?? []).filter((s) => s.is_favorite);
+
+  const { data: conditions } = await supabase
+    .from("character_conditions")
+    .select("*")
+    .eq("character_id", id)
+    .order("created_at", { ascending: true });
 
   return (
     <div className="mx-auto max-w-md px-4 py-6 space-y-6">
@@ -67,6 +74,17 @@ export default async function QuickDashboardPage({ params }: Props) {
             sanMax={char.san_max}
           />
         </div>
+      </div>
+
+      {/* 状態異常 */}
+      <div className="rounded-lg border border-coc-border bg-coc-surface p-4">
+        <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest mb-3">
+          状態異常
+        </h2>
+        <ConditionBadgeEditor
+          characterId={char.id}
+          initialConditions={conditions ?? []}
+        />
       </div>
 
       {/* お気に入り技能クイックロール */}

@@ -447,3 +447,13 @@ export type CharacterVow = {
   resolved_at: string | null;
   created_at: string;
 };
+
+export type CharacterCondition = {
+  id: string;
+  character_id: string;
+  condition_name: string;
+  color: string | null;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+};

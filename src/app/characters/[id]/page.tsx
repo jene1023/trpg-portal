@@ -19,6 +19,7 @@ import PdfExportButton from "@/app/_components/PdfExportButton";
 import DuplicateButton from "@/app/_components/DuplicateButton";
 import SectionDivider from "@/app/_components/SectionDivider";
 import PublicShareToggle from "@/app/_components/PublicShareToggle";
+import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,6 +40,12 @@ export default async function CharacterDetailPage({ params }: Props) {
     .from("character_skills")
     .select("*")
     .eq("character_id", id);
+
+  const { data: conditions } = await supabase
+    .from("character_conditions")
+    .select("*")
+    .eq("character_id", id)
+    .order("created_at", { ascending: true });
 
   const db = calcDamageBonus(char.str, char.siz);
   const build = calcBuild(char.str, char.siz);
@@ -169,6 +176,14 @@ export default async function CharacterDetailPage({ params }: Props) {
               sanMax={char.san_max}
               con={char.con}
             />
+            <SectionDivider className="my-2" />
+            <div>
+              <p className="text-xs text-coc-muted font-semibold mb-2">状態異常</p>
+              <ConditionBadgeEditor
+                characterId={id}
+                initialConditions={conditions ?? []}
+              />
+            </div>
             <div className="grid grid-cols-3 gap-2 pt-2">
               {[
                 { label: "幸運", value: char.luck },

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -48,6 +48,13 @@ export default async function PreflightPage({ params }: Props) {
     .from("character_spells")
     .select("id, spell_name, mp_cost, san_cost")
     .eq("character_id", id)
+    .order("created_at", { ascending: true });
+
+  const { data: activeConditions } = await supabase
+    .from("character_conditions")
+    .select("id, condition_name, color, notes")
+    .eq("character_id", id)
+    .eq("is_active", true)
     .order("created_at", { ascending: true });
 
   if (!char) notFound();
@@ -152,6 +159,56 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           狂気記録を管理 →
+        </Link>
+      </div>
+
+      {/* アクティブな状態異常 */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle size={16} className={(activeConditions ?? []).length > 0 ? "text-yellow-400" : "text-coc-muted"} />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            状態異常
+          </h2>
+          {(activeConditions ?? []).length > 0 && (
+            <span className="ml-auto rounded bg-yellow-900/60 border border-yellow-700 px-2 py-0.5 text-xs text-yellow-300 font-semibold">
+              {(activeConditions ?? []).length}件
+            </span>
+          )}
+        </div>
+        {(activeConditions ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">状態異常なし</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {(activeConditions ?? []).map(
+              (c: { id: string; condition_name: string; color: string | null; notes: string | null }) => (
+                <span
+                  key={c.id}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                    c.color === "red"
+                      ? "border-red-700 bg-red-950/40 text-red-300"
+                      : c.color === "green"
+                      ? "border-green-700 bg-green-950/40 text-green-300"
+                      : c.color === "blue"
+                      ? "border-blue-700 bg-blue-950/40 text-blue-300"
+                      : c.color === "yellow"
+                      ? "border-yellow-700 bg-yellow-950/40 text-yellow-300"
+                      : "border-coc-border bg-coc-raised text-coc-muted"
+                  }`}
+                >
+                  {c.condition_name}
+                  {c.notes && (
+                    <span className="ml-1 opacity-70">({c.notes})</span>
+                  )}
+                </span>
+              )
+            )}
+          </div>
+        )}
+        <Link
+          href={`/characters/${id}`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          状態異常を管理 →
         </Link>
       </div>
 
