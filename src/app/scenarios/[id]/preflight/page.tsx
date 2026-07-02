@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Shield,
   ExternalLink,
+  Package,
 } from "lucide-react";
 import {
   supabase,
@@ -47,11 +48,18 @@ export default async function ScenarioPreflightPage({ params }: Props) {
     .eq("scenario_name", scenario.title)
     .order("name", { ascending: true });
 
+  const { data: propsData } = await supabase
+    .from("scenario_props")
+    .select("id, name, is_distributed")
+    .eq("scenario_id", id)
+    .order("created_at", { ascending: true });
+
   const participants: Array<{ id: string; attendance_status: string; characters: { id: string; name: string; player_name: string | null } }> =
     scenario.scenario_participants ?? [];
   const handouts: Array<{ id: string; title: string; is_secret: boolean; recipient_name: string | null; is_distributed: boolean }> =
     scenario.handouts ?? [];
   const npcList: Array<{ id: string; name: string; purpose: string | null }> = npcs ?? [];
+  const propList: Array<{ id: string; name: string; is_distributed: boolean }> = propsData ?? [];
 
   const attendingCount = participants.filter((p) => p.attendance_status === "attending").length;
   const absentCount = participants.filter((p) => p.attendance_status === "absent").length;
@@ -60,6 +68,7 @@ export default async function ScenarioPreflightPage({ params }: Props) {
   const secretCount = handouts.filter((h) => h.is_secret).length;
   const noRecipientCount = handouts.filter((h) => !h.recipient_name).length;
   const undistributedCount = handouts.filter((h) => !h.is_distributed).length;
+  const undistributedPropCount = propList.filter((p) => !p.is_distributed).length;
 
   const sectionClass = "rounded-lg border bg-coc-surface p-4";
 
@@ -108,6 +117,16 @@ export default async function ScenarioPreflightPage({ params }: Props) {
       ok: !!scenario.vtt_url,
       label: "卓URL（VTT / 通話ツール）の設定",
       warn: !scenario.vtt_url ? "未設定" : undefined,
+    },
+    {
+      ok: propList.length === 0 || undistributedPropCount === 0,
+      label: "物証・道具の配布",
+      warn:
+        propList.length === 0
+          ? "プロップなし"
+          : undistributedPropCount > 0
+          ? `未配布 ${undistributedPropCount}件`
+          : undefined,
     },
   ];
 
@@ -416,6 +435,59 @@ export default async function ScenarioPreflightPage({ params }: Props) {
           NPC一覧を開く →
         </Link>
       </div>
+
+      {/* 物証・道具 */}
+      {propList.length > 0 && (
+        <div className={`${sectionClass} border-coc-border mb-4`}>
+          <div className="flex items-center gap-2 mb-3">
+            <Package
+              size={16}
+              className={undistributedPropCount > 0 ? "text-yellow-400" : "text-coc-muted"}
+            />
+            <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+              物証・道具
+            </h2>
+            <span className="ml-auto text-xs text-coc-muted">{propList.length}件</span>
+          </div>
+          {undistributedPropCount > 0 && (
+            <div className="flex items-center gap-1.5 rounded-md border border-yellow-800 bg-yellow-950/20 px-3 py-2 mb-3">
+              <AlertTriangle size={14} className="text-yellow-400 flex-shrink-0" />
+              <p className="text-xs text-yellow-300">
+                未配布のプロップが {undistributedPropCount}件あります
+              </p>
+            </div>
+          )}
+          <ul className="space-y-1 mb-3">
+            {propList.map((prop) => (
+              <li
+                key={prop.id}
+                className="flex items-center justify-between rounded-md border border-coc-border bg-coc-raised px-3 py-1.5"
+              >
+                <span
+                  className={`text-sm ${
+                    prop.is_distributed ? "line-through text-coc-muted" : "text-coc-text"
+                  }`}
+                >
+                  {prop.name}
+                </span>
+                <span
+                  className={`text-xs font-semibold ${
+                    prop.is_distributed ? "text-green-400" : "text-yellow-400"
+                  }`}
+                >
+                  {prop.is_distributed ? "配布済み" : "未配布"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={`/scenarios/${id}/props`}
+            className="inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+          >
+            物証・道具を管理 →
+          </Link>
+        </div>
+      )}
 
       {/* クイックリンク */}
       <div className="flex flex-col gap-2">

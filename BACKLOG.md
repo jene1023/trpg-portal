@@ -620,7 +620,7 @@
 **実装ヒント:** `npcs` テーブルに `speech_style: text | null`（口調・一人称）と `sample_quotes: text | null`（セリフ例・口癖）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Npc` 型に両カラムを追加。`src/app/_components/NpcForm.tsx` に `<textarea>` フィールドを2つ追加（`src/app/npcs/new/page.tsx` と `src/app/npcs/[id]/page.tsx` に自動反映）。`src/app/npcs/[id]/page.tsx` の「セリフ例」セクションはデフォルト折りたたみ（`<details>`）で表示しセッション中の参照コストを下げる。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: NPC roleplay memo with speech style and sample quotes for KP`
 
-## [TODO] シナリオ物証・道具管理（KP向けプロップ管理） — 優先度: 中
+## [DONE] シナリオ物証・道具管理（KP向けプロップ管理） — 優先度: 中
 **対象:** KP
 **概要:** シナリオ中に登場する物証・道具・アイテム（手紙・鍵・古地図・血染めの日記等）を名前・説明・入手条件・配布済みフラグで管理できる機能。ハンドアウト（`handouts`テーブル）は「情報カード」の管理に特化しているのに対し、こちらは「物理的な道具・証拠品」の管理に特化し、KPのプロップ渡し忘れを防ぐ。
 **実装ヒント:** Supabaseに `scenario_props` テーブルを追加（id, scenario_id, name, description: text | null, acquisition_condition: text | null, is_distributed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/props/page.tsx` を "use client" で新規作成（一覧＋インライン追加フォーム、配布済みチェックボックスで `supabase.from("scenario_props").update({is_distributed})` トグル）。`src/lib/supabase.ts` に `ScenarioProp` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「物証・道具」リンクと未配布件数バッジを追加。KPセッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも未配布プロップの確認項目を追加。

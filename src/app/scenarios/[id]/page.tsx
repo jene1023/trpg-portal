@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -40,13 +40,18 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { count: npcCount },
     { count: creatureCount },
     { data: ratingRows },
+    { data: propRows },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
     supabase.from("npcs").select("*", { count: "exact", head: true }).eq("scenario_name", scenario.title),
     supabase.from("creatures").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_player_ratings").select("fun_rating, horror_rating, mystery_rating, character_rating").eq("scenario_id", id),
+    supabase.from("scenario_props").select("id, is_distributed").eq("scenario_id", id),
   ]);
+
+  const propCount = propRows?.length ?? 0;
+  const undistributedPropCount = propRows?.filter((p) => !p.is_distributed).length ?? 0;
 
   const ratingCount = ratingRows?.length ?? 0;
   const avgFun = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.fun_rating, 0) / ratingCount) : null;
@@ -409,6 +414,31 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">真相タイムライン</p>
               <p className="text-xs text-coc-muted">事件経緯をKP専用の時系列ノートで整理</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/props`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Package size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">
+                物証・道具
+                {propCount > 0 && (
+                  <span className="ml-2 text-xs text-coc-muted">({propCount}件</span>
+                )}
+                {undistributedPropCount > 0 && (
+                  <span className="ml-0.5 text-xs text-yellow-400"> / 未配布 {undistributedPropCount}件</span>
+                )}
+                {propCount > 0 && (
+                  <span className="text-xs text-coc-muted">)</span>
+                )}
+              </p>
+              <p className="text-xs text-coc-muted">シナリオ中の物証・証拠品・プロップを管理</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>

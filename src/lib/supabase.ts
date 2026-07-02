@@ -469,3 +469,13 @@ export type CharacterGalleryImage = {
   order_index: number;
   created_at: string;
 };
+
+export type ScenarioProp = {
+  id: string;
+  scenario_id: string;
+  name: string;
+  description: string | null;
+  acquisition_condition: string | null;
+  is_distributed: boolean;
+  created_at: string;
+};
