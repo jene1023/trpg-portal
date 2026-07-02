@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
 import PartyMemberCard from "@/app/_components/PartyMemberCard";
+import PartySanCheck from "@/app/_components/PartySanCheck";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character;
@@ -67,6 +68,17 @@ export default async function PartyViewPage({ params }: Props) {
             <PartyMemberCard key={char.id} char={char} />
           ))}
         </div>
+      )}
+
+      {list.length > 0 && (
+        <PartySanCheck
+          characters={list.map(({ characters: char }) => ({
+            id: char.id,
+            name: char.name,
+            sanCurrent: char.san_current,
+            sanMax: char.san_max,
+          }))}
+        />
       )}
 
       <div className="mt-6 text-xs text-coc-muted text-center">

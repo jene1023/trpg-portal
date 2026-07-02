@@ -536,7 +536,7 @@
 **実装ヒント:** `character_skills` テーブルに `is_favorite: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `CharacterSkill` 型に `is_favorite: boolean` を追加。`src/app/_components/SkillList.tsx` の各技能行にスター/ピンアイコンを追加し `supabase.from("character_skills").update({ is_favorite }).eq("id", id)` でトグル。`src/app/_components/DiceRoller.tsx` にお気に入り技能を先頭グループとして表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にお気に入り技能ショートカットセクションを追加。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: favorite skill pinning for quick roll access during sessions`
 
-## [TODO] パーティー一括SANチェック（恐怖イベント対応）— 優先度: 高
+## [DONE] パーティー一括SANチェック（恐怖イベント対応）— 優先度: 高
 **対象:** KP / 共通
 **概要:** 神話生物遭遇時など全員が同じSAN喪失判定を行う場面で、KPがシナリオのパーティービューから「一括SANチェック」をトリガーし、参加者全員のSAN値を自動更新できるUI。既存のSanCheckRollerとPartyStatAdjusterの組み合わせを強化する。
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` に「一括SANチェック」ボタンを持つ "use client" セクションを追加。成功時喪失ダイス式と失敗時喪失ダイス式を入力し、ボタン押下で全参加者ごとに 1d100判定（`Math.floor(Math.random()*100)+1`）を実行してsanの現在値を自動更新。各キャラの結果（成功/失敗・喪失量）を結果テーブルで表示し `supabase.from("characters").update({ san_current }).eq("id", id)` で一括反映。SAN喪失5以上のキャラクターには狂気記録（`madness_records`）追加導線を表示。追加DBなし（既存 `scenario_participants`, `characters` を流用）。
