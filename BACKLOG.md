@@ -554,7 +554,7 @@
 **実装ヒント:** `handouts` テーブルに `is_distributed: boolean DEFAULT false` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `is_distributed: boolean` を追加。`src/app/scenarios/[id]/handouts/page.tsx`（`src/app/_components/HandoutList.tsx`）の各ハンドアウトカードに「配布済み」チェックボックスを追加し `supabase.from("handouts").update({ is_distributed }).eq("id", id)` でトグル。`src/app/scenarios/[id]/preflight/page.tsx`（KPセッション準備チェックリスト/DONE済み）の「ハンドアウト準備状況」セクションに未配布件数を警告バッジで追加。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: handout distribution tracking to prevent forgotten handouts`
 
-## [TODO] GMスクリーン（KP用セッション中統合ビュー） — 優先度: 高
+## [DONE] GMスクリーン（KP用セッション中統合ビュー） — 優先度: 高
 **対象:** KP
 **概要:** シナリオに紐づくNPC能力値・クリーチャーSAN喪失式・パーティーHP/SAN・ハンドアウト配布状況を1画面に集約したKP専用ビュー。セッション中に複数ページを行き来する手間を省き、KPの進行をスムーズにする。
 **実装ヒント:** `src/app/scenarios/[id]/gm-screen/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), npcs(*), creatures(*)")` で関連データを一括取得。NPCはStatBlock風に（STR/DEX/HP/MPを2列グリッド）、クリーチャーはSAN喪失式をバッジ表示、パーティーはHP/SANをカラーバー表示、ハンドアウトは`is_distributed`フラグ付きリスト表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「GMスクリーン」リンクを追加。追加DBなし。
