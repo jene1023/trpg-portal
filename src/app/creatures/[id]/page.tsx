@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Skull } from "lucide-react";
 import { supabase, isSupabaseConfigured, Creature, Scenario } from "@/lib/supabase";
 
 const STAT_DISPLAY: { key: keyof Creature; label: string }[] = [
@@ -78,6 +78,18 @@ export default async function CreatureDetailPage({ params }: Props) {
           )}
         </div>
       </div>
+
+      {typedCreature.scenario_id && typedCreature.hp !== null && (
+        <div className="mb-5">
+          <Link
+            href={`/scenarios/${typedCreature.scenario_id}/enemy-tracker?name=${encodeURIComponent(typedCreature.name)}&hp=${typedCreature.hp}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-4 py-2 text-sm font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
+          >
+            <Skull size={15} />
+            このシナリオの戦闘トラッカーに敵として追加
+          </Link>
+        </div>
+      )}
 
       <div className="space-y-4">
         {typedCreature.mythos_background && (

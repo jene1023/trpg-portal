@@ -590,7 +590,7 @@
 **実装ヒント:** Supabaseに `scenario_clues` テーブルを追加（id, scenario_id, character_id, title, content: text | null, status: "found"|"investigating"|"resolved", created_at）。`src/app/characters/[id]/clues/page.tsx` を "use client" で新規作成（シナリオselect＋ステータス列ごとのカード表示）。カード追加フォームはモーダルまたはインライン入力で実装。`supabase.from("scenario_clues").update({ status })` でドラッグ不要のボタントグルによりステータス変更。`src/lib/supabase.ts` に `ScenarioClue` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「手がかりボード」リンクを追加。
 **コミット:** `feat: scenario clue board for PL investigation tracking`
 
-## [TODO] 戦闘中敵HPトラッカー（セッション中ウィジェット） — 優先度: 高
+## [DONE] 戦闘中敵HPトラッカー（セッション中ウィジェット） — 優先度: 高
 **対象:** KP / 共通
 **概要:** セッション中に遭遇した敵（NPC/クリーチャー）のHPをその場でトラッキングできるウィジェット。既存の「戦闘ラウンドカウンター」（`scenario_participants`ベース）はPC側のDEX/イニシアチブ管理のみで、敵のHP追跡が欠落している。複数体の雑魚が登場する戦闘でのダメージ管理を大幅に効率化する。
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を拡張（または `src/app/scenarios/[id]/enemy-tracker/page.tsx` を新規作成）し "use client" で実装。useState で「敵リスト（名前・HP最大・HP現在）」を管理（ページリロードでリセット、ローカル状態のみ・追加DBなし）。「敵を追加」フォームで名前と最大HPを入力し敵カードを生成。各カードに+/-ボタンでHP増減し 0以下で「倒れた」バッジ表示。既存の `src/app/creatures/[id]/page.tsx` からクリーチャーを「敵として追加」するボタンも配置し、HPを初期値として取り込む。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加（既存「戦闘管理」と統合または並置）。
