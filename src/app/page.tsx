@@ -120,10 +120,10 @@ export default async function HomePage() {
         <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-coc-text coc-title-glow">
           CoC Portal
         </h1>
-        <div className="flex items-center justify-center gap-3 text-coc-faint text-lg">
-          <span className="flex-1 border-t border-coc-border" />
-          <span className="text-coc-gold select-none coc-star-twinkle">✦</span>
-          <span className="flex-1 border-t border-coc-border" />
+        <div className="flex items-center justify-center gap-4">
+          <span className="coc-fade-rule" aria-hidden="true" />
+          <span className="text-coc-gold text-lg select-none coc-star-twinkle">✦</span>
+          <span className="coc-fade-rule rotate-180" aria-hidden="true" />
         </div>
         <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-wide">
           <span
