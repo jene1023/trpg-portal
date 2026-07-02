@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 
@@ -96,6 +96,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
               hour: "2-digit",
               minute: "2-digit",
             })}
+          </div>
+        )}
+        {scenario.vtt_url && (
+          <div className="mt-3">
+            <a
+              href={scenario.vtt_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-coc-gold bg-coc-gold/10 px-3 py-1 text-xs font-semibold text-coc-gold hover:bg-coc-gold/20 transition-colors"
+            >
+              <ExternalLink size={13} />
+              {scenario.vtt_type ? `${scenario.vtt_type}で卓に入る` : "卓に入る"}
+            </a>
           </div>
         )}
       </div>

@@ -524,7 +524,7 @@
 **実装ヒント:** `characters` テーブルに `speech_style: text | null`（例: "一人称: 俺。語尾に「だぜ」が多い。仲間には砕けた口調」）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `speech_style: string | null` を追加。`src/app/_components/CharacterForm.tsx` と `src/app/characters/[id]/edit/page.tsx` に `<textarea>` フィールドを追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の基本情報セクションに表示。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）にも折りたたみ表示で追加し、セッション中の口調確認に使えるようにする。
 **コミット:** `feat: character speech style memo for roleplay reference`
 
-## [TODO] 卓URLリンク管理（VTT・通話ツール連携） — 優先度: 中
+## [DONE] 卓URLリンク管理（VTT・通話ツール連携） — 優先度: 中
 **対象:** KP / 共通
 **概要:** Roll20・ユドナリウム・ここフォリア・Discord・Zoomなど、シナリオで使うVTTや通話ツールのURLをシナリオに紐づけて保存し、セッション開始時にワンクリックで各ツールに飛べる機能。現在KPはURLをLINEやDiscordで毎回共有しなければならず、ポータル内で完結しない。
 **実装ヒント:** `scenarios` テーブルに `vtt_url: text | null`（卓URL）と `vtt_type: text | null`（"ユドナリウム"|"ここフォリア"|"Roll20"|"Discord"|"Zoom"|"その他"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/ScenarioForm.tsx` に `vtt_type` select と `vtt_url` 入力欄を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓に入る」ボタンを表示（`<a href={vtt_url} target="_blank" rel="noopener">`）。セッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも卓URLの設定状態を確認項目として追加。

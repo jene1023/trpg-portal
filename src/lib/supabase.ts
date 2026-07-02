@@ -141,6 +141,8 @@ export type Scenario = {
   status: ScenarioStatus;
   played_at: string | null;
   next_session_at: string | null;
+  vtt_url: string | null;
+  vtt_type: string | null;
   created_at: string;
 };
 

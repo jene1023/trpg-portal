@@ -16,6 +16,8 @@ export default function ScenarioForm() {
     status: "planning" as ScenarioStatus,
     played_at: "",
     next_session_at: "",
+    vtt_type: "",
+    vtt_url: "",
   });
 
   function handleChange(
@@ -45,6 +47,8 @@ export default function ScenarioForm() {
       next_session_at: form.next_session_at
         ? new Date(form.next_session_at).toISOString()
         : null,
+      vtt_type: form.vtt_type || null,
+      vtt_url: form.vtt_url.trim() || null,
     });
     if (err) {
       setError(err.message);
@@ -123,6 +127,42 @@ export default function ScenarioForm() {
           type="datetime-local"
           value={form.next_session_at}
           onChange={handleChange}
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="vtt_type" className={labelClass}>
+          VTT / 通話ツール
+        </label>
+        <select
+          id="vtt_type"
+          name="vtt_type"
+          value={form.vtt_type}
+          onChange={handleChange}
+          className={fieldClass}
+        >
+          <option value="">-- 選択してください --</option>
+          <option value="ユドナリウム">ユドナリウム</option>
+          <option value="ここフォリア">ここフォリア</option>
+          <option value="Roll20">Roll20</option>
+          <option value="Discord">Discord</option>
+          <option value="Zoom">Zoom</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="vtt_url" className={labelClass}>
+          卓URL
+        </label>
+        <input
+          id="vtt_url"
+          name="vtt_url"
+          type="url"
+          value={form.vtt_url}
+          onChange={handleChange}
+          placeholder="https://example.com/room/..."
           className={fieldClass}
         />
       </div>

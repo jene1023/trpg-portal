@@ -12,6 +12,7 @@ import {
   CalendarClock,
   ShieldCheck,
   Shield,
+  ExternalLink,
 } from "lucide-react";
 import {
   supabase,
@@ -92,6 +93,11 @@ export default async function ScenarioPreflightPage({ params }: Props) {
       label: "次回セッション予定日の設定",
       warn: !scenario.next_session_at ? "未設定" : undefined,
     },
+    {
+      ok: !!scenario.vtt_url,
+      label: "卓URL（VTT / 通話ツール）の設定",
+      warn: !scenario.vtt_url ? "未設定" : undefined,
+    },
   ];
 
   const allGreen = checks.every((c) => c.ok);
@@ -142,6 +148,29 @@ export default async function ScenarioPreflightPage({ params }: Props) {
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-yellow-800 bg-yellow-950/20 px-4 py-3">
           <AlertTriangle size={16} className="text-yellow-400" />
           <p className="text-sm text-yellow-300">次回セッション予定日が未設定です</p>
+        </div>
+      )}
+
+      {/* 卓URL */}
+      {scenario.vtt_url ? (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-3">
+          <ExternalLink size={16} className="text-coc-gold flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-coc-muted">卓URL{scenario.vtt_type ? ` (${scenario.vtt_type})` : ""}</p>
+            <a
+              href={scenario.vtt_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-coc-gold hover:underline break-all"
+            >
+              {scenario.vtt_url}
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-yellow-800 bg-yellow-950/20 px-4 py-3">
+          <AlertTriangle size={16} className="text-yellow-400" />
+          <p className="text-sm text-yellow-300">卓URL（VTT / 通話ツール）が未設定です</p>
         </div>
       )}
 
