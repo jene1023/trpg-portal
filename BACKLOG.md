@@ -512,7 +512,7 @@
 **実装ヒント:** `src/app/_components/QuickStatEditor.tsx` と `src/app/scenarios/[id]/party/page.tsx`（`PartyStatAdjuster.tsx`）に `supabase.channel('character-stats').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'characters' }, payload => { /* stateを更新 */ }).subscribe()` を追加し、DB更新と同時にリアルタイムイベントを受信してUIを再描画。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）でも同様に subscribe してHP/MP/SANを自動更新。追加DBなし。
 **コミット:** `feat: realtime HP/SAN sync across clients via Supabase Realtime`
 
-## [TODO] セッション終了ウィザード（一括処理フロー） — 優先度: 高
+## [DONE] セッション終了ウィザード（一括処理フロー） — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション終了時に「①セッションログ記入 → ②成長チェック技能の成長判定ロール → ③狂気状態の更新 → ④次回セッション予定の設定」を4ステップで順番にガイドするウィザードUI。各機能は個別ページとして実装済みだが横断フローが存在せず、セッション後の処理を忘れがちな課題を解消する。
 **実装ヒント:** `src/app/characters/[id]/session-end/page.tsx` を "use client" で新規作成。`useState` でステップ番号（0〜3）を管理し、「次へ」ボタンでステップを進める。Step0: `supabase.from("sessions").insert(...)` でセッションログ入力フォーム（SessionLogFormを流用）。Step1: `growth_checked: true` の技能一覧と成長ロールボタン（growth-roll/page.txの入力ロジックを再利用）。Step2: アクティブな狂気記録一覧と回復/継続トグル（madness/page.tsxから流用）。Step3: シナリオ一覧selectで `next_session_at` を設定。追加DBなし（既存テーブルのみ利用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション終了処理」ボタンを追加。
