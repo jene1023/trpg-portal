@@ -435,3 +435,15 @@ export type ScenarioClue = {
   status: ClueStatus;
   created_at: string;
 };
+
+export type VowStatus = "active" | "fulfilled" | "failed" | "abandoned";
+
+export type CharacterVow = {
+  id: string;
+  character_id: string;
+  title: string;
+  description: string | null;
+  status: VowStatus;
+  resolved_at: string | null;
+  created_at: string;
+};

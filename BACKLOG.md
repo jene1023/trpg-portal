@@ -596,7 +596,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を拡張（または `src/app/scenarios/[id]/enemy-tracker/page.tsx` を新規作成）し "use client" で実装。useState で「敵リスト（名前・HP最大・HP現在）」を管理（ページリロードでリセット、ローカル状態のみ・追加DBなし）。「敵を追加」フォームで名前と最大HPを入力し敵カードを生成。各カードに+/-ボタンでHP増減し 0以下で「倒れた」バッジ表示。既存の `src/app/creatures/[id]/page.tsx` からクリーチャーを「敵として追加」するボタンも配置し、HPを初期値として取り込む。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加（既存「戦闘管理」と統合または並置）。
 **コミット:** `feat: enemy HP tracker widget for in-session combat management`
 
-## [TODO] 探索者の誓約・長期目標管理 — 優先度: 中
+## [DONE] 探索者の誓約・長期目標管理 — 優先度: 中
 **対象:** PL
 **概要:** キャラクターがセッションをまたいで追い求める「大きな目標」（例: カルトの壊滅・行方不明の兄の真相究明・呪われた家の謎解き）を記録し、達成/失敗/放棄の決着をつけられる機能。既存の「技能目標トラッカー」（`skill_goals`）は数値的な技能値目標のみで、物語的・キャラクター的な誓約を管理する手段が存在しない。
 **実装ヒント:** Supabaseに `character_vows` テーブルを追加（id, character_id, title, description: text | null, status: "active"|"fulfilled"|"failed"|"abandoned", resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/vows/page.tsx` を新規作成（Server Component + "use client" フォーム）。アクティブ誓約はカード上部に、解決済みはアーカイブとして下部に表示。各カードに「達成」「失敗」「放棄」ボタンを配置し `supabase.from("character_vows").update({ status, resolved_at })` で更新。`src/lib/supabase.ts` に `CharacterVow` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「誓約・目標」リンクを追加。
