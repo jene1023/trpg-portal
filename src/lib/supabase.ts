@@ -580,3 +580,14 @@ export type CampaignScenario = {
   order_index: number;
   created_at: string;
 };
+
+export type PlotThreadStatus = "pending" | "revealed" | "abandoned";
+
+export type PlotThread = {
+  id: string;
+  scenario_id: string;
+  title: string;
+  description: string | null;
+  status: PlotThreadStatus;
+  created_at: string;
+};

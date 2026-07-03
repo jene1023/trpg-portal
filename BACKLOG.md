@@ -733,7 +733,7 @@
 **実装ヒント:** Supabaseに `campaigns` テーブルを追加（id, title, synopsis, status: "ongoing"|"completed"|"planning", created_at）と `campaign_scenarios` テーブルを追加（id, campaign_id, scenario_id, order_index, created_at）。`src/app/campaigns/page.tsx`（一覧＋作成フォーム）と `src/app/campaigns/[id]/page.tsx`（シナリオ一覧・進捗サマリー）を新規作成。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「キャンペーンに追加」ボタンを追加。`src/app/_components/NavBar.tsx` に「キャンペーン」リンクを追加。`src/lib/supabase.ts` に `Campaign`, `CampaignScenario` 型を追加。
 **コミット:** `feat: campaign/series management to group and track multi-scenario arcs`
 
-## [TODO] シナリオ謎・伏線管理（プロットスレッド） — 優先度: 中
+## [DONE] シナリオ謎・伏線管理（プロットスレッド） — 優先度: 中
 **対象:** KP
 **概要:** シナリオ内の未解明の謎・伏線・秘密をリスト管理し、「未解明」「解明済み」「放棄」のステータスで追跡できる機能。`truth-timeline`（出来事年表）は時系列記録だが、こちらはKPが「どの謎がまだ残っているか」を把握するためのチェックリスト。
 **実装ヒント:** Supabaseに `plot_threads` テーブルを追加（id, scenario_id, title, description, status: "pending"|"revealed"|"abandoned", created_at）。`src/app/scenarios/[id]/plot-threads/page.tsx` を "use client" で新規作成（ステータス別カンバン風リスト＋追加フォーム）。ステータス変更は `supabase.from("plot_threads").update({ status }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「未解明の謎：N件」バッジを追加。`src/lib/supabase.ts` に `PlotThread` 型を追加（status: "pending" | "revealed" | "abandoned"）。
