@@ -618,3 +618,12 @@ export type CharacterMessage = {
 export type CharacterMessageWithSender = CharacterMessage & {
   sender: { id: string; name: string } | null;
 };
+
+export type ScenePacingLog = {
+  id: string;
+  scenario_id: string;
+  scene_label: string;
+  started_at: string;
+  ended_at: string | null;
+  created_at: string;
+};

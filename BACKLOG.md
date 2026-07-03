@@ -763,7 +763,7 @@
 **実装ヒント:** Supabaseに `character_messages` テーブルを追加（id, sender_character_id, recipient_character_id, subject, body, sent_at, is_read: boolean, created_at）。`src/app/characters/[id]/messages/page.tsx` を "use client" で新規作成（受信箱一覧＋送信フォーム）。送信先はキャラクター一覧（`supabase.from("characters").select("id, name")`）からselectで選択。既読/未読管理（`supabase.from("character_messages").update({ is_read: true }).eq("id", id)`）を実装。未読件数バッジをキャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに追加。`src/lib/supabase.ts` に `CharacterMessage` 型を追加。
 **コミット:** `feat: in-character message / letter system between characters`
 
-## [TODO] シナリオシーン別ペーシングログ — 優先度: 低
+## [DONE] シナリオシーン別ペーシングログ — 優先度: 低
 **対象:** KP
 **概要:** セッション中に各シーン（エリア）の開始・終了時刻を記録し、セッション終了後に「どのシーンに何分かかったか」の振り返りができる時間管理ログ。セッション振り返りレポート（scenario_reviews）の定性評価を補完する定量データとなる。
 **実装ヒント:** Supabaseに `scene_pacing_logs` テーブルを追加（id, scenario_id, scene_label, started_at: timestamptz, ended_at: timestamptz | null, created_at）。`src/app/scenarios/[id]/pacing/page.tsx` を "use client" で新規作成。「シーン開始」ボタンで `started_at = now()` を記録し、「シーン終了」で `ended_at = now()` を更新（`supabase.from("scene_pacing_logs").update({ ended_at }).eq("id", activeId)`）。各シーンの経過時間を `(ended_at - started_at)` で分単位計算して一覧表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ペーシングログ」リンクを追加。`src/lib/supabase.ts` に `ScenePacingLog` 型を追加。
