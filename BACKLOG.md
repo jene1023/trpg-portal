@@ -673,7 +673,7 @@
 **実装ヒント:** `next-pwa` または `@ducanh2912/next-pwa` パッケージを追加。`public/manifest.json` を新規作成（name, short_name, icons, start_url, display: "standalone"）。`next.config.ts` に PWA 設定を追加（`runtimeCaching` でキャラクター詳細・技能・クイックダッシュボードページをキャッシュ）。PWAアイコン（192px・512px）を `public/icons/` に配置。`src/app/layout.tsx` の `<head>` に `<link rel="manifest" href="/manifest.json">` を追加。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）を Service Worker でキャッシュ優先対象に設定。Next.jsガイド（`node_modules/next/dist/docs/` を必ず参照）に従い実装。
 **コミット:** `feat: PWA support with offline caching for in-session mobile use`
 
-## [TODO] Supabaseリアルタイム対応パーティービュー — 優先度: 高
+## [DONE] Supabaseリアルタイム対応パーティービュー — 優先度: 高
 **対象:** KP / 共通
 **概要:** パーティービュー（`scenarios/[id]/party`）にSupabase Realtimeを組み込み、HP/SAN変更がページリロードなしで全接続デバイスへ即時反映されるようにする。KPが複数のPLデバイスからの状態変化をリアルタイムで監視でき、戦闘中の全体把握が劇的に向上する。
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を "use client" コンポーネント化し、`supabase.channel("party-\${scenarioId}").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, handler)` でリアルタイム購読を開始（`useEffect` 内でサブスクライブ・クリーンアップ）。参加者の `character_id` のみをフィルタして他シナリオのキャラ更新を受け取らないよう `filter` オプションを設定。`PartyStatAdjuster.tsx` からの更新が即座に他デバイスへも伝播する。追加DBなし（Supabase Realtime は既存テーブルで動作）。
