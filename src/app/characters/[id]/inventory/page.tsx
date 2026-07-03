@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookMarked } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { computeDamageBonus } from "@/lib/diceExpression";
 import InventoryForm from "@/app/_components/InventoryForm";
@@ -49,9 +49,18 @@ export default async function InventoryPage({ params }: Props) {
         </Link>
       </div>
 
-      <h1 className="font-cinzel text-xl font-bold text-coc-text mb-6">
-        武器・所持品
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-cinzel text-xl font-bold text-coc-text">
+          武器・所持品
+        </h1>
+        <Link
+          href="/item-catalog"
+          className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+        >
+          <BookMarked size={13} />
+          カタログを管理
+        </Link>
+      </div>
 
       <InventoryForm
         characterId={id}

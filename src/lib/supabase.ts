@@ -551,3 +551,14 @@ export type ScenarioReview = {
   reviewed_at: string | null;
   created_at: string;
 };
+
+export type ItemCatalogCategory = "weapon" | "medical" | "tool" | "misc";
+
+export type ItemCatalog = {
+  id: string;
+  category: ItemCatalogCategory;
+  name: string;
+  damage: string | null;
+  notes: string | null;
+  created_at: string;
+};

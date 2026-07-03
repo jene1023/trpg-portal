@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Dice6, Flame } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Dice6, Flame, BookMarked, X } from "lucide-react";
 import {
   supabase,
   isSupabaseConfigured,
@@ -9,6 +9,8 @@ import {
   ItemType,
   CharacterSkill,
   SuccessLevel,
+  ItemCatalog,
+  ItemCatalogCategory,
 } from "@/lib/supabase";
 import { combineDamageExpression, evaluateDiceExpression } from "@/lib/diceExpression";
 
@@ -75,11 +77,58 @@ function isCombatSkill(name: string): boolean {
 type RollResult = { roll: number; degree: SuccessDegree; skillName: string; skillValue: number };
 type DamageRollResult = { weaponId: string; expression: string; detail: string; total: number };
 
+const CATALOG_CAT_LABELS: Record<ItemCatalogCategory | "all", string> = {
+  all: "すべて",
+  weapon: "武器",
+  medical: "医薬品",
+  tool: "道具",
+  misc: "その他",
+};
+
+const CATALOG_CATEGORIES: Array<{ value: ItemCatalogCategory | "all"; label: string }> = [
+  { value: "all", label: "すべて" },
+  { value: "weapon", label: "武器" },
+  { value: "medical", label: "医薬品" },
+  { value: "tool", label: "道具" },
+  { value: "misc", label: "その他" },
+];
+
 export default function InventoryForm({ characterId, initialItems, skills, damageBonus }: Props) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+
+  const [catalogItems, setCatalogItems] = useState<ItemCatalog[]>([]);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [catalogCategory, setCatalogCategory] = useState<ItemCatalogCategory | "all">("all");
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!catalogOpen || catalogLoaded || !isSupabaseConfigured) return;
+    supabase
+      .from("item_catalog")
+      .select("*")
+      .order("category", { ascending: true })
+      .order("name", { ascending: true })
+      .then(({ data }) => {
+        setCatalogItems((data as ItemCatalog[]) ?? []);
+        setCatalogLoaded(true);
+      });
+  }, [catalogOpen, catalogLoaded]);
+
+  function pickFromCatalog(item: ItemCatalog) {
+    setForm({
+      item_type: item.category === "weapon" ? "weapon" : "item",
+      name: item.name,
+      damage: item.damage ?? "",
+      range: "",
+      ammo_current: "",
+      ammo_max: "",
+      notes: item.notes ?? "",
+    });
+    setCatalogOpen(false);
+  }
 
   const [rollWeaponId, setRollWeaponId] = useState<string | null>(null);
   const [rollSkillId, setRollSkillId] = useState<string>("");
@@ -392,9 +441,91 @@ export default function InventoryForm({ characterId, initialItems, skills, damag
           onSubmit={submit}
           className="rounded-lg border border-coc-border bg-coc-surface p-4 space-y-3"
         >
-          <h3 className="font-cinzel text-sm font-semibold text-coc-gold tracking-widest">
-            アイテムを追加
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-cinzel text-sm font-semibold text-coc-gold tracking-widest">
+              アイテムを追加
+            </h3>
+            <button
+              type="button"
+              onClick={() => { setCatalogOpen((v) => !v); setCatalogCategory("all"); }}
+              className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border transition-colors ${
+                catalogOpen
+                  ? "border-coc-gold text-coc-gold bg-coc-gold/10"
+                  : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+              }`}
+            >
+              <BookMarked size={12} />
+              カタログから選択
+            </button>
+          </div>
+
+          {/* カタログ選択パネル */}
+          {catalogOpen && (
+            <div className="rounded-md border border-coc-border bg-coc-void p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-coc-muted">テンプレートを選んでフォームに反映します</p>
+                <button
+                  type="button"
+                  onClick={() => setCatalogOpen(false)}
+                  className="text-coc-muted hover:text-coc-text transition-colors"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {CATALOG_CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCatalogCategory(c.value)}
+                    className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+                      catalogCategory === c.value
+                        ? "border-coc-gold text-coc-gold bg-coc-gold/10"
+                        : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+              {!catalogLoaded ? (
+                <p className="text-xs text-coc-muted text-center py-2">読み込み中…</p>
+              ) : (
+                (() => {
+                  const filtered =
+                    catalogCategory === "all"
+                      ? catalogItems
+                      : catalogItems.filter((i) => i.category === catalogCategory);
+                  return filtered.length === 0 ? (
+                    <p className="text-xs text-coc-muted text-center py-2">
+                      アイテムがありません。
+                      <a href="/item-catalog" target="_blank" rel="noopener" className="ml-1 text-coc-gold underline">
+                        カタログを管理
+                      </a>
+                    </p>
+                  ) : (
+                    <div className="space-y-1 max-h-44 overflow-y-auto">
+                      {filtered.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => pickFromCatalog(item)}
+                          className="w-full text-left rounded-md border border-coc-border bg-coc-surface hover:border-coc-gold px-3 py-2 transition-colors"
+                        >
+                          <p className="text-xs font-medium text-coc-text">{item.name}</p>
+                          <p className="text-[10px] text-coc-muted mt-0.5">
+                            {CATALOG_CAT_LABELS[item.category]}
+                            {item.damage ? ` • ダメージ: ${item.damage}` : ""}
+                            {item.notes ? ` • ${item.notes}` : ""}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>種別</label>

@@ -715,7 +715,7 @@
 **実装ヒント:** `src/app/characters/compare/page.tsx` を "use client" で新規作成。URLクエリパラメータ `?ids=id1,id2,id3` でキャラクターを指定し `supabase.from("characters").select("*, character_skills(*)").in("id", ids)` で一括取得。能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）をテーブル形式で横並び表示し、最高値セルを強調（`font-bold text-green-600`）。`src/app/characters/page.tsx` の各キャラカードに「比較に追加」チェックボックスを追加し、選択後「比較する」ボタンで `/characters/compare?ids=...` に遷移。追加DBなし。
 **コミット:** `feat: character comparison view for side-by-side stat review`
 
-## [TODO] アイテムカタログ（インベントリ用テンプレートライブラリ） — 優先度: 中
+## [DONE] アイテムカタログ（インベントリ用テンプレートライブラリ） — 優先度: 中
 **対象:** PL / 共通
 **概要:** 探偵道具・医薬品・銃器・消耗品など CoC で頻出のアイテムを「カタログ」として登録し、インベントリ追加時にワンクリックで選択できるテンプレートライブラリ。毎回同じアイテム名・ダメージ式・メモを手入力する手間をなくす。
 **実装ヒント:** Supabaseに `item_catalog` テーブルを追加（id, category: "weapon"|"medical"|"tool"|"misc", name, damage, notes, created_at）。`src/app/item-catalog/page.tsx` を新規作成（カテゴリフィルタ＋一覧＋追加フォーム）。`src/app/characters/[id]/inventory/page.tsx` の追加フォームに「カタログから選択」ボタンを追加し、選択したカタログエントリの name/damage/notes をフォームへ自動補完。`src/lib/supabase.ts` に `ItemCatalog` 型を追加。初期データとして代表的な武器・アイテムをシードデータとして `item_catalog` に挿入するSQLをコメントで記載。`src/app/_components/NavBar.tsx` には追加不要（キャラクターインベントリ内の補助機能として位置づける）。
