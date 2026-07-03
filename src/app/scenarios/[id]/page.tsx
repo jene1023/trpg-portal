@@ -8,6 +8,7 @@ import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
+import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -79,6 +80,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
           シナリオ一覧
         </Link>
         <div className="flex items-center gap-2">
+          <ScenarioExportButton scenarioId={id} scenarioTitle={scenario.title} />
           <AddToCampaignButton scenarioId={id} />
           <ScenarioDuplicateButton scenarioId={id} />
         </div>

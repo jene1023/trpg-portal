@@ -739,7 +739,7 @@
 **実装ヒント:** Supabaseに `plot_threads` テーブルを追加（id, scenario_id, title, description, status: "pending"|"revealed"|"abandoned", created_at）。`src/app/scenarios/[id]/plot-threads/page.tsx` を "use client" で新規作成（ステータス別カンバン風リスト＋追加フォーム）。ステータス変更は `supabase.from("plot_threads").update({ status }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「未解明の謎：N件」バッジを追加。`src/lib/supabase.ts` に `PlotThread` 型を追加（status: "pending" | "revealed" | "abandoned"）。
 **コミット:** `feat: plot thread tracking for mystery and foreshadowing management`
 
-## [TODO] シナリオデータ一括エクスポート（KPアーカイブ） — 優先度: 低
+## [DONE] シナリオデータ一括エクスポート（KPアーカイブ） — 優先度: 低
 **対象:** KP
 **概要:** シナリオに紐づくデータ（ハンドアウト・NPC・エリア・シーン・BGMキュー・共有メモ・プロットスレッド）を1つのJSONファイルとしてダウンロードできる機能。完了シナリオのアーカイブ、バックアップ、他のKPとのシナリオ素材共有に使う。
 **実装ヒント:** `src/app/scenarios/[id]/export/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("*, handouts(*), scenario_areas(*), scenario_scenes(*), bgm_cues(*), scenario_notes(*)")` で関連データを一括取得し、NPC（`scenario_name` 一致）も含める。`JSON.stringify(data, null, 2)` + `Blob` + `URL.createObjectURL` でダウンロード。ファイル名は `scenario-{title}-{date}.json` 形式。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンを追加。追加DBなし。
