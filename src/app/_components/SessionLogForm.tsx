@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { supabase, isSupabaseConfigured, SessionLog } from "@/lib/supabase";
+import { sendDiscordWebhook } from "@/lib/discordWebhook";
 
 type Props = {
   characterId: string;
   nextSessionNumber: number;
   onAdded: (log: SessionLog) => void;
+  characterName?: string;
+  discordWebhookUrl?: string | null;
 };
 
-export default function SessionLogForm({ characterId, nextSessionNumber, onAdded }: Props) {
+export default function SessionLogForm({ characterId, nextSessionNumber, onAdded, characterName, discordWebhookUrl }: Props) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -50,6 +53,17 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
     setSaving(false);
 
     if (!error && data) {
+      if (discordWebhookUrl) {
+        const label = characterName ? `**${characterName}**` : "探索者";
+        const losses: string[] = [];
+        if (form.san_loss > 0) losses.push(`SAN喪失: ${form.san_loss}`);
+        if (form.hp_loss > 0) losses.push(`HP喪失: ${form.hp_loss}`);
+        const lossText = losses.length > 0 ? `　${losses.join(" / ")}` : "";
+        await sendDiscordWebhook(
+          discordWebhookUrl,
+          `📖 ${label} セッション#${form.session_number}「${form.title}」を記録しました${lossText}`
+        );
+      }
       onAdded(data as SessionLog);
       setForm({
         session_number: form.session_number + 1,

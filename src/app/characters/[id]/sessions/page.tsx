@@ -15,7 +15,7 @@ export default async function SessionsPage({ params }: Props) {
 
   const { data: char } = await supabase
     .from("characters")
-    .select("id, name")
+    .select("id, name, scenario_name")
     .eq("id", id)
     .single();
 
@@ -26,6 +26,15 @@ export default async function SessionsPage({ params }: Props) {
     .select("*")
     .eq("character_id", id)
     .order("session_number", { ascending: false });
+
+  const discordWebhookUrl = char.scenario_name
+    ? await supabase
+        .from("scenarios")
+        .select("discord_webhook_url")
+        .eq("title", char.scenario_name)
+        .maybeSingle()
+        .then((r) => r.data?.discord_webhook_url ?? null)
+    : null;
 
   const sessionIds = (logs ?? []).map((l) => l.id);
 
@@ -74,6 +83,8 @@ export default async function SessionsPage({ params }: Props) {
         initialLogs={logs ?? []}
         allNpcs={npcs ?? []}
         encountersBySession={encountersBySession}
+        characterName={char.name}
+        discordWebhookUrl={discordWebhookUrl}
       />
     </div>
   );

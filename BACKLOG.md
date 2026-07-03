@@ -679,7 +679,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を "use client" コンポーネント化し、`supabase.channel("party-\${scenarioId}").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, handler)` でリアルタイム購読を開始（`useEffect` 内でサブスクライブ・クリーンアップ）。参加者の `character_id` のみをフィルタして他シナリオのキャラ更新を受け取らないよう `filter` オプションを設定。`PartyStatAdjuster.tsx` からの更新が即座に他デバイスへも伝播する。追加DBなし（Supabase Realtime は既存テーブルで動作）。
 **コミット:** `feat: real-time party status sync via Supabase Realtime`
 
-## [TODO] Discordウェブフック連携 — 優先度: 中
+## [DONE] Discordウェブフック連携 — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオにDiscordウェブフックURLを設定し、SANチェック結果・セッションログ追加・狂気発症をDiscordに自動投稿できる機能。オンセグループ全体への状況共有をポータル内操作で完結させる。
 **実装ヒント:** `scenarios` テーブルに `discord_webhook_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `discord_webhook_url: string | null` を追加。`src/app/_components/ScenarioForm.tsx` にウェブフックURL入力欄を追加（シナリオ編集ページのみ表示）。`src/lib/discordWebhook.ts` を新規作成（`fetch(webhookUrl, { method: "POST", body: JSON.stringify({ content }) })` のラッパー関数）。`SanCheckRoller.tsx`・`SessionLogForm.tsx` のデータ保存後処理にオプションの `discordWebhook()` 呼び出しを追加（webhookUrl が未設定の場合はスキップ）。

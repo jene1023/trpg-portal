@@ -47,6 +47,15 @@ export default async function CharacterDetailPage({ params }: Props) {
     .eq("character_id", id)
     .order("created_at", { ascending: true });
 
+  const discordWebhookUrl = char.scenario_name
+    ? await supabase
+        .from("scenarios")
+        .select("discord_webhook_url")
+        .eq("title", char.scenario_name)
+        .maybeSingle()
+        .then((r) => r.data?.discord_webhook_url ?? null)
+    : null;
+
   const { count: galleryCount } = await supabase
     .from("character_gallery_images")
     .select("id", { count: "exact", head: true })
@@ -276,7 +285,7 @@ export default async function CharacterDetailPage({ params }: Props) {
             <SectionDivider className="my-2" />
             <div>
               <p className="text-xs text-coc-muted font-semibold mb-2">SANチェック（正気度ロール）</p>
-              <SanCheckRoller characterId={id} sanCurrent={char.san_current} sanMax={char.san_max} />
+              <SanCheckRoller characterId={id} sanCurrent={char.san_current} sanMax={char.san_max} characterName={char.name} discordWebhookUrl={discordWebhookUrl} />
             </div>
             <SectionDivider className="my-2" />
             <SkillList skills={skills ?? []} characterId={id} sanCurrent={char.san_current} />

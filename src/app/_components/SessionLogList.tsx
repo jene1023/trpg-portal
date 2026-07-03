@@ -17,6 +17,8 @@ type Props = {
   initialLogs: SessionLog[];
   allNpcs: { id: string; name: string }[];
   encountersBySession: Record<string, EncounterEntry[]>;
+  characterName?: string;
+  discordWebhookUrl?: string | null;
 };
 
 export default function SessionLogList({
@@ -24,6 +26,8 @@ export default function SessionLogList({
   initialLogs,
   allNpcs,
   encountersBySession,
+  characterName,
+  discordWebhookUrl,
 }: Props) {
   const [logs, setLogs] = useState<SessionLog[]>(initialLogs);
 
@@ -42,6 +46,8 @@ export default function SessionLogList({
         characterId={characterId}
         nextSessionNumber={nextSessionNumber}
         onAdded={handleAdded}
+        characterName={characterName}
+        discordWebhookUrl={discordWebhookUrl}
       />
 
       {logs.length === 0 ? (

@@ -3,12 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { sendDiscordWebhook } from "@/lib/discordWebhook";
 import { Brain } from "lucide-react";
 
 type Props = {
   characterId: string;
   sanCurrent: number;
   sanMax: number;
+  characterName?: string;
+  discordWebhookUrl?: string | null;
 };
 
 type Result = {
@@ -41,7 +44,7 @@ function rollD100(): number {
   return value;
 }
 
-export default function SanCheckRoller({ characterId, sanCurrent, sanMax }: Props) {
+export default function SanCheckRoller({ characterId, sanCurrent, sanMax, characterName, discordWebhookUrl }: Props) {
   const [san, setSan] = useState(sanCurrent);
   const [successFormula, setSuccessFormula] = useState("0");
   const [failureFormula, setFailureFormula] = useState("1d4");
@@ -67,6 +70,15 @@ export default function SanCheckRoller({ characterId, sanCurrent, sanMax }: Prop
         .from("characters")
         .update({ san_current: sanAfter })
         .eq("id", characterId);
+    }
+
+    if (discordWebhookUrl) {
+      const label = characterName ? `**${characterName}**` : "探索者";
+      const result_label = success ? "✅ 成功" : "❌ 失敗";
+      await sendDiscordWebhook(
+        discordWebhookUrl,
+        `🧠 ${label} SANチェック — 1d100 → **${roll}** / 目標値 ${sanBefore} → ${result_label}　喪失: **${loss}** (SAN: ${sanBefore} → ${sanAfter})`
+      );
     }
   }
 

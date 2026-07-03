@@ -6,6 +6,7 @@ import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarC
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
+import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -508,11 +509,16 @@ export default async function ScenarioDetailPage({ params }: Props) {
       )}
 
       {scenario.gm_notes && (
-        <div className="rounded-xl border border-coc-border bg-coc-raised px-5 py-4">
+        <div className="mb-4 rounded-xl border border-coc-border bg-coc-raised px-5 py-4">
           <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-2">GM メモ</p>
           <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
         </div>
       )}
+
+      <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+        <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>
+        <ScenarioDiscordWebhookEditor scenarioId={id} initialUrl={scenario.discord_webhook_url ?? null} />
+      </div>
     </div>
   );
 }

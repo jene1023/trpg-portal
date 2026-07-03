@@ -18,6 +18,7 @@ export default function ScenarioForm() {
     next_session_at: "",
     vtt_type: "",
     vtt_url: "",
+    discord_webhook_url: "",
   });
 
   function handleChange(
@@ -49,6 +50,7 @@ export default function ScenarioForm() {
         : null,
       vtt_type: form.vtt_type || null,
       vtt_url: form.vtt_url.trim() || null,
+      discord_webhook_url: form.discord_webhook_url.trim() || null,
     });
     if (err) {
       setError(err.message);
@@ -165,6 +167,24 @@ export default function ScenarioForm() {
           placeholder="https://example.com/room/..."
           className={fieldClass}
         />
+      </div>
+
+      <div>
+        <label htmlFor="discord_webhook_url" className={labelClass}>
+          Discord Webhook URL（通知連携）
+        </label>
+        <input
+          id="discord_webhook_url"
+          name="discord_webhook_url"
+          type="url"
+          value={form.discord_webhook_url}
+          onChange={handleChange}
+          placeholder="https://discord.com/api/webhooks/..."
+          className={fieldClass}
+        />
+        <p className="text-xs text-coc-faint mt-1">
+          設定するとSANチェック・セッションログ追加時にDiscordへ自動通知されます
+        </p>
       </div>
 
       <div>

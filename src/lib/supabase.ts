@@ -155,6 +155,7 @@ export type Scenario = {
   next_session_at: string | null;
   vtt_url: string | null;
   vtt_type: string | null;
+  discord_webhook_url: string | null;
   created_at: string;
 };
 
