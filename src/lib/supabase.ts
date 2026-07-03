@@ -591,3 +591,15 @@ export type PlotThread = {
   status: PlotThreadStatus;
   created_at: string;
 };
+
+export type SessionAgendaItemType = "scene" | "handout" | "npc" | "note";
+
+export type SessionAgendaItem = {
+  id: string;
+  scenario_id: string;
+  item_type: SessionAgendaItemType;
+  label: string;
+  is_done: boolean;
+  order_index: number;
+  created_at: string;
+};

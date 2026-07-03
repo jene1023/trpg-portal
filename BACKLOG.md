@@ -751,7 +751,7 @@
 **実装ヒント:** `src/app/characters/[id]/quick/page.tsx` と `src/app/scenarios/[id]/party/page.tsx` を "use client" 化し、`supabase.channel("characters").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, payload => setState(payload.new))` でリアルタイム購読。既存の `QuickStatEditor.tsx` と `PartyStatAdjuster.tsx` のDB更新後の `router.refresh()` 呼び出しはそのまま残し、Realtime受信側でもstateを更新する二段構えにすることでフォールバックを保つ。Supabase Realtime はプロジェクト設定でデフォルト有効。追加DBなし。
 **コミット:** `feat: realtime HP/SAN sync via Supabase Realtime channels`
 
-## [TODO] KPセッションアジェンダ（進行チェックリスト） — 優先度: 高
+## [DONE] KPセッションアジェンダ（進行チェックリスト） — 優先度: 高
 **対象:** KP
 **概要:** セッション当日にKPが「必達シーン」「配布ハンドアウト」「登場NPC」「リマインド事項」をチェックリスト形式で管理・消し込みできる進行補助機能。現在の共有メモ（scenario_notes）はメモ書き用途で、やることリストの消し込みに向いていない。
 **実装ヒント:** Supabaseに `session_agenda_items` テーブルを追加（id, scenario_id, item_type: "scene"|"handout"|"npc"|"note", label, is_done: boolean, order_index, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成（ドラッグ不要のシンプルな順序付きチェックリスト＋追加フォーム）。is_done のトグルは `supabase.from("session_agenda_items").update({ is_done }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッションアジェンダ」リンクを追加。`src/lib/supabase.ts` に `SessionAgendaItem` 型を追加。

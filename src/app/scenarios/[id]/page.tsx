@@ -419,8 +419,8 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <div className="flex items-center gap-3">
             <ListChecks size={20} className="text-coc-gold" />
             <div>
-              <p className="font-medium text-coc-text">アジェンダ</p>
-              <p className="text-xs text-coc-muted">場面別プランナーでセッションの流れを事前計画</p>
+              <p className="font-medium text-coc-text">セッションアジェンダ</p>
+              <p className="text-xs text-coc-muted">進行チェックリスト・場面プランナーでセッションを管理</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
