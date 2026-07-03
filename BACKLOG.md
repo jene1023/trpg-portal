@@ -709,7 +709,7 @@
 **実装ヒント:** Supabaseに `scenario_reviews` テーブルを追加（id, scenario_id, rating: smallint 1-5, went_well, improvements, overall_notes, reviewed_at, created_at）。`src/app/scenarios/[id]/review/page.tsx` を "use client" で新規作成（フォーム＋既存レビュー表示）。`src/lib/supabase.ts` に `ScenarioReview` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の `status === "completed"` のシナリオに「KP振り返り」リンクを表示。シナリオ一覧（`src/app/scenarios/page.tsx`）の完了カードに星評価バッジを追加（reviewが存在する場合）。
 **コミット:** `feat: KP retrospective report with rating for completed scenarios`
 
-## [TODO] キャラクター比較ビュー — 優先度: 低
+## [DONE] キャラクター比較ビュー — 優先度: 低
 **対象:** PL / 共通
 **概要:** 2〜4名のキャラクターの能力値・主要技能・HP/SAN/MPを横並びで比較できるページ。パーティー編成時の役割分担確認や、リビルド前後の差分チェックに使う。
 **実装ヒント:** `src/app/characters/compare/page.tsx` を "use client" で新規作成。URLクエリパラメータ `?ids=id1,id2,id3` でキャラクターを指定し `supabase.from("characters").select("*, character_skills(*)").in("id", ids)` で一括取得。能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）をテーブル形式で横並び表示し、最高値セルを強調（`font-bold text-green-600`）。`src/app/characters/page.tsx` の各キャラカードに「比較に追加」チェックボックスを追加し、選択後「比較する」ボタンで `/characters/compare?ids=...` に遷移。追加DBなし。
