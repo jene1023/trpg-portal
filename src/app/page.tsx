@@ -126,14 +126,14 @@ export default async function HomePage() {
           <span className="text-coc-gold text-lg select-none coc-star-twinkle">✦</span>
           <span className="coc-fade-rule rotate-180" aria-hidden="true" />
         </div>
-        <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-wide">
+        <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-[0.04em] leading-relaxed">
           <span
-            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative -top-1 mr-1 opacity-40 select-none"
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative -top-1 mr-1 opacity-50 select-none"
             aria-hidden="true"
           >&ldquo;</span>
           深淵をのぞき込むとき、深淵もまたのぞき込んでいる
           <span
-            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative top-2 ml-1 opacity-40 select-none"
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative top-2 ml-1 opacity-50 select-none"
             aria-hidden="true"
           >&rdquo;</span>
         </p>

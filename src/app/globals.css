@@ -388,6 +388,24 @@ body {
   border-right: 1px solid var(--color-coc-gold-dim);
 }
 
+/* モバイルナビドロワー: 扉が開くようにスライドダウン */
+@keyframes coc-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-mobile-drawer {
+    animation: coc-slide-down 0.22s ease-out both;
+  }
+}
+
 /* ヒーロータイトル: 燭台の光を受けて揺れる金色の光輪 */
 @keyframes coc-title-glow {
   0%, 100% { text-shadow: 0 0 22px rgba(201, 133, 58, 0.18), 0 0 50px rgba(201, 133, 58, 0.07); }

@@ -93,7 +93,7 @@ export default function NavBar() {
 
       {/* モバイルドロワー */}
       {open && (
-        <div className="md:hidden border-t border-coc-border bg-coc-void">
+        <div className="coc-mobile-drawer md:hidden border-t border-coc-border bg-coc-void">
           <form onSubmit={handleSearchSubmit} className="relative px-4 pt-3">
             <Search size={14} className="absolute left-7 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
             <input
