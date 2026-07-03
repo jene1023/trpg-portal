@@ -128,6 +128,15 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
     ]);
   }
 
+  // --- 詳細プロフィール ---
+  const [furigana, setFurigana] = useState(initialData?.furigana ?? "");
+  const [birthday, setBirthday] = useState(initialData?.birthday ?? "");
+  const [eyeColor, setEyeColor] = useState(initialData?.eye_color ?? "");
+  const [hairColor, setHairColor] = useState(initialData?.hair_color ?? "");
+  const [heightCm, setHeightCm] = useState(initialData?.height_cm?.toString() ?? "");
+  const [weightKg, setWeightKg] = useState(initialData?.weight_kg?.toString() ?? "");
+  const [mythosBooks, setMythosBooks] = useState(initialData?.mythos_books_read?.toString() ?? "0");
+
   // --- 背景 ---
   const [background, setBackground] = useState(initialData?.background ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
@@ -253,6 +262,13 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         background: background.trim() || null,
         notes: notes.trim() || null,
         speech_style: speechStyle.trim() || null,
+        furigana: furigana.trim() || null,
+        birthday: birthday || null,
+        eye_color: eyeColor.trim() || null,
+        hair_color: hairColor.trim() || null,
+        height_cm: heightCm ? parseInt(heightCm) : null,
+        weight_kg: weightKg ? parseFloat(weightKg) : null,
+        mythos_books_read: parseInt(mythosBooks) || 0,
       };
 
       if (isEdit) {
@@ -387,6 +403,41 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
           </div>
         </div>
       </div>
+
+      {/* === 詳細プロフィール === */}
+      <details className={sectionClass}>
+        <summary className={`${sectionTitle} cursor-pointer select-none`}>詳細プロフィール（任意）</summary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className={labelClass}>ふりがな</label>
+            <input value={furigana} onChange={(e) => setFurigana(e.target.value)} className={inputClass} placeholder="たなかいちろう" />
+          </div>
+          <div>
+            <label className={labelClass}>誕生日</label>
+            <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>目の色</label>
+            <input value={eyeColor} onChange={(e) => setEyeColor(e.target.value)} className={inputClass} placeholder="青灰色" />
+          </div>
+          <div>
+            <label className={labelClass}>髪の色</label>
+            <input value={hairColor} onChange={(e) => setHairColor(e.target.value)} className={inputClass} placeholder="黒" />
+          </div>
+          <div>
+            <label className={labelClass}>身長 (cm)</label>
+            <input type="number" min={1} max={300} value={heightCm} onChange={(e) => setHeightCm(e.target.value)} className={inputClass} placeholder="175" />
+          </div>
+          <div>
+            <label className={labelClass}>体重 (kg)</label>
+            <input type="number" min={1} max={999} step={0.1} value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className={inputClass} placeholder="68.5" />
+          </div>
+          <div>
+            <label className={labelClass}>読了した神話書数</label>
+            <input type="number" min={0} value={mythosBooks} onChange={(e) => setMythosBooks(e.target.value)} className={inputClass} placeholder="0" />
+          </div>
+        </div>
+      </details>
 
       {/* === 能力値 === */}
       <div className={sectionClass}>

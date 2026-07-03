@@ -46,6 +46,13 @@ export type Character = {
   farewell_scene: string | null;
   farewell_message: string | null;
   speech_style: string | null;
+  furigana: string | null;
+  birthday: string | null;
+  eye_color: string | null;
+  hair_color: string | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  mythos_books_read: number;
   created_at: string;
   updated_at: string;
 };

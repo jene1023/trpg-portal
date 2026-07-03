@@ -645,7 +645,7 @@
 **実装ヒント:** `src/app/characters/[id]/udonarium-piece/page.tsx` を新規作成（"use client"）。ユドナリウムのキャラコマ形式（`<character>` 要素配下に `<data name="name">` 等のネストでステータス定義するXML）を生成。BCDiceチャットパレット生成ロジック（`src/app/characters/[id]/chat-palette/page.tsx`）を流用してコマンドリストを挿入。`new Blob([xmlString], {type: "text/xml"})` + `URL.createObjectURL` で `{キャラ名}_udonarium.xml` をダウンロード。既存Cocofoliaコマ出力ページを参考に実装。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「ユドナリウムコマ」リンクを追加。追加DBなし。
 **コミット:** `feat: Udonarium character piece XML export for VTT integration`
 
-## [TODO] 探索者プロフィール詳細フィールド拡張（ふりがな・誕生日・外見詳細） — 優先度: 中
+## [DONE] 探索者プロフィール詳細フィールド拡張（ふりがな・誕生日・外見詳細） — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターにふりがな・誕生日・目の色・髪の色・身長/体重・読了した神話書リストなど、ロールプレイを豊かにする細かいフィールドを追加する。現在の `characters` テーブルは基本ステータス中心で、外見・経歴の詳細情報が不足している。
 **リサーチ根拠:** いあキャラが2023年の大型アップデートで「ふりがな・誕生日・読んだクトゥルフ神話の書・遭遇した超自然存在」等の細かいフィールドを追加してユーザーから高評価を受けた。CoCキャラクター管理ツールに求められる「かゆい所に手が届く」機能として需要が確認された。

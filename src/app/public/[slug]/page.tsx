@@ -75,16 +75,54 @@ export default async function PublicProfilePage({ params }: Props) {
             <SectionDivider className="my-2" />
 
             <dl className="space-y-1.5 text-sm">
+              {char.furigana && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">ふりがな</dt>
+                  <dd className="text-coc-text">{char.furigana}</dd>
+                </div>
+              )}
               {char.age && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">年齢</dt>
                   <dd className="text-coc-text">{char.age}歳</dd>
                 </div>
               )}
+              {char.birthday && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">誕生日</dt>
+                  <dd className="text-coc-text">{char.birthday}</dd>
+                </div>
+              )}
               {char.gender && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">性別</dt>
                   <dd className="text-coc-text">{char.gender}</dd>
+                </div>
+              )}
+              {(char.height_cm || char.weight_kg) && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">体格</dt>
+                  <dd className="text-coc-text">
+                    {char.height_cm ? `${char.height_cm}cm` : ""}
+                    {char.height_cm && char.weight_kg ? " / " : ""}
+                    {char.weight_kg ? `${char.weight_kg}kg` : ""}
+                  </dd>
+                </div>
+              )}
+              {(char.eye_color || char.hair_color) && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">外見</dt>
+                  <dd className="text-coc-text text-right leading-tight">
+                    {char.eye_color ? `目：${char.eye_color}` : ""}
+                    {char.eye_color && char.hair_color ? " / " : ""}
+                    {char.hair_color ? `髪：${char.hair_color}` : ""}
+                  </dd>
+                </div>
+              )}
+              {(char.mythos_books_read ?? 0) > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">神話書読了</dt>
+                  <dd className="text-coc-text">{char.mythos_books_read}冊</dd>
                 </div>
               )}
               {char.player_name && (
