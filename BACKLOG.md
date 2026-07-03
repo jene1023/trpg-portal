@@ -652,7 +652,7 @@
 **実装ヒント:** `characters` テーブルに `furigana: text | null`, `birthday: date | null`, `eye_color: text | null`, `hair_color: text | null`, `height_cm: integer | null`, `weight_kg: decimal | null`, `mythos_books_read: integer DEFAULT 0`（読了神話書数）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に各カラムを追加。`src/app/_components/CharacterForm.tsx` と `src/app/characters/[id]/edit/page.tsx` に「詳細プロフィール」セクションとして各入力フィールドを追加（折りたたみ表示でもOK）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の基本情報セクションに表示。公開プロフィールページ（`src/app/public/[slug]/page.tsx`）にも反映。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: extended character profile fields for furigana, birthday, and appearance details`
 
-## [TODO] PLレベル横断統計ダッシュボード — 優先度: 中
+## [DONE] PLレベル横断統計ダッシュボード — 優先度: 中
 **対象:** PL / 共通
 **概要:** 複数キャラクター・複数シナリオをまたいだプレイヤー単位の総合統計を可視化するページ。「何セッション遊んだか・累計SAN喪失量・総ダイスロール数・生存キャラ数/死亡キャラ数・技能別通算成功率」を一画面で確認でき、継続プレイへのモチベーションを高める。
 **リサーチ根拠:** Roll20・World Anvil等の海外ツールがプレイヤー活動統計を継続利用モチベーション向上の手段として実装しており、Charaeno・いあキャラ・キャラクター保管所いずれも未対応の差別化ポイントとなることが確認された。

@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/rules", label: "ルール" },
   { href: "/calendar", label: "カレンダー" },
   { href: "/materials", label: "素材" },
+  { href: "/stats", label: "統計" },
 ];
 
 export default function NavBar() {
