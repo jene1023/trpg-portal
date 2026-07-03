@@ -769,7 +769,7 @@
 **実装ヒント:** Supabaseに `scene_pacing_logs` テーブルを追加（id, scenario_id, scene_label, started_at: timestamptz, ended_at: timestamptz | null, created_at）。`src/app/scenarios/[id]/pacing/page.tsx` を "use client" で新規作成。「シーン開始」ボタンで `started_at = now()` を記録し、「シーン終了」で `ended_at = now()` を更新（`supabase.from("scene_pacing_logs").update({ ended_at }).eq("id", activeId)`）。各シーンの経過時間を `(ended_at - started_at)` で分単位計算して一覧表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ペーシングログ」リンクを追加。`src/lib/supabase.ts` に `ScenePacingLog` 型を追加。
 **コミット:** `feat: scene pacing log for session time management and retrospective`
 
-## [TODO] グループダイスロール（パーティー一括判定） — 優先度: 高
+## [DONE] グループダイスロール（パーティー一括判定） — 優先度: 高
 **対象:** KP / 共通
 **概要:** シナリオ参加者全員に同一の技能判定（例：「知覚」「図書館」「SANチェック」）をワンクリックで一括実行し、成功度ごとに結果を並べて表示できる機能。現在はKPがキャラクターごとにDiceRollerを操作する必要があり、複数人同時判定に手間がかかる。
 **実装ヒント:** `src/app/scenarios/[id]/group-roll/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(*, character_skills(*))").eq("scenario_id", id)` で参加者と技能を一括取得。技能名テキスト入力（または代表技能の select）と「全員ロール」ボタンで各キャラクターに1d100判定を実行。結果は成功度（決定的成功/通常成功/失敗/致命的失敗）でグループ表示し、`supabase.from("dice_rolls").insert([...])` で各キャラのロールをまとめて保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「グループロール」リンクを追加。追加DBなし（既存 `scenario_participants`, `character_skills`, `dice_rolls` を流用）。
