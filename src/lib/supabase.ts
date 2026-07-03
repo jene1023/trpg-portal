@@ -532,3 +532,11 @@ export type CharacterReaction = {
   message: string | null;
   created_at: string;
 };
+
+export type DiceShortcut = {
+  id: string;
+  character_id: string;
+  label: string;
+  expression: string;
+  created_at: string;
+};

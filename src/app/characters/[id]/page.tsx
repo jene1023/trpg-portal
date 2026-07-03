@@ -20,6 +20,7 @@ import DuplicateButton from "@/app/_components/DuplicateButton";
 import SectionDivider from "@/app/_components/SectionDivider";
 import PublicShareToggle from "@/app/_components/PublicShareToggle";
 import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
+import DiceShortcutPad from "@/app/_components/DiceShortcutPad";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -276,6 +277,8 @@ export default async function CharacterDetailPage({ params }: Props) {
               <>
                 <DiceRoller skills={skills ?? []} characterId={id} />
                 <SectionDivider className="my-2" />
+                <DiceShortcutPad characterId={id} />
+                <SectionDivider className="my-2" />
               </>
             )}
             <div>
@@ -446,6 +449,13 @@ export default async function CharacterDetailPage({ params }: Props) {
                 className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>特質・重要情報</span>
+                <span className="text-coc-gold">→</span>
+              </Link>
+              <Link
+                href={`/characters/${id}/dice-shortcuts`}
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>ダイスショートカット</span>
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link

@@ -697,7 +697,7 @@
 **実装ヒント:** Supabaseに `character_reactions` テーブルを追加（id, character_id, reactor_name: text | null, reaction_type: "heart"|"dice"|"skull"|"scream", message: text | null, created_at）。`src/app/public/[slug]/page.tsx` 下部に "use client" の `ReactionForm.tsx` コンポーネントを新規作成・配置（既存の `is_public` チェックを流用）。リアクション一覧も同ページにカード形式で表示。`src/lib/supabase.ts` に `CharacterReaction` 型を追加。スパム防止のためreactor_nameが未設定の場合は「匿名」として保存し、同一セッションからの30秒以内の連続送信はクライアント側stateで制御。
 **コミット:** `feat: reaction stamps and comments on public character profiles`
 
-## [TODO] カスタムダイス式ショートカット集 — 優先度: 高
+## [DONE] カスタムダイス式ショートカット集 — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッション中によく使うダイス式（"2d6"・"1d4+1d6"・ダメージ確認用の式など）をプリセット登録し、DiceRollerからワンタップで実行できるショートカット機能。技能に紐づかない任意ロールの手間を大幅に削減する。
 **実装ヒント:** Supabaseに `dice_shortcuts` テーブルを追加（id, character_id, label, expression, created_at）。`src/app/characters/[id]/dice-shortcuts/page.tsx` を新規作成（一覧＋追加フォーム）。`src/app/_components/DiceShortcutPad.tsx` を "use client" で新規作成し、各ショートカットボタンを押すと `diceExpression.ts`（既存）でロールして結果を表示し `supabase.from("dice_rolls").insert(...)` で保存。`src/lib/supabase.ts` に `DiceShortcut` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のダイスローラーセクションに「ショートカット」リンクを追加。
