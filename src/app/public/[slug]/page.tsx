@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, CharacterReaction } from "@/lib/supabase";
 import { calcDamageBonus, calcBuild, calcMov } from "@/lib/coc-calc";
 import StatBlock from "@/app/_components/StatBlock";
 import StatusBadge from "@/app/_components/StatusBadge";
 import PortraitImage from "@/app/_components/PortraitImage";
 import SectionDivider from "@/app/_components/SectionDivider";
+import ReactionForm from "@/app/_components/ReactionForm";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -23,6 +24,12 @@ export default async function PublicProfilePage({ params }: Props) {
     .single();
 
   if (!char) notFound();
+
+  const { data: reactions } = await supabase
+    .from("character_reactions")
+    .select("*")
+    .eq("character_id", char.id)
+    .order("created_at", { ascending: false });
 
   const { character_skills: skills } = char;
 
@@ -216,6 +223,15 @@ export default async function PublicProfilePage({ params }: Props) {
               </p>
             </div>
           )}
+
+          {/* リアクション */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>リアクション</h2>
+            <ReactionForm
+              characterId={char.id}
+              initialReactions={(reactions ?? []) as CharacterReaction[]}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -691,7 +691,7 @@
 **実装ヒント:** Supabaseに `character_downtime` テーブルを追加（id, character_id, activity_type: "research"|"training"|"rest"|"social"|"other", title, description, duration_days, result, created_at）。`src/app/characters/[id]/downtime/page.tsx` を新規作成（一覧＋追加フォーム、created_at降順）。`src/lib/supabase.ts` に `CharacterDowntime` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「ダウンタイム」リンクを追加。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に最新ダウンタイム活動サマリーを追記。
 **コミット:** `feat: character downtime activity log between sessions`
 
-## [TODO] 公開キャラクターへのリアクション機能 — 優先度: 低
+## [DONE] 公開キャラクターへのリアクション機能 — 優先度: 低
 **対象:** PL / 共通
 **概要:** `is_public` フラグが立ったキャラクターの公開プロフィールページ（`/public/[slug]`）に、閲覧者がスタンプ（❤️🎲💀😱）や一言コメントを送れるリアクション機能を追加する。セッション後のキャラ紹介・卓仲間からのフィードバックを可視化する。
 **実装ヒント:** Supabaseに `character_reactions` テーブルを追加（id, character_id, reactor_name: text | null, reaction_type: "heart"|"dice"|"skull"|"scream", message: text | null, created_at）。`src/app/public/[slug]/page.tsx` 下部に "use client" の `ReactionForm.tsx` コンポーネントを新規作成・配置（既存の `is_public` チェックを流用）。リアクション一覧も同ページにカード形式で表示。`src/lib/supabase.ts` に `CharacterReaction` 型を追加。スパム防止のためreactor_nameが未設定の場合は「匿名」として保存し、同一セッションからの30秒以内の連続送信はクライアント側stateで制御。

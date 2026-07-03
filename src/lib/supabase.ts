@@ -521,3 +521,14 @@ export type CharacterDowntime = {
   result: string | null;
   created_at: string;
 };
+
+export type ReactionType = "heart" | "dice" | "skull" | "scream";
+
+export type CharacterReaction = {
+  id: string;
+  character_id: string;
+  reactor_name: string | null;
+  reaction_type: ReactionType;
+  message: string | null;
+  created_at: string;
+};
