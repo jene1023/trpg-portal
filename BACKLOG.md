@@ -637,3 +637,38 @@
 **概要:** セッションログ単位でKP・PL双方が「印象に残った場面・良かった演出・次回への期待・改善提案」を自由記述で投稿し合える共同振り返りページ。既存の `scenario_retrospectives`（KP専用の構造化ノート）と `scenario_player_ratings`（PL評価）とは異なり、セッション単位の自由記述フィードバックに特化し、参加者全員の声を一か所に集約する。
 **実装ヒント:** Supabaseに `session_reflections` テーブルを追加（id, session_id, author_name, role: "kp"|"pl"|"other", content: text, created_at）。`src/app/scenarios/[id]/reflections/page.tsx` を "use client" で新規作成（シナリオ内のセッションログを select で選び、投稿フォーム＋created_at降順の一覧表示）。`role` は select（KP/PL/その他）で入力。`src/lib/supabase.ts` に `SessionReflection` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「合同振り返り」リンクを追加。`session_id` は `sessions` テーブルの `id` を参照（外部キー推奨）。
 **コミット:** `feat: shared session reflection notes for KP and PL post-game feedback`
+
+## [TODO] ユドナリウム互換コマデータ出力 — 優先度: 高
+**対象:** PL / 共通
+**概要:** ユドナリウム（Udonarium）で使えるキャラクターコマのXMLデータを自動生成してダウンロードできる機能。既存のここフォリアコマJSON出力（DONE）に続き、もう一方の主要VTTツールに対応する。
+**リサーチ根拠:** ユドナリウムはここフォリアと並ぶ二大オンセツールで独自XML形式を採用しており、Charaeno・いあキャラ・キャラクター保管所いずれも未対応のブルーオーシャン領域。コマ手動作成の手間削減ニーズが複数サイトで確認された（「ユドナリウムのキャラコマを作るやつ」等の外部ツールが存在するほど需要がある）。
+**実装ヒント:** `src/app/characters/[id]/udonarium-piece/page.tsx` を新規作成（"use client"）。ユドナリウムのキャラコマ形式（`<character>` 要素配下に `<data name="name">` 等のネストでステータス定義するXML）を生成。BCDiceチャットパレット生成ロジック（`src/app/characters/[id]/chat-palette/page.tsx`）を流用してコマンドリストを挿入。`new Blob([xmlString], {type: "text/xml"})` + `URL.createObjectURL` で `{キャラ名}_udonarium.xml` をダウンロード。既存Cocofoliaコマ出力ページを参考に実装。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「ユドナリウムコマ」リンクを追加。追加DBなし。
+**コミット:** `feat: Udonarium character piece XML export for VTT integration`
+
+## [TODO] 探索者プロフィール詳細フィールド拡張（ふりがな・誕生日・外見詳細） — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターにふりがな・誕生日・目の色・髪の色・身長/体重・読了した神話書リストなど、ロールプレイを豊かにする細かいフィールドを追加する。現在の `characters` テーブルは基本ステータス中心で、外見・経歴の詳細情報が不足している。
+**リサーチ根拠:** いあキャラが2023年の大型アップデートで「ふりがな・誕生日・読んだクトゥルフ神話の書・遭遇した超自然存在」等の細かいフィールドを追加してユーザーから高評価を受けた。CoCキャラクター管理ツールに求められる「かゆい所に手が届く」機能として需要が確認された。
+**実装ヒント:** `characters` テーブルに `furigana: text | null`, `birthday: date | null`, `eye_color: text | null`, `hair_color: text | null`, `height_cm: integer | null`, `weight_kg: decimal | null`, `mythos_books_read: integer DEFAULT 0`（読了神話書数）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に各カラムを追加。`src/app/_components/CharacterForm.tsx` と `src/app/characters/[id]/edit/page.tsx` に「詳細プロフィール」セクションとして各入力フィールドを追加（折りたたみ表示でもOK）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の基本情報セクションに表示。公開プロフィールページ（`src/app/public/[slug]/page.tsx`）にも反映。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: extended character profile fields for furigana, birthday, and appearance details`
+
+## [TODO] PLレベル横断統計ダッシュボード — 優先度: 中
+**対象:** PL / 共通
+**概要:** 複数キャラクター・複数シナリオをまたいだプレイヤー単位の総合統計を可視化するページ。「何セッション遊んだか・累計SAN喪失量・総ダイスロール数・生存キャラ数/死亡キャラ数・技能別通算成功率」を一画面で確認でき、継続プレイへのモチベーションを高める。
+**リサーチ根拠:** Roll20・World Anvil等の海外ツールがプレイヤー活動統計を継続利用モチベーション向上の手段として実装しており、Charaeno・いあキャラ・キャラクター保管所いずれも未対応の差別化ポイントとなることが確認された。
+**実装ヒント:** `src/app/stats/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, sessions(*), dice_rolls(*)")` で全キャラのデータを一括取得し集計。主要メトリクス: 総キャラクター数/生存数/死亡数/退場数、総セッション数、累計SAN喪失合計（`sessions.san_loss` 合計）、総ダイスロール数と通算成功率（`dice_rolls` 集計）、最多使用技能TOP5。グラフはCSSバーのみで依存ライブラリ不要。`src/app/_components/NavBar.tsx` に「統計」リンクを追加。追加DBなし（既存テーブルのみ）。
+**コミット:** `feat: player-level statistics dashboard across all characters and sessions`
+
+## [TODO] セッション録音・アーカイブURLリンク管理 — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** Zoom/Discord/YouTubeなどで録音・録画されたセッションのアーカイブURLをセッションログに紐づけて保存できる機能。「あの時のセッションの録音どこだっけ？」という問題を解決し、セッションログから直接アーカイブに飛べるようにする。
+**リサーチ根拠:** オンラインセッション（オンセ）では録音・録画が広く行われており、アーカイブURLをセッション情報と一緒に管理したいニーズが確認された。既存の `bgm_cues` テーブルでURLリンク管理パターンは確立済みで、セッションログへの拡張が自然。
+**実装ヒント:** `sessions` テーブルに `recording_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Session` 型に `recording_url: string | null` を追加。`src/app/_components/SessionLogForm.tsx` に URL入力フィールドを追加。`src/app/characters/[id]/sessions/page.tsx` の各セッションカードに `recording_url` が設定されている場合「録音を聞く」リンクボタン（`<a target="_blank" rel="noopener">`）を表示。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: session recording URL field for linking archived audio/video`
+
+## [TODO] PWA化（ホーム画面追加・オフラインキャッシュ） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** Next.js アプリをプログレッシブウェブアプリ（PWA）化し、スマホのホーム画面への追加とキャラクター基本情報のオフラインキャッシュを実現する。セッション会場のWi-Fiが不安定な状況でも基本ステータス・技能を参照できるようにし、ネイティブアプリに近い体験を提供する。
+**リサーチ根拠:** Quest Portal VTTがモバイルネイティブ感でユーザーから高評価を受けており、Charaeno・いあキャラ・キャラクター保管所いずれもPWA化されていないことがリサーチで確認された。オンセ外（対面セッション）での需要も明確。
+**実装ヒント:** `next-pwa` または `@ducanh2912/next-pwa` パッケージを追加。`public/manifest.json` を新規作成（name, short_name, icons, start_url, display: "standalone"）。`next.config.ts` に PWA 設定を追加（`runtimeCaching` でキャラクター詳細・技能・クイックダッシュボードページをキャッシュ）。PWAアイコン（192px・512px）を `public/icons/` に配置。`src/app/layout.tsx` の `<head>` に `<link rel="manifest" href="/manifest.json">` を追加。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）を Service Worker でキャッシュ優先対象に設定。Next.jsガイド（`node_modules/next/dist/docs/` を必ず参照）に従い実装。
+**コミット:** `feat: PWA support with offline caching for in-session mobile use`
