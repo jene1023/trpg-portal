@@ -685,7 +685,7 @@
 **実装ヒント:** `scenarios` テーブルに `discord_webhook_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `discord_webhook_url: string | null` を追加。`src/app/_components/ScenarioForm.tsx` にウェブフックURL入力欄を追加（シナリオ編集ページのみ表示）。`src/lib/discordWebhook.ts` を新規作成（`fetch(webhookUrl, { method: "POST", body: JSON.stringify({ content }) })` のラッパー関数）。`SanCheckRoller.tsx`・`SessionLogForm.tsx` のデータ保存後処理にオプションの `discordWebhook()` 呼び出しを追加（webhookUrl が未設定の場合はスキップ）。
 **コミット:** `feat: Discord webhook integration for SAN checks and session logs`
 
-## [TODO] キャラクターダウンタイム活動記録 — 優先度: 中
+## [DONE] キャラクターダウンタイム活動記録 — 優先度: 中
 **対象:** PL
 **概要:** セッション間の空き期間にキャラクターが何をしていたか（図書館調査・技能訓練・休養・情報収集など）を記録できる機能。次セッション前の「前回から今日までの行動」整理とロールプレイの深みを高める。
 **実装ヒント:** Supabaseに `character_downtime` テーブルを追加（id, character_id, activity_type: "research"|"training"|"rest"|"social"|"other", title, description, duration_days, result, created_at）。`src/app/characters/[id]/downtime/page.tsx` を新規作成（一覧＋追加フォーム、created_at降順）。`src/lib/supabase.ts` に `CharacterDowntime` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「ダウンタイム」リンクを追加。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に最新ダウンタイム活動サマリーを追記。

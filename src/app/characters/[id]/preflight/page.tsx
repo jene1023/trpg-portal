@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -56,6 +56,13 @@ export default async function PreflightPage({ params }: Props) {
     .eq("character_id", id)
     .eq("is_active", true)
     .order("created_at", { ascending: true });
+
+  const { data: latestDowntimes } = await supabase
+    .from("character_downtime")
+    .select("id, activity_type, title, result, created_at")
+    .eq("character_id", id)
+    .order("created_at", { ascending: false })
+    .limit(3);
 
   if (!char) notFound();
 
@@ -351,6 +358,46 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           呪文を管理 →
+        </Link>
+      </div>
+
+      {/* 最新ダウンタイム活動 */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Coffee size={16} className="text-coc-muted" />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            前回のダウンタイム活動
+          </h2>
+        </div>
+        {(latestDowntimes ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">ダウンタイム活動の記録なし</p>
+        ) : (
+          <ul className="space-y-2">
+            {(latestDowntimes ?? []).map(
+              (dt: { id: string; activity_type: string; title: string; result: string | null; created_at: string }) => (
+                <li
+                  key={dt.id}
+                  className="rounded-md border border-coc-border bg-coc-raised px-3 py-2 space-y-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-coc-muted">
+                      {new Date(dt.created_at).toLocaleDateString("ja-JP")}
+                    </span>
+                    <span className="text-sm font-semibold text-coc-text">{dt.title}</span>
+                  </div>
+                  {dt.result && (
+                    <p className="text-xs text-coc-gold leading-relaxed">{dt.result}</p>
+                  )}
+                </li>
+              )
+            )}
+          </ul>
+        )}
+        <Link
+          href={`/characters/${id}/downtime`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          ダウンタイム活動を管理 →
         </Link>
       </div>
 

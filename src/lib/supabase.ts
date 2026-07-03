@@ -508,3 +508,16 @@ export type SessionReflection = {
   content: string;
   created_at: string;
 };
+
+export type DowntimeActivityType = "research" | "training" | "rest" | "social" | "other";
+
+export type CharacterDowntime = {
+  id: string;
+  character_id: string;
+  activity_type: DowntimeActivityType;
+  title: string;
+  description: string | null;
+  duration_days: number | null;
+  result: string | null;
+  created_at: string;
+};

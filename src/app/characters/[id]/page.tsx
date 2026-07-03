@@ -539,6 +539,13 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <span>誓約・目標</span>
                 <span className="text-coc-gold">→</span>
               </Link>
+              <Link
+                href={`/characters/${id}/downtime`}
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>ダウンタイム活動</span>
+                <span className="text-coc-gold">→</span>
+              </Link>
               {(() => {
                 const growthPending = (skills ?? []).filter((s) => s.growth_checked);
                 return (
