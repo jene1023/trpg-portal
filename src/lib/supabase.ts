@@ -540,3 +540,14 @@ export type DiceShortcut = {
   expression: string;
   created_at: string;
 };
+
+export type ScenarioReview = {
+  id: string;
+  scenario_id: string;
+  rating: number;
+  went_well: string | null;
+  improvements: string | null;
+  overall_notes: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+};

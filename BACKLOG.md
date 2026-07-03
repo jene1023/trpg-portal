@@ -703,7 +703,7 @@
 **実装ヒント:** Supabaseに `dice_shortcuts` テーブルを追加（id, character_id, label, expression, created_at）。`src/app/characters/[id]/dice-shortcuts/page.tsx` を新規作成（一覧＋追加フォーム）。`src/app/_components/DiceShortcutPad.tsx` を "use client" で新規作成し、各ショートカットボタンを押すと `diceExpression.ts`（既存）でロールして結果を表示し `supabase.from("dice_rolls").insert(...)` で保存。`src/lib/supabase.ts` に `DiceShortcut` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のダイスローラーセクションに「ショートカット」リンクを追加。
 **コミット:** `feat: custom dice expression shortcuts for quick in-session rolls`
 
-## [TODO] シナリオ振り返りレポート（KP用） — 優先度: 中
+## [DONE] シナリオ振り返りレポート（KP用） — 優先度: 中
 **対象:** KP
 **概要:** 完了したシナリオに対してKPが5段階評価・感想・反省点・次回改善点を記録できるレビュー機能。シナリオをまたいだKP自身の成長ログとなり、同じ失敗を繰り返さないための振り返り習慣を支援する。
 **実装ヒント:** Supabaseに `scenario_reviews` テーブルを追加（id, scenario_id, rating: smallint 1-5, went_well, improvements, overall_notes, reviewed_at, created_at）。`src/app/scenarios/[id]/review/page.tsx` を "use client" で新規作成（フォーム＋既存レビュー表示）。`src/lib/supabase.ts` に `ScenarioReview` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の `status === "completed"` のシナリオに「KP振り返り」リンクを表示。シナリオ一覧（`src/app/scenarios/page.tsx`）の完了カードに星評価バッジを追加（reviewが存在する場合）。

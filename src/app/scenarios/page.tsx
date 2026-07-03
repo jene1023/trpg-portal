@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Plus, Users, CalendarClock } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus } from "@/lib/supabase";
 
+type ReviewMap = Record<string, number>;
+
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
   ongoing: "進行中",
@@ -35,6 +37,7 @@ function formatNextSession(value: string): string {
 export default function ScenariosPage() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
+  const [reviewRatings, setReviewRatings] = useState<ReviewMap>({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ScenarioStatus | "all">("all");
 
@@ -44,10 +47,12 @@ export default function ScenariosPage() {
       return;
     }
     async function load() {
-      const [{ data: scenariosData }, { data: participantsData }] = await Promise.all([
-        supabase.from("scenarios").select("*").order("created_at", { ascending: false }),
-        supabase.from("scenario_participants").select("scenario_id"),
-      ]);
+      const [{ data: scenariosData }, { data: participantsData }, { data: reviewsData }] =
+        await Promise.all([
+          supabase.from("scenarios").select("*").order("created_at", { ascending: false }),
+          supabase.from("scenario_participants").select("scenario_id"),
+          supabase.from("scenario_reviews").select("scenario_id, rating"),
+        ]);
       if (scenariosData) setScenarios(scenariosData as Scenario[]);
       if (participantsData) {
         const counts: Record<string, number> = {};
@@ -55,6 +60,13 @@ export default function ScenariosPage() {
           counts[row.scenario_id] = (counts[row.scenario_id] ?? 0) + 1;
         }
         setParticipantCounts(counts);
+      }
+      if (reviewsData) {
+        const ratings: ReviewMap = {};
+        for (const row of reviewsData) {
+          ratings[row.scenario_id] = row.rating;
+        }
+        setReviewRatings(ratings);
       }
       setLoading(false);
     }
@@ -132,7 +144,13 @@ export default function ScenariosPage() {
                 >
                   {scenario.title}
                 </Link>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                  {scenario.status === "completed" && reviewRatings[scenario.id] != null && (
+                    <span className="flex items-center gap-0.5 rounded-full border border-coc-gold-dim bg-coc-raised px-2 py-0.5 text-xs text-coc-gold">
+                      {"★".repeat(reviewRatings[scenario.id])}
+                      {"☆".repeat(5 - reviewRatings[scenario.id])}
+                    </span>
+                  )}
                   {(participantCounts[scenario.id] ?? 0) > 0 && (
                     <span className="flex items-center gap-1 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-muted">
                       <Users size={11} />
