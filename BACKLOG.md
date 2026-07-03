@@ -721,7 +721,7 @@
 **実装ヒント:** Supabaseに `item_catalog` テーブルを追加（id, category: "weapon"|"medical"|"tool"|"misc", name, damage, notes, created_at）。`src/app/item-catalog/page.tsx` を新規作成（カテゴリフィルタ＋一覧＋追加フォーム）。`src/app/characters/[id]/inventory/page.tsx` の追加フォームに「カタログから選択」ボタンを追加し、選択したカタログエントリの name/damage/notes をフォームへ自動補完。`src/lib/supabase.ts` に `ItemCatalog` 型を追加。初期データとして代表的な武器・アイテムをシードデータとして `item_catalog` に挿入するSQLをコメントで記載。`src/app/_components/NavBar.tsx` には追加不要（キャラクターインベントリ内の補助機能として位置づける）。
 **コミット:** `feat: item catalog template library for quick inventory addition`
 
-## [TODO] セッションリプレイ記事生成補助 — 優先度: 高
+## [DONE] セッションリプレイ記事生成補助 — 優先度: 高
 **対象:** KP / 共通
 **概要:** セッション終了後、シナリオに紐づくセッションログ・共有メモ・NPC遭遇記録を自動集約し、リプレイ風まとめテキストをワンクリックで生成してクリップボードにコピーできる機能。毎回手動でまとめ記事を書く手間を大幅に削減する。
 **実装ヒント:** `src/app/scenarios/[id]/recap/page.tsx` を新規作成（Server Component）。参加者のcharacter_idを `scenario_participants` から取得し、`sessions`（セッションログ）・`scenario_notes`（共有メモ）・`npc_encounters`（NPC遭遇）を `Promise.all` で並行取得。セクション「セッション概要」「登場NPC」「共有メモ」「SAN/HP損害サマリー」に分けて表示し、`navigator.clipboard.writeText()` でマークダウン形式コピーボタンを配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ記事を生成」リンクを追加。追加DBなし。
