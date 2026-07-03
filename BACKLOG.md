@@ -638,7 +638,7 @@
 **実装ヒント:** Supabaseに `session_reflections` テーブルを追加（id, session_id, author_name, role: "kp"|"pl"|"other", content: text, created_at）。`src/app/scenarios/[id]/reflections/page.tsx` を "use client" で新規作成（シナリオ内のセッションログを select で選び、投稿フォーム＋created_at降順の一覧表示）。`role` は select（KP/PL/その他）で入力。`src/lib/supabase.ts` に `SessionReflection` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「合同振り返り」リンクを追加。`session_id` は `sessions` テーブルの `id` を参照（外部キー推奨）。
 **コミット:** `feat: shared session reflection notes for KP and PL post-game feedback`
 
-## [TODO] ユドナリウム互換コマデータ出力 — 優先度: 高
+## [DONE] ユドナリウム互換コマデータ出力 — 優先度: 高
 **対象:** PL / 共通
 **概要:** ユドナリウム（Udonarium）で使えるキャラクターコマのXMLデータを自動生成してダウンロードできる機能。既存のここフォリアコマJSON出力（DONE）に続き、もう一方の主要VTTツールに対応する。
 **リサーチ根拠:** ユドナリウムはここフォリアと並ぶ二大オンセツールで独自XML形式を採用しており、Charaeno・いあキャラ・キャラクター保管所いずれも未対応のブルーオーシャン領域。コマ手動作成の手間削減ニーズが複数サイトで確認された（「ユドナリウムのキャラコマを作るやつ」等の外部ツールが存在するほど需要がある）。
