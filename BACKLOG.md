@@ -744,3 +744,27 @@
 **概要:** シナリオに紐づくデータ（ハンドアウト・NPC・エリア・シーン・BGMキュー・共有メモ・プロットスレッド）を1つのJSONファイルとしてダウンロードできる機能。完了シナリオのアーカイブ、バックアップ、他のKPとのシナリオ素材共有に使う。
 **実装ヒント:** `src/app/scenarios/[id]/export/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("*, handouts(*), scenario_areas(*), scenario_scenes(*), bgm_cues(*), scenario_notes(*)")` で関連データを一括取得し、NPC（`scenario_name` 一致）も含める。`JSON.stringify(data, null, 2)` + `Blob` + `URL.createObjectURL` でダウンロード。ファイル名は `scenario-{title}-{date}.json` 形式。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario full data JSON export for archiving and sharing`
+
+## [TODO] リアルタイムHP/SAN同期（Supabase Realtime） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** KPがパーティービューでHPを更新した瞬間、PLのクイックダッシュボードにも即時反映されるリアルタイム同期機能。現在はページリロードしないと変更が見えないため、セッション中の状態把握にタイムラグがある。
+**実装ヒント:** `src/app/characters/[id]/quick/page.tsx` と `src/app/scenarios/[id]/party/page.tsx` を "use client" 化し、`supabase.channel("characters").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, payload => setState(payload.new))` でリアルタイム購読。既存の `QuickStatEditor.tsx` と `PartyStatAdjuster.tsx` のDB更新後の `router.refresh()` 呼び出しはそのまま残し、Realtime受信側でもstateを更新する二段構えにすることでフォールバックを保つ。Supabase Realtime はプロジェクト設定でデフォルト有効。追加DBなし。
+**コミット:** `feat: realtime HP/SAN sync via Supabase Realtime channels`
+
+## [TODO] KPセッションアジェンダ（進行チェックリスト） — 優先度: 高
+**対象:** KP
+**概要:** セッション当日にKPが「必達シーン」「配布ハンドアウト」「登場NPC」「リマインド事項」をチェックリスト形式で管理・消し込みできる進行補助機能。現在の共有メモ（scenario_notes）はメモ書き用途で、やることリストの消し込みに向いていない。
+**実装ヒント:** Supabaseに `session_agenda_items` テーブルを追加（id, scenario_id, item_type: "scene"|"handout"|"npc"|"note", label, is_done: boolean, order_index, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成（ドラッグ不要のシンプルな順序付きチェックリスト＋追加フォーム）。is_done のトグルは `supabase.from("session_agenda_items").update({ is_done }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッションアジェンダ」リンクを追加。`src/lib/supabase.ts` に `SessionAgendaItem` 型を追加。
+**コミット:** `feat: KP session agenda checklist for in-session progression tracking`
+
+## [TODO] キャラクター間In-characterメッセージ（手紙・伝言） — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクター同士がIn-characterで「手紙」「伝言メモ」をやり取りし、ポータル内に保存できる機能。セッション外のロールプレイや、KPからPL個別へのキャラクター宛メッセージをテキスト記録として残す。
+**実装ヒント:** Supabaseに `character_messages` テーブルを追加（id, sender_character_id, recipient_character_id, subject, body, sent_at, is_read: boolean, created_at）。`src/app/characters/[id]/messages/page.tsx` を "use client" で新規作成（受信箱一覧＋送信フォーム）。送信先はキャラクター一覧（`supabase.from("characters").select("id, name")`）からselectで選択。既読/未読管理（`supabase.from("character_messages").update({ is_read: true }).eq("id", id)`）を実装。未読件数バッジをキャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに追加。`src/lib/supabase.ts` に `CharacterMessage` 型を追加。
+**コミット:** `feat: in-character message / letter system between characters`
+
+## [TODO] シナリオシーン別ペーシングログ — 優先度: 低
+**対象:** KP
+**概要:** セッション中に各シーン（エリア）の開始・終了時刻を記録し、セッション終了後に「どのシーンに何分かかったか」の振り返りができる時間管理ログ。セッション振り返りレポート（scenario_reviews）の定性評価を補完する定量データとなる。
+**実装ヒント:** Supabaseに `scene_pacing_logs` テーブルを追加（id, scenario_id, scene_label, started_at: timestamptz, ended_at: timestamptz | null, created_at）。`src/app/scenarios/[id]/pacing/page.tsx` を "use client" で新規作成。「シーン開始」ボタンで `started_at = now()` を記録し、「シーン終了」で `ended_at = now()` を更新（`supabase.from("scene_pacing_logs").update({ ended_at }).eq("id", activeId)`）。各シーンの経過時間を `(ended_at - started_at)` で分単位計算して一覧表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ペーシングログ」リンクを追加。`src/lib/supabase.ts` に `ScenePacingLog` 型を追加。
+**コミット:** `feat: scene pacing log for session time management and retrospective`
