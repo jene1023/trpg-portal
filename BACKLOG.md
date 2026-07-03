@@ -672,3 +672,27 @@
 **リサーチ根拠:** Quest Portal VTTがモバイルネイティブ感でユーザーから高評価を受けており、Charaeno・いあキャラ・キャラクター保管所いずれもPWA化されていないことがリサーチで確認された。オンセ外（対面セッション）での需要も明確。
 **実装ヒント:** `next-pwa` または `@ducanh2912/next-pwa` パッケージを追加。`public/manifest.json` を新規作成（name, short_name, icons, start_url, display: "standalone"）。`next.config.ts` に PWA 設定を追加（`runtimeCaching` でキャラクター詳細・技能・クイックダッシュボードページをキャッシュ）。PWAアイコン（192px・512px）を `public/icons/` に配置。`src/app/layout.tsx` の `<head>` に `<link rel="manifest" href="/manifest.json">` を追加。`src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）を Service Worker でキャッシュ優先対象に設定。Next.jsガイド（`node_modules/next/dist/docs/` を必ず参照）に従い実装。
 **コミット:** `feat: PWA support with offline caching for in-session mobile use`
+
+## [TODO] Supabaseリアルタイム対応パーティービュー — 優先度: 高
+**対象:** KP / 共通
+**概要:** パーティービュー（`scenarios/[id]/party`）にSupabase Realtimeを組み込み、HP/SAN変更がページリロードなしで全接続デバイスへ即時反映されるようにする。KPが複数のPLデバイスからの状態変化をリアルタイムで監視でき、戦闘中の全体把握が劇的に向上する。
+**実装ヒント:** `src/app/scenarios/[id]/party/page.tsx` を "use client" コンポーネント化し、`supabase.channel("party-\${scenarioId}").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, handler)` でリアルタイム購読を開始（`useEffect` 内でサブスクライブ・クリーンアップ）。参加者の `character_id` のみをフィルタして他シナリオのキャラ更新を受け取らないよう `filter` オプションを設定。`PartyStatAdjuster.tsx` からの更新が即座に他デバイスへも伝播する。追加DBなし（Supabase Realtime は既存テーブルで動作）。
+**コミット:** `feat: real-time party status sync via Supabase Realtime`
+
+## [TODO] Discordウェブフック連携 — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオにDiscordウェブフックURLを設定し、SANチェック結果・セッションログ追加・狂気発症をDiscordに自動投稿できる機能。オンセグループ全体への状況共有をポータル内操作で完結させる。
+**実装ヒント:** `scenarios` テーブルに `discord_webhook_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に `discord_webhook_url: string | null` を追加。`src/app/_components/ScenarioForm.tsx` にウェブフックURL入力欄を追加（シナリオ編集ページのみ表示）。`src/lib/discordWebhook.ts` を新規作成（`fetch(webhookUrl, { method: "POST", body: JSON.stringify({ content }) })` のラッパー関数）。`SanCheckRoller.tsx`・`SessionLogForm.tsx` のデータ保存後処理にオプションの `discordWebhook()` 呼び出しを追加（webhookUrl が未設定の場合はスキップ）。
+**コミット:** `feat: Discord webhook integration for SAN checks and session logs`
+
+## [TODO] キャラクターダウンタイム活動記録 — 優先度: 中
+**対象:** PL
+**概要:** セッション間の空き期間にキャラクターが何をしていたか（図書館調査・技能訓練・休養・情報収集など）を記録できる機能。次セッション前の「前回から今日までの行動」整理とロールプレイの深みを高める。
+**実装ヒント:** Supabaseに `character_downtime` テーブルを追加（id, character_id, activity_type: "research"|"training"|"rest"|"social"|"other", title, description, duration_days, result, created_at）。`src/app/characters/[id]/downtime/page.tsx` を新規作成（一覧＋追加フォーム、created_at降順）。`src/lib/supabase.ts` に `CharacterDowntime` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「ダウンタイム」リンクを追加。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に最新ダウンタイム活動サマリーを追記。
+**コミット:** `feat: character downtime activity log between sessions`
+
+## [TODO] 公開キャラクターへのリアクション機能 — 優先度: 低
+**対象:** PL / 共通
+**概要:** `is_public` フラグが立ったキャラクターの公開プロフィールページ（`/public/[slug]`）に、閲覧者がスタンプ（❤️🎲💀😱）や一言コメントを送れるリアクション機能を追加する。セッション後のキャラ紹介・卓仲間からのフィードバックを可視化する。
+**実装ヒント:** Supabaseに `character_reactions` テーブルを追加（id, character_id, reactor_name: text | null, reaction_type: "heart"|"dice"|"skull"|"scream", message: text | null, created_at）。`src/app/public/[slug]/page.tsx` 下部に "use client" の `ReactionForm.tsx` コンポーネントを新規作成・配置（既存の `is_public` チェックを流用）。リアクション一覧も同ページにカード形式で表示。`src/lib/supabase.ts` に `CharacterReaction` 型を追加。スパム防止のためreactor_nameが未設定の場合は「匿名」として保存し、同一セッションからの30秒以内の連続送信はクライアント側stateで制御。
+**コミット:** `feat: reaction stamps and comments on public character profiles`
