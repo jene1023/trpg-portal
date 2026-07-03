@@ -286,6 +286,43 @@ body {
   opacity: 0.55;
 }
 
+/* SectionDivider グラデーションライン: ❖ シンボルから外側へ溶けていく */
+.coc-divider-l {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to left, var(--color-coc-border-glow) 0%, var(--color-coc-border) 35%, transparent 100%);
+  opacity: 0.65;
+}
+
+.coc-divider-r {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-coc-border-glow) 0%, var(--color-coc-border) 35%, transparent 100%);
+  opacity: 0.65;
+}
+
+/* NavBar アクティブリンク: 燭台の炎のように脈打つ下線 */
+@keyframes coc-nav-active-glow {
+  0%, 100% { box-shadow: 0 2px 6px rgba(201, 133, 58, 0.35); opacity: 0.75; }
+  50%       { box-shadow: 0 2px 12px rgba(201, 133, 58, 0.65); opacity: 1; }
+}
+
+.coc-nav-active-line {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, var(--color-coc-gold) 30%, var(--color-coc-gold) 70%, transparent 100%);
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-nav-active-line {
+    animation: coc-nav-active-glow 3s ease-in-out infinite;
+  }
+}
+
 /* ポートレート: ホバー時に燭台の光が上から差し込む暖色オーバーレイ */
 .coc-portrait-amber-glow {
   background: radial-gradient(

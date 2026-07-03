@@ -51,13 +51,14 @@ export default function NavBar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`text-sm font-medium transition-colors pb-0.5 ${
+                  className={`relative text-sm font-medium transition-colors pb-1 ${
                     isActive
-                      ? "text-coc-gold border-b border-coc-gold"
+                      ? "text-coc-gold"
                       : "text-coc-muted hover:text-coc-text"
                   }`}
                 >
                   {link.label}
+                  {isActive && <span className="coc-nav-active-line" aria-hidden="true" />}
                 </Link>
               </li>
             );
