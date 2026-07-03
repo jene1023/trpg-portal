@@ -42,12 +42,10 @@
 
 body {
   background-color: var(--color-coc-bg);
-  /* 燭台からの環境光: ページ上部に温かい琥珀の光、周縁は虚無へ溶ける */
-  background-image: radial-gradient(
-    ellipse 160% 90% at 50% -15%,
-    #201508 0%,
-    transparent 58%
-  );
+  /* 燭台からの環境光 + 四隅へ溶けていくビネット（古いレンズ越しに覗く効果） */
+  background-image:
+    radial-gradient(ellipse 78% 82% at 50% 50%, transparent 50%, rgba(7, 5, 3, 0.72) 100%),
+    radial-gradient(ellipse 160% 90% at 50% -15%, #201508 0%, transparent 58%);
   background-attachment: fixed;
   color: var(--color-coc-text);
 }
@@ -359,6 +357,35 @@ body {
   .coc-name-glow {
     animation: coc-name-glow 5s ease-in-out infinite;
   }
+}
+
+/* アルケイン・コーナーフレーム: 古文書の対角線の二隅を飾る細い金線 */
+.coc-corner-frame {
+  position: relative;
+}
+
+.coc-corner-frame::before,
+.coc-corner-frame::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.coc-corner-frame::before {
+  top: 0;
+  left: 0;
+  border-top: 1px solid var(--color-coc-gold-dim);
+  border-left: 1px solid var(--color-coc-gold-dim);
+}
+
+.coc-corner-frame::after {
+  bottom: 0;
+  right: 0;
+  border-bottom: 1px solid var(--color-coc-gold-dim);
+  border-right: 1px solid var(--color-coc-gold-dim);
 }
 
 /* ヒーロータイトル: 燭台の光を受けて揺れる金色の光輪 */

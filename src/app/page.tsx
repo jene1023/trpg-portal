@@ -114,7 +114,7 @@ export default async function HomePage() {
       )}
 
       {/* ヒーロー */}
-      <div className="text-center space-y-3">
+      <div className="coc-corner-frame text-center space-y-3 py-5 px-5">
         <p className="text-coc-muted text-sm tracking-[0.2em] uppercase font-cinzel">
           Cthulhu Mythos TRPG
         </p>
