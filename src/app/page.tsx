@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario } from "@/lib/supabase";
 import CharacterCard from "./_components/CharacterCard";
+import SectionDivider from "./_components/SectionDivider";
 
 const tiles = [
   {
@@ -137,6 +138,9 @@ export default async function HomePage() {
           >&rdquo;</span>
         </p>
       </div>
+
+      {/* ヒーローとタイルの区切り */}
+      <SectionDivider />
 
       {/* タイル */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 coc-stagger-grid">
@@ -281,9 +285,12 @@ export default async function HomePage() {
       {recent && recent.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
-              最近のキャラクター
-            </h2>
+            <div className="flex items-center gap-2">
+              <Clock size={14} className="text-coc-gold" />
+              <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+                最近のキャラクター
+              </h2>
+            </div>
             <Link href="/characters" className="text-xs text-coc-gold hover:underline">
               すべて表示
             </Link>
