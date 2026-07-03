@@ -632,7 +632,7 @@
 **実装ヒント:** Supabaseに `scenario_random_events` テーブルを追加（id, scenario_id, weight: integer DEFAULT 1, title, description: text | null, created_at）。`src/app/scenarios/[id]/random-events/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。「抽選する」ボタン押下で各イベントの `weight` 合計に対する累積比率で `Math.random()` を使い1件を選出してモーダル表示。`src/lib/supabase.ts` に `ScenarioRandomEvent` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ランダムイベント」リンクを追加。追加DBテーブルのみ。
 **コミット:** `feat: scenario random event table with weighted draw for KP`
 
-## [TODO] セッション後合同フィードバック（KP・PL共同振り返り） — 優先度: 中
+## [DONE] セッション後合同フィードバック（KP・PL共同振り返り） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッションログ単位でKP・PL双方が「印象に残った場面・良かった演出・次回への期待・改善提案」を自由記述で投稿し合える共同振り返りページ。既存の `scenario_retrospectives`（KP専用の構造化ノート）と `scenario_player_ratings`（PL評価）とは異なり、セッション単位の自由記述フィードバックに特化し、参加者全員の声を一か所に集約する。
 **実装ヒント:** Supabaseに `session_reflections` テーブルを追加（id, session_id, author_name, role: "kp"|"pl"|"other", content: text, created_at）。`src/app/scenarios/[id]/reflections/page.tsx` を "use client" で新規作成（シナリオ内のセッションログを select で選び、投稿フォーム＋created_at降順の一覧表示）。`role` は select（KP/PL/その他）で入力。`src/lib/supabase.ts` に `SessionReflection` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「合同振り返り」リンクを追加。`session_id` は `sessions` テーブルの `id` を参照（外部キー推奨）。

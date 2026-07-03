@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -298,6 +298,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">振り返りノート</p>
               <p className="text-xs text-coc-muted">うまくいったこと・改善点・PLの反応を記録</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/reflections`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <MessageSquare size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">合同振り返り</p>
+              <p className="text-xs text-coc-muted">KP・PL双方がセッションの感想・改善提案を自由投稿</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>

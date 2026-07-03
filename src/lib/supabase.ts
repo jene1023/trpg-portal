@@ -488,3 +488,14 @@ export type ScenarioRandomEvent = {
   description: string | null;
   created_at: string;
 };
+
+export type ReflectionRole = "kp" | "pl" | "other";
+
+export type SessionReflection = {
+  id: string;
+  session_id: string | null;
+  author_name: string | null;
+  role: ReflectionRole;
+  content: string;
+  created_at: string;
+};
