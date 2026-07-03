@@ -8,6 +8,7 @@ import { Menu, Search, X } from "lucide-react";
 const navLinks = [
   { href: "/characters", label: "キャラクター" },
   { href: "/scenarios", label: "シナリオ" },
+  { href: "/campaigns", label: "キャンペーン" },
   { href: "/npcs", label: "NPC" },
   { href: "/creatures", label: "クリーチャー" },
   { href: "/rules", label: "ルール" },

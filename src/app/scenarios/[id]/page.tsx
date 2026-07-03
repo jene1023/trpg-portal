@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
+import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -75,7 +76,10 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <ArrowLeft size={16} />
           シナリオ一覧
         </Link>
-        <ScenarioDuplicateButton scenarioId={id} />
+        <div className="flex items-center gap-2">
+          <AddToCampaignButton scenarioId={id} />
+          <ScenarioDuplicateButton scenarioId={id} />
+        </div>
       </div>
 
       <div className="mb-6">

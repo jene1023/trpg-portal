@@ -562,3 +562,21 @@ export type ItemCatalog = {
   notes: string | null;
   created_at: string;
 };
+
+export type CampaignStatus = "ongoing" | "completed" | "planning";
+
+export type Campaign = {
+  id: string;
+  title: string;
+  synopsis: string | null;
+  status: CampaignStatus;
+  created_at: string;
+};
+
+export type CampaignScenario = {
+  id: string;
+  campaign_id: string;
+  scenario_id: string;
+  order_index: number;
+  created_at: string;
+};

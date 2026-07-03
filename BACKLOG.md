@@ -727,7 +727,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/recap/page.tsx` を新規作成（Server Component）。参加者のcharacter_idを `scenario_participants` から取得し、`sessions`（セッションログ）・`scenario_notes`（共有メモ）・`npc_encounters`（NPC遭遇）を `Promise.all` で並行取得。セクション「セッション概要」「登場NPC」「共有メモ」「SAN/HP損害サマリー」に分けて表示し、`navigator.clipboard.writeText()` でマークダウン形式コピーボタンを配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ記事を生成」リンクを追加。追加DBなし。
 **コミット:** `feat: session recap text generator for KP post-session report`
 
-## [TODO] シリーズ/キャンペーン管理 — 優先度: 中
+## [DONE] シリーズ/キャンペーン管理 — 優先度: 中
 **対象:** KP / 共通
 **概要:** 複数シナリオを「キャンペーン」としてまとめ、連作の進行状況・全体シノプシス・通算セッション数を一画面で把握できる機能。単発シナリオと連作両方に対応し、長期卓の全体感を可視化する。
 **実装ヒント:** Supabaseに `campaigns` テーブルを追加（id, title, synopsis, status: "ongoing"|"completed"|"planning", created_at）と `campaign_scenarios` テーブルを追加（id, campaign_id, scenario_id, order_index, created_at）。`src/app/campaigns/page.tsx`（一覧＋作成フォーム）と `src/app/campaigns/[id]/page.tsx`（シナリオ一覧・進捗サマリー）を新規作成。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「キャンペーンに追加」ボタンを追加。`src/app/_components/NavBar.tsx` に「キャンペーン」リンクを追加。`src/lib/supabase.ts` に `Campaign`, `CampaignScenario` 型を追加。
