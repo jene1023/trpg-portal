@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Brain } from "lucide-react";
@@ -50,6 +50,28 @@ export default function PartySanCheck({ characters }: Props) {
   const [failureFormula, setFailureFormula] = useState("1d4");
   const [results, setResults] = useState<RollResult[] | null>(null);
   const [rolling, setRolling] = useState(false);
+
+  const characterIds = useMemo(() => characters.map((c) => c.id), [characters]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || characterIds.length === 0) return;
+    const idSet = new Set(characterIds);
+    const channel = supabase
+      .channel("party-san-check-sync")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "characters" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          const p = payload.new as { id: string; san_current: number };
+          if (idSet.has(p.id)) {
+            setCurrentSans((prev) => ({ ...prev, [p.id]: p.san_current }));
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [characterIds]);
 
   async function runCheck() {
     if (rolling || characters.length === 0) return;

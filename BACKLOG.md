@@ -745,7 +745,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/export/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("*, handouts(*), scenario_areas(*), scenario_scenes(*), bgm_cues(*), scenario_notes(*)")` で関連データを一括取得し、NPC（`scenario_name` 一致）も含める。`JSON.stringify(data, null, 2)` + `Blob` + `URL.createObjectURL` でダウンロード。ファイル名は `scenario-{title}-{date}.json` 形式。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario full data JSON export for archiving and sharing`
 
-## [TODO] リアルタイムHP/SAN同期（Supabase Realtime） — 優先度: 高
+## [DONE] リアルタイムHP/SAN同期（Supabase Realtime） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** KPがパーティービューでHPを更新した瞬間、PLのクイックダッシュボードにも即時反映されるリアルタイム同期機能。現在はページリロードしないと変更が見えないため、セッション中の状態把握にタイムラグがある。
 **実装ヒント:** `src/app/characters/[id]/quick/page.tsx` と `src/app/scenarios/[id]/party/page.tsx` を "use client" 化し、`supabase.channel("characters").on("postgres_changes", { event: "UPDATE", schema: "public", table: "characters" }, payload => setState(payload.new))` でリアルタイム購読。既存の `QuickStatEditor.tsx` と `PartyStatAdjuster.tsx` のDB更新後の `router.refresh()` 呼び出しはそのまま残し、Realtime受信側でもstateを更新する二段構えにすることでフォールバックを保つ。Supabase Realtime はプロジェクト設定でデフォルト有効。追加DBなし。
