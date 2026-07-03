@@ -666,7 +666,7 @@
 **実装ヒント:** `sessions` テーブルに `recording_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Session` 型に `recording_url: string | null` を追加。`src/app/_components/SessionLogForm.tsx` に URL入力フィールドを追加。`src/app/characters/[id]/sessions/page.tsx` の各セッションカードに `recording_url` が設定されている場合「録音を聞く」リンクボタン（`<a target="_blank" rel="noopener">`）を表示。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: session recording URL field for linking archived audio/video`
 
-## [TODO] PWA化（ホーム画面追加・オフラインキャッシュ） — 優先度: 中
+## [DONE] PWA化（ホーム画面追加・オフラインキャッシュ） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** Next.js アプリをプログレッシブウェブアプリ（PWA）化し、スマホのホーム画面への追加とキャラクター基本情報のオフラインキャッシュを実現する。セッション会場のWi-Fiが不安定な状況でも基本ステータス・技能を参照できるようにし、ネイティブアプリに近い体験を提供する。
 **リサーチ根拠:** Quest Portal VTTがモバイルネイティブ感でユーザーから高評価を受けており、Charaeno・いあキャラ・キャラクター保管所いずれもPWA化されていないことがリサーチで確認された。オンセ外（対面セッション）での需要も明確。

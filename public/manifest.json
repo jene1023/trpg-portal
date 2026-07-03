@@ -1,0 +1,36 @@
+{
+  "name": "CoC Portal",
+  "short_name": "CoC Portal",
+  "description": "クトゥルフ神話TRPG キャラクター管理ポータル",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0f0a",
+  "theme_color": "#1a0f0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "キャラクター一覧",
+      "url": "/characters",
+      "description": "登録キャラクター一覧"
+    },
+    {
+      "name": "シナリオ一覧",
+      "url": "/scenarios",
+      "description": "シナリオ管理"
+    }
+  ]
+}

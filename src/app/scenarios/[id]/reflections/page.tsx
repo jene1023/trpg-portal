@@ -56,7 +56,7 @@ export default function ReflectionsPage() {
       const characterMap: Record<string, string> = {};
       const characterIds: string[] = [];
       for (const p of participants ?? []) {
-        const char = p.characters as { id: string; name: string } | null;
+        const char = (p.characters as unknown) as { id: string; name: string } | null;
         if (char) {
           characterMap[char.id] = char.name;
           characterIds.push(char.id);

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#1a0f0a"/>
+  <circle cx="256" cy="256" r="186" fill="none" stroke="#c9a84c" stroke-width="10"/>
+  <circle cx="256" cy="256" r="138" fill="none" stroke="#c9a84c" stroke-width="5"/>
+  <text x="256" y="208" font-family="serif" font-size="86" font-weight="bold" fill="#c9a84c" text-anchor="middle">CoC</text>
+  <text x="256" y="312" font-family="serif" font-size="58" fill="#c9a84c" text-anchor="middle">Portal</text>
+  <line x1="80" y1="256" x2="160" y2="256" stroke="#c9a84c" stroke-width="5"/>
+  <line x1="352" y1="256" x2="432" y2="256" stroke="#c9a84c" stroke-width="5"/>
+</svg>

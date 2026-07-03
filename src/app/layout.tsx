@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import NavBar from "./_components/NavBar";
+import ServiceWorkerRegistrar from "./_components/ServiceWorkerRegistrar";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -19,6 +20,12 @@ const crimsonText = Crimson_Text({
 export const metadata: Metadata = {
   title: "CoC Portal",
   description: "クトゥルフ神話TRPG キャラクター管理ポータル",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "CoC Portal",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +38,12 @@ export default function RootLayout({
       lang="ja"
       className={`${cinzel.variable} ${crimsonText.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="theme-color" content="#1a0f0a" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+      </head>
       <body className="min-h-full flex flex-col bg-coc-bg text-coc-text">
+        <ServiceWorkerRegistrar />
         <NavBar />
         <main className="flex-1">{children}</main>
       </body>
