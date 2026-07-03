@@ -603,3 +603,18 @@ export type SessionAgendaItem = {
   order_index: number;
   created_at: string;
 };
+
+export type CharacterMessage = {
+  id: string;
+  sender_character_id: string;
+  recipient_character_id: string;
+  subject: string;
+  body: string | null;
+  sent_at: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+export type CharacterMessageWithSender = CharacterMessage & {
+  sender: { id: string; name: string } | null;
+};

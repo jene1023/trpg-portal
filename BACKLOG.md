@@ -757,7 +757,7 @@
 **実装ヒント:** Supabaseに `session_agenda_items` テーブルを追加（id, scenario_id, item_type: "scene"|"handout"|"npc"|"note", label, is_done: boolean, order_index, created_at）。`src/app/scenarios/[id]/agenda/page.tsx` を "use client" で新規作成（ドラッグ不要のシンプルな順序付きチェックリスト＋追加フォーム）。is_done のトグルは `supabase.from("session_agenda_items").update({ is_done }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッションアジェンダ」リンクを追加。`src/lib/supabase.ts` に `SessionAgendaItem` 型を追加。
 **コミット:** `feat: KP session agenda checklist for in-session progression tracking`
 
-## [TODO] キャラクター間In-characterメッセージ（手紙・伝言） — 優先度: 中
+## [DONE] キャラクター間In-characterメッセージ（手紙・伝言） — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクター同士がIn-characterで「手紙」「伝言メモ」をやり取りし、ポータル内に保存できる機能。セッション外のロールプレイや、KPからPL個別へのキャラクター宛メッセージをテキスト記録として残す。
 **実装ヒント:** Supabaseに `character_messages` テーブルを追加（id, sender_character_id, recipient_character_id, subject, body, sent_at, is_read: boolean, created_at）。`src/app/characters/[id]/messages/page.tsx` を "use client" で新規作成（受信箱一覧＋送信フォーム）。送信先はキャラクター一覧（`supabase.from("characters").select("id, name")`）からselectで選択。既読/未読管理（`supabase.from("character_messages").update({ is_read: true }).eq("id", id)`）を実装。未読件数バッジをキャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに追加。`src/lib/supabase.ts` に `CharacterMessage` 型を追加。

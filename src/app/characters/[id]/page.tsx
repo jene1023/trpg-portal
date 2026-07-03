@@ -62,6 +62,12 @@ export default async function CharacterDetailPage({ params }: Props) {
     .select("id", { count: "exact", head: true })
     .eq("character_id", id);
 
+  const { count: unreadMessageCount } = await supabase
+    .from("character_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_character_id", id)
+    .eq("is_read", false);
+
   const db = calcDamageBonus(char.str, char.siz);
   const build = calcBuild(char.str, char.siz);
   const mov = calcMov(char.str, char.dex, char.siz);
@@ -554,6 +560,24 @@ export default async function CharacterDetailPage({ params }: Props) {
                 className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>ダウンタイム活動</span>
+                <span className="text-coc-gold">→</span>
+              </Link>
+              <Link
+                href={`/characters/${id}/messages`}
+                className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors motion-safe:active:scale-[0.98] ${
+                  (unreadMessageCount ?? 0) > 0
+                    ? "border-coc-gold/40 bg-coc-gold/5 text-coc-text hover:border-coc-gold/70 hover:bg-coc-gold/10"
+                    : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  手紙・伝言メモ
+                  {(unreadMessageCount ?? 0) > 0 && (
+                    <span className="rounded bg-coc-gold/20 border border-coc-gold/50 px-1.5 py-0.5 text-xs font-semibold text-coc-gold">
+                      未読 {unreadMessageCount}件
+                    </span>
+                  )}
+                </span>
                 <span className="text-coc-gold">→</span>
               </Link>
               {(() => {
