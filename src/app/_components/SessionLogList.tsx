@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { SessionLog } from "@/lib/supabase";
 import SessionLogForm from "./SessionLogForm";
 import SessionNpcEncounters from "./SessionNpcEncounters";
@@ -89,6 +90,18 @@ export default function SessionLogList({
                 <p className="font-crimson text-coc-text text-[15px] leading-relaxed whitespace-pre-wrap border-l-2 border-coc-border pl-3">
                   {log.summary}
                 </p>
+              )}
+
+              {log.recording_url && (
+                <a
+                  href={log.recording_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-coc-gold hover:brightness-125 transition-all"
+                >
+                  <ExternalLink size={12} />
+                  録音を聞く
+                </a>
               )}
 
               <SessionNpcEncounters

@@ -659,7 +659,7 @@
 **実装ヒント:** `src/app/stats/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, sessions(*), dice_rolls(*)")` で全キャラのデータを一括取得し集計。主要メトリクス: 総キャラクター数/生存数/死亡数/退場数、総セッション数、累計SAN喪失合計（`sessions.san_loss` 合計）、総ダイスロール数と通算成功率（`dice_rolls` 集計）、最多使用技能TOP5。グラフはCSSバーのみで依存ライブラリ不要。`src/app/_components/NavBar.tsx` に「統計」リンクを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: player-level statistics dashboard across all characters and sessions`
 
-## [TODO] セッション録音・アーカイブURLリンク管理 — 優先度: 低
+## [DONE] セッション録音・アーカイブURLリンク管理 — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** Zoom/Discord/YouTubeなどで録音・録画されたセッションのアーカイブURLをセッションログに紐づけて保存できる機能。「あの時のセッションの録音どこだっけ？」という問題を解決し、セッションログから直接アーカイブに飛べるようにする。
 **リサーチ根拠:** オンラインセッション（オンセ）では録音・録画が広く行われており、アーカイブURLをセッション情報と一緒に管理したいニーズが確認された。既存の `bgm_cues` テーブルでURLリンク管理パターンは確立済みで、セッションログへの拡張が自然。

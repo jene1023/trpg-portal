@@ -304,3 +304,6 @@ alter table share_tokens add column if not exists scenario_id uuid references sc
 
 -- 技能カテゴリ別フィルタ (追加マイグレーション)
 alter table character_skills add column if not exists category text;
+
+-- セッション録音URL (追加マイグレーション)
+alter table sessions add column if not exists recording_url text;

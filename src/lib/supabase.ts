@@ -91,6 +91,7 @@ export type SessionLog = {
   san_loss: number;
   hp_loss: number;
   played_at: string | null;
+  recording_url: string | null;
   created_at: string;
 };
 

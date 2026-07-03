@@ -19,6 +19,7 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
     san_loss: 0,
     hp_loss: 0,
     played_at: "",
+    recording_url: "",
   });
 
   function change(field: string, value: string | number) {
@@ -41,6 +42,7 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
         san_loss: form.san_loss,
         hp_loss: form.hp_loss,
         played_at: form.played_at || null,
+        recording_url: form.recording_url.trim() || null,
       })
       .select()
       .single();
@@ -56,6 +58,7 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
         san_loss: 0,
         hp_loss: 0,
         played_at: "",
+        recording_url: "",
       });
       setOpen(false);
     }
@@ -146,6 +149,17 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
             className={inputClass}
           />
         </div>
+      </div>
+
+      <div>
+        <label className={labelClass}>録音・録画アーカイブURL（任意）</label>
+        <input
+          type="url"
+          placeholder="https://..."
+          value={form.recording_url}
+          onChange={(e) => change("recording_url", e.target.value)}
+          className={inputClass}
+        />
       </div>
 
       <div className="flex gap-2 pt-1">
