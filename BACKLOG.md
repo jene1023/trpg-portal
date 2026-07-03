@@ -720,3 +720,27 @@
 **概要:** 探偵道具・医薬品・銃器・消耗品など CoC で頻出のアイテムを「カタログ」として登録し、インベントリ追加時にワンクリックで選択できるテンプレートライブラリ。毎回同じアイテム名・ダメージ式・メモを手入力する手間をなくす。
 **実装ヒント:** Supabaseに `item_catalog` テーブルを追加（id, category: "weapon"|"medical"|"tool"|"misc", name, damage, notes, created_at）。`src/app/item-catalog/page.tsx` を新規作成（カテゴリフィルタ＋一覧＋追加フォーム）。`src/app/characters/[id]/inventory/page.tsx` の追加フォームに「カタログから選択」ボタンを追加し、選択したカタログエントリの name/damage/notes をフォームへ自動補完。`src/lib/supabase.ts` に `ItemCatalog` 型を追加。初期データとして代表的な武器・アイテムをシードデータとして `item_catalog` に挿入するSQLをコメントで記載。`src/app/_components/NavBar.tsx` には追加不要（キャラクターインベントリ内の補助機能として位置づける）。
 **コミット:** `feat: item catalog template library for quick inventory addition`
+
+## [TODO] セッションリプレイ記事生成補助 — 優先度: 高
+**対象:** KP / 共通
+**概要:** セッション終了後、シナリオに紐づくセッションログ・共有メモ・NPC遭遇記録を自動集約し、リプレイ風まとめテキストをワンクリックで生成してクリップボードにコピーできる機能。毎回手動でまとめ記事を書く手間を大幅に削減する。
+**実装ヒント:** `src/app/scenarios/[id]/recap/page.tsx` を新規作成（Server Component）。参加者のcharacter_idを `scenario_participants` から取得し、`sessions`（セッションログ）・`scenario_notes`（共有メモ）・`npc_encounters`（NPC遭遇）を `Promise.all` で並行取得。セクション「セッション概要」「登場NPC」「共有メモ」「SAN/HP損害サマリー」に分けて表示し、`navigator.clipboard.writeText()` でマークダウン形式コピーボタンを配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ記事を生成」リンクを追加。追加DBなし。
+**コミット:** `feat: session recap text generator for KP post-session report`
+
+## [TODO] シリーズ/キャンペーン管理 — 優先度: 中
+**対象:** KP / 共通
+**概要:** 複数シナリオを「キャンペーン」としてまとめ、連作の進行状況・全体シノプシス・通算セッション数を一画面で把握できる機能。単発シナリオと連作両方に対応し、長期卓の全体感を可視化する。
+**実装ヒント:** Supabaseに `campaigns` テーブルを追加（id, title, synopsis, status: "ongoing"|"completed"|"planning", created_at）と `campaign_scenarios` テーブルを追加（id, campaign_id, scenario_id, order_index, created_at）。`src/app/campaigns/page.tsx`（一覧＋作成フォーム）と `src/app/campaigns/[id]/page.tsx`（シナリオ一覧・進捗サマリー）を新規作成。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「キャンペーンに追加」ボタンを追加。`src/app/_components/NavBar.tsx` に「キャンペーン」リンクを追加。`src/lib/supabase.ts` に `Campaign`, `CampaignScenario` 型を追加。
+**コミット:** `feat: campaign/series management to group and track multi-scenario arcs`
+
+## [TODO] シナリオ謎・伏線管理（プロットスレッド） — 優先度: 中
+**対象:** KP
+**概要:** シナリオ内の未解明の謎・伏線・秘密をリスト管理し、「未解明」「解明済み」「放棄」のステータスで追跡できる機能。`truth-timeline`（出来事年表）は時系列記録だが、こちらはKPが「どの謎がまだ残っているか」を把握するためのチェックリスト。
+**実装ヒント:** Supabaseに `plot_threads` テーブルを追加（id, scenario_id, title, description, status: "pending"|"revealed"|"abandoned", created_at）。`src/app/scenarios/[id]/plot-threads/page.tsx` を "use client" で新規作成（ステータス別カンバン風リスト＋追加フォーム）。ステータス変更は `supabase.from("plot_threads").update({ status }).eq("id", id)` で即時更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「未解明の謎：N件」バッジを追加。`src/lib/supabase.ts` に `PlotThread` 型を追加（status: "pending" | "revealed" | "abandoned"）。
+**コミット:** `feat: plot thread tracking for mystery and foreshadowing management`
+
+## [TODO] シナリオデータ一括エクスポート（KPアーカイブ） — 優先度: 低
+**対象:** KP
+**概要:** シナリオに紐づくデータ（ハンドアウト・NPC・エリア・シーン・BGMキュー・共有メモ・プロットスレッド）を1つのJSONファイルとしてダウンロードできる機能。完了シナリオのアーカイブ、バックアップ、他のKPとのシナリオ素材共有に使う。
+**実装ヒント:** `src/app/scenarios/[id]/export/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("*, handouts(*), scenario_areas(*), scenario_scenes(*), bgm_cues(*), scenario_notes(*)")` で関連データを一括取得し、NPC（`scenario_name` 一致）も含める。`JSON.stringify(data, null, 2)` + `Blob` + `URL.createObjectURL` でダウンロード。ファイル名は `scenario-{title}-{date}.json` 形式。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「エクスポート」ボタンを追加。追加DBなし。
+**コミット:** `feat: scenario full data JSON export for archiving and sharing`
