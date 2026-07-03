@@ -768,3 +768,27 @@
 **概要:** セッション中に各シーン（エリア）の開始・終了時刻を記録し、セッション終了後に「どのシーンに何分かかったか」の振り返りができる時間管理ログ。セッション振り返りレポート（scenario_reviews）の定性評価を補完する定量データとなる。
 **実装ヒント:** Supabaseに `scene_pacing_logs` テーブルを追加（id, scenario_id, scene_label, started_at: timestamptz, ended_at: timestamptz | null, created_at）。`src/app/scenarios/[id]/pacing/page.tsx` を "use client" で新規作成。「シーン開始」ボタンで `started_at = now()` を記録し、「シーン終了」で `ended_at = now()` を更新（`supabase.from("scene_pacing_logs").update({ ended_at }).eq("id", activeId)`）。各シーンの経過時間を `(ended_at - started_at)` で分単位計算して一覧表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ペーシングログ」リンクを追加。`src/lib/supabase.ts` に `ScenePacingLog` 型を追加。
 **コミット:** `feat: scene pacing log for session time management and retrospective`
+
+## [TODO] グループダイスロール（パーティー一括判定） — 優先度: 高
+**対象:** KP / 共通
+**概要:** シナリオ参加者全員に同一の技能判定（例：「知覚」「図書館」「SANチェック」）をワンクリックで一括実行し、成功度ごとに結果を並べて表示できる機能。現在はKPがキャラクターごとにDiceRollerを操作する必要があり、複数人同時判定に手間がかかる。
+**実装ヒント:** `src/app/scenarios/[id]/group-roll/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(*, character_skills(*))").eq("scenario_id", id)` で参加者と技能を一括取得。技能名テキスト入力（または代表技能の select）と「全員ロール」ボタンで各キャラクターに1d100判定を実行。結果は成功度（決定的成功/通常成功/失敗/致命的失敗）でグループ表示し、`supabase.from("dice_rolls").insert([...])` で各キャラのロールをまとめて保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「グループロール」リンクを追加。追加DBなし（既存 `scenario_participants`, `character_skills`, `dice_rolls` を流用）。
+**コミット:** `feat: group dice roll for simultaneous party skill checks`
+
+## [TODO] 神話生物・神格クイック辞典 — 優先度: 中
+**対象:** KP
+**概要:** CoC7版の主要神話生物（グール・ゾンビ・ディープワン・クトゥルフ等）の能力値・代表攻撃・SANチェック値を静的データとして収録し、セッション中にキーワード検索で即参照できる辞典ページ。既存のルールリファレンス（`rules/page.tsx`）を補完するKP専用ツール。
+**実装ヒント:** `src/app/mythos/page.tsx` を新規作成（"use client" + useState でフィルタ）。神話生物データは `src/lib/mythosData.ts` に静的配列として定義（name, origin, str, con, pow, dex, hp, san_loss_success, san_loss_fail, attacks: string[], notes）。検索バーで name/origin をリアルタイムフィルタ。各エントリはアコーディオン表示（閉じた状態で名前のみ、開くと全能力値・攻撃・SANロス表示）。rules/page.tsx の実装パターンを踏襲。`src/app/_components/NavBar.tsx` に「神話辞典」リンクを追加。追加DBなし（静的データのみ）。
+**コミット:** `feat: mythos bestiary quick reference for KP`
+
+## [TODO] セッション前PLチャレンジ目標 — 優先度: 中
+**対象:** PL
+**概要:** PLが次回セッションに向けて「この技能で成功する」「このNPCと会話する」「呪文を1回使う」などの個人チャレンジ目標を設定し、セッション後に達成/未達を記録できる機能。成長記録・セッションログと連携し、キャラクターへの没入感と継続プレイのモチベーションを高める。
+**実装ヒント:** Supabaseに `session_goals` テーブルを追加（id, character_id, goal: text, status: "pending"|"achieved"|"failed", set_at: timestamptz, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/session-goals/page.tsx` を "use client" で新規作成（目標入力フォーム＋一覧、status 別に「進行中」「達成」「未達」タブ表示）。各目標カードに「達成」「未達」ボタンを配置し `supabase.from("session_goals").update({ status, resolved_at }).eq("id", id)` で即時更新。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に保留中の目標一覧を追加表示。`src/lib/supabase.ts` に `SessionGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション目標」リンクを追加。
+**コミット:** `feat: per-session PL challenge goals with achievement tracking`
+
+## [TODO] KPオペレーション統合ビュー — 優先度: 高
+**対象:** KP
+**概要:** セッション当日にKPが使う主要ツール（パーティーステータス・アジェンダチェックリスト・共有メモ・グループロール）を1ページにタブ集約した「指揮卓」ビュー。現在は各機能が別ページにあり、セッション中のタブ切り替えコストが高い。
+**実装ヒント:** `src/app/scenarios/[id]/ops/page.tsx` を "use client" で新規作成。タブ切り替え（「ステータス」「アジェンダ」「メモ」「ロール」）で既存コンポーネント（`PartyMemberCard.tsx`, `SessionAgendaChecklist.tsx`, `ScenarioNoteList.tsx`）を切り替え表示。URLハッシュ（`#status`, `#agenda`, `#notes`, `#roll`）でタブ状態を保持しブラウザ履歴に対応（`useEffect` + `window.location.hash`）。データ取得は各コンポーネントに委譲し、このページ自体は `scenarioId` を prop で渡すだけのシェルとして薄く実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「セッション開始 →」ボタンを追加して `/scenarios/[id]/ops` へ遷移。追加DBなし（既存ページのコンポーネントを流用）。
+**コミット:** `feat: KP operations dashboard for unified in-session management`
