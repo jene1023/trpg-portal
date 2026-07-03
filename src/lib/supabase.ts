@@ -479,3 +479,12 @@ export type ScenarioProp = {
   is_distributed: boolean;
   created_at: string;
 };
+
+export type ScenarioRandomEvent = {
+  id: string;
+  scenario_id: string;
+  weight: number;
+  title: string;
+  description: string | null;
+  created_at: string;
+};

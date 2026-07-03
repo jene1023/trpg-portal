@@ -626,7 +626,7 @@
 **実装ヒント:** Supabaseに `scenario_props` テーブルを追加（id, scenario_id, name, description: text | null, acquisition_condition: text | null, is_distributed: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/props/page.tsx` を "use client" で新規作成（一覧＋インライン追加フォーム、配布済みチェックボックスで `supabase.from("scenario_props").update({is_distributed})` トグル）。`src/lib/supabase.ts` に `ScenarioProp` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「物証・道具」リンクと未配布件数バッジを追加。KPセッション準備チェックリスト（`src/app/scenarios/[id]/preflight/page.tsx`）にも未配布プロップの確認項目を追加。
 **コミット:** `feat: scenario prop and evidence management for KP`
 
-## [TODO] ランダムイベントテーブル（KP向けランダム抽選） — 優先度: 低
+## [DONE] ランダムイベントテーブル（KP向けランダム抽選） — 優先度: 低
 **対象:** KP
 **概要:** シナリオに紐づいたランダムイベント候補リストを作成し、ボタン1クリックで重み付き抽選できる機能。探索中の偶発的展開や、セッション進行に詰まった際の補助ツール。KPが事前に候補を登録しておけば即座に使える。
 **実装ヒント:** Supabaseに `scenario_random_events` テーブルを追加（id, scenario_id, weight: integer DEFAULT 1, title, description: text | null, created_at）。`src/app/scenarios/[id]/random-events/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。「抽選する」ボタン押下で各イベントの `weight` 合計に対する累積比率で `Math.random()` を使い1件を選出してモーダル表示。`src/lib/supabase.ts` に `ScenarioRandomEvent` 型を追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ランダムイベント」リンクを追加。追加DBテーブルのみ。
