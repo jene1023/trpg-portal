@@ -652,3 +652,18 @@ export type CharacterPhobia = {
   acquired_at: string | null;
   created_at: string;
 };
+
+export type CharacterTome = {
+  id: string;
+  character_id: string;
+  title: string;
+  author: string | null;
+  language: string | null;
+  san_loss_skimming: string | null;
+  san_loss_full_read: string | null;
+  cthulhu_mythos_gain: number | null;
+  spells_contained: string | null;
+  is_read: boolean;
+  notes: string | null;
+  created_at: string;
+};

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, BookOpen } from "lucide-react";
+import { ArrowLeft, Sparkles, BookOpen, BookMarked } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import SpellForm from "@/app/_components/SpellForm";
 
@@ -44,13 +44,22 @@ export default async function SpellsPage({ params }: Props) {
           <Sparkles size={20} className="text-coc-gold" />
           <h1 className="font-cinzel text-xl font-bold text-coc-text">呪文・魔術</h1>
         </div>
-        <Link
-          href={`/spells?characterId=${id}`}
-          className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
-        >
-          <BookOpen size={13} />
-          カタログから追加
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/characters/${id}/tomes`}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          >
+            <BookMarked size={13} />
+            所有魔道書
+          </Link>
+          <Link
+            href={`/spells?characterId=${id}`}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          >
+            <BookOpen size={13} />
+            カタログから追加
+          </Link>
+        </div>
       </div>
       <p className="text-sm text-coc-muted mb-6">
         習得した呪文を管理します。MP・SAN消費・効果をセッション中に素早く参照できます。

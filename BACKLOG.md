@@ -807,7 +807,7 @@
 **実装ヒント:** Supabaseに `character_phobias` テーブルを追加（id, character_id, phobia_type: "phobia"|"mania", name, trigger_description, is_active: boolean, acquired_at, created_at）。`src/app/characters/[id]/phobias/page.tsx` を新規作成（phobia_type別タブ表示 + 追加フォーム）。各行に「活性/回復」トグルを配置し `supabase.from("character_phobias").update({ is_active })` で更新。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）にアクティブなフォビア/マニアのサマリーを追記。`src/lib/supabase.ts` に `CharacterPhobia` 型を追加。キャラクター詳細ページに「恐怖症/マニア」リンクを追加。
 **コミット:** `feat: phobia and mania management for CoC7 madness tracking`
 
-## [TODO] 魔道書コレクション管理 — 優先度: 中
+## [DONE] 魔道書コレクション管理 — 優先度: 中
 **対象:** PL
 **概要:** キャラクターが入手・読了した魔道書（ネクロノミコン等）をタイトル・言語・読了ステータス・読書時SANロス・クトゥルフ神話技能上昇値・収録呪文と共に記録する機能。現在の「呪文管理（character_spells）」は取得済み呪文の一覧だが、魔道書はSAN/技能への副作用があり独立した管理価値がある。
 **リサーチ根拠:** CharaenoやPrismScroll Cthulhuが魔道書専用フィールドを実装しており、呪文マスターのPLが頻繁にセッション中参照する要素として確認された。
