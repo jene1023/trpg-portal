@@ -793,7 +793,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/ops/page.tsx` を "use client" で新規作成。タブ切り替え（「ステータス」「アジェンダ」「メモ」「ロール」）で既存コンポーネント（`PartyMemberCard.tsx`, `SessionAgendaChecklist.tsx`, `ScenarioNoteList.tsx`）を切り替え表示。URLハッシュ（`#status`, `#agenda`, `#notes`, `#roll`）でタブ状態を保持しブラウザ履歴に対応（`useEffect` + `window.location.hash`）。データ取得は各コンポーネントに委譲し、このページ自体は `scenarioId` を prop で渡すだけのシェルとして薄く実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「セッション開始 →」ボタンを追加して `/scenarios/[id]/ops` へ遷移。追加DBなし（既存ページのコンポーネントを流用）。
 **コミット:** `feat: KP operations dashboard for unified in-session management`
 
-## [TODO] VTTコマJSONエクスポート（ユドナリウム/ここふぁりあ対応） — 優先度: 高
+## [DONE] VTTコマJSONエクスポート（ユドナリウム/ここふぁりあ対応） — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターの能力値・HP/MP/SANをユドナリウムおよびここふぁりあが読み込める「コマデータJSON」形式でエクスポートする機能。既存のBCDiceチャットパレット生成と組み合わせ、VTTセッションへの移行コストをゼロに近づける。
 **リサーチ根拠:** ユドナリウム・ここふぁりあは国内オンセの主要VTTであり、「毎回手でコマを作り直すのが面倒」という不満がユーザーアンケートや個人ブログ（TRPGツールガイド等）で繰り返し挙げられている最大の課題の一つ。

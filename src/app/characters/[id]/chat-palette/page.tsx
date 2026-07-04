@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Copy, Check } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { Character, CharacterSkill } from "@/lib/supabase";
+import VttExportButton from "@/app/_components/VttExportButton";
 
 export default function ChatPalettePage() {
   const params = useParams();
@@ -158,6 +159,16 @@ export default function ChatPalettePage() {
         <p>• <span className="text-coc-text">1D100&lt;=値</span> 形式はBCDice（ユドナリウム・ここフォリア）に対応しています。</p>
         <p>• コメント行（// で始まる行）はVTTツールでセパレータとして表示されます。</p>
         <p>• 技能値が変更された場合はページを再読み込みしてください。</p>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest mb-3">
+          VTTエクスポート
+        </h2>
+        <p className="text-xs text-coc-muted mb-4">
+          チャットパレットコマンドを統合したVTTコマデータをダウンロードできます。
+        </p>
+        <VttExportButton char={char} skills={skills} />
       </div>
     </div>
   );
