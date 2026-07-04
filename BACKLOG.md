@@ -787,7 +787,7 @@
 **実装ヒント:** Supabaseに `session_goals` テーブルを追加（id, character_id, goal: text, status: "pending"|"achieved"|"failed", set_at: timestamptz, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/session-goals/page.tsx` を "use client" で新規作成（目標入力フォーム＋一覧、status 別に「進行中」「達成」「未達」タブ表示）。各目標カードに「達成」「未達」ボタンを配置し `supabase.from("session_goals").update({ status, resolved_at }).eq("id", id)` で即時更新。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に保留中の目標一覧を追加表示。`src/lib/supabase.ts` に `SessionGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション目標」リンクを追加。
 **コミット:** `feat: per-session PL challenge goals with achievement tracking`
 
-## [TODO] KPオペレーション統合ビュー — 優先度: 高
+## [DONE] KPオペレーション統合ビュー — 優先度: 高
 **対象:** KP
 **概要:** セッション当日にKPが使う主要ツール（パーティーステータス・アジェンダチェックリスト・共有メモ・グループロール）を1ページにタブ集約した「指揮卓」ビュー。現在は各機能が別ページにあり、セッション中のタブ切り替えコストが高い。
 **実装ヒント:** `src/app/scenarios/[id]/ops/page.tsx` を "use client" で新規作成。タブ切り替え（「ステータス」「アジェンダ」「メモ」「ロール」）で既存コンポーネント（`PartyMemberCard.tsx`, `SessionAgendaChecklist.tsx`, `ScenarioNoteList.tsx`）を切り替え表示。URLハッシュ（`#status`, `#agenda`, `#notes`, `#roll`）でタブ状態を保持しブラウザ履歴に対応（`useEffect` + `window.location.hash`）。データ取得は各コンポーネントに委譲し、このページ自体は `scenarioId` を prop で渡すだけのシェルとして薄く実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「セッション開始 →」ボタンを追加して `/scenarios/[id]/ops` へ遷移。追加DBなし（既存ページのコンポーネントを流用）。
