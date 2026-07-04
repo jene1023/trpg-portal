@@ -875,3 +875,27 @@
 **概要:** セッション参加回数・SAN喪失総量・技能成長回数・ダイス成功率・狂気発症回数などの行動履歴から達成バッジ（称号）を自動判定し、キャラクターページで表示するゲーミフィケーション機能。既存テーブルの集計のみで追加DBは不要。
 **実装ヒント:** `src/app/characters/[id]/achievements/page.tsx` を新規作成（Server Component）。`sessions`, `dice_rolls`, `growth_history`, `madness_records` を `Promise.all` で並行取得して各バッジ条件を判定（例: "ベテラン探索者" = sessions.length >= 10, "折れない精神" = san_loss合計 >= 30, "成長の証" = growth_history.length >= 5, "ファンブル常連" = fumble回数 >= 5）。バッジ定義は静的配列（name, description, icon, condition関数）で管理。達成済み/未達成を視覚的に区別（達成済みはカラー、未達成はグレーアウト）して表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「実績」リンクを追加。追加DBなし。
 **コミット:** `feat: character achievement badge system based on session history`
+
+## [TODO] ダイス成功率シミュレーター — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** 技能値と判定種別（通常/ボーナスダイス/ペナルティダイス）を入力すると、成功確率・通常成功率・決定的成功率・ファンブル率を即座に計算して表示するリファレンスツール。セッション前の戦略立案やKPの難易度設計に役立つ。
+**実装ヒント:** `src/app/dice-calc/page.tsx` を "use client" で新規作成（追加DBなし・静的計算のみ）。技能値スライダー（0〜99）と判定種別セレクタを配置。通常判定は `rate = Math.min(skill, 99) / 100`、ボーナスは `1 - (1 - rate)^2`、ペナルティは `rate^2` で確率計算。決定的成功は技能値の1/5以下、ファンブルは96以上かつ技能値50未満で100。結果をパーセンテージ＋CSSバーで表示。`src/app/_components/NavBar.tsx` に「確率計算」リンクを追加。
+**コミット:** `feat: dice success rate simulator for skill check probability`
+
+## [TODO] シナリオ難易度・メタ情報タグ — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオに「難易度（初心者向け/中級/上級）」「推定プレイ時間（短編/中編/長編）」「推奨人数（最小・最大）」「コンテンツ警告タグ」を設定できる機能。シナリオ一覧での絞り込みや参加者へのプレ情報共有に使う。
+**実装ヒント:** `scenarios` テーブルに `difficulty: "beginner"|"intermediate"|"advanced" | null`、`playtime_type: "short"|"medium"|"long" | null`、`min_players: integer | null`、`max_players: integer | null`、`content_tags: text[] | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に各フィールドを追加。`src/app/_components/ScenarioForm.tsx` にメタ情報入力セクション（select要素＋タグ入力）を追加。`src/app/scenarios/page.tsx` のフィルタUIに難易度・プレイ時間フィルタを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の概要カードにバッジ表示。
+**コミット:** `feat: scenario difficulty and meta tags for filtering and player briefing`
+
+## [TODO] セッション振り返りフォーム（卓評価） — 優先度: 中
+**対象:** KP / 共通
+**概要:** セッション終了後に「楽しさ（1〜5）」「緊張感（1〜5）」「印象的な場面（自由記述）」「次回への改善点（自由記述）」を記録できる振り返りフォーム。セッションログの事実記録と分けて感想・評価を残せる。
+**実装ヒント:** Supabaseに `session_reviews` テーブルを追加（id, scenario_id, session_label, fun_score: smallint, tension_score: smallint, highlight, improvement, reviewed_at, created_at）。`src/app/scenarios/[id]/review/page.tsx` を "use client" で新規作成（一覧＋新規入力フォーム）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓振り返り」リンクと平均スコアサマリを追加。`src/lib/supabase.ts` に `SessionReview` 型を追加。
+**コミット:** `feat: post-session review form for scenario feedback and improvement tracking`
+
+## [TODO] キャラクター肖像画プロンプト生成 — 優先度: 低
+**対象:** PL / 共通
+**概要:** キャラクターの外見・職業・性格・背景情報をもとに、Midjourney/StableDiffusion等のAI画像生成ツールで使える英語プロンプトを自動生成してクリップボードにコピーできる機能。プロフィールカード機能（SNS共有）と組み合わせて、キャラクターのビジュアル化を支援する。
+**実装ヒント:** `src/app/characters/[id]/portrait-prompt/page.tsx` を "use client" で新規作成（追加DBなし）。`supabase.from("characters").select("*, character_traits(*)")` でキャラデータを取得し、外見テキスト（`appearance`フィールド）・職業（`occupation`）・性格特質（`character_traits`のpersonalityタイプ）を組み合わせて英語プロンプトを組み立てる静的テンプレート関数 `buildPortraitPrompt(character)` を `src/lib/portraitPrompt.ts` に実装。生成されたプロンプトをテキストエリアに表示し「コピー」ボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「肖像画プロンプト」リンクを追加。
+**コミット:** `feat: AI portrait prompt generator from character appearance and traits`
