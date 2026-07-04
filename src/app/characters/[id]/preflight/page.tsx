@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target, Zap } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -69,6 +69,13 @@ export default async function PreflightPage({ params }: Props) {
     .select("id, goal, set_at")
     .eq("character_id", id)
     .eq("status", "pending")
+    .order("created_at", { ascending: true });
+
+  const { data: activePhobias } = await supabase
+    .from("character_phobias")
+    .select("id, phobia_type, name, trigger_description")
+    .eq("character_id", id)
+    .eq("is_active", true)
     .order("created_at", { ascending: true });
 
   if (!char) notFound();
@@ -445,6 +452,57 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           セッション目標を管理 →
+        </Link>
+      </div>
+
+      {/* アクティブな恐怖症・マニア */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Zap size={16} className={(activePhobias ?? []).length > 0 ? "text-purple-400" : "text-coc-muted"} />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            恐怖症・マニア（発症中）
+          </h2>
+          {(activePhobias ?? []).length > 0 && (
+            <span className="ml-auto rounded bg-purple-900/60 border border-purple-700 px-2 py-0.5 text-xs text-purple-300 font-semibold">
+              {(activePhobias ?? []).length}件
+            </span>
+          )}
+        </div>
+        {(activePhobias ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">発症中の恐怖症・マニアなし</p>
+        ) : (
+          <ul className="space-y-2">
+            {(activePhobias ?? []).map(
+              (p: { id: string; phobia_type: string; name: string; trigger_description: string | null }) => (
+                <li
+                  key={p.id}
+                  className={`rounded-md border px-3 py-2 ${
+                    p.phobia_type === "phobia"
+                      ? "border-red-800 bg-red-950/20"
+                      : "border-purple-800 bg-purple-950/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold ${
+                      p.phobia_type === "phobia" ? "text-red-400" : "text-purple-400"
+                    }`}>
+                      {p.phobia_type === "phobia" ? "恐怖症" : "マニア"}
+                    </span>
+                    <span className="text-sm text-coc-text">{p.name}</span>
+                  </div>
+                  {p.trigger_description && (
+                    <p className="text-xs text-coc-muted mt-0.5">トリガー: {p.trigger_description}</p>
+                  )}
+                </li>
+              )
+            )}
+          </ul>
+        )}
+        <Link
+          href={`/characters/${id}/phobias`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          恐怖症・マニアを管理 →
         </Link>
       </div>
 

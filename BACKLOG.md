@@ -800,7 +800,7 @@
 **実装ヒント:** `src/app/_components/VttExportButton.tsx` を "use client" で新規作成。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、ユドナリウムのコマJSONスキーマ（`name`, `initiative`, `currentStatus:[{label:"HP", value, max}, ...]`）に変換して `Blob` + `URL.createObjectURL` でダウンロード。ここふぁりあ向けには別タブでテキストアリーナに貼るCSV形式も選択可能にする。`src/app/characters/[id]/chat-palette/page.tsx` に「VTTエクスポート」セクションとして配置し既存のチャットパレットページと統合。追加DBなし。
 **コミット:** `feat: VTT token JSON export for Udonarium and Kokoforia`
 
-## [TODO] 恐怖症・マニア詳細管理（フォビア/マニア） — 優先度: 高
+## [DONE] 恐怖症・マニア詳細管理（フォビア/マニア） — 優先度: 高
 **対象:** PL
 **概要:** CoC7版の恐怖症（フォビア）とマニア（躁病）をキャラクター単位で一覧・記録・管理できる専用UI。既存の「狂気状態管理（madness_records）」はsymptomを自由テキストで記録するが、CoC7版公式シートはフォビア/マニアを独立フィールドとして持つため、症状名・発動トリガー・活性状態を分けて追跡できるよう補完する。
 **リサーチ根拠:** Charaeno が恐怖症/マニア用の独立フィールドを実装しており、公式7版シートの構成に沿ったより細かい狂気管理がユーザーから高評価を得ている（Charaeno公式note）。

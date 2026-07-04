@@ -639,3 +639,16 @@ export type SessionGoal = {
   resolved_at: string | null;
   created_at: string;
 };
+
+export type PhobiaType = "phobia" | "mania";
+
+export type CharacterPhobia = {
+  id: string;
+  character_id: string;
+  phobia_type: PhobiaType;
+  name: string;
+  trigger_description: string | null;
+  is_active: boolean;
+  acquired_at: string | null;
+  created_at: string;
+};
