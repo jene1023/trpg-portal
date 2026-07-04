@@ -814,7 +814,7 @@
 **実装ヒント:** Supabaseに `character_tomes` テーブルを追加（id, character_id, title, author, language, san_loss_skimming: text（例: "1/1d3"）, san_loss_full_read: text（例: "1d4/2d6"）, cthulhu_mythos_gain: integer, spells_contained: text, is_read: boolean, notes, created_at）。`src/app/characters/[id]/tomes/page.tsx` を新規作成（一覧＋追加フォーム）。is_readのトグルで既読/未読を管理。`src/lib/supabase.ts` に `CharacterTome` 型を追加。キャラクター詳細ページに「魔道書」リンクを追加し、呪文ページ（`src/app/characters/[id]/spells/page.tsx`）にも「所有魔道書」への導線を設置。
 **コミット:** `feat: grimoire/tome collection management with SAN and skill effects`
 
-## [TODO] KP秘匿メモ（キャラクター/NPC/シナリオへのKP専用非公開フィールド） — 優先度: 中
+## [DONE] KP秘匿メモ（キャラクター/NPC/シナリオへのKP専用非公開フィールド） — 優先度: 中
 **対象:** KP
 **概要:** KPがキャラクター・NPC・シナリオのそれぞれに「PLに見せない秘匿情報」（真の正体・隠し設定・KP向け注記）を追記できる非公開メモフィールド。現在全データがPLにも見える前提で構築されており、KP専用情報の記録場所がない。
 **リサーチ根拠:** CharaXivの「KP専用非公開フィールド」が人気機能として紹介されており（Charaeno公式note・CharaXiv紹介記事）、KPが安心してキャラ設定を管理したいニーズが確認された。

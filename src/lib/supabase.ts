@@ -667,3 +667,13 @@ export type CharacterTome = {
   notes: string | null;
   created_at: string;
 };
+
+export type KpMemoEntityType = "character" | "npc" | "scenario";
+
+export type KpMemo = {
+  id: string;
+  entity_type: KpMemoEntityType;
+  entity_id: string;
+  content: string;
+  created_at: string;
+};

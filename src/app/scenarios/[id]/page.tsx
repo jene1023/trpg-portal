@@ -9,6 +9,7 @@ import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
+import KpMemoSection from "@/app/_components/KpMemoSection";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -613,6 +614,9 @@ export default async function ScenarioDetailPage({ params }: Props) {
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>
         <ScenarioDiscordWebhookEditor scenarioId={id} initialUrl={scenario.discord_webhook_url ?? null} />
       </div>
+
+      {/* KP秘匿メモ */}
+      <KpMemoSection entityType="scenario" entityId={id} />
     </div>
   );
 }

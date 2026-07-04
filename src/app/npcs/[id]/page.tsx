@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel } from "@/lib/supabase";
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
+import KpMemoSection from "@/app/_components/KpMemoSection";
 
 const LEVEL_LABEL: Record<SuccessLevel, string> = {
   critical_success: "決定的成功",
@@ -304,6 +305,9 @@ export default async function NpcDetailPage({ params }: Props) {
             </ul>
           </div>
         )}
+
+        {/* KP秘匿メモ */}
+        <KpMemoSection entityType="npc" entityId={npc.id} />
       </div>
     </div>
   );
