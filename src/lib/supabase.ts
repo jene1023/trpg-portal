@@ -705,3 +705,12 @@ export type EntityTag = {
   tag_id: string;
   created_at: string;
 };
+
+export type CharacterSnapshot = {
+  id: string;
+  character_id: string;
+  label: string;
+  snapshot_data: Record<string, unknown>;
+  taken_at: string;
+  created_at: string;
+};

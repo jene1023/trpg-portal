@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target, Zap, Heart } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import SnapshotSaveButton from "@/app/_components/SnapshotSaveButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -123,6 +124,21 @@ export default async function PreflightPage({ params }: Props) {
       <p className="text-sm text-coc-muted mb-6">
         セッション開始前にHP・SAN・装備・狂気・前回ログをまとめて確認できます。
       </p>
+
+      {/* スナップショット保存ボタン */}
+      <SnapshotSaveButton characterId={id} />
+
+      <div className="mt-4">
+        <Link
+          href={`/characters/${id}/snapshots`}
+          className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+        >
+          <span>スナップショット履歴を見る</span>
+          <span className="text-coc-gold">→</span>
+        </Link>
+      </div>
+
+      <div className="mt-6" />
 
       {/* HP / MP / SAN */}
       <div className={`${sectionClass} border-coc-border mb-4 space-y-4`}>

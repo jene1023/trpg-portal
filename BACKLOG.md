@@ -852,7 +852,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/print/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), scenario_areas(*), plot_threads(*)")` と NPCを `scenario_name` で取得して一括表示。`@media print { nav { display: none; } .no-print { display: none; } }` で印刷時はヘッダー・ナビを非表示。セクション区切りは `break-inside: avoid` で改ページ制御。`src/app/_components/ScenarioExportButton.tsx` を "use client" で新規作成し `window.print()` を呼び出す（または `src/app/_components/ScenarioExportButton.tsx` が既存の場合は流用）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「印刷/PDF」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario print/PDF export for KP offline session materials`
 
-## [TODO] セッション前キャラクタースナップショット（ロールバック対応） — 優先度: 高
+## [DONE] セッション前キャラクタースナップショット（ロールバック対応） — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション開始前にキャラクターのステータス・技能値をまるごとスナップショットとして保存し、誤ったHP/MP/SAN更新や技能値ミスが発生した場合に任意の時点へロールバックできる機能。データ損失防止として最優先。
 **実装ヒント:** Supabaseに `character_snapshots` テーブルを追加（id, character_id, label: text, snapshot_data: jsonb, taken_at: timestamptz, created_at）。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）に「スナップショットを保存」ボタン（"use client" コンポーネント）を追加し、`supabase.from("characters").select("*, character_skills(*)")` の全データをJSONB形式で格納。`src/app/characters/[id]/snapshots/page.tsx` を新規作成（一覧表示＋復元UI）。復元時は `characters.update({hp_current, mp_current, san_current, ...})` および `character_skills` の一括 upsert を実行し、復元前に確認ダイアログを表示。`src/lib/supabase.ts` に `CharacterSnapshot` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット」リンクを追加。
