@@ -846,7 +846,7 @@
 **実装ヒント:** Supabaseに `character_bonds` テーブルを追加（id, character_id, target_name, bond_score: integer, damage_taken: integer DEFAULT 0, is_lost: boolean DEFAULT false, notes: text | null, created_at）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（Server Component + "use client" フォーム）。絆スコア・ダメージ値を表示し「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置、`supabase.from("character_bonds").update(...)` で更新。`bond_score - damage_taken` で有効絆値をリアルタイム表示。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）にアクティブな絆一覧と有効絆値サマリーを追記。`src/lib/supabase.ts` に `CharacterBond` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加。
 **コミット:** `feat: CoC7 bond management with score, damage, and loss tracking`
 
-## [TODO] シナリオPDF出力（KP用オフライン資料） — 優先度: 中
+## [DONE] シナリオPDF出力（KP用オフライン資料） — 優先度: 中
 **対象:** KP
 **概要:** KPがシナリオに紐づく情報（基本情報・NPC一覧・エリアメモ・ハンドアウト一覧・プロットスレッド）をA4印刷・PDF保存できるページ。既存のキャラクターPDF出力（`characters/[id]/print/page.tsx`）と同様のアプローチで、対面セッション時のKP手元資料やシナリオアーカイブに使う。
 **実装ヒント:** `src/app/scenarios/[id]/print/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), scenario_areas(*), plot_threads(*)")` と NPCを `scenario_name` で取得して一括表示。`@media print { nav { display: none; } .no-print { display: none; } }` で印刷時はヘッダー・ナビを非表示。セクション区切りは `break-inside: avoid` で改ページ制御。`src/app/_components/ScenarioExportButton.tsx` を "use client" で新規作成し `window.print()` を呼び出す（または `src/app/_components/ScenarioExportButton.tsx` が既存の場合は流用）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「印刷/PDF」ボタンを追加。追加DBなし。

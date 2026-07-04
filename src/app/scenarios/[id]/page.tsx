@@ -9,6 +9,7 @@ import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
+import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 
@@ -89,6 +90,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <PlayCircle size={15} />
             セッション開始
           </Link>
+          <ScenarioPrintButton scenarioId={id} />
           <ScenarioExportButton scenarioId={id} scenarioTitle={scenario.title} />
           <AddToCampaignButton scenarioId={id} />
           <ScenarioDuplicateButton scenarioId={id} />
