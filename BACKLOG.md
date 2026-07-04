@@ -840,7 +840,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を刷新（"use client"）。既存の `scenario_participants` から取得するPC列（DEX値あり）に加え、「NPC/敵を追加」フォームで名前・DEX・HPを入力した即席エントリを同リストに追加（ローカル state のみ、追加DBなし）。既存クリーチャー（`src/app/creatures/[id]/page.tsx`）から「戦闘に追加」ボタンでHP・DEXを取り込む。全エンティティをDEX降順ソートしてイニシアチブ順を一覧表示。各行に「行動済み」チェック・HP+/-ボタン（現在値0以下で「倒れた」バッジ）を配置。「次ラウンド」ボタンで行動済みフラグ全解除＋ラウンド数+1。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「戦闘管理」リンクをこのページへ誘導。
 **コミット:** `feat: unified PC+NPC initiative tracker with HP management for combat`
 
-## [TODO] CoC7版「絆」管理（ボンドルール対応） — 優先度: 中
+## [DONE] CoC7版「絆」管理（ボンドルール対応） — 優先度: 中
 **対象:** PL
 **概要:** CoC7版の核心ルールである「絆（Bonds）」——探索者が深く結びついた人物との関係性を記録し、SANロス時の回復源や絆へのダメージ・喪失を追跡できる専用機能。既存の `character_relations`（関係メモ）や `character_traits`（重要な人物）とは異なり、絆のポイント値・ダメージ量・喪失フラグを持ちCoC7版のゲームメカニクスに特化する。
 **実装ヒント:** Supabaseに `character_bonds` テーブルを追加（id, character_id, target_name, bond_score: integer, damage_taken: integer DEFAULT 0, is_lost: boolean DEFAULT false, notes: text | null, created_at）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（Server Component + "use client" フォーム）。絆スコア・ダメージ値を表示し「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置、`supabase.from("character_bonds").update(...)` で更新。`bond_score - damage_taken` で有効絆値をリアルタイム表示。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）にアクティブな絆一覧と有効絆値サマリーを追記。`src/lib/supabase.ts` に `CharacterBond` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加。

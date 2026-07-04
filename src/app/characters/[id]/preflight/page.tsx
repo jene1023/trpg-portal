@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target, Zap } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target, Zap, Heart } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -76,6 +76,13 @@ export default async function PreflightPage({ params }: Props) {
     .select("id, phobia_type, name, trigger_description")
     .eq("character_id", id)
     .eq("is_active", true)
+    .order("created_at", { ascending: true });
+
+  const { data: activeBonds } = await supabase
+    .from("character_bonds")
+    .select("id, target_name, bond_score, damage_taken")
+    .eq("character_id", id)
+    .eq("is_lost", false)
     .order("created_at", { ascending: true });
 
   if (!char) notFound();
@@ -503,6 +510,56 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           恐怖症・マニアを管理 →
+        </Link>
+      </div>
+
+      {/* アクティブな絆 */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Heart size={16} className={(activeBonds ?? []).length > 0 ? "text-rose-400" : "text-coc-muted"} />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            絆（Bonds）
+          </h2>
+          <span className="ml-auto text-xs text-coc-muted">{(activeBonds ?? []).length}件</span>
+        </div>
+        {(activeBonds ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">絆なし</p>
+        ) : (
+          <ul className="space-y-2">
+            {(activeBonds ?? []).map(
+              (b: { id: string; target_name: string; bond_score: number; damage_taken: number }) => {
+                const effective = Math.max(0, b.bond_score - b.damage_taken);
+                return (
+                  <li
+                    key={b.id}
+                    className={`rounded-md border px-3 py-2 flex items-center justify-between ${
+                      effective === 0 && b.bond_score > 0
+                        ? "border-red-800 bg-red-950/20"
+                        : "border-coc-border bg-coc-raised"
+                    }`}
+                  >
+                    <span className="text-sm text-coc-text">{b.target_name}</span>
+                    <span className={`text-lg font-bold tabular-nums ${
+                      effective === 0 && b.bond_score > 0 ? "text-red-400" : "text-coc-gold"
+                    }`}>
+                      {effective}
+                      {b.damage_taken > 0 && (
+                        <span className="text-xs font-normal text-coc-muted ml-1">
+                          ({b.bond_score}−{b.damage_taken})
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                );
+              }
+            )}
+          </ul>
+        )}
+        <Link
+          href={`/characters/${id}/bonds`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          絆を管理 →
         </Link>
       </div>
 

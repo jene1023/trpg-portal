@@ -679,6 +679,17 @@ export type KpMemo = {
   created_at: string;
 };
 
+export type CharacterBond = {
+  id: string;
+  character_id: string;
+  target_name: string;
+  bond_score: number;
+  damage_taken: number;
+  is_lost: boolean;
+  notes: string | null;
+  created_at: string;
+};
+
 export type Tag = {
   id: string;
   name: string;
