@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Upload, X, GitCompare } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, Tag } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
 import CharacterCardSkeleton from "@/app/_components/CharacterCardSkeleton";
 
@@ -16,6 +16,7 @@ const FILTERS: { label: string; value: CharacterStatus | "all" }[] = [
 ];
 
 type CharacterWithSkills = Character & { character_skills: CharacterSkill[] };
+type EntityTagRow = { entity_id: string; tags: Tag | null };
 
 export default function CharactersPage() {
   const [characters, setCharacters] = useState<CharacterWithSkills[]>([]);
@@ -24,6 +25,8 @@ export default function CharactersPage() {
   const [occupationQuery, setOccupationQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [tagsByCharacter, setTagsByCharacter] = useState<Record<string, Tag[]>>({});
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -31,21 +34,50 @@ export default function CharactersPage() {
       return;
     }
     async function load() {
-      const { data } = await supabase
-        .from("characters")
-        .select("*, character_skills(*)")
-        .order("updated_at", { ascending: false });
-      if (data) setCharacters(data as CharacterWithSkills[]);
+      const [{ data: charsData }, { data: entityTagsData }] = await Promise.all([
+        supabase
+          .from("characters")
+          .select("*, character_skills(*)")
+          .order("updated_at", { ascending: false }),
+        supabase
+          .from("entity_tags")
+          .select("entity_id, tags(id, name, created_at)")
+          .eq("entity_type", "character"),
+      ]);
+      if (charsData) setCharacters(charsData as CharacterWithSkills[]);
+      if (entityTagsData) {
+        const map: Record<string, Tag[]> = {};
+        for (const row of entityTagsData as EntityTagRow[]) {
+          if (!row.tags) continue;
+          if (!map[row.entity_id]) map[row.entity_id] = [];
+          map[row.entity_id].push(row.tags);
+        }
+        setTagsByCharacter(map);
+      }
       setLoading(false);
     }
     load();
   }, []);
+
+  const allTagNames = Array.from(
+    new Set(Object.values(tagsByCharacter).flat().map((t) => t.name))
+  ).sort();
+
+  function toggleTag(name: string) {
+    setSelectedTags((prev) =>
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+    );
+  }
 
   const filtered = characters
     .filter((c) => {
       if (filter !== "all" && c.status !== filter) return false;
       if (nameQuery && !c.name.toLowerCase().includes(nameQuery.toLowerCase())) return false;
       if (occupationQuery && !(c.occupation ?? "").toLowerCase().includes(occupationQuery.toLowerCase())) return false;
+      if (selectedTags.length > 0) {
+        const charTagNames = (tagsByCharacter[c.id] ?? []).map((t) => t.name);
+        if (!selectedTags.some((tag) => charTagNames.includes(tag))) return false;
+      }
       return true;
     })
     .sort((a, b) => {
@@ -134,6 +166,34 @@ export default function CharactersPage() {
           </button>
         )}
       </div>
+
+      {/* タグフィルタ */}
+      {allTagNames.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-4">
+          <span className="text-xs text-coc-muted mr-1">タグ:</span>
+          {allTagNames.map((name) => (
+            <button
+              key={name}
+              onClick={() => toggleTag(name)}
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                selectedTags.includes(name)
+                  ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                  : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="text-xs text-coc-muted hover:text-coc-text ml-1"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+      )}
 
       {/* フィルタータブ */}
       <div className="flex gap-1 mb-6 border-b border-coc-border">

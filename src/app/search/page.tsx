@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, QuickNote, ScenarioNote } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, QuickNote, ScenarioNote, Tag } from "@/lib/supabase";
 
 type SessionResult = SessionLog & { characters: { name: string } | null };
 type QuickNoteResult = QuickNote & { characters: { name: string } | null };
@@ -50,6 +50,7 @@ function SearchPageInner() {
         { data: sessionsData },
         { data: quickNotesData },
         { data: scenarioNotesData },
+        { data: matchingTagsData },
       ] = await Promise.all([
         supabase.from("characters").select("*").ilike("name", `%${q}%`),
         supabase.from("npcs").select("*").ilike("name", `%${q}%`),
@@ -57,10 +58,73 @@ function SearchPageInner() {
         supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`),
         supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`),
         supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`),
+        supabase.from("tags").select("id, name").ilike("name", `%${q}%`),
       ]);
-      setCharacters((charactersData as Character[]) ?? []);
-      setNpcs((npcsData as Npc[]) ?? []);
-      setScenarios((scenariosData as Scenario[]) ?? []);
+
+      let mergedChars = (charactersData as Character[]) ?? [];
+      let mergedNpcs = (npcsData as Npc[]) ?? [];
+      let mergedScenarios = (scenariosData as Scenario[]) ?? [];
+
+      // Tag-based search: find entities tagged with matching tags
+      if (matchingTagsData && (matchingTagsData as Tag[]).length > 0) {
+        const tagIds = (matchingTagsData as Tag[]).map((t) => t.id);
+        const { data: entityTagsData } = await supabase
+          .from("entity_tags")
+          .select("entity_type, entity_id")
+          .in("tag_id", tagIds);
+
+        if (entityTagsData) {
+          const charIds = [
+            ...new Set(
+              entityTagsData
+                .filter((e) => e.entity_type === "character")
+                .map((e) => e.entity_id)
+            ),
+          ];
+          const npcIds = [
+            ...new Set(
+              entityTagsData
+                .filter((e) => e.entity_type === "npc")
+                .map((e) => e.entity_id)
+            ),
+          ];
+          const scenarioIds = [
+            ...new Set(
+              entityTagsData
+                .filter((e) => e.entity_type === "scenario")
+                .map((e) => e.entity_id)
+            ),
+          ];
+
+          const existingCharIds = new Set(mergedChars.map((c) => c.id));
+          const existingNpcIds = new Set(mergedNpcs.map((n) => n.id));
+          const existingScenarioIds = new Set(mergedScenarios.map((s) => s.id));
+
+          const newCharIds = charIds.filter((id) => !existingCharIds.has(id));
+          const newNpcIds = npcIds.filter((id) => !existingNpcIds.has(id));
+          const newScenarioIds = scenarioIds.filter((id) => !existingScenarioIds.has(id));
+
+          const [tcRes, tnRes, tsRes] = await Promise.all([
+            newCharIds.length
+              ? supabase.from("characters").select("*").in("id", newCharIds)
+              : Promise.resolve({ data: [] }),
+            newNpcIds.length
+              ? supabase.from("npcs").select("*").in("id", newNpcIds)
+              : Promise.resolve({ data: [] }),
+            newScenarioIds.length
+              ? supabase.from("scenarios").select("*").in("id", newScenarioIds)
+              : Promise.resolve({ data: [] }),
+          ]);
+
+          mergedChars = [...mergedChars, ...((tcRes.data as Character[]) ?? [])];
+          mergedNpcs = [...mergedNpcs, ...((tnRes.data as Npc[]) ?? [])];
+          mergedScenarios = [...mergedScenarios, ...((tsRes.data as Scenario[]) ?? [])];
+        }
+      }
+
+      setCharacters(mergedChars);
+      setNpcs(mergedNpcs);
+      setScenarios(mergedScenarios);
       setSessions((sessionsData as SessionResult[]) ?? []);
       setQuickNotes((quickNotesData as QuickNoteResult[]) ?? []);
       setScenarioNotes((scenarioNotesData as ScenarioNoteResult[]) ?? []);

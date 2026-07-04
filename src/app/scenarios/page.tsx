@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Users, CalendarClock } from "lucide-react";
-import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus, Tag } from "@/lib/supabase";
 
 type ReviewMap = Record<string, number>;
+type EntityTagRow = { entity_id: string; tags: Tag | null };
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -40,6 +41,8 @@ export default function ScenariosPage() {
   const [reviewRatings, setReviewRatings] = useState<ReviewMap>({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ScenarioStatus | "all">("all");
+  const [tagsByScenario, setTagsByScenario] = useState<Record<string, Tag[]>>({});
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -47,12 +50,20 @@ export default function ScenariosPage() {
       return;
     }
     async function load() {
-      const [{ data: scenariosData }, { data: participantsData }, { data: reviewsData }] =
-        await Promise.all([
-          supabase.from("scenarios").select("*").order("created_at", { ascending: false }),
-          supabase.from("scenario_participants").select("scenario_id"),
-          supabase.from("scenario_reviews").select("scenario_id, rating"),
-        ]);
+      const [
+        { data: scenariosData },
+        { data: participantsData },
+        { data: reviewsData },
+        { data: entityTagsData },
+      ] = await Promise.all([
+        supabase.from("scenarios").select("*").order("created_at", { ascending: false }),
+        supabase.from("scenario_participants").select("scenario_id"),
+        supabase.from("scenario_reviews").select("scenario_id, rating"),
+        supabase
+          .from("entity_tags")
+          .select("entity_id, tags(id, name, created_at)")
+          .eq("entity_type", "scenario"),
+      ]);
       if (scenariosData) setScenarios(scenariosData as Scenario[]);
       if (participantsData) {
         const counts: Record<string, number> = {};
@@ -68,15 +79,37 @@ export default function ScenariosPage() {
         }
         setReviewRatings(ratings);
       }
+      if (entityTagsData) {
+        const map: Record<string, Tag[]> = {};
+        for (const row of entityTagsData as EntityTagRow[]) {
+          if (!row.tags) continue;
+          if (!map[row.entity_id]) map[row.entity_id] = [];
+          map[row.entity_id].push(row.tags);
+        }
+        setTagsByScenario(map);
+      }
       setLoading(false);
     }
     load();
   }, []);
 
-  const filtered =
-    statusFilter === "all"
-      ? scenarios
-      : scenarios.filter((s) => s.status === statusFilter);
+  const allTagNames = Array.from(
+    new Set(Object.values(tagsByScenario).flat().map((t) => t.name))
+  ).sort();
+
+  function toggleTag(name: string) {
+    setSelectedTags((prev) =>
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+    );
+  }
+
+  const filtered = scenarios
+    .filter((s) => statusFilter === "all" || s.status === statusFilter)
+    .filter((s) => {
+      if (selectedTags.length === 0) return true;
+      const scenTagNames = (tagsByScenario[s.id] ?? []).map((t) => t.name);
+      return selectedTags.some((tag) => scenTagNames.includes(tag));
+    });
 
   return (
     <div className="coc-page-enter mx-auto max-w-4xl px-4 py-8">
@@ -92,7 +125,7 @@ export default function ScenariosPage() {
       </div>
 
       {/* ステータスフィルタ */}
-      <div className="mb-6">
+      <div className="mb-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as ScenarioStatus | "all")}
@@ -104,6 +137,34 @@ export default function ScenariosPage() {
           <option value="completed">完了</option>
         </select>
       </div>
+
+      {/* タグフィルタ */}
+      {allTagNames.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-6">
+          <span className="text-xs text-coc-muted mr-1">タグ:</span>
+          {allTagNames.map((name) => (
+            <button
+              key={name}
+              onClick={() => toggleTag(name)}
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                selectedTags.includes(name)
+                  ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                  : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="text-xs text-coc-muted hover:text-coc-text ml-1"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+      )}
 
       {loading && (
         <div className="flex justify-center items-center py-24 text-coc-muted font-crimson text-lg italic animate-pulse">
@@ -187,6 +248,20 @@ export default function ScenariosPage() {
                 <div className="mt-3 rounded-lg border border-coc-border bg-coc-raised px-3 py-2">
                   <p className="text-xs font-medium text-coc-muted mb-1">GM メモ</p>
                   <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
+                </div>
+              )}
+
+              {/* タグ表示 */}
+              {(tagsByScenario[scenario.id] ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {(tagsByScenario[scenario.id] ?? []).map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="rounded-full border border-coc-gold-dim bg-coc-gold/10 px-2 py-0.5 text-xs text-coc-gold"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
                 </div>
               )}
 

@@ -10,6 +10,7 @@ import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebho
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
+import TagSelector from "@/app/_components/TagSelector";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -613,6 +614,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
       <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>
         <ScenarioDiscordWebhookEditor scenarioId={id} initialUrl={scenario.discord_webhook_url ?? null} />
+      </div>
+
+      {/* タグ */}
+      <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+        <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">タグ</p>
+        <TagSelector entityType="scenario" entityId={id} />
       </div>
 
       {/* KP秘匿メモ */}

@@ -22,6 +22,7 @@ import PublicShareToggle from "@/app/_components/PublicShareToggle";
 import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
 import DiceShortcutPad from "@/app/_components/DiceShortcutPad";
 import KpMemoSection from "@/app/_components/KpMemoSection";
+import TagSelector from "@/app/_components/TagSelector";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -641,6 +642,12 @@ export default async function CharacterDetailPage({ params }: Props) {
               <span className="text-coc-gold">→</span>
             </Link>
           )}
+
+          {/* タグ */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>タグ</h2>
+            <TagSelector entityType="character" entityId={id} />
+          </div>
 
           {/* KP秘匿メモ */}
           <KpMemoSection entityType="character" entityId={id} />

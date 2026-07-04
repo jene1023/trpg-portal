@@ -821,7 +821,7 @@
 **実装ヒント:** Supabaseに `kp_memos` テーブルを追加（id, entity_type: "character"|"npc"|"scenario", entity_id: uuid, content: text, created_at）。`src/app/_components/KpMemoSection.tsx` を "use client" で新規作成（props: entityType, entityId）。textarea + 保存ボタンで `supabase.from("kp_memos").upsert(...)` により entity_type + entity_id をキーに1件管理（複数行不要）。キャラクター詳細（`src/app/characters/[id]/page.tsx`）・NPC詳細（`src/app/npcs/[id]/page.tsx`）・シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）の末尾に折りたたみ表示で配置。`src/lib/supabase.ts` に `KpMemo` 型を追加。
 **コミット:** `feat: KP-only hidden memo field for characters, NPCs, and scenarios`
 
-## [TODO] タグ付け + タグ横断検索 — 優先度: 低
+## [DONE] タグ付け + タグ横断検索 — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** キャラクター・シナリオ・NPCに自由タグ（例: "現代日本" "探偵もの" "長期キャン"）を付与し、タグ単位で横断検索できる機能。既存のキャラクター一覧フィルタ（名前・職業・ステータス）やグローバル検索（テキスト一致）を補完し、テーマ・時代・ジャンルでのグルーピングを可能にする。
 **リサーチ根拠:** いあキャラ・Charaenoともにタグ検索をサポートしており、大量のキャラやシナリオを管理するベテランユーザーからの需要が高いと複数のブログ・ユーザーレビューで確認された。

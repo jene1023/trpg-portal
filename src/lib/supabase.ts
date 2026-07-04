@@ -677,3 +677,19 @@ export type KpMemo = {
   content: string;
   created_at: string;
 };
+
+export type Tag = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type EntityTagEntityType = "character" | "scenario" | "npc";
+
+export type EntityTag = {
+  id: string;
+  entity_type: EntityTagEntityType;
+  entity_id: string;
+  tag_id: string;
+  created_at: string;
+};

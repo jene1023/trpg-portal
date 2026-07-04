@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel } from "
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
+import TagSelector from "@/app/_components/TagSelector";
 
 const LEVEL_LABEL: Record<SuccessLevel, string> = {
   critical_success: "決定的成功",
@@ -305,6 +306,12 @@ export default async function NpcDetailPage({ params }: Props) {
             </ul>
           </div>
         )}
+
+        {/* タグ */}
+        <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+          <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">タグ</p>
+          <TagSelector entityType="npc" entityId={npc.id} />
+        </div>
 
         {/* KP秘匿メモ */}
         <KpMemoSection entityType="npc" entityId={npc.id} />
