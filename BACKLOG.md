@@ -851,3 +851,27 @@
 **概要:** KPがシナリオに紐づく情報（基本情報・NPC一覧・エリアメモ・ハンドアウト一覧・プロットスレッド）をA4印刷・PDF保存できるページ。既存のキャラクターPDF出力（`characters/[id]/print/page.tsx`）と同様のアプローチで、対面セッション時のKP手元資料やシナリオアーカイブに使う。
 **実装ヒント:** `src/app/scenarios/[id]/print/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), scenario_areas(*), plot_threads(*)")` と NPCを `scenario_name` で取得して一括表示。`@media print { nav { display: none; } .no-print { display: none; } }` で印刷時はヘッダー・ナビを非表示。セクション区切りは `break-inside: avoid` で改ページ制御。`src/app/_components/ScenarioExportButton.tsx` を "use client" で新規作成し `window.print()` を呼び出す（または `src/app/_components/ScenarioExportButton.tsx` が既存の場合は流用）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「印刷/PDF」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario print/PDF export for KP offline session materials`
+
+## [TODO] セッション前キャラクタースナップショット（ロールバック対応） — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション開始前にキャラクターのステータス・技能値をまるごとスナップショットとして保存し、誤ったHP/MP/SAN更新や技能値ミスが発生した場合に任意の時点へロールバックできる機能。データ損失防止として最優先。
+**実装ヒント:** Supabaseに `character_snapshots` テーブルを追加（id, character_id, label: text, snapshot_data: jsonb, taken_at: timestamptz, created_at）。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）に「スナップショットを保存」ボタン（"use client" コンポーネント）を追加し、`supabase.from("characters").select("*, character_skills(*)")` の全データをJSONB形式で格納。`src/app/characters/[id]/snapshots/page.tsx` を新規作成（一覧表示＋復元UI）。復元時は `characters.update({hp_current, mp_current, san_current, ...})` および `character_skills` の一括 upsert を実行し、復元前に確認ダイアログを表示。`src/lib/supabase.ts` に `CharacterSnapshot` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット」リンクを追加。
+**コミット:** `feat: character snapshot and rollback for session data safety`
+
+## [TODO] シナリオ別参加者ダイス統計ダッシュボード — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオに参加した全キャラクターのダイスロール履歴（`dice_rolls`テーブル）をシナリオ単位で集計し、参加者別の成功率・ファンブル率・最多使用技能・総判定数を一覧表示するKP向けダッシュボード。既存のキャラクター単位統計（`dice-stats`）とは異なり卓全体の傾向を把握できる。
+**実装ヒント:** `src/app/scenarios/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id").eq("scenario_id", id)` で参加者IDを取得し、`supabase.from("dice_rolls").select("*").in("character_id", ids)` でロール履歴を一括取得。character_idごとにグループ化して成功数/総数/ファンブル数を集計し、参加者名と共に表示（参加者名は `characters.name` で取得）。CSSの `width: calc(${rate}%)` バーグラフで成功率を可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「判定統計」リンクを追加。追加DBなし。
+**コミット:** `feat: per-scenario dice statistics dashboard across all participants`
+
+## [TODO] NPCプリセットライブラリ（KP汎用NPCテンプレート） — 優先度: 低
+**対象:** KP
+**概要:** よく使う汎用NPC（医師・警察官・教授・店員等）を「NPCプリセット」としてあらかじめ保存しておき、新規シナリオのNPC作成時に呼び出して即座にフォームへ反映できる機能。既存の「NPC複製機能」はシナリオ内NPCのコピーだが、こちらはシナリオ横断で使い回せる汎用テンプレートとして機能する。
+**実装ヒント:** Supabaseに `npc_presets` テーブルを追加（id, name, occupation_name, appearance, purpose, notes, str, con, pow, dex, app, siz, int_stat, edu, hp, mp, db, created_at）。`src/app/npc-presets/page.tsx` を新規作成（一覧＋作成フォーム）。NPC作成ページ（`src/app/npcs/new/page.tsx`）に「プリセットから読み込む」select 要素を追加し、選択すると `supabase.from("npc_presets").select("*").eq("id", presetId)` で取得した値をフォームの各 state へ自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。`src/lib/supabase.ts` に `NpcPreset` 型を追加。追加DBあり（`npc_presets` テーブル）。
+**コミット:** `feat: NPC preset library for reusable NPC templates across scenarios`
+
+## [TODO] 探索者実績・称号システム — 優先度: 低
+**対象:** PL / 共通
+**概要:** セッション参加回数・SAN喪失総量・技能成長回数・ダイス成功率・狂気発症回数などの行動履歴から達成バッジ（称号）を自動判定し、キャラクターページで表示するゲーミフィケーション機能。既存テーブルの集計のみで追加DBは不要。
+**実装ヒント:** `src/app/characters/[id]/achievements/page.tsx` を新規作成（Server Component）。`sessions`, `dice_rolls`, `growth_history`, `madness_records` を `Promise.all` で並行取得して各バッジ条件を判定（例: "ベテラン探索者" = sessions.length >= 10, "折れない精神" = san_loss合計 >= 30, "成長の証" = growth_history.length >= 5, "ファンブル常連" = fumble回数 >= 5）。バッジ定義は静的配列（name, description, icon, condition関数）で管理。達成済み/未達成を視覚的に区別（達成済みはカラー、未達成はグレーアウト）して表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「実績」リンクを追加。追加DBなし。
+**コミット:** `feat: character achievement badge system based on session history`
