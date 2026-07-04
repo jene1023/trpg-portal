@@ -627,3 +627,15 @@ export type ScenePacingLog = {
   ended_at: string | null;
   created_at: string;
 };
+
+export type SessionGoalStatus = "pending" | "achieved" | "failed";
+
+export type SessionGoal = {
+  id: string;
+  character_id: string;
+  goal: string;
+  status: SessionGoalStatus;
+  set_at: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};

@@ -781,7 +781,7 @@
 **実装ヒント:** `src/app/mythos/page.tsx` を新規作成（"use client" + useState でフィルタ）。神話生物データは `src/lib/mythosData.ts` に静的配列として定義（name, origin, str, con, pow, dex, hp, san_loss_success, san_loss_fail, attacks: string[], notes）。検索バーで name/origin をリアルタイムフィルタ。各エントリはアコーディオン表示（閉じた状態で名前のみ、開くと全能力値・攻撃・SANロス表示）。rules/page.tsx の実装パターンを踏襲。`src/app/_components/NavBar.tsx` に「神話辞典」リンクを追加。追加DBなし（静的データのみ）。
 **コミット:** `feat: mythos bestiary quick reference for KP`
 
-## [TODO] セッション前PLチャレンジ目標 — 優先度: 中
+## [DONE] セッション前PLチャレンジ目標 — 優先度: 中
 **対象:** PL
 **概要:** PLが次回セッションに向けて「この技能で成功する」「このNPCと会話する」「呪文を1回使う」などの個人チャレンジ目標を設定し、セッション後に達成/未達を記録できる機能。成長記録・セッションログと連携し、キャラクターへの没入感と継続プレイのモチベーションを高める。
 **実装ヒント:** Supabaseに `session_goals` テーブルを追加（id, character_id, goal: text, status: "pending"|"achieved"|"failed", set_at: timestamptz, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/session-goals/page.tsx` を "use client" で新規作成（目標入力フォーム＋一覧、status 別に「進行中」「達成」「未達」タブ表示）。各目標カードに「達成」「未達」ボタンを配置し `supabase.from("session_goals").update({ status, resolved_at }).eq("id", id)` で即時更新。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）に保留中の目標一覧を追加表示。`src/lib/supabase.ts` に `SessionGoal` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション目標」リンクを追加。

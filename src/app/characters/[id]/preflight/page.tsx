@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type Props = { params: Promise<{ id: string }> };
@@ -63,6 +63,13 @@ export default async function PreflightPage({ params }: Props) {
     .eq("character_id", id)
     .order("created_at", { ascending: false })
     .limit(3);
+
+  const { data: pendingGoals } = await supabase
+    .from("session_goals")
+    .select("id, goal, set_at")
+    .eq("character_id", id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
 
   if (!char) notFound();
 
@@ -398,6 +405,46 @@ export default async function PreflightPage({ params }: Props) {
           className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
         >
           ダウンタイム活動を管理 →
+        </Link>
+      </div>
+
+      {/* セッション目標 */}
+      <div className={`${sectionClass} border-coc-border mb-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Target size={16} className={(pendingGoals ?? []).length > 0 ? "text-coc-gold" : "text-coc-muted"} />
+          <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest">
+            セッション目標
+          </h2>
+          {(pendingGoals ?? []).length > 0 && (
+            <span className="ml-auto rounded bg-coc-gold/20 border border-coc-gold/50 px-2 py-0.5 text-xs text-coc-gold font-semibold">
+              {(pendingGoals ?? []).length}件
+            </span>
+          )}
+        </div>
+        {(pendingGoals ?? []).length === 0 ? (
+          <p className="text-sm text-coc-muted">進行中の目標なし</p>
+        ) : (
+          <ul className="space-y-2">
+            {(pendingGoals ?? []).map((g: { id: string; goal: string; set_at: string | null }) => (
+              <li
+                key={g.id}
+                className="rounded-md border border-coc-border bg-coc-raised px-3 py-2"
+              >
+                <p className="text-sm text-coc-text leading-relaxed">{g.goal}</p>
+                {g.set_at && (
+                  <p className="text-xs text-coc-muted mt-0.5">
+                    設定日: {new Date(g.set_at).toLocaleDateString("ja-JP")}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link
+          href={`/characters/${id}/session-goals`}
+          className="mt-3 inline-block text-xs text-coc-muted hover:text-coc-text transition-colors"
+        >
+          セッション目標を管理 →
         </Link>
       </div>
 
