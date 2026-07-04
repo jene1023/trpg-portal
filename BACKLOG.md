@@ -827,3 +827,27 @@
 **リサーチ根拠:** いあキャラ・Charaenoともにタグ検索をサポートしており、大量のキャラやシナリオを管理するベテランユーザーからの需要が高いと複数のブログ・ユーザーレビューで確認された。
 **実装ヒント:** Supabaseに `tags` テーブル（id, name, created_at）と `entity_tags` テーブル（id, entity_type: "character"|"scenario"|"npc", entity_id: uuid, tag_id: uuid, created_at）を追加。`src/app/_components/TagSelector.tsx` を "use client" で新規作成（テキスト入力でタグ追加、×ボタンで削除、既存タグはオートコンプリート）。キャラクター一覧（`src/app/characters/page.tsx`）・シナリオ一覧（`src/app/scenarios/page.tsx`）にタグフィルタ追加。グローバル検索（`src/app/search/page.tsx`）にタグ横断検索を追加。`src/lib/supabase.ts` に `Tag`, `EntityTag` 型を追加。
 **コミット:** `feat: tag system for characters, scenarios, and NPCs with cross-search`
+
+## [TODO] ハンドアウト画像添付（ビジュアルハンドアウト） — 優先度: 高
+**対象:** KP / 共通
+**概要:** KPがハンドアウトに画像URL（古文書・地図・手紙の模写・写真）を添付してセッション中に視覚的に共有できる機能。現在のハンドアウトはテキストのみで、没入感の高い視覚的証拠品の配布ができない。ポートレートアップロード（Supabase Storage）と同様のアプローチで画像を管理する。
+**実装ヒント:** `handouts` テーブルに `image_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `image_url: string | null` を追加。`src/app/_components/HandoutList.tsx` のハンドアウトカードで `image_url` が設定されていれば `<img>` をカード内に表示（`object-contain max-h-48` 等でサイズ制御）。`src/app/scenarios/[id]/handouts/page.tsx` の追加フォームに「画像URL」入力欄を追加。Supabase Storageの `portraits` バケットと同様に `handout-images` バケットへの直接アップロード対応は `src/app/_components/HandoutList.tsx` 内にオプションのファイル入力として実装可能。共有URL（`src/app/share/[token]/page.tsx`）でも `image_url` が設定されていれば表示。追加DBカラムのみ、新テーブルなし。
+**コミット:** `feat: visual handout image attachment for immersive prop sharing`
+
+## [TODO] PC+NPC統合イニシアチブトラッカー（戦闘管理強化） — 優先度: 高
+**対象:** KP / 共通
+**概要:** 現在の「戦闘ラウンドカウンター」（`combat/page.tsx`）はPC側のDEXソートのみ、「敵HPトラッカー」（`enemy-tracker` ローカル状態）はHP管理のみで分離している。PC・NPC・カスタム敵を同一のイニシアチブリストで管理し、各エンティティのHP増減・行動済みフラグ・倒れたバッジを1画面で操作できる完全な戦闘管理ページへ統合する。
+**実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を刷新（"use client"）。既存の `scenario_participants` から取得するPC列（DEX値あり）に加え、「NPC/敵を追加」フォームで名前・DEX・HPを入力した即席エントリを同リストに追加（ローカル state のみ、追加DBなし）。既存クリーチャー（`src/app/creatures/[id]/page.tsx`）から「戦闘に追加」ボタンでHP・DEXを取り込む。全エンティティをDEX降順ソートしてイニシアチブ順を一覧表示。各行に「行動済み」チェック・HP+/-ボタン（現在値0以下で「倒れた」バッジ）を配置。「次ラウンド」ボタンで行動済みフラグ全解除＋ラウンド数+1。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「戦闘管理」リンクをこのページへ誘導。
+**コミット:** `feat: unified PC+NPC initiative tracker with HP management for combat`
+
+## [TODO] CoC7版「絆」管理（ボンドルール対応） — 優先度: 中
+**対象:** PL
+**概要:** CoC7版の核心ルールである「絆（Bonds）」——探索者が深く結びついた人物との関係性を記録し、SANロス時の回復源や絆へのダメージ・喪失を追跡できる専用機能。既存の `character_relations`（関係メモ）や `character_traits`（重要な人物）とは異なり、絆のポイント値・ダメージ量・喪失フラグを持ちCoC7版のゲームメカニクスに特化する。
+**実装ヒント:** Supabaseに `character_bonds` テーブルを追加（id, character_id, target_name, bond_score: integer, damage_taken: integer DEFAULT 0, is_lost: boolean DEFAULT false, notes: text | null, created_at）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（Server Component + "use client" フォーム）。絆スコア・ダメージ値を表示し「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置、`supabase.from("character_bonds").update(...)` で更新。`bond_score - damage_taken` で有効絆値をリアルタイム表示。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）にアクティブな絆一覧と有効絆値サマリーを追記。`src/lib/supabase.ts` に `CharacterBond` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加。
+**コミット:** `feat: CoC7 bond management with score, damage, and loss tracking`
+
+## [TODO] シナリオPDF出力（KP用オフライン資料） — 優先度: 中
+**対象:** KP
+**概要:** KPがシナリオに紐づく情報（基本情報・NPC一覧・エリアメモ・ハンドアウト一覧・プロットスレッド）をA4印刷・PDF保存できるページ。既存のキャラクターPDF出力（`characters/[id]/print/page.tsx`）と同様のアプローチで、対面セッション時のKP手元資料やシナリオアーカイブに使う。
+**実装ヒント:** `src/app/scenarios/[id]/print/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("*, scenario_participants(*, characters(*)), handouts(*), scenario_areas(*), plot_threads(*)")` と NPCを `scenario_name` で取得して一括表示。`@media print { nav { display: none; } .no-print { display: none; } }` で印刷時はヘッダー・ナビを非表示。セクション区切りは `break-inside: avoid` で改ページ制御。`src/app/_components/ScenarioExportButton.tsx` を "use client" で新規作成し `window.print()` を呼び出す（または `src/app/_components/ScenarioExportButton.tsx` が既存の場合は流用）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「印刷/PDF」ボタンを追加。追加DBなし。
+**コミット:** `feat: scenario print/PDF export for KP offline session materials`
