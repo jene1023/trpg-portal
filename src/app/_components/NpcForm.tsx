@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, NpcPreset } from "@/lib/supabase";
 
 type StatKey = "str" | "con" | "pow" | "dex" | "app" | "siz" | "int_stat" | "edu" | "hp" | "mp";
 
@@ -25,6 +25,18 @@ export default function NpcForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showStats, setShowStats] = useState(false);
+  const [presets, setPresets] = useState<NpcPreset[]>([]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase
+      .from("npc_presets")
+      .select("*")
+      .order("name", { ascending: true })
+      .then(({ data }) => {
+        if (data) setPresets(data as NpcPreset[]);
+      });
+  }, []);
 
   const [form, setForm] = useState({
     scenario_name: "",
@@ -59,6 +71,38 @@ export default function NpcForm() {
   function handleStatChange(e: React.ChangeEvent<HTMLInputElement>) {
     const key = e.target.name as StatKey;
     setStats((prev) => ({ ...prev, [key]: e.target.value }));
+  }
+
+  function handlePresetLoad(e: React.ChangeEvent<HTMLSelectElement>) {
+    const presetId = e.target.value;
+    if (!presetId) return;
+    const preset = presets.find((p) => p.id === presetId);
+    if (!preset) return;
+    setForm((prev) => ({
+      ...prev,
+      name: preset.name,
+      appearance: preset.appearance ?? "",
+      purpose: preset.purpose ?? "",
+      notes: preset.notes ?? "",
+    }));
+    const newStats: Record<StatKey, string> = {
+      str: preset.str?.toString() ?? "",
+      con: preset.con?.toString() ?? "",
+      pow: preset.pow?.toString() ?? "",
+      dex: preset.dex?.toString() ?? "",
+      app: preset.app?.toString() ?? "",
+      siz: preset.siz?.toString() ?? "",
+      int_stat: preset.int_stat?.toString() ?? "",
+      edu: preset.edu?.toString() ?? "",
+      hp: preset.hp?.toString() ?? "",
+      mp: preset.mp?.toString() ?? "",
+    };
+    setStats(newStats);
+    setDb(preset.db ?? "");
+    if (Object.values(newStats).some((v) => v !== "")) {
+      setShowStats(true);
+    }
+    e.target.value = "";
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -113,6 +157,27 @@ export default function NpcForm() {
         <p className="rounded-lg border border-red-800 bg-red-950/40 px-4 py-3 text-sm text-red-400">
           {error}
         </p>
+      )}
+
+      {presets.length > 0 && (
+        <div>
+          <label className={labelClass}>プリセットから読み込む</label>
+          <select
+            onChange={handlePresetLoad}
+            defaultValue=""
+            className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+          >
+            <option value="">— プリセットを選択 —</option>
+            {presets.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.occupation_name ? `[${p.occupation_name}] ` : ""}{p.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-coc-faint">
+            選択するとフォームへ自動入力します（シナリオ名・陣営は保持）
+          </p>
+        </div>
       )}
 
       <div>

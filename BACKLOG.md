@@ -864,7 +864,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id").eq("scenario_id", id)` で参加者IDを取得し、`supabase.from("dice_rolls").select("*").in("character_id", ids)` でロール履歴を一括取得。character_idごとにグループ化して成功数/総数/ファンブル数を集計し、参加者名と共に表示（参加者名は `characters.name` で取得）。CSSの `width: calc(${rate}%)` バーグラフで成功率を可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「判定統計」リンクを追加。追加DBなし。
 **コミット:** `feat: per-scenario dice statistics dashboard across all participants`
 
-## [TODO] NPCプリセットライブラリ（KP汎用NPCテンプレート） — 優先度: 低
+## [DONE] NPCプリセットライブラリ（KP汎用NPCテンプレート） — 優先度: 低
 **対象:** KP
 **概要:** よく使う汎用NPC（医師・警察官・教授・店員等）を「NPCプリセット」としてあらかじめ保存しておき、新規シナリオのNPC作成時に呼び出して即座にフォームへ反映できる機能。既存の「NPC複製機能」はシナリオ内NPCのコピーだが、こちらはシナリオ横断で使い回せる汎用テンプレートとして機能する。
 **実装ヒント:** Supabaseに `npc_presets` テーブルを追加（id, name, occupation_name, appearance, purpose, notes, str, con, pow, dex, app, siz, int_stat, edu, hp, mp, db, created_at）。`src/app/npc-presets/page.tsx` を新規作成（一覧＋作成フォーム）。NPC作成ページ（`src/app/npcs/new/page.tsx`）に「プリセットから読み込む」select 要素を追加し、選択すると `supabase.from("npc_presets").select("*").eq("id", presetId)` で取得した値をフォームの各 state へ自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。`src/lib/supabase.ts` に `NpcPreset` 型を追加。追加DBあり（`npc_presets` テーブル）。

@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/scenarios", label: "シナリオ" },
   { href: "/campaigns", label: "キャンペーン" },
   { href: "/npcs", label: "NPC" },
+  { href: "/npc-presets", label: "NPCプリセット" },
   { href: "/creatures", label: "クリーチャー" },
   { href: "/mythos", label: "神話辞典" },
   { href: "/rules", label: "ルール" },
