@@ -834,7 +834,7 @@
 **実装ヒント:** `handouts` テーブルに `image_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `image_url: string | null` を追加。`src/app/_components/HandoutList.tsx` のハンドアウトカードで `image_url` が設定されていれば `<img>` をカード内に表示（`object-contain max-h-48` 等でサイズ制御）。`src/app/scenarios/[id]/handouts/page.tsx` の追加フォームに「画像URL」入力欄を追加。Supabase Storageの `portraits` バケットと同様に `handout-images` バケットへの直接アップロード対応は `src/app/_components/HandoutList.tsx` 内にオプションのファイル入力として実装可能。共有URL（`src/app/share/[token]/page.tsx`）でも `image_url` が設定されていれば表示。追加DBカラムのみ、新テーブルなし。
 **コミット:** `feat: visual handout image attachment for immersive prop sharing`
 
-## [TODO] PC+NPC統合イニシアチブトラッカー（戦闘管理強化） — 優先度: 高
+## [DONE] PC+NPC統合イニシアチブトラッカー（戦闘管理強化） — 優先度: 高
 **対象:** KP / 共通
 **概要:** 現在の「戦闘ラウンドカウンター」（`combat/page.tsx`）はPC側のDEXソートのみ、「敵HPトラッカー」（`enemy-tracker` ローカル状態）はHP管理のみで分離している。PC・NPC・カスタム敵を同一のイニシアチブリストで管理し、各エンティティのHP増減・行動済みフラグ・倒れたバッジを1画面で操作できる完全な戦闘管理ページへ統合する。
 **実装ヒント:** `src/app/scenarios/[id]/combat/page.tsx` を刷新（"use client"）。既存の `scenario_participants` から取得するPC列（DEX値あり）に加え、「NPC/敵を追加」フォームで名前・DEX・HPを入力した即席エントリを同リストに追加（ローカル state のみ、追加DBなし）。既存クリーチャー（`src/app/creatures/[id]/page.tsx`）から「戦闘に追加」ボタンでHP・DEXを取り込む。全エンティティをDEX降順ソートしてイニシアチブ順を一覧表示。各行に「行動済み」チェック・HP+/-ボタン（現在値0以下で「倒れた」バッジ）を配置。「次ラウンド」ボタンで行動済みフラグ全解除＋ラウンド数+1。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「戦闘管理」リンクをこのページへ誘導。
