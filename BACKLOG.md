@@ -775,7 +775,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/group-roll/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(*, character_skills(*))").eq("scenario_id", id)` で参加者と技能を一括取得。技能名テキスト入力（または代表技能の select）と「全員ロール」ボタンで各キャラクターに1d100判定を実行。結果は成功度（決定的成功/通常成功/失敗/致命的失敗）でグループ表示し、`supabase.from("dice_rolls").insert([...])` で各キャラのロールをまとめて保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「グループロール」リンクを追加。追加DBなし（既存 `scenario_participants`, `character_skills`, `dice_rolls` を流用）。
 **コミット:** `feat: group dice roll for simultaneous party skill checks`
 
-## [TODO] 神話生物・神格クイック辞典 — 優先度: 中
+## [DONE] 神話生物・神格クイック辞典 — 優先度: 中
 **対象:** KP
 **概要:** CoC7版の主要神話生物（グール・ゾンビ・ディープワン・クトゥルフ等）の能力値・代表攻撃・SANチェック値を静的データとして収録し、セッション中にキーワード検索で即参照できる辞典ページ。既存のルールリファレンス（`rules/page.tsx`）を補完するKP専用ツール。
 **実装ヒント:** `src/app/mythos/page.tsx` を新規作成（"use client" + useState でフィルタ）。神話生物データは `src/lib/mythosData.ts` に静的配列として定義（name, origin, str, con, pow, dex, hp, san_loss_success, san_loss_fail, attacks: string[], notes）。検索バーで name/origin をリアルタイムフィルタ。各エントリはアコーディオン表示（閉じた状態で名前のみ、開くと全能力値・攻撃・SANロス表示）。rules/page.tsx の実装パターンを踏襲。`src/app/_components/NavBar.tsx` に「神話辞典」リンクを追加。追加DBなし（静的データのみ）。
