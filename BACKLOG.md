@@ -828,7 +828,7 @@
 **実装ヒント:** Supabaseに `tags` テーブル（id, name, created_at）と `entity_tags` テーブル（id, entity_type: "character"|"scenario"|"npc", entity_id: uuid, tag_id: uuid, created_at）を追加。`src/app/_components/TagSelector.tsx` を "use client" で新規作成（テキスト入力でタグ追加、×ボタンで削除、既存タグはオートコンプリート）。キャラクター一覧（`src/app/characters/page.tsx`）・シナリオ一覧（`src/app/scenarios/page.tsx`）にタグフィルタ追加。グローバル検索（`src/app/search/page.tsx`）にタグ横断検索を追加。`src/lib/supabase.ts` に `Tag`, `EntityTag` 型を追加。
 **コミット:** `feat: tag system for characters, scenarios, and NPCs with cross-search`
 
-## [TODO] ハンドアウト画像添付（ビジュアルハンドアウト） — 優先度: 高
+## [DONE] ハンドアウト画像添付（ビジュアルハンドアウト） — 優先度: 高
 **対象:** KP / 共通
 **概要:** KPがハンドアウトに画像URL（古文書・地図・手紙の模写・写真）を添付してセッション中に視覚的に共有できる機能。現在のハンドアウトはテキストのみで、没入感の高い視覚的証拠品の配布ができない。ポートレートアップロード（Supabase Storage）と同様のアプローチで画像を管理する。
 **実装ヒント:** `handouts` テーブルに `image_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Handout` 型に `image_url: string | null` を追加。`src/app/_components/HandoutList.tsx` のハンドアウトカードで `image_url` が設定されていれば `<img>` をカード内に表示（`object-contain max-h-48` 等でサイズ制御）。`src/app/scenarios/[id]/handouts/page.tsx` の追加フォームに「画像URL」入力欄を追加。Supabase Storageの `portraits` バケットと同様に `handout-images` バケットへの直接アップロード対応は `src/app/_components/HandoutList.tsx` 内にオプションのファイル入力として実装可能。共有URL（`src/app/share/[token]/page.tsx`）でも `image_url` が設定されていれば表示。追加DBカラムのみ、新テーブルなし。

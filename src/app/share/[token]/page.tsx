@@ -46,7 +46,7 @@ export default async function SharePage({ params }: Props) {
 
     const { data: handout } = await supabase
       .from("handouts")
-      .select("title, content, recipient_name, is_secret")
+      .select("title, content, recipient_name, is_secret, image_url")
       .eq("id", handoutId)
       .single();
 
@@ -57,6 +57,7 @@ export default async function SharePage({ params }: Props) {
       content: string | null;
       recipient_name: string | null;
       is_secret: boolean;
+      image_url: string | null;
     };
 
     return (
@@ -83,6 +84,13 @@ export default async function SharePage({ params }: Props) {
               </div>
             ) : (
               <p className="text-coc-muted text-sm italic">（本文なし）</p>
+            )}
+            {h.image_url && (
+              <img
+                src={h.image_url}
+                alt={h.title}
+                className="mt-2 max-h-64 w-full rounded-lg object-contain border border-coc-border"
+              />
             )}
             <p className="text-xs text-coc-faint pt-2">
               このリンクの有効期限: {expiresAt}
@@ -125,6 +133,7 @@ export default async function SharePage({ params }: Props) {
     recipient_name: string | null;
     is_secret: boolean;
     is_distributed: boolean;
+    image_url: string | null;
   };
 
   const scenario = scenarioRaw as {
@@ -307,6 +316,13 @@ export default async function SharePage({ params }: Props) {
                     <p className="text-sm text-coc-text whitespace-pre-wrap border-l-2 border-coc-border pl-3 leading-relaxed">
                       {h.content}
                     </p>
+                  )}
+                  {h.image_url && (
+                    <img
+                      src={h.image_url}
+                      alt={h.title}
+                      className="mt-2 max-h-48 w-full rounded-lg object-contain border border-coc-border"
+                    />
                   )}
                 </div>
               ))}

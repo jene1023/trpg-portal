@@ -16,6 +16,7 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
   const [content, setContent] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [isSecret, setIsSecret] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [shareUrls, setShareUrls] = useState<Record<string, string>>({});
@@ -34,6 +35,7 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
         content: content.trim() || null,
         recipient_name: recipientName.trim() || null,
         is_secret: isSecret,
+        image_url: imageUrl.trim() || null,
       })
       .select()
       .single();
@@ -44,6 +46,7 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
       setContent("");
       setRecipientName("");
       setIsSecret(false);
+      setImageUrl("");
       setShowForm(false);
     }
     setSaving(false);
@@ -154,6 +157,17 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
             />
           </div>
 
+          <div>
+            <label className="block text-xs text-coc-muted mb-1">画像URL（オプション）</label>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-faint focus:outline-none focus:border-coc-gold transition-colors"
+              placeholder="https://example.com/image.png"
+            />
+          </div>
+
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -258,11 +272,22 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
                   <p className="text-xs text-coc-faint italic">
                     （秘匿内容 — 目のアイコンで表示）
                   </p>
-                ) : h.content ? (
-                  <p className="font-crimson text-coc-text text-[15px] leading-relaxed whitespace-pre-wrap border-l-2 border-coc-border pl-3">
-                    {h.content}
-                  </p>
-                ) : null}
+                ) : (
+                  <>
+                    {h.content && (
+                      <p className="font-crimson text-coc-text text-[15px] leading-relaxed whitespace-pre-wrap border-l-2 border-coc-border pl-3">
+                        {h.content}
+                      </p>
+                    )}
+                    {h.image_url && (
+                      <img
+                        src={h.image_url}
+                        alt={h.title}
+                        className="mt-2 max-h-48 w-full rounded-lg object-contain border border-coc-border"
+                      />
+                    )}
+                  </>
+                )}
 
                 {shareUrls[h.id] && (
                   <div className="mt-2 rounded-md border border-coc-gold-dim bg-coc-raised px-3 py-2">

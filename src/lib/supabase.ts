@@ -167,6 +167,7 @@ export type Handout = {
   recipient_name: string | null;
   is_secret: boolean;
   is_distributed: boolean;
+  image_url: string | null;
   created_at: string;
 };
 
