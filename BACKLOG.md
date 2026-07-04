@@ -792,3 +792,38 @@
 **概要:** セッション当日にKPが使う主要ツール（パーティーステータス・アジェンダチェックリスト・共有メモ・グループロール）を1ページにタブ集約した「指揮卓」ビュー。現在は各機能が別ページにあり、セッション中のタブ切り替えコストが高い。
 **実装ヒント:** `src/app/scenarios/[id]/ops/page.tsx` を "use client" で新規作成。タブ切り替え（「ステータス」「アジェンダ」「メモ」「ロール」）で既存コンポーネント（`PartyMemberCard.tsx`, `SessionAgendaChecklist.tsx`, `ScenarioNoteList.tsx`）を切り替え表示。URLハッシュ（`#status`, `#agenda`, `#notes`, `#roll`）でタブ状態を保持しブラウザ履歴に対応（`useEffect` + `window.location.hash`）。データ取得は各コンポーネントに委譲し、このページ自体は `scenarioId` を prop で渡すだけのシェルとして薄く実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダー右上に「セッション開始 →」ボタンを追加して `/scenarios/[id]/ops` へ遷移。追加DBなし（既存ページのコンポーネントを流用）。
 **コミット:** `feat: KP operations dashboard for unified in-session management`
+
+## [TODO] VTTコマJSONエクスポート（ユドナリウム/ここふぁりあ対応） — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターの能力値・HP/MP/SANをユドナリウムおよびここふぁりあが読み込める「コマデータJSON」形式でエクスポートする機能。既存のBCDiceチャットパレット生成と組み合わせ、VTTセッションへの移行コストをゼロに近づける。
+**リサーチ根拠:** ユドナリウム・ここふぁりあは国内オンセの主要VTTであり、「毎回手でコマを作り直すのが面倒」という不満がユーザーアンケートや個人ブログ（TRPGツールガイド等）で繰り返し挙げられている最大の課題の一つ。
+**実装ヒント:** `src/app/_components/VttExportButton.tsx` を "use client" で新規作成。`supabase.from("characters").select("*, character_skills(*)")` でデータ取得し、ユドナリウムのコマJSONスキーマ（`name`, `initiative`, `currentStatus:[{label:"HP", value, max}, ...]`）に変換して `Blob` + `URL.createObjectURL` でダウンロード。ここふぁりあ向けには別タブでテキストアリーナに貼るCSV形式も選択可能にする。`src/app/characters/[id]/chat-palette/page.tsx` に「VTTエクスポート」セクションとして配置し既存のチャットパレットページと統合。追加DBなし。
+**コミット:** `feat: VTT token JSON export for Udonarium and Kokoforia`
+
+## [TODO] 恐怖症・マニア詳細管理（フォビア/マニア） — 優先度: 高
+**対象:** PL
+**概要:** CoC7版の恐怖症（フォビア）とマニア（躁病）をキャラクター単位で一覧・記録・管理できる専用UI。既存の「狂気状態管理（madness_records）」はsymptomを自由テキストで記録するが、CoC7版公式シートはフォビア/マニアを独立フィールドとして持つため、症状名・発動トリガー・活性状態を分けて追跡できるよう補完する。
+**リサーチ根拠:** Charaeno が恐怖症/マニア用の独立フィールドを実装しており、公式7版シートの構成に沿ったより細かい狂気管理がユーザーから高評価を得ている（Charaeno公式note）。
+**実装ヒント:** Supabaseに `character_phobias` テーブルを追加（id, character_id, phobia_type: "phobia"|"mania", name, trigger_description, is_active: boolean, acquired_at, created_at）。`src/app/characters/[id]/phobias/page.tsx` を新規作成（phobia_type別タブ表示 + 追加フォーム）。各行に「活性/回復」トグルを配置し `supabase.from("character_phobias").update({ is_active })` で更新。セッション前チェックリスト（`src/app/characters/[id]/preflight/page.tsx`）にアクティブなフォビア/マニアのサマリーを追記。`src/lib/supabase.ts` に `CharacterPhobia` 型を追加。キャラクター詳細ページに「恐怖症/マニア」リンクを追加。
+**コミット:** `feat: phobia and mania management for CoC7 madness tracking`
+
+## [TODO] 魔道書コレクション管理 — 優先度: 中
+**対象:** PL
+**概要:** キャラクターが入手・読了した魔道書（ネクロノミコン等）をタイトル・言語・読了ステータス・読書時SANロス・クトゥルフ神話技能上昇値・収録呪文と共に記録する機能。現在の「呪文管理（character_spells）」は取得済み呪文の一覧だが、魔道書はSAN/技能への副作用があり独立した管理価値がある。
+**リサーチ根拠:** CharaenoやPrismScroll Cthulhuが魔道書専用フィールドを実装しており、呪文マスターのPLが頻繁にセッション中参照する要素として確認された。
+**実装ヒント:** Supabaseに `character_tomes` テーブルを追加（id, character_id, title, author, language, san_loss_skimming: text（例: "1/1d3"）, san_loss_full_read: text（例: "1d4/2d6"）, cthulhu_mythos_gain: integer, spells_contained: text, is_read: boolean, notes, created_at）。`src/app/characters/[id]/tomes/page.tsx` を新規作成（一覧＋追加フォーム）。is_readのトグルで既読/未読を管理。`src/lib/supabase.ts` に `CharacterTome` 型を追加。キャラクター詳細ページに「魔道書」リンクを追加し、呪文ページ（`src/app/characters/[id]/spells/page.tsx`）にも「所有魔道書」への導線を設置。
+**コミット:** `feat: grimoire/tome collection management with SAN and skill effects`
+
+## [TODO] KP秘匿メモ（キャラクター/NPC/シナリオへのKP専用非公開フィールド） — 優先度: 中
+**対象:** KP
+**概要:** KPがキャラクター・NPC・シナリオのそれぞれに「PLに見せない秘匿情報」（真の正体・隠し設定・KP向け注記）を追記できる非公開メモフィールド。現在全データがPLにも見える前提で構築されており、KP専用情報の記録場所がない。
+**リサーチ根拠:** CharaXivの「KP専用非公開フィールド」が人気機能として紹介されており（Charaeno公式note・CharaXiv紹介記事）、KPが安心してキャラ設定を管理したいニーズが確認された。
+**実装ヒント:** Supabaseに `kp_memos` テーブルを追加（id, entity_type: "character"|"npc"|"scenario", entity_id: uuid, content: text, created_at）。`src/app/_components/KpMemoSection.tsx` を "use client" で新規作成（props: entityType, entityId）。textarea + 保存ボタンで `supabase.from("kp_memos").upsert(...)` により entity_type + entity_id をキーに1件管理（複数行不要）。キャラクター詳細（`src/app/characters/[id]/page.tsx`）・NPC詳細（`src/app/npcs/[id]/page.tsx`）・シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）の末尾に折りたたみ表示で配置。`src/lib/supabase.ts` に `KpMemo` 型を追加。
+**コミット:** `feat: KP-only hidden memo field for characters, NPCs, and scenarios`
+
+## [TODO] タグ付け + タグ横断検索 — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** キャラクター・シナリオ・NPCに自由タグ（例: "現代日本" "探偵もの" "長期キャン"）を付与し、タグ単位で横断検索できる機能。既存のキャラクター一覧フィルタ（名前・職業・ステータス）やグローバル検索（テキスト一致）を補完し、テーマ・時代・ジャンルでのグルーピングを可能にする。
+**リサーチ根拠:** いあキャラ・Charaenoともにタグ検索をサポートしており、大量のキャラやシナリオを管理するベテランユーザーからの需要が高いと複数のブログ・ユーザーレビューで確認された。
+**実装ヒント:** Supabaseに `tags` テーブル（id, name, created_at）と `entity_tags` テーブル（id, entity_type: "character"|"scenario"|"npc", entity_id: uuid, tag_id: uuid, created_at）を追加。`src/app/_components/TagSelector.tsx` を "use client" で新規作成（テキスト入力でタグ追加、×ボタンで削除、既存タグはオートコンプリート）。キャラクター一覧（`src/app/characters/page.tsx`）・シナリオ一覧（`src/app/scenarios/page.tsx`）にタグフィルタ追加。グローバル検索（`src/app/search/page.tsx`）にタグ横断検索を追加。`src/lib/supabase.ts` に `Tag`, `EntityTag` 型を追加。
+**コミット:** `feat: tag system for characters, scenarios, and NPCs with cross-search`
