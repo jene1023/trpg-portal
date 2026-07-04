@@ -412,6 +412,18 @@ body {
   }
 }
 
+/* 大気感パネル: 燭台の炎が照らす古文書風パネル — 微細な上辺グロー＋下辺の深み */
+.coc-panel-atmospheric {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -5%, rgba(201, 133, 58, 0.045) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 35% at 50% 108%, rgba(7, 5, 3, 0.40) 0%, transparent 70%),
+    var(--color-coc-raised);
+  box-shadow:
+    inset 0 1px 0 rgba(201, 133, 58, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0 0 0 1px var(--color-coc-border);
+}
+
 /* ルーンシンボル: ゆっくりと回転しながら明滅する儀式の印 */
 @keyframes coc-rune-spin {
   from { transform: rotate(0deg); }
