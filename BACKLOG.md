@@ -858,7 +858,7 @@
 **実装ヒント:** Supabaseに `character_snapshots` テーブルを追加（id, character_id, label: text, snapshot_data: jsonb, taken_at: timestamptz, created_at）。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）に「スナップショットを保存」ボタン（"use client" コンポーネント）を追加し、`supabase.from("characters").select("*, character_skills(*)")` の全データをJSONB形式で格納。`src/app/characters/[id]/snapshots/page.tsx` を新規作成（一覧表示＋復元UI）。復元時は `characters.update({hp_current, mp_current, san_current, ...})` および `character_skills` の一括 upsert を実行し、復元前に確認ダイアログを表示。`src/lib/supabase.ts` に `CharacterSnapshot` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット」リンクを追加。
 **コミット:** `feat: character snapshot and rollback for session data safety`
 
-## [TODO] シナリオ別参加者ダイス統計ダッシュボード — 優先度: 中
+## [DONE] シナリオ別参加者ダイス統計ダッシュボード — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに参加した全キャラクターのダイスロール履歴（`dice_rolls`テーブル）をシナリオ単位で集計し、参加者別の成功率・ファンブル率・最多使用技能・総判定数を一覧表示するKP向けダッシュボード。既存のキャラクター単位統計（`dice-stats`）とは異なり卓全体の傾向を把握できる。
 **実装ヒント:** `src/app/scenarios/[id]/dice-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id").eq("scenario_id", id)` で参加者IDを取得し、`supabase.from("dice_rolls").select("*").in("character_id", ids)` でロール履歴を一括取得。character_idごとにグループ化して成功数/総数/ファンブル数を集計し、参加者名と共に表示（参加者名は `characters.name` で取得）。CSSの `width: calc(${rate}%)` バーグラフで成功率を可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「判定統計」リンクを追加。追加DBなし。
