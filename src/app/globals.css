@@ -372,6 +372,12 @@ body {
   height: 14px;
   opacity: 0.38;
   pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.coc-corner-frame:hover::before,
+.coc-corner-frame:hover::after {
+  opacity: 0.68;
 }
 
 .coc-corner-frame::before {

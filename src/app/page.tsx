@@ -123,7 +123,7 @@ export default async function HomePage() {
         </h1>
         <div className="flex items-center justify-center gap-4">
           <span className="coc-fade-rule" aria-hidden="true" />
-          <span className="text-coc-gold text-lg select-none coc-star-twinkle">✦</span>
+          <span className="text-coc-gold text-lg select-none coc-rune-awaken">✦</span>
           <span className="coc-fade-rule rotate-180" aria-hidden="true" />
         </div>
         <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-[0.04em] leading-relaxed">
