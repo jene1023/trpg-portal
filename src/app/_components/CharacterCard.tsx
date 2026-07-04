@@ -96,7 +96,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
         <div className="px-3 py-3 space-y-2">
           {/* キャッチフレーズ */}
           {character.catchphrase && (
-            <p className="text-xs italic text-coc-gold font-crimson leading-snug line-clamp-2 pl-2 border-l-2 border-coc-gold-dim">
+            <p className="text-xs italic text-coc-gold font-crimson leading-snug line-clamp-2 coc-catchphrase-block">
               &ldquo;{character.catchphrase}&rdquo;
             </p>
           )}
