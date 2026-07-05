@@ -34,6 +34,7 @@ import {
   ItemCatalog,
   ItemCatalogCategory,
 } from "@/lib/supabase";
+import ItemCatalogAddButton from "@/app/_components/ItemCatalogAddButton";
 
 const CATEGORIES: { value: ItemCatalogCategory | "all"; label: string }[] = [
   { value: "all", label: "すべて" },
@@ -211,13 +212,16 @@ export default function ItemCatalogPage() {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => remove(item.id)}
-                className="shrink-0 text-coc-muted hover:text-red-400 transition-colors"
-                title="削除"
-              >
-                <Trash2 size={14} />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <ItemCatalogAddButton item={item} />
+                <button
+                  onClick={() => remove(item.id)}
+                  className="text-coc-muted hover:text-red-400 transition-colors"
+                  title="削除"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

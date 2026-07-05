@@ -906,7 +906,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/kp-preflight/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("scenarios").select("*, handouts(*), bgm_cues(*), scenario_scenes(*), scenario_participants(*, characters(*))")` でシナリオ関連データを一括取得。ハンドアウトは `is_distributed` フラグをトグル可（`supabase.from("handouts").update({is_distributed}).eq("id", id)` で即時反映）。BGMキュー・シーン・参加者出欠は読み取り表示のみ（既存フラグを参照）。チェック状態は各テーブルの既存フラグを使用し追加DBなし。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「KP準備確認」リンクを追加。
 **コミット:** `feat: KP pre-session preflight checklist for scenario readiness`
 
-## [TODO] アイテムカタログ（マスター装備リスト） — 優先度: 中
+## [DONE] アイテムカタログ（マスター装備リスト） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** CoC7版の標準武器・装備・道具をあらかじめ登録したマスターカタログを一覧表示し、キャラクターを選択してインベントリへ一クリック追加できる機能。毎回武器名・ダメージ・射程を手入力する手間を省く。`ItemCatalog` 型（`src/lib/supabase.ts:563`）は定義済みだがUIページが未実装。
 **実装ヒント:** `src/app/item-catalog/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント `src/app/_components/ItemCatalogAddButton.tsx`）。`supabase.from("item_catalog").select("*").order("category")` でカテゴリ別一覧表示（weapon/medical/tool/misc の4区分タブまたはフィルタ）。各アイテムの「追加」ボタンでキャラクター選択モーダルを表示し `supabase.from("inventory_items").insert({character_id, item_type: item.category === "weapon" ? "weapon" : "item", name: item.name, damage: item.damage, notes: item.notes})` でインベントリへ登録。カタログ自体のCRUD（作成・削除）も同ページ内の管理セクションで実装。`src/app/_components/NavBar.tsx` に「装備カタログ」リンクを追加。追加DBなし（既存 `item_catalog` テーブルを流用）。

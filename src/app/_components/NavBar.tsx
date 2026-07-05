@@ -18,6 +18,7 @@ const navLinks = [
   { href: "/materials", label: "素材" },
   { href: "/stats", label: "統計" },
   { href: "/dice-calc", label: "確率計算" },
+  { href: "/item-catalog", label: "装備カタログ" },
 ];
 
 export default function NavBar() {
