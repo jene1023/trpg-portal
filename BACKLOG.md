@@ -900,7 +900,7 @@
 **実装ヒント:** `src/app/characters/[id]/portrait-prompt/page.tsx` を "use client" で新規作成（追加DBなし）。`supabase.from("characters").select("*, character_traits(*)")` でキャラデータを取得し、外見テキスト（`appearance`フィールド）・職業（`occupation`）・性格特質（`character_traits`のpersonalityタイプ）を組み合わせて英語プロンプトを組み立てる静的テンプレート関数 `buildPortraitPrompt(character)` を `src/lib/portraitPrompt.ts` に実装。生成されたプロンプトをテキストエリアに表示し「コピー」ボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「肖像画プロンプト」リンクを追加。
 **コミット:** `feat: AI portrait prompt generator from character appearance and traits`
 
-## [TODO] KP準備チェックリスト（セッション当日用） — 優先度: 高
+## [DONE] KP準備チェックリスト（セッション当日用） — 優先度: 高
 **対象:** KP
 **概要:** KPがセッション当日にハンドアウト配布・BGMキュー確認・シーンリスト・参加者出欠を一画面でまとめて点検できる専用のプリフライトUI。PLの `preflight` ページ（`/characters/[id]/preflight`）のKP対応版として、セッション直前の「確認漏れ」を防ぐ。
 **実装ヒント:** `src/app/scenarios/[id]/kp-preflight/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("scenarios").select("*, handouts(*), bgm_cues(*), scenario_scenes(*), scenario_participants(*, characters(*))")` でシナリオ関連データを一括取得。ハンドアウトは `is_distributed` フラグをトグル可（`supabase.from("handouts").update({is_distributed}).eq("id", id)` で即時反映）。BGMキュー・シーン・参加者出欠は読み取り表示のみ（既存フラグを参照）。チェック状態は各テーブルの既存フラグを使用し追加DBなし。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「KP準備確認」リンクを追加。
