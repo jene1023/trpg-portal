@@ -870,7 +870,7 @@
 **実装ヒント:** Supabaseに `npc_presets` テーブルを追加（id, name, occupation_name, appearance, purpose, notes, str, con, pow, dex, app, siz, int_stat, edu, hp, mp, db, created_at）。`src/app/npc-presets/page.tsx` を新規作成（一覧＋作成フォーム）。NPC作成ページ（`src/app/npcs/new/page.tsx`）に「プリセットから読み込む」select 要素を追加し、選択すると `supabase.from("npc_presets").select("*").eq("id", presetId)` で取得した値をフォームの各 state へ自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。`src/lib/supabase.ts` に `NpcPreset` 型を追加。追加DBあり（`npc_presets` テーブル）。
 **コミット:** `feat: NPC preset library for reusable NPC templates across scenarios`
 
-## [TODO] 探索者実績・称号システム — 優先度: 低
+## [DONE] 探索者実績・称号システム — 優先度: 低
 **対象:** PL / 共通
 **概要:** セッション参加回数・SAN喪失総量・技能成長回数・ダイス成功率・狂気発症回数などの行動履歴から達成バッジ（称号）を自動判定し、キャラクターページで表示するゲーミフィケーション機能。既存テーブルの集計のみで追加DBは不要。
 **実装ヒント:** `src/app/characters/[id]/achievements/page.tsx` を新規作成（Server Component）。`sessions`, `dice_rolls`, `growth_history`, `madness_records` を `Promise.all` で並行取得して各バッジ条件を判定（例: "ベテラン探索者" = sessions.length >= 10, "折れない精神" = san_loss合計 >= 30, "成長の証" = growth_history.length >= 5, "ファンブル常連" = fumble回数 >= 5）。バッジ定義は静的配列（name, description, icon, condition関数）で管理。達成済み/未達成を視覚的に区別（達成済みはカラー、未達成はグレーアウト）して表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「実績」リンクを追加。追加DBなし。
