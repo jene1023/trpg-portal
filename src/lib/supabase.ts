@@ -742,3 +742,15 @@ export type NpcPreset = {
   db: string | null;
   created_at: string;
 };
+
+export type SessionReview = {
+  id: string;
+  scenario_id: string;
+  session_label: string | null;
+  fun_score: number;
+  tension_score: number;
+  highlight: string | null;
+  improvement: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+};

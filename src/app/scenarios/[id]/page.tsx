@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -66,6 +66,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { data: ratingRows },
     { data: propRows },
     { count: pendingThreadCount },
+    { data: sessionReviewRows },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
@@ -74,7 +75,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
     supabase.from("scenario_player_ratings").select("fun_rating, horror_rating, mystery_rating, character_rating").eq("scenario_id", id),
     supabase.from("scenario_props").select("id, is_distributed").eq("scenario_id", id),
     supabase.from("plot_threads").select("*", { count: "exact", head: true }).eq("scenario_id", id).eq("status", "pending"),
+    supabase.from("session_reviews").select("fun_score, tension_score").eq("scenario_id", id),
   ]);
+
+  const sessionReviewCount = sessionReviewRows?.length ?? 0;
+  const avgSessionFun = sessionReviewCount > 0 ? (sessionReviewRows!.reduce((s, r) => s + r.fun_score, 0) / sessionReviewCount) : null;
+  const avgSessionTension = sessionReviewCount > 0 ? (sessionReviewRows!.reduce((s, r) => s + r.tension_score, 0) / sessionReviewCount) : null;
 
   const propCount = propRows?.length ?? 0;
   const undistributedPropCount = propRows?.filter((p) => !p.is_distributed).length ?? 0;
@@ -397,6 +403,24 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <span className="text-coc-muted">→</span>
           </Link>
         )}
+
+        <Link
+          href={`/scenarios/${id}/session-review`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <PenLine size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">卓振り返り</p>
+              <p className="text-xs text-coc-muted">
+                {sessionReviewCount > 0
+                  ? `${sessionReviewCount}件 楽しさ${avgSessionFun!.toFixed(1)} / 緊張感${avgSessionTension!.toFixed(1)}`
+                  : "楽しさ・緊張感・印象的な場面を記録"}
+              </p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
 
         <Link
           href={`/scenarios/${id}/reflections`}

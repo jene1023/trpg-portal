@@ -888,7 +888,7 @@
 **実装ヒント:** `scenarios` テーブルに `difficulty: "beginner"|"intermediate"|"advanced" | null`、`playtime_type: "short"|"medium"|"long" | null`、`min_players: integer | null`、`max_players: integer | null`、`content_tags: text[] | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に各フィールドを追加。`src/app/_components/ScenarioForm.tsx` にメタ情報入力セクション（select要素＋タグ入力）を追加。`src/app/scenarios/page.tsx` のフィルタUIに難易度・プレイ時間フィルタを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の概要カードにバッジ表示。
 **コミット:** `feat: scenario difficulty and meta tags for filtering and player briefing`
 
-## [TODO] セッション振り返りフォーム（卓評価） — 優先度: 中
+## [DONE] セッション振り返りフォーム（卓評価） — 優先度: 中
 **対象:** KP / 共通
 **概要:** セッション終了後に「楽しさ（1〜5）」「緊張感（1〜5）」「印象的な場面（自由記述）」「次回への改善点（自由記述）」を記録できる振り返りフォーム。セッションログの事実記録と分けて感想・評価を残せる。
 **実装ヒント:** Supabaseに `session_reviews` テーブルを追加（id, scenario_id, session_label, fun_score: smallint, tension_score: smallint, highlight, improvement, reviewed_at, created_at）。`src/app/scenarios/[id]/review/page.tsx` を "use client" で新規作成（一覧＋新規入力フォーム）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓振り返り」リンクと平均スコアサマリを追加。`src/lib/supabase.ts` に `SessionReview` 型を追加。
