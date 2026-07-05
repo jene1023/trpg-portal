@@ -899,3 +899,27 @@
 **概要:** キャラクターの外見・職業・性格・背景情報をもとに、Midjourney/StableDiffusion等のAI画像生成ツールで使える英語プロンプトを自動生成してクリップボードにコピーできる機能。プロフィールカード機能（SNS共有）と組み合わせて、キャラクターのビジュアル化を支援する。
 **実装ヒント:** `src/app/characters/[id]/portrait-prompt/page.tsx` を "use client" で新規作成（追加DBなし）。`supabase.from("characters").select("*, character_traits(*)")` でキャラデータを取得し、外見テキスト（`appearance`フィールド）・職業（`occupation`）・性格特質（`character_traits`のpersonalityタイプ）を組み合わせて英語プロンプトを組み立てる静的テンプレート関数 `buildPortraitPrompt(character)` を `src/lib/portraitPrompt.ts` に実装。生成されたプロンプトをテキストエリアに表示し「コピー」ボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「肖像画プロンプト」リンクを追加。
 **コミット:** `feat: AI portrait prompt generator from character appearance and traits`
+
+## [TODO] KP準備チェックリスト（セッション当日用） — 優先度: 高
+**対象:** KP
+**概要:** KPがセッション当日にハンドアウト配布・BGMキュー確認・シーンリスト・参加者出欠を一画面でまとめて点検できる専用のプリフライトUI。PLの `preflight` ページ（`/characters/[id]/preflight`）のKP対応版として、セッション直前の「確認漏れ」を防ぐ。
+**実装ヒント:** `src/app/scenarios/[id]/kp-preflight/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント）。`supabase.from("scenarios").select("*, handouts(*), bgm_cues(*), scenario_scenes(*), scenario_participants(*, characters(*))")` でシナリオ関連データを一括取得。ハンドアウトは `is_distributed` フラグをトグル可（`supabase.from("handouts").update({is_distributed}).eq("id", id)` で即時反映）。BGMキュー・シーン・参加者出欠は読み取り表示のみ（既存フラグを参照）。チェック状態は各テーブルの既存フラグを使用し追加DBなし。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「KP準備確認」リンクを追加。
+**コミット:** `feat: KP pre-session preflight checklist for scenario readiness`
+
+## [TODO] アイテムカタログ（マスター装備リスト） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** CoC7版の標準武器・装備・道具をあらかじめ登録したマスターカタログを一覧表示し、キャラクターを選択してインベントリへ一クリック追加できる機能。毎回武器名・ダメージ・射程を手入力する手間を省く。`ItemCatalog` 型（`src/lib/supabase.ts:563`）は定義済みだがUIページが未実装。
+**実装ヒント:** `src/app/item-catalog/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント `src/app/_components/ItemCatalogAddButton.tsx`）。`supabase.from("item_catalog").select("*").order("category")` でカテゴリ別一覧表示（weapon/medical/tool/misc の4区分タブまたはフィルタ）。各アイテムの「追加」ボタンでキャラクター選択モーダルを表示し `supabase.from("inventory_items").insert({character_id, item_type: item.category === "weapon" ? "weapon" : "item", name: item.name, damage: item.damage, notes: item.notes})` でインベントリへ登録。カタログ自体のCRUD（作成・削除）も同ページ内の管理セクションで実装。`src/app/_components/NavBar.tsx` に「装備カタログ」リンクを追加。追加DBなし（既存 `item_catalog` テーブルを流用）。
+**コミット:** `feat: item catalog master list with one-click inventory add`
+
+## [TODO] シナリオ統計サマリー（KP実績レポート） — 優先度: 中
+**対象:** KP / 共通
+**概要:** 全シナリオを横断した集計（総実施数・参加者のべ数・平均SAN損失・キャラクター死亡/引退数・完了シナリオ数）をグラフ・数値カードで表示するKP向けダッシュボード。個別シナリオの統計ではなく、KP活動全体の実績を一覧できる。
+**実装ヒント:** `src/app/scenarios/stats/page.tsx` を新規作成（Server Component）。`Promise.all` で以下を並行取得: `supabase.from("scenarios").select("id, status, played_at")`、`supabase.from("scenario_participants").select("id, scenario_id")`、`supabase.from("sessions").select("san_loss, hp_loss")`、`supabase.from("characters").select("id, status").in("status", ["dead", "retired"])`。取得データをサーバー側でステータス別・月別に集計しカード表示（追加DBなし）。グラフはCSSのみの棒グラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。シナリオ一覧（`src/app/scenarios/page.tsx`）に「統計」リンクを追加。
+**コミット:** `feat: KP scenario statistics summary dashboard`
+
+## [TODO] 死亡・引退キャラクター追悼ホール — 優先度: 低
+**対象:** PL / 共通
+**概要:** ステータスが "dead" または "retired" のキャラクターを専用の追悼ページで一覧表示し、`farewell_scene`・`farewell_message` を含む追悼カードとして並べる機能。個別の farewell ページ（`/characters/[id]/farewell`）は存在するが、全キャラを横断する「英雄の記念碑」ビューはない。
+**実装ヒント:** `src/app/characters/hall-of-fame/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*").in("status", ["dead", "retired"]).order("updated_at", {ascending: false})` で取得。各キャラをカード形式で表示（名前・職業・ステータスバッジ・`farewell_message` の先頭50文字プレビュー）。`farewell_scene` が入力済みのキャラは `<details>` 要素で展開可能にする。`src/app/characters/page.tsx`（キャラ一覧）フッターまたは `src/app/_components/NavBar.tsx` に「記念碑」リンクを追加。追加DBなし。
+**コミット:** `feat: hall of fame page for deceased and retired characters`
