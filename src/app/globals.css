@@ -493,3 +493,20 @@ body {
     animation: coc-title-glow 5s ease-in-out infinite;
   }
 }
+
+/* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
+@keyframes coc-hero-quote-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }
+  50%       { text-shadow: 0 0 20px rgba(160, 138, 191, 0.22), 0 0 44px rgba(100, 80, 160, 0.08); }
+}
+
+.coc-hero-quote {
+  text-shadow: 0 0 10px rgba(160, 138, 191, 0.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-hero-quote {
+    animation: coc-hero-quote-glow 7s ease-in-out infinite;
+    animation-delay: 1.5s;
+  }
+}
