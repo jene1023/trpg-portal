@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp } from "lucide-react";
-import { supabase, isSupabaseConfigured, ScenarioStatus, AttendanceStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
@@ -23,6 +23,24 @@ const STATUS_COLORS: Record<ScenarioStatus, string> = {
   planning: "text-coc-muted border-coc-border",
   ongoing: "text-coc-gold border-coc-gold-dim",
   completed: "text-green-400 border-green-800",
+};
+
+const DIFFICULTY_LABELS: Record<ScenarioDifficulty, string> = {
+  beginner: "初心者向け",
+  intermediate: "中級",
+  advanced: "上級",
+};
+
+const DIFFICULTY_COLORS: Record<ScenarioDifficulty, string> = {
+  beginner: "text-green-400 border-green-800",
+  intermediate: "text-yellow-400 border-yellow-800",
+  advanced: "text-red-400 border-red-800",
+};
+
+const PLAYTIME_LABELS: Record<ScenarioPlaytimeType, string> = {
+  short: "短編（〜3時間）",
+  medium: "中編（3〜6時間）",
+  long: "長編（6時間〜）",
 };
 
 type Props = { params: Promise<{ id: string }> };
@@ -135,6 +153,47 @@ export default async function ScenarioDetailPage({ params }: Props) {
               <ExternalLink size={13} />
               {scenario.vtt_type ? `${scenario.vtt_type}で卓に入る` : "卓に入る"}
             </a>
+          </div>
+        )}
+
+        {/* メタ情報バッジ */}
+        {(scenario.difficulty || scenario.playtime_type || scenario.min_players != null || scenario.max_players != null) && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {scenario.difficulty && (
+              <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${DIFFICULTY_COLORS[scenario.difficulty as ScenarioDifficulty]}`}>
+                {DIFFICULTY_LABELS[scenario.difficulty as ScenarioDifficulty]}
+              </span>
+            )}
+            {scenario.playtime_type && (
+              <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
+                {PLAYTIME_LABELS[scenario.playtime_type as ScenarioPlaytimeType]}
+              </span>
+            )}
+            {(scenario.min_players != null || scenario.max_players != null) && (
+              <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
+                推奨{" "}
+                {scenario.min_players != null && scenario.max_players != null
+                  ? `${scenario.min_players}〜${scenario.max_players}人`
+                  : scenario.min_players != null
+                  ? `${scenario.min_players}人〜`
+                  : `〜${scenario.max_players}人`}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* コンテンツ警告タグ */}
+        {(scenario.content_tags ?? []).length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="text-xs text-coc-muted self-center">注意:</span>
+            {(scenario.content_tags ?? []).map((tag: string) => (
+              <span
+                key={tag}
+                className="rounded-full border border-red-900 bg-red-950/30 px-2.5 py-0.5 text-xs text-red-400"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         )}
       </div>

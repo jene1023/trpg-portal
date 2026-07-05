@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, isSupabaseConfigured, ScenarioStatus } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType } from "@/lib/supabase";
 
 export default function ScenarioForm() {
   const router = useRouter();
@@ -19,6 +19,11 @@ export default function ScenarioForm() {
     vtt_type: "",
     vtt_url: "",
     discord_webhook_url: "",
+    difficulty: "" as ScenarioDifficulty | "",
+    playtime_type: "" as ScenarioPlaytimeType | "",
+    min_players: "",
+    max_players: "",
+    content_tags: "",
   });
 
   function handleChange(
@@ -39,6 +44,11 @@ export default function ScenarioForm() {
     }
     setSaving(true);
     setError(null);
+    const rawTags = form.content_tags.trim();
+    const contentTagsArray = rawTags
+      ? rawTags.split(/[,、]/).map((t) => t.trim()).filter(Boolean)
+      : null;
+
     const { error: err } = await supabase.from("scenarios").insert({
       title: form.title.trim(),
       synopsis: form.synopsis.trim() || null,
@@ -51,6 +61,11 @@ export default function ScenarioForm() {
       vtt_type: form.vtt_type || null,
       vtt_url: form.vtt_url.trim() || null,
       discord_webhook_url: form.discord_webhook_url.trim() || null,
+      difficulty: form.difficulty || null,
+      playtime_type: form.playtime_type || null,
+      min_players: form.min_players ? parseInt(form.min_players) : null,
+      max_players: form.max_players ? parseInt(form.max_players) : null,
+      content_tags: contentTagsArray,
     });
     if (err) {
       setError(err.message);
@@ -185,6 +200,98 @@ export default function ScenarioForm() {
         <p className="text-xs text-coc-faint mt-1">
           設定するとSANチェック・セッションログ追加時にDiscordへ自動通知されます
         </p>
+      </div>
+
+      {/* メタ情報セクション */}
+      <div className="rounded-lg border border-coc-border bg-coc-raised px-4 py-4 flex flex-col gap-4">
+        <p className="text-xs font-medium text-coc-muted uppercase tracking-wider">メタ情報（任意）</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="difficulty" className={labelClass}>
+              難易度
+            </label>
+            <select
+              id="difficulty"
+              name="difficulty"
+              value={form.difficulty}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="">-- 未設定 --</option>
+              <option value="beginner">初心者向け</option>
+              <option value="intermediate">中級</option>
+              <option value="advanced">上級</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="playtime_type" className={labelClass}>
+              推定プレイ時間
+            </label>
+            <select
+              id="playtime_type"
+              name="playtime_type"
+              value={form.playtime_type}
+              onChange={handleChange}
+              className={fieldClass}
+            >
+              <option value="">-- 未設定 --</option>
+              <option value="short">短編（〜3時間）</option>
+              <option value="medium">中編（3〜6時間）</option>
+              <option value="long">長編（6時間〜）</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="min_players" className={labelClass}>
+              推奨人数（最小）
+            </label>
+            <input
+              id="min_players"
+              name="min_players"
+              type="number"
+              min="1"
+              max="10"
+              value={form.min_players}
+              onChange={handleChange}
+              placeholder="例: 2"
+              className={fieldClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="max_players" className={labelClass}>
+              推奨人数（最大）
+            </label>
+            <input
+              id="max_players"
+              name="max_players"
+              type="number"
+              min="1"
+              max="10"
+              value={form.max_players}
+              onChange={handleChange}
+              placeholder="例: 4"
+              className={fieldClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="content_tags" className={labelClass}>
+            コンテンツ警告タグ（カンマ区切り）
+          </label>
+          <input
+            id="content_tags"
+            name="content_tags"
+            value={form.content_tags}
+            onChange={handleChange}
+            placeholder="例: ホラー, 流血, 精神的描写"
+            className={fieldClass}
+          />
+        </div>
       </div>
 
       <div>

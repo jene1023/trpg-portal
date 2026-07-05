@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Users, CalendarClock } from "lucide-react";
-import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus, Tag } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, Tag } from "@/lib/supabase";
 
 type ReviewMap = Record<string, number>;
 type EntityTagRow = { entity_id: string; tags: Tag | null };
@@ -12,6 +12,24 @@ const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
   ongoing: "進行中",
   completed: "完了",
+};
+
+const DIFFICULTY_LABELS: Record<ScenarioDifficulty, string> = {
+  beginner: "初心者向け",
+  intermediate: "中級",
+  advanced: "上級",
+};
+
+const DIFFICULTY_COLORS: Record<ScenarioDifficulty, string> = {
+  beginner: "text-green-400 border-green-800",
+  intermediate: "text-yellow-400 border-yellow-800",
+  advanced: "text-red-400 border-red-800",
+};
+
+const PLAYTIME_LABELS: Record<ScenarioPlaytimeType, string> = {
+  short: "短編",
+  medium: "中編",
+  long: "長編",
 };
 
 const STATUS_COLORS: Record<ScenarioStatus, string> = {
@@ -41,6 +59,8 @@ export default function ScenariosPage() {
   const [reviewRatings, setReviewRatings] = useState<ReviewMap>({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ScenarioStatus | "all">("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<ScenarioDifficulty | "all">("all");
+  const [playtimeFilter, setPlaytimeFilter] = useState<ScenarioPlaytimeType | "all">("all");
   const [tagsByScenario, setTagsByScenario] = useState<Record<string, Tag[]>>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -105,6 +125,8 @@ export default function ScenariosPage() {
 
   const filtered = scenarios
     .filter((s) => statusFilter === "all" || s.status === statusFilter)
+    .filter((s) => difficultyFilter === "all" || s.difficulty === difficultyFilter)
+    .filter((s) => playtimeFilter === "all" || s.playtime_type === playtimeFilter)
     .filter((s) => {
       if (selectedTags.length === 0) return true;
       const scenTagNames = (tagsByScenario[s.id] ?? []).map((t) => t.name);
@@ -124,8 +146,8 @@ export default function ScenariosPage() {
         </Link>
       </div>
 
-      {/* ステータスフィルタ */}
-      <div className="mb-4">
+      {/* フィルタ */}
+      <div className="flex flex-wrap gap-2 mb-4">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as ScenarioStatus | "all")}
@@ -135,6 +157,26 @@ export default function ScenariosPage() {
           <option value="planning">準備中</option>
           <option value="ongoing">進行中</option>
           <option value="completed">完了</option>
+        </select>
+        <select
+          value={difficultyFilter}
+          onChange={(e) => setDifficultyFilter(e.target.value as ScenarioDifficulty | "all")}
+          className="rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+        >
+          <option value="all">すべての難易度</option>
+          <option value="beginner">初心者向け</option>
+          <option value="intermediate">中級</option>
+          <option value="advanced">上級</option>
+        </select>
+        <select
+          value={playtimeFilter}
+          onChange={(e) => setPlaytimeFilter(e.target.value as ScenarioPlaytimeType | "all")}
+          className="rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+        >
+          <option value="all">すべての時間</option>
+          <option value="short">短編</option>
+          <option value="medium">中編</option>
+          <option value="long">長編</option>
         </select>
       </div>
 
@@ -212,6 +254,25 @@ export default function ScenariosPage() {
                       {"☆".repeat(5 - reviewRatings[scenario.id])}
                     </span>
                   )}
+                  {scenario.difficulty && (
+                    <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${DIFFICULTY_COLORS[scenario.difficulty as ScenarioDifficulty]}`}>
+                      {DIFFICULTY_LABELS[scenario.difficulty as ScenarioDifficulty]}
+                    </span>
+                  )}
+                  {scenario.playtime_type && (
+                    <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
+                      {PLAYTIME_LABELS[scenario.playtime_type as ScenarioPlaytimeType]}
+                    </span>
+                  )}
+                  {(scenario.min_players != null || scenario.max_players != null) && (
+                    <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
+                      {scenario.min_players != null && scenario.max_players != null
+                        ? `${scenario.min_players}〜${scenario.max_players}人`
+                        : scenario.min_players != null
+                        ? `${scenario.min_players}人〜`
+                        : `〜${scenario.max_players}人`}
+                    </span>
+                  )}
                   {(participantCounts[scenario.id] ?? 0) > 0 && (
                     <span className="flex items-center gap-1 rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-muted">
                       <Users size={11} />
@@ -248,6 +309,21 @@ export default function ScenariosPage() {
                 <div className="mt-3 rounded-lg border border-coc-border bg-coc-raised px-3 py-2">
                   <p className="text-xs font-medium text-coc-muted mb-1">GM メモ</p>
                   <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
+                </div>
+              )}
+
+              {/* コンテンツ警告タグ */}
+              {(scenario.content_tags ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-xs text-coc-muted self-center">注意:</span>
+                  {(scenario.content_tags ?? []).map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-red-900 bg-red-950/30 px-2 py-0.5 text-xs text-red-400"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               )}
 

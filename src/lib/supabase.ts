@@ -144,6 +144,8 @@ export type MadnessRecord = {
 };
 
 export type ScenarioStatus = "planning" | "ongoing" | "completed";
+export type ScenarioDifficulty = "beginner" | "intermediate" | "advanced";
+export type ScenarioPlaytimeType = "short" | "medium" | "long";
 
 export type Scenario = {
   id: string;
@@ -156,6 +158,11 @@ export type Scenario = {
   vtt_url: string | null;
   vtt_type: string | null;
   discord_webhook_url: string | null;
+  difficulty: ScenarioDifficulty | null;
+  playtime_type: ScenarioPlaytimeType | null;
+  min_players: number | null;
+  max_players: number | null;
+  content_tags: string[] | null;
   created_at: string;
 };
 

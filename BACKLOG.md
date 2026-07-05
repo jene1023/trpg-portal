@@ -882,7 +882,7 @@
 **実装ヒント:** `src/app/dice-calc/page.tsx` を "use client" で新規作成（追加DBなし・静的計算のみ）。技能値スライダー（0〜99）と判定種別セレクタを配置。通常判定は `rate = Math.min(skill, 99) / 100`、ボーナスは `1 - (1 - rate)^2`、ペナルティは `rate^2` で確率計算。決定的成功は技能値の1/5以下、ファンブルは96以上かつ技能値50未満で100。結果をパーセンテージ＋CSSバーで表示。`src/app/_components/NavBar.tsx` に「確率計算」リンクを追加。
 **コミット:** `feat: dice success rate simulator for skill check probability`
 
-## [TODO] シナリオ難易度・メタ情報タグ — 優先度: 中
+## [DONE] シナリオ難易度・メタ情報タグ — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに「難易度（初心者向け/中級/上級）」「推定プレイ時間（短編/中編/長編）」「推奨人数（最小・最大）」「コンテンツ警告タグ」を設定できる機能。シナリオ一覧での絞り込みや参加者へのプレ情報共有に使う。
 **実装ヒント:** `scenarios` テーブルに `difficulty: "beginner"|"intermediate"|"advanced" | null`、`playtime_type: "short"|"medium"|"long" | null`、`min_players: integer | null`、`max_players: integer | null`、`content_tags: text[] | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に各フィールドを追加。`src/app/_components/ScenarioForm.tsx` にメタ情報入力セクション（select要素＋タグ入力）を追加。`src/app/scenarios/page.tsx` のフィルタUIに難易度・プレイ時間フィルタを追加。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の概要カードにバッジ表示。

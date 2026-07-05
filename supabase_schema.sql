@@ -307,3 +307,10 @@ alter table character_skills add column if not exists category text;
 
 -- セッション録音URL (追加マイグレーション)
 alter table sessions add column if not exists recording_url text;
+
+-- シナリオ難易度・メタ情報タグ (追加マイグレーション)
+alter table scenarios add column if not exists difficulty text check (difficulty in ('beginner', 'intermediate', 'advanced'));
+alter table scenarios add column if not exists playtime_type text check (playtime_type in ('short', 'medium', 'long'));
+alter table scenarios add column if not exists min_players integer;
+alter table scenarios add column if not exists max_players integer;
+alter table scenarios add column if not exists content_tags text[];
