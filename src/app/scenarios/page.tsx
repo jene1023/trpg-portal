@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users, CalendarClock } from "lucide-react";
+import { Plus, Users, CalendarClock, BarChart2 } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, Tag } from "@/lib/supabase";
 
 type ReviewMap = Record<string, number>;
@@ -137,13 +137,22 @@ export default function ScenariosPage() {
     <div className="coc-page-enter mx-auto max-w-4xl px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-cinzel text-2xl font-bold text-coc-text">シナリオ一覧</h1>
-        <Link
-          href="/scenarios/new"
-          className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
-        >
-          <Plus size={16} />
-          シナリオを追加
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/scenarios/stats"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:bg-coc-surface transition-colors"
+          >
+            <BarChart2 size={16} />
+            統計
+          </Link>
+          <Link
+            href="/scenarios/new"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-2 text-sm text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors"
+          >
+            <Plus size={16} />
+            シナリオを追加
+          </Link>
+        </div>
       </div>
 
       {/* フィルタ */}

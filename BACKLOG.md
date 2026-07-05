@@ -912,7 +912,7 @@
 **実装ヒント:** `src/app/item-catalog/page.tsx` を新規作成（Server Component + "use client" 子コンポーネント `src/app/_components/ItemCatalogAddButton.tsx`）。`supabase.from("item_catalog").select("*").order("category")` でカテゴリ別一覧表示（weapon/medical/tool/misc の4区分タブまたはフィルタ）。各アイテムの「追加」ボタンでキャラクター選択モーダルを表示し `supabase.from("inventory_items").insert({character_id, item_type: item.category === "weapon" ? "weapon" : "item", name: item.name, damage: item.damage, notes: item.notes})` でインベントリへ登録。カタログ自体のCRUD（作成・削除）も同ページ内の管理セクションで実装。`src/app/_components/NavBar.tsx` に「装備カタログ」リンクを追加。追加DBなし（既存 `item_catalog` テーブルを流用）。
 **コミット:** `feat: item catalog master list with one-click inventory add`
 
-## [TODO] シナリオ統計サマリー（KP実績レポート） — 優先度: 中
+## [DONE] シナリオ統計サマリー（KP実績レポート） — 優先度: 中
 **対象:** KP / 共通
 **概要:** 全シナリオを横断した集計（総実施数・参加者のべ数・平均SAN損失・キャラクター死亡/引退数・完了シナリオ数）をグラフ・数値カードで表示するKP向けダッシュボード。個別シナリオの統計ではなく、KP活動全体の実績を一覧できる。
 **実装ヒント:** `src/app/scenarios/stats/page.tsx` を新規作成（Server Component）。`Promise.all` で以下を並行取得: `supabase.from("scenarios").select("id, status, played_at")`、`supabase.from("scenario_participants").select("id, scenario_id")`、`supabase.from("sessions").select("san_loss, hp_loss")`、`supabase.from("characters").select("id, status").in("status", ["dead", "retired"])`。取得データをサーバー側でステータス別・月別に集計しカード表示（追加DBなし）。グラフはCSSのみの棒グラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。シナリオ一覧（`src/app/scenarios/page.tsx`）に「統計」リンクを追加。
