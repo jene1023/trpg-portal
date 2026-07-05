@@ -923,3 +923,27 @@
 **概要:** ステータスが "dead" または "retired" のキャラクターを専用の追悼ページで一覧表示し、`farewell_scene`・`farewell_message` を含む追悼カードとして並べる機能。個別の farewell ページ（`/characters/[id]/farewell`）は存在するが、全キャラを横断する「英雄の記念碑」ビューはない。
 **実装ヒント:** `src/app/characters/hall-of-fame/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*").in("status", ["dead", "retired"]).order("updated_at", {ascending: false})` で取得。各キャラをカード形式で表示（名前・職業・ステータスバッジ・`farewell_message` の先頭50文字プレビュー）。`farewell_scene` が入力済みのキャラは `<details>` 要素で展開可能にする。`src/app/characters/page.tsx`（キャラ一覧）フッターまたは `src/app/_components/NavBar.tsx` に「記念碑」リンクを追加。追加DBなし。
 **コミット:** `feat: hall of fame page for deceased and retired characters`
+
+## [TODO] シナリオ別NPC管理ページ — 優先度: 高
+**対象:** KP
+**概要:** シナリオ詳細から直接そのシナリオのNPCだけを一覧・追加できるページ。現在NPCは `scenario_name`（テキスト）で紐づいており、KPはNPC一覧（`/npcs`）へ移動して手動フィルタする必要がある。シナリオ内に留まったままNPCを管理できるようにする。
+**実装ヒント:** `src/app/scenarios/[id]/npcs/page.tsx` を新規作成（Server Component + "use client" 追加フォーム）。`supabase.from("scenarios").select("title").eq("id", id)` でシナリオ名取得後、`supabase.from("npcs").select("*").eq("scenario_name", scenario.title).order("created_at")` でNPC一覧取得。各NPCカードには `/npcs/[npc_id]` への詳細リンクと削除ボタンを配置。新規NPC追加フォームは `NpcForm.tsx` を流用し `scenario_name` を自動セット。`src/app/scenarios/[id]/page.tsx`（シナリオ詳細ダッシュボード）に「NPC管理」カードリンクを追加。追加DBなし。
+**コミット:** `feat: scenario-scoped NPC management page`
+
+## [TODO] シナリオ参加者能力値バランスビュー — 優先度: 高
+**対象:** KP
+**概要:** シナリオに参加する全キャラクターの主要能力値（STR・DEX・INT・EDU・SAN・HP）を横並び比較できるKP向けページ。現在のパーティービュー（`/party`）はHP/MP/SANの現在値表示のみで、セッション前の編成確認・戦闘難易度調整には能力値比較が不可欠。
+**実装ヒント:** `src/app/scenarios/[id]/party-balance/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値（str/con/pow/dex/int_stat/edu）をテーブル形式で横並び表示し、最大値の列をハイライト。CSSバーで全体の中での位置を視覚化（`width: calc(${val/21*100}%)`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値バランス」リンクを追加。追加DBなし。
+**コミット:** `feat: party ability score balance view for KP pre-session prep`
+
+## [TODO] キャンペーン統計ダッシュボード — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーンに紐づく全シナリオを横断した実績集計（参加シナリオ数・完了数・のべ参加者数・累計SAN損失・累計HP損失・死亡/引退キャラ数）をカード＋棒グラフで表示するダッシュボード。現在 `/campaigns/[id]/page.tsx` はシナリオ一覧のみで数値集計がない。
+**実装ヒント:** `src/app/campaigns/[id]/stats/page.tsx` を新規作成（Server Component）。`supabase.from("campaign_scenarios").select("scenario_id").eq("campaign_id", id)` でシナリオID一覧取得後、`Promise.all` で `scenarios`（status別カウント）・`scenario_participants`（のべ参加者数）・`sessions`（san_loss/hp_lossの合計）・`characters`（dead/retiredのカウント）を並行取得しサーバーサイドで集計。CSSのみのバーグラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。`src/app/campaigns/[id]/page.tsx` に「統計」リンクを追加。追加DBなし（`campaign_scenarios`は既存）。
+**コミット:** `feat: campaign statistics dashboard with aggregate metrics`
+
+## [TODO] セッションリプレイページ（全参加者記録統合） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** シナリオの全参加キャラクターのセッションログ＋ファンブル/クリティカル判定（`dice_rolls`テーブル）を時系列にまとめたリプレイ振り返りページ。現在セッションログはキャラ単位でしか見られず、卓全体の流れを一つのストーリーとして振り返る手段がない。セッション後の感想会・SNSシェアに活用できる。
+**実装ヒント:** `src/app/scenarios/[id]/replay/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者取得後、`Promise.all` で各キャラの `sessions`（session_number・title・summary・san_loss・hp_loss）と `dice_rolls`（critical_success/fumbleのみ・rolled_at昇順）を取得。全イベントを `played_at`/`rolled_at` でソートし、キャラ名バッジ付きのタイムライン形式で表示（CSSの `border-left` で縦線）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ」リンクを追加。追加DBなし。
+**コミット:** `feat: scenario replay page combining all participant session logs`
