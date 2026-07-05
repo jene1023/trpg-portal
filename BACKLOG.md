@@ -894,7 +894,7 @@
 **実装ヒント:** Supabaseに `session_reviews` テーブルを追加（id, scenario_id, session_label, fun_score: smallint, tension_score: smallint, highlight, improvement, reviewed_at, created_at）。`src/app/scenarios/[id]/review/page.tsx` を "use client" で新規作成（一覧＋新規入力フォーム）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「卓振り返り」リンクと平均スコアサマリを追加。`src/lib/supabase.ts` に `SessionReview` 型を追加。
 **コミット:** `feat: post-session review form for scenario feedback and improvement tracking`
 
-## [TODO] キャラクター肖像画プロンプト生成 — 優先度: 低
+## [DONE] キャラクター肖像画プロンプト生成 — 優先度: 低
 **対象:** PL / 共通
 **概要:** キャラクターの外見・職業・性格・背景情報をもとに、Midjourney/StableDiffusion等のAI画像生成ツールで使える英語プロンプトを自動生成してクリップボードにコピーできる機能。プロフィールカード機能（SNS共有）と組み合わせて、キャラクターのビジュアル化を支援する。
 **実装ヒント:** `src/app/characters/[id]/portrait-prompt/page.tsx` を "use client" で新規作成（追加DBなし）。`supabase.from("characters").select("*, character_traits(*)")` でキャラデータを取得し、外見テキスト（`appearance`フィールド）・職業（`occupation`）・性格特質（`character_traits`のpersonalityタイプ）を組み合わせて英語プロンプトを組み立てる静的テンプレート関数 `buildPortraitPrompt(character)` を `src/lib/portraitPrompt.ts` に実装。生成されたプロンプトをテキストエリアに表示し「コピー」ボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「肖像画プロンプト」リンクを追加。
