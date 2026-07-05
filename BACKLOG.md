@@ -876,7 +876,7 @@
 **実装ヒント:** `src/app/characters/[id]/achievements/page.tsx` を新規作成（Server Component）。`sessions`, `dice_rolls`, `growth_history`, `madness_records` を `Promise.all` で並行取得して各バッジ条件を判定（例: "ベテラン探索者" = sessions.length >= 10, "折れない精神" = san_loss合計 >= 30, "成長の証" = growth_history.length >= 5, "ファンブル常連" = fumble回数 >= 5）。バッジ定義は静的配列（name, description, icon, condition関数）で管理。達成済み/未達成を視覚的に区別（達成済みはカラー、未達成はグレーアウト）して表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「実績」リンクを追加。追加DBなし。
 **コミット:** `feat: character achievement badge system based on session history`
 
-## [TODO] ダイス成功率シミュレーター — 優先度: 中
+## [DONE] ダイス成功率シミュレーター — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** 技能値と判定種別（通常/ボーナスダイス/ペナルティダイス）を入力すると、成功確率・通常成功率・決定的成功率・ファンブル率を即座に計算して表示するリファレンスツール。セッション前の戦略立案やKPの難易度設計に役立つ。
 **実装ヒント:** `src/app/dice-calc/page.tsx` を "use client" で新規作成（追加DBなし・静的計算のみ）。技能値スライダー（0〜99）と判定種別セレクタを配置。通常判定は `rate = Math.min(skill, 99) / 100`、ボーナスは `1 - (1 - rate)^2`、ペナルティは `rate^2` で確率計算。決定的成功は技能値の1/5以下、ファンブルは96以上かつ技能値50未満で100。結果をパーセンテージ＋CSSバーで表示。`src/app/_components/NavBar.tsx` に「確率計算」リンクを追加。

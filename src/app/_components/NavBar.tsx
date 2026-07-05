@@ -17,6 +17,7 @@ const navLinks = [
   { href: "/calendar", label: "カレンダー" },
   { href: "/materials", label: "素材" },
   { href: "/stats", label: "統計" },
+  { href: "/dice-calc", label: "確率計算" },
 ];
 
 export default function NavBar() {
