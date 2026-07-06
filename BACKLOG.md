@@ -942,7 +942,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/stats/page.tsx` を新規作成（Server Component）。`supabase.from("campaign_scenarios").select("scenario_id").eq("campaign_id", id)` でシナリオID一覧取得後、`Promise.all` で `scenarios`（status別カウント）・`scenario_participants`（のべ参加者数）・`sessions`（san_loss/hp_lossの合計）・`characters`（dead/retiredのカウント）を並行取得しサーバーサイドで集計。CSSのみのバーグラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。`src/app/campaigns/[id]/page.tsx` に「統計」リンクを追加。追加DBなし（`campaign_scenarios`は既存）。
 **コミット:** `feat: campaign statistics dashboard with aggregate metrics`
 
-## [TODO] セッションリプレイページ（全参加者記録統合） — 優先度: 中
+## [DONE] セッションリプレイページ（全参加者記録統合） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** シナリオの全参加キャラクターのセッションログ＋ファンブル/クリティカル判定（`dice_rolls`テーブル）を時系列にまとめたリプレイ振り返りページ。現在セッションログはキャラ単位でしか見られず、卓全体の流れを一つのストーリーとして振り返る手段がない。セッション後の感想会・SNSシェアに活用できる。
 **実装ヒント:** `src/app/scenarios/[id]/replay/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者取得後、`Promise.all` で各キャラの `sessions`（session_number・title・summary・san_loss・hp_loss）と `dice_rolls`（critical_success/fumbleのみ・rolled_at昇順）を取得。全イベントを `played_at`/`rolled_at` でソートし、キャラ名バッジ付きのタイムライン形式で表示（CSSの `border-left` で縦線）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ」リンクを追加。追加DBなし。
