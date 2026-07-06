@@ -924,7 +924,7 @@
 **実装ヒント:** `src/app/characters/hall-of-fame/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*").in("status", ["dead", "retired"]).order("updated_at", {ascending: false})` で取得。各キャラをカード形式で表示（名前・職業・ステータスバッジ・`farewell_message` の先頭50文字プレビュー）。`farewell_scene` が入力済みのキャラは `<details>` 要素で展開可能にする。`src/app/characters/page.tsx`（キャラ一覧）フッターまたは `src/app/_components/NavBar.tsx` に「記念碑」リンクを追加。追加DBなし。
 **コミット:** `feat: hall of fame page for deceased and retired characters`
 
-## [TODO] シナリオ別NPC管理ページ — 優先度: 高
+## [DONE] シナリオ別NPC管理ページ — 優先度: 高
 **対象:** KP
 **概要:** シナリオ詳細から直接そのシナリオのNPCだけを一覧・追加できるページ。現在NPCは `scenario_name`（テキスト）で紐づいており、KPはNPC一覧（`/npcs`）へ移動して手動フィルタする必要がある。シナリオ内に留まったままNPCを管理できるようにする。
 **実装ヒント:** `src/app/scenarios/[id]/npcs/page.tsx` を新規作成（Server Component + "use client" 追加フォーム）。`supabase.from("scenarios").select("title").eq("id", id)` でシナリオ名取得後、`supabase.from("npcs").select("*").eq("scenario_name", scenario.title).order("created_at")` でNPC一覧取得。各NPCカードには `/npcs/[npc_id]` への詳細リンクと削除ボタンを配置。新規NPC追加フォームは `NpcForm.tsx` を流用し `scenario_name` を自動セット。`src/app/scenarios/[id]/page.tsx`（シナリオ詳細ダッシュボード）に「NPC管理」カードリンクを追加。追加DBなし。
