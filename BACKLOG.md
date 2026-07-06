@@ -988,7 +988,7 @@
 **実装ヒント:** `src/lib/discordNotify.ts` を新規作成（`sendDiscordNotification(webhookUrl: string, content: string): Promise<void>` — `fetch` でDiscord Webhook エンドポイントにPOST）。`src/app/_components/SessionLogForm.tsx` のフォーム送信成功後に呼び出し（`san_loss >= 5` の場合は喪失警告メッセージ、それ以外はセッション記録通知）。`src/app/_components/CharacterForm.tsx` で status を `"dead"` に変更した際にも呼び出し。webhookUrlは `character → scenario_participants → scenarios` の連鎖取得、またはフォームに scenario_id を props 経由で渡して取得。追加DBなし（既存 `scenarios.discord_webhook_url` を利用）。
 **コミット:** `feat: auto Discord notification on session events via webhook`
 
-## [TODO] セッション参加者ダイスロールスコアボード — 優先度: 低
+## [DONE] セッション参加者ダイスロールスコアボード — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** シナリオに参加した全キャラクターの `dice_rolls` を集計し「最多ファンブル」「最多クリティカル成功」「最高成功率」「総判定数」のランキングを表示するエンタメ統計ページ。セッション後の振り返り・盛り上がりに使える。
 **実装ヒント:** `src/app/scenarios/[id]/scoreboard/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者一覧取得後、各 `character_id` の `dice_rolls` を `Promise.all` で並行取得しサーバーサイドで集計（fumble数・critical_success数・成功率・総判定数）。ランキングはCSSのみのカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「スコアボード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
