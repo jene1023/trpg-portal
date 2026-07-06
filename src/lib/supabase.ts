@@ -164,6 +164,8 @@ export type Scenario = {
   min_players: number | null;
   max_players: number | null;
   content_tags: string[] | null;
+  remind_enabled: boolean;
+  remind_email: string | null;
   created_at: string;
 };
 

@@ -962,7 +962,7 @@
 **実装ヒント:** `src/lib/nameData.ts` を新規作成し、1920年代向け姓100件・名100件と現代向け姓100件・名100件の静的配列を定義。`src/app/_components/CharacterForm.tsx` の名前フィールド横に「🎲」ボタンを追加（"use client" のまま onClick で配列からランダム取得しフォームstateを更新）。`src/app/_components/NpcForm.tsx` にも同様のボタンを追加し `nameData.ts` を流用。追加DBなし。
 **コミット:** `feat: random investigator and NPC name generator`
 
-## [TODO] セッション前日リマインド通知（Supabase Edge Function） — 優先度: 中
+## [DONE] セッション前日リマインド通知（Supabase Edge Function） — 優先度: 中
 **対象:** KP / 共通
 **概要:** 進行中シナリオの `next_session_at` が翌日に迫ったとき、Supabase Edge Function + メール送信でKPへリマインドを自動配信する機能。現在 next_session_at の表示（DONE）はあるが、ユーザーがポータルを開かないと気づけず「うっかり忘れ」が発生する。
 **リサーチ根拠:** TRPGセッションは月1〜2回程度の開催頻度のため「うっかり忘れた」ケースがコミュニティで散見されると複数のTRPG情報サイトで言及されており、日程調整ツールとの併用が前提になっている現状を改善する。

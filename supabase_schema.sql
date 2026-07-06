@@ -314,3 +314,7 @@ alter table scenarios add column if not exists playtime_type text check (playtim
 alter table scenarios add column if not exists min_players integer;
 alter table scenarios add column if not exists max_players integer;
 alter table scenarios add column if not exists content_tags text[];
+
+-- セッション前日リマインド通知 (追加マイグレーション)
+alter table scenarios add column if not exists remind_enabled boolean default false;
+alter table scenarios add column if not exists remind_email text;

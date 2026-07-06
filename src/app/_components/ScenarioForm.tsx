@@ -24,12 +24,16 @@ export default function ScenarioForm() {
     min_players: "",
     max_players: "",
     content_tags: "",
+    remind_enabled: false,
+    remind_email: "",
   });
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, type, value } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,6 +70,8 @@ export default function ScenarioForm() {
       min_players: form.min_players ? parseInt(form.min_players) : null,
       max_players: form.max_players ? parseInt(form.max_players) : null,
       content_tags: contentTagsArray,
+      remind_enabled: form.remind_enabled,
+      remind_email: form.remind_email.trim() || null,
     });
     if (err) {
       setError(err.message);
@@ -200,6 +206,39 @@ export default function ScenarioForm() {
         <p className="text-xs text-coc-faint mt-1">
           設定するとSANチェック・セッションログ追加時にDiscordへ自動通知されます
         </p>
+      </div>
+
+      <div className="rounded-lg border border-coc-border bg-coc-raised px-4 py-4 flex flex-col gap-3">
+        <p className="text-xs font-medium text-coc-muted uppercase tracking-wider">前日リマインドメール（任意）</p>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            name="remind_enabled"
+            checked={form.remind_enabled}
+            onChange={handleChange}
+            className="rounded border-coc-border accent-coc-gold"
+          />
+          <span className="text-sm text-coc-text">前日リマインドを有効にする</span>
+        </label>
+        {form.remind_enabled && (
+          <div>
+            <label htmlFor="remind_email" className={labelClass}>
+              リマインド先メールアドレス
+            </label>
+            <input
+              id="remind_email"
+              name="remind_email"
+              type="email"
+              value={form.remind_email}
+              onChange={handleChange}
+              placeholder="kp@example.com"
+              className={fieldClass}
+            />
+            <p className="text-xs text-coc-faint mt-1">
+              次回セッション予定の前日 JST 9:00 に自動メールが送信されます
+            </p>
+          </div>
+        )}
       </div>
 
       {/* メタ情報セクション */}

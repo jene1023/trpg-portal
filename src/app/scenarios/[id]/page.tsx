@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, Sce
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
+import ScenarioReminderEditor from "@/app/_components/ScenarioReminderEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
 import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
@@ -760,6 +761,15 @@ export default async function ScenarioDetailPage({ params }: Props) {
       <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>
         <ScenarioDiscordWebhookEditor scenarioId={id} initialUrl={scenario.discord_webhook_url ?? null} />
+      </div>
+
+      <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+        <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">リマインドメール設定</p>
+        <ScenarioReminderEditor
+          scenarioId={id}
+          initialEnabled={scenario.remind_enabled ?? false}
+          initialEmail={scenario.remind_email ?? null}
+        />
       </div>
 
       {/* タグ */}
