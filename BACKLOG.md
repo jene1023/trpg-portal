@@ -994,7 +994,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/scoreboard/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者一覧取得後、各 `character_id` の `dice_rolls` を `Promise.all` で並行取得しサーバーサイドで集計（fumble数・critical_success数・成功率・総判定数）。ランキングはCSSのみのカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「スコアボード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
 **コミット:** `feat: dice roll scoreboard across scenario participants`
 
-## [TODO] セッション録画埋め込みビューア — 優先度: 低
+## [DONE] セッション録画埋め込みビューア — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** `sessions` テーブルの `recording_url`（YouTube/ニコニコ動画）が入力されたセッションログに対して、セッション詳細ページで iframe 埋め込みプレイヤーとして録画を視聴できる機能。現在フィールドは存在するが参照UIが未実装。
 **実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("*").eq("id", sessionId).single()` でログ取得。YouTube URL（`youtube.com/watch?v=` または `youtu.be/`）から動画IDを抽出し `https://www.youtube.com/embed/{videoId}` に変換してiframe表示。ニコニコ動画URL（`nicovideo.jp/watch/`）は `https://embed.nicovideo.jp/watch/{smId}` に変換。recording_url が null の場合はセッション情報のみ表示。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「録画を見る」リンクを追加（recording_url が non-null の場合のみ）。追加DBなし。
