@@ -32,7 +32,7 @@ export default function TagSelector({ entityType, entityId }: Props) {
         supabase.from("tags").select("*").order("name"),
       ]);
       if (entityTagsData) {
-        const fetched = (entityTagsData as EntityTagRow[])
+        const fetched = (entityTagsData as unknown as EntityTagRow[])
           .map((r) => r.tags)
           .filter((t): t is Tag => t !== null);
         setTags(fetched);

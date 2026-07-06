@@ -47,7 +47,7 @@ export default function CharactersPage() {
       if (charsData) setCharacters(charsData as CharacterWithSkills[]);
       if (entityTagsData) {
         const map: Record<string, Tag[]> = {};
-        for (const row of entityTagsData as EntityTagRow[]) {
+        for (const row of entityTagsData as unknown as EntityTagRow[]) {
           if (!row.tags) continue;
           if (!map[row.entity_id]) map[row.entity_id] = [];
           map[row.entity_id].push(row.tags);

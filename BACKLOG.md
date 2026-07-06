@@ -930,7 +930,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/npcs/page.tsx` を新規作成（Server Component + "use client" 追加フォーム）。`supabase.from("scenarios").select("title").eq("id", id)` でシナリオ名取得後、`supabase.from("npcs").select("*").eq("scenario_name", scenario.title).order("created_at")` でNPC一覧取得。各NPCカードには `/npcs/[npc_id]` への詳細リンクと削除ボタンを配置。新規NPC追加フォームは `NpcForm.tsx` を流用し `scenario_name` を自動セット。`src/app/scenarios/[id]/page.tsx`（シナリオ詳細ダッシュボード）に「NPC管理」カードリンクを追加。追加DBなし。
 **コミット:** `feat: scenario-scoped NPC management page`
 
-## [TODO] シナリオ参加者能力値バランスビュー — 優先度: 高
+## [DONE] シナリオ参加者能力値バランスビュー — 優先度: 高
 **対象:** KP
 **概要:** シナリオに参加する全キャラクターの主要能力値（STR・DEX・INT・EDU・SAN・HP）を横並び比較できるKP向けページ。現在のパーティービュー（`/party`）はHP/MP/SANの現在値表示のみで、セッション前の編成確認・戦闘難易度調整には能力値比較が不可欠。
 **実装ヒント:** `src/app/scenarios/[id]/party-balance/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値（str/con/pow/dex/int_stat/edu）をテーブル形式で横並び表示し、最大値の列をハイライト。CSSバーで全体の中での位置を視覚化（`width: calc(${val/21*100}%)`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値バランス」リンクを追加。追加DBなし。
