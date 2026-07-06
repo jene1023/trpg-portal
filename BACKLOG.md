@@ -999,3 +999,27 @@
 **概要:** `sessions` テーブルの `recording_url`（YouTube/ニコニコ動画）が入力されたセッションログに対して、セッション詳細ページで iframe 埋め込みプレイヤーとして録画を視聴できる機能。現在フィールドは存在するが参照UIが未実装。
 **実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("*").eq("id", sessionId).single()` でログ取得。YouTube URL（`youtube.com/watch?v=` または `youtu.be/`）から動画IDを抽出し `https://www.youtube.com/embed/{videoId}` に変換してiframe表示。ニコニコ動画URL（`nicovideo.jp/watch/`）は `https://embed.nicovideo.jp/watch/{smId}` に変換。recording_url が null の場合はセッション情報のみ表示。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「録画を見る」リンクを追加（recording_url が non-null の場合のみ）。追加DBなし。
 **コミット:** `feat: session recording embedded viewer for YouTube and Niconico`
+
+## [TODO] 困難/極限判定閾値インジケーター（技能リスト拡張） — 優先度: 高
+**対象:** PL / 共通
+**概要:** CoC7版の困難成功（技能値÷2）・極限成功（技能値÷5）の閾値を技能リストの各行にサブテキストで表示するトグルを追加する。KPから「困難成功で...」と指定されたとき、PLが即座に自分のターゲット値を把握できるようにする。
+**実装ヒント:** `src/app/_components/SkillList.tsx` に「閾値表示」トグルボタン（useState で `showThresholds: boolean` を管理）を追加。`showThresholds` が true のとき、各技能行に `困難: ${Math.floor(skill.current_value / 2)}` / `極限: ${Math.floor(skill.current_value / 5)}` をグレーのサブテキストで表示。DiceRoller（`src/app/_components/DiceRoller.tsx`）でも技能選択後に選択技能の3段階閾値（通常/困難/極限）をインフォバーとして表示するとより便利。追加DBなし。
+**コミット:** `feat: show hard/extreme success thresholds in skill list`
+
+## [TODO] セッション参加者出欠確認管理 — 優先度: 高
+**対象:** KP / 共通
+**概要:** シナリオ参加者（`scenario_participants`）に出欠フラグ（確認済み/未確認/欠席）を追加し、KPが次回セッション前に参加確認漏れを防げるようにする。現在は参加者の登録のみで出欠状況の管理ができない。
+**実装ヒント:** `scenario_participants` テーブルに `attendance_status: text NOT NULL DEFAULT 'pending'` カラムを追加（ALTER TABLE、値は `"pending"|"confirmed"|"absent"`）。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `attendance_status: "pending" | "confirmed" | "absent"` を追加。`src/app/scenarios/[id]/party/page.tsx`（パーティービュー）内の `PartyStatAdjuster.tsx` または新規 `AttendanceToggle.tsx` コンポーネントで3択ボタンを追加し `supabase.from("scenario_participants").update({attendance_status}).eq("id", p.id)` で更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「⚠ 未確認あり」バナーを表示（`pending` 人数 > 0 のとき）。KP準備確認（`src/app/scenarios/[id]/kp-preflight/page.tsx`）にも出欠サマリーを追記。
+**コミット:** `feat: session attendance status tracking for scenario participants`
+
+## [TODO] 卓内ダイスロールリアルタイムフィード（Supabase Realtime） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** Supabase Realtimeを使い、シナリオ参加キャラクターのダイスロール（`dice_rolls`テーブル）をセッション中に全員がリアルタイム確認できるフィードページ。誰が何の技能を振り何が出たかをリアルタイムで共有し、オンセの臨場感を高める。
+**実装ヒント:** `src/app/scenarios/[id]/dice-feed/page.tsx` を "use client" で新規作成。参加者の `character_id` 一覧を `scenario_participants` から取得後、`supabase.channel('dice-feed-${scenarioId}').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dice_rolls', filter: \`character_id=in.(${ids.join(',')})\` }, payload => setRolls(prev => [payload.new, ...prev].slice(0, 50)))` でリアルタイム購読（useEffect でサブスクライブ、アンマウントで `supabase.removeChannel`）。各ロールは「キャラ名・技能名・ロール値・成功度バッジ」のカードで表示（成功度別に色分け）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ダイスフィード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
+**コミット:** `feat: realtime dice roll feed for scenario participants via Supabase`
+
+## [TODO] PLフィードバック収集フォーム（セッション後アンケート） — 優先度: 中
+**対象:** KP / 共通
+**概要:** セッション後にPLがKPへ感想・評価（楽しさ1〜5・印象的な場面・改善提案）を匿名で送れる公開フォーム。既存のKP自己評価（`session_reviews`、DONE済み）を補完し、PLの率直なフィードバックをKPが受け取れるようにする。
+**実装ヒント:** Supabaseに `player_feedback` テーブルを追加（id, scenario_id, session_label, player_name, fun_score: smallint, highlight, improvement, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成（認証不要・公開アクセス可）。フォームはシンプルな1ページ構成（fun_score の星評価UI・highlight と improvement のtextarea）。KPのシナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）には受信済みフィードバック件数バッジと閲覧リンクを追加。`src/app/scenarios/[id]/feedback/results/page.tsx` を新規作成し、KPが全フィードバックを一覧確認できるページを実装（認証済みユーザーのみ表示）。`src/lib/supabase.ts` に `PlayerFeedback` 型を追加。
+**コミット:** `feat: player feedback form for post-session KP improvement`
