@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -8,6 +9,12 @@ export const isSupabaseConfigured = url.startsWith("http");
 export const supabase: SupabaseClient = isSupabaseConfigured
   ? createClient(url, key)
   : (null as unknown as SupabaseClient);
+
+// Auth-aware browser client (uses cookies for session sharing with server)
+export function createSupabaseBrowserClient() {
+  if (!isSupabaseConfigured) return null as unknown as ReturnType<typeof createBrowserClient>;
+  return createBrowserClient(url, key);
+}
 
 export type CharacterStatus = "alive" | "dead" | "insane" | "retired";
 

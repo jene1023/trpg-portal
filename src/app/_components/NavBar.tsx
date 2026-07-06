@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, Search, X, LogOut, User } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
 
 const navLinks = [
   { href: "/characters", label: "キャラクター" },
@@ -26,6 +28,15 @@ export default function NavBar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
+
+  async function handleLogout() {
+    if (!isSupabaseConfigured) return;
+    const client = createSupabaseBrowserClient();
+    await client.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -81,6 +92,30 @@ export default function NavBar() {
               />
             </form>
           </li>
+          <li>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-xs text-coc-muted">
+                  <User size={12} />
+                  {user.email?.split("@")[0]}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  title="ログアウト"
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-coc-muted hover:text-red-400 transition-colors"
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg border border-coc-border px-3 py-1.5 text-xs text-coc-muted hover:text-coc-gold hover:border-coc-gold transition-colors"
+              >
+                ログイン
+              </Link>
+            )}
+          </li>
         </ul>
 
         {/* モバイルハンバーガー */}
@@ -126,6 +161,31 @@ export default function NavBar() {
                 </li>
               );
             })}
+            <li className="border-t border-coc-border pt-3 mt-1">
+              {user ? (
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-sm text-coc-muted">
+                    <User size={14} />
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={() => { setOpen(false); handleLogout(); }}
+                    className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    <LogOut size={14} />
+                    ログアウト
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block text-sm font-medium text-coc-gold hover:text-amber-400 transition-colors"
+                >
+                  ログイン / 新規登録
+                </Link>
+              )}
+            </li>
           </ul>
         </div>
       )}

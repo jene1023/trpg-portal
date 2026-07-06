@@ -1030,7 +1030,7 @@
 **実装ヒント:** `src/app/c/[slug]/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), character_traits(*), character_spells(*)").eq("public_slug", slug).eq("is_public", true).single()` でデータ取得（未設定または `is_public=false` の場合は 404）。キャラ詳細の読み取り専用ビュー（編集UI非表示）を実装。`<head>` に `og:title` / `og:description` の OGP メタタグを追加しSNSプレビューを最適化。`src/app/_components/PublicShareToggle.tsx`（既存）から生成するURLをこのルートに変更。追加DBなし。
 **コミット:** `feat: public character profile page at /c/[slug] with OGP support`
 
-## [TODO] ユーザー認証・個人データ分離（Supabase Auth + RLS） — 優先度: 高
+## [DONE] ユーザー認証・個人データ分離（Supabase Auth + RLS） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** Supabase Auth のメール認証を実装し、PLは自分のキャラのみ・KPは自分のシナリオのみ管理できるよう Row Level Security でデータを分離する。現在は認証なしで全データが共有状態にあり、プライバシー・セキュリティ上の根本課題。
 **実装ヒント:** `src/middleware.ts` を新規作成し未認証ユーザーを `/login` へリダイレクト。`src/app/login/page.tsx` を "use client" で実装（`supabase.auth.signInWithPassword` + `signUp`）。`src/app/_components/AuthProvider.tsx` を Context として作成しセッション状態を全体で共有。`characters`・`scenarios`・`npcs`・`handouts` 等の主要テーブルに `user_id uuid REFERENCES auth.users DEFAULT auth.uid()` を追加し `CREATE POLICY` で `auth.uid() = user_id` を設定。`src/app/_components/NavBar.tsx` にユーザーメニュー（表示名・ログアウト）を追加。`src/lib/supabase.ts` のクライアントを `@supabase/ssr` の `createBrowserClient` / `createServerClient` に移行。

@@ -3,6 +3,7 @@ import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import NavBar from "./_components/NavBar";
 import ServiceWorkerRegistrar from "./_components/ServiceWorkerRegistrar";
+import AuthProvider from "./_components/AuthProvider";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -43,9 +44,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
       <body className="min-h-full flex flex-col bg-coc-bg text-coc-text">
-        <ServiceWorkerRegistrar />
-        <NavBar />
-        <main className="flex-1">{children}</main>
+        <AuthProvider>
+          <ServiceWorkerRegistrar />
+          <NavBar />
+          <main className="flex-1">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

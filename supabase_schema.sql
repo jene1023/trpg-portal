@@ -318,3 +318,49 @@ alter table scenarios add column if not exists content_tags text[];
 -- セッション前日リマインド通知 (追加マイグレーション)
 alter table scenarios add column if not exists remind_enabled boolean default false;
 alter table scenarios add column if not exists remind_email text;
+
+-- ユーザー認証・個人データ分離 (Supabase Auth + RLS マイグレーション)
+-- 注意: このマイグレーションを適用するには Supabase Auth が有効化されている必要があります。
+--       Supabase ダッシュボードの Authentication > Settings でメール認証を有効にしてから実行してください。
+
+-- 主要テーブルに user_id を追加
+alter table characters add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table scenarios  add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table npcs       add column if not exists user_id uuid references auth.users(id) on delete cascade;
+alter table handouts   add column if not exists user_id uuid references auth.users(id) on delete cascade;
+
+-- 既存レコードへのデフォルト user_id 設定（移行時用: 実際の運用では設定不要）
+-- update characters set user_id = auth.uid() where user_id is null;
+
+-- characters テーブルの RLS ポリシー更新
+drop policy if exists "allow all for anon" on characters;
+-- 認証済みユーザーは自分のキャラクターのみ操作可能
+create policy "users can manage own characters" on characters
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- 公開キャラクターは誰でも参照可能
+create policy "public characters are readable" on characters
+  for select using (is_public = true);
+
+-- scenarios テーブルの RLS ポリシー更新
+drop policy if exists "allow all for anon" on scenarios;
+create policy "users can manage own scenarios" on scenarios
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- npcs テーブルの RLS ポリシー更新
+drop policy if exists "allow all for anon" on npcs;
+create policy "users can manage own npcs" on npcs
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- handouts テーブルの RLS ポリシー更新
+drop policy if exists "allow all for anon" on handouts;
+create policy "users can manage own handouts" on handouts
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- share_tokens は誰でも参照可能（共有URL用）
+-- 既存ポリシーを維持
+
+-- INSERT 時に user_id を自動設定するデフォルト
+alter table characters alter column user_id set default auth.uid();
+alter table scenarios  alter column user_id set default auth.uid();
+alter table npcs       alter column user_id set default auth.uid();
+alter table handouts   alter column user_id set default auth.uid();
