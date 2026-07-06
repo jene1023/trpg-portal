@@ -43,10 +43,13 @@
 body {
   background-color: var(--color-coc-bg);
   /* 燭台からの環境光 + 四隅へ溶けていくビネット（古いレンズ越しに覗く効果） */
+  /* + 羊皮紙グレイン: 古文書の紙肌を模した極細 fractalNoise ノイズ */
   background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.70' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 78% 82% at 50% 50%, transparent 50%, rgba(7, 5, 3, 0.72) 100%),
     radial-gradient(ellipse 160% 90% at 50% -15%, #201508 0%, transparent 58%);
   background-attachment: fixed;
+  background-size: 200px 200px, auto, auto;
   color: var(--color-coc-text);
 }
 
@@ -215,8 +218,10 @@ body {
 }
 
 /* 燭台光カード背景: 左上から暖かい環境光が差し込む奥行き表現 */
+/* + 羊皮紙グレイン: カード面に高周波ノイズを重ね、磨かれた古文書の質感を与える */
 .coc-card-bg {
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.042'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 90% 55% at 12% 0%, rgba(201, 133, 58, 0.045) 0%, transparent 60%),
     linear-gradient(
       145deg,
