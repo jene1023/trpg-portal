@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Trash2 } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2 } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -201,6 +201,17 @@ export default function CampaignDetailPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* 統計リンク */}
+      <div className="mb-6">
+        <Link
+          href={`/campaigns/${campaignId}/stats`}
+          className="flex items-center gap-2 w-fit rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <BarChart2 size={15} />
+          統計を見る
+        </Link>
+      </div>
 
       {/* シナリオ一覧 */}
       <div className="mb-4">

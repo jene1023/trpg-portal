@@ -936,7 +936,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party-balance/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値（str/con/pow/dex/int_stat/edu）をテーブル形式で横並び表示し、最大値の列をハイライト。CSSバーで全体の中での位置を視覚化（`width: calc(${val/21*100}%)`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値バランス」リンクを追加。追加DBなし。
 **コミット:** `feat: party ability score balance view for KP pre-session prep`
 
-## [TODO] キャンペーン統計ダッシュボード — 優先度: 中
+## [DONE] キャンペーン統計ダッシュボード — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーンに紐づく全シナリオを横断した実績集計（参加シナリオ数・完了数・のべ参加者数・累計SAN損失・累計HP損失・死亡/引退キャラ数）をカード＋棒グラフで表示するダッシュボード。現在 `/campaigns/[id]/page.tsx` はシナリオ一覧のみで数値集計がない。
 **実装ヒント:** `src/app/campaigns/[id]/stats/page.tsx` を新規作成（Server Component）。`supabase.from("campaign_scenarios").select("scenario_id").eq("campaign_id", id)` でシナリオID一覧取得後、`Promise.all` で `scenarios`（status別カウント）・`scenario_participants`（のべ参加者数）・`sessions`（san_loss/hp_lossの合計）・`characters`（dead/retiredのカウント）を並行取得しサーバーサイドで集計。CSSのみのバーグラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。`src/app/campaigns/[id]/page.tsx` に「統計」リンクを追加。追加DBなし（`campaign_scenarios`は既存）。
