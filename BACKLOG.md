@@ -1023,3 +1023,21 @@
 **概要:** セッション後にPLがKPへ感想・評価（楽しさ1〜5・印象的な場面・改善提案）を匿名で送れる公開フォーム。既存のKP自己評価（`session_reviews`、DONE済み）を補完し、PLの率直なフィードバックをKPが受け取れるようにする。
 **実装ヒント:** Supabaseに `player_feedback` テーブルを追加（id, scenario_id, session_label, player_name, fun_score: smallint, highlight, improvement, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成（認証不要・公開アクセス可）。フォームはシンプルな1ページ構成（fun_score の星評価UI・highlight と improvement のtextarea）。KPのシナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）には受信済みフィードバック件数バッジと閲覧リンクを追加。`src/app/scenarios/[id]/feedback/results/page.tsx` を新規作成し、KPが全フィードバックを一覧確認できるページを実装（認証済みユーザーのみ表示）。`src/lib/supabase.ts` に `PlayerFeedback` 型を追加。
 **コミット:** `feat: player feedback form for post-session KP improvement`
+
+## [TODO] 公開探索者プロフィールページ（/c/[slug]） — 優先度: 中
+**対象:** PL / 共通
+**概要:** `is_public=true` + `public_slug` 設定済みキャラクターをURLで誰でも閲覧できる専用ページ。SNSのプロフィールリンクやセッション募集時の自己紹介リンクとして使える。現在フィールドは存在するが閲覧ルートが未実装。
+**実装ヒント:** `src/app/c/[slug]/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), character_traits(*), character_spells(*)").eq("public_slug", slug).eq("is_public", true).single()` でデータ取得（未設定または `is_public=false` の場合は 404）。キャラ詳細の読み取り専用ビュー（編集UI非表示）を実装。`<head>` に `og:title` / `og:description` の OGP メタタグを追加しSNSプレビューを最適化。`src/app/_components/PublicShareToggle.tsx`（既存）から生成するURLをこのルートに変更。追加DBなし。
+**コミット:** `feat: public character profile page at /c/[slug] with OGP support`
+
+## [TODO] ユーザー認証・個人データ分離（Supabase Auth + RLS） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** Supabase Auth のメール認証を実装し、PLは自分のキャラのみ・KPは自分のシナリオのみ管理できるよう Row Level Security でデータを分離する。現在は認証なしで全データが共有状態にあり、プライバシー・セキュリティ上の根本課題。
+**実装ヒント:** `src/middleware.ts` を新規作成し未認証ユーザーを `/login` へリダイレクト。`src/app/login/page.tsx` を "use client" で実装（`supabase.auth.signInWithPassword` + `signUp`）。`src/app/_components/AuthProvider.tsx` を Context として作成しセッション状態を全体で共有。`characters`・`scenarios`・`npcs`・`handouts` 等の主要テーブルに `user_id uuid REFERENCES auth.users DEFAULT auth.uid()` を追加し `CREATE POLICY` で `auth.uid() = user_id` を設定。`src/app/_components/NavBar.tsx` にユーザーメニュー（表示名・ログアウト）を追加。`src/lib/supabase.ts` のクライアントを `@supabase/ssr` の `createBrowserClient` / `createServerClient` に移行。
+**コミット:** `feat: Supabase Auth with email login and per-user data isolation via RLS`
+
+## [TODO] キャラクター月次活動サマリーレポート — 優先度: 中
+**対象:** PL / 共通
+**概要:** 月単位でプレイしたセッション数・SAN喪失合計・成長した技能数・参加シナリオを集計した「月次レポート」ページ。過去の活動量を振り返りモチベーション向上に活用できる。
+**実装ヒント:** `src/app/characters/[id]/monthly-report/page.tsx` を新規作成（Server Component）。クエリパラメータ `?month=YYYY-MM` で対象月を指定（未指定時は当月）。`supabase.from("sessions").select("*").eq("character_id", id).gte("played_at", monthStart).lt("played_at", monthEnd)` でセッション取得し san_loss / hp_loss 合計・セッション数を集計。`supabase.from("growth_history").select("*").eq("character_id", id).gte("created_at", monthStart).lt("created_at", monthEnd)` から成長記録件数も取得。グラフはCSSのみのバー表示（既存 `stats-graph` と同方式）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「月次レポート」リンクを追加。追加DBなし。
+**コミット:** `feat: monthly activity summary report per character`
