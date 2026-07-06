@@ -975,3 +975,27 @@
 **リサーチ根拠:** オフラインセッション向けのPDF出力需要（DONE済み）と並行して、スマートフォン間のURL共有をQRコード化することがコンベンション参加者に有効という声が国内TRPGコミュニティブログで確認された。ここフォリアのQRコマシェア機能も類似ニーズを示している。
 **実装ヒント:** `src/app/_components/QrCodeShare.tsx` を "use client" で新規作成。`qrcode` npm パッケージ（軽量・ゼロ依存）でCanvas/SVGにQRコードを描画し、モーダルで表示。「PNGダウンロード」ボタンで `canvas.toBlob` → `URL.createObjectURL` でダウンロード。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の公開URLコピーボタン隣に「QR」ボタンとして追加（is_public が true のときのみ表示）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の共有リンク生成ボタン隣にも同様に追加。追加DBなし。
 **コミット:** `feat: QR code share for public character profile and handout URLs`
+
+## [TODO] ホームダッシュボード（アクティビティフィード） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** ポータルのトップページに「直近のセッションログ」「進行中シナリオの次回予定」「最近更新されたキャラクター」「アクティブな狂気状態キャラクターの警告」を一画面に集約したダッシュボードを実装する。現在のトップページはリンク集にとどまっており、開いた瞬間に状況を把握できない。
+**実装ヒント:** `src/app/page.tsx` を Server Component として拡張。`Promise.all` で `supabase.from("sessions").select("*, characters(name)").order("created_at",{ascending:false}).limit(5)`・`supabase.from("scenarios").select("*").eq("status","ongoing").not("next_session_at","is",null).order("next_session_at").limit(5)`・`supabase.from("characters").select("*").order("updated_at",{ascending:false}).limit(6)`・`supabase.from("madness_records").select("*, characters(name)").eq("is_active",true).limit(5)` を並行取得し、各セクションをカード形式で縦に配置。追加DBなし。
+**コミット:** `feat: home dashboard with activity feed and upcoming sessions`
+
+## [TODO] Discord Webhook 自動通知（セッションイベント連携） — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオに設定された `discord_webhook_url` へ、セッションログ追加・SAN5以上喪失・キャラクター死亡 のイベント発生時に自動でDiscord通知を送信する機能。現在はURLを保存するだけで実際の送信処理が未実装。
+**実装ヒント:** `src/lib/discordNotify.ts` を新規作成（`sendDiscordNotification(webhookUrl: string, content: string): Promise<void>` — `fetch` でDiscord Webhook エンドポイントにPOST）。`src/app/_components/SessionLogForm.tsx` のフォーム送信成功後に呼び出し（`san_loss >= 5` の場合は喪失警告メッセージ、それ以外はセッション記録通知）。`src/app/_components/CharacterForm.tsx` で status を `"dead"` に変更した際にも呼び出し。webhookUrlは `character → scenario_participants → scenarios` の連鎖取得、またはフォームに scenario_id を props 経由で渡して取得。追加DBなし（既存 `scenarios.discord_webhook_url` を利用）。
+**コミット:** `feat: auto Discord notification on session events via webhook`
+
+## [TODO] セッション参加者ダイスロールスコアボード — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** シナリオに参加した全キャラクターの `dice_rolls` を集計し「最多ファンブル」「最多クリティカル成功」「最高成功率」「総判定数」のランキングを表示するエンタメ統計ページ。セッション後の振り返り・盛り上がりに使える。
+**実装ヒント:** `src/app/scenarios/[id]/scoreboard/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者一覧取得後、各 `character_id` の `dice_rolls` を `Promise.all` で並行取得しサーバーサイドで集計（fumble数・critical_success数・成功率・総判定数）。ランキングはCSSのみのカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「スコアボード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
+**コミット:** `feat: dice roll scoreboard across scenario participants`
+
+## [TODO] セッション録画埋め込みビューア — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** `sessions` テーブルの `recording_url`（YouTube/ニコニコ動画）が入力されたセッションログに対して、セッション詳細ページで iframe 埋め込みプレイヤーとして録画を視聴できる機能。現在フィールドは存在するが参照UIが未実装。
+**実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("*").eq("id", sessionId).single()` でログ取得。YouTube URL（`youtube.com/watch?v=` または `youtu.be/`）から動画IDを抽出し `https://www.youtube.com/embed/{videoId}` に変換してiframe表示。ニコニコ動画URL（`nicovideo.jp/watch/`）は `https://embed.nicovideo.jp/watch/{smId}` に変換。recording_url が null の場合はセッション情報のみ表示。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「録画を見る」リンクを追加（recording_url が non-null の場合のみ）。追加DBなし。
+**コミット:** `feat: session recording embedded viewer for YouTube and Niconico`
