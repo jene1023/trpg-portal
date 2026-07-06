@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase, isSupabaseConfigured, SessionLog } from "@/lib/supabase";
-import { sendDiscordWebhook } from "@/lib/discordWebhook";
+import { sendDiscordNotification } from "@/lib/discordNotify";
 
 type Props = {
   characterId: string;
@@ -59,9 +59,12 @@ export default function SessionLogForm({ characterId, nextSessionNumber, onAdded
         if (form.san_loss > 0) losses.push(`SAN喪失: ${form.san_loss}`);
         if (form.hp_loss > 0) losses.push(`HP喪失: ${form.hp_loss}`);
         const lossText = losses.length > 0 ? `　${losses.join(" / ")}` : "";
-        await sendDiscordWebhook(
+        const isSanCritical = form.san_loss >= 5;
+        const icon = isSanCritical ? "⚠️" : "📖";
+        const prefix = isSanCritical ? "【SAN大量喪失】" : "";
+        await sendDiscordNotification(
           discordWebhookUrl,
-          `📖 ${label} セッション#${form.session_number}「${form.title}」を記録しました${lossText}`
+          `${icon} ${prefix}${label} セッション#${form.session_number}「${form.title}」を記録しました${lossText}`
         );
       }
       onAdded(data as SessionLog);

@@ -982,7 +982,7 @@
 **実装ヒント:** `src/app/page.tsx` を Server Component として拡張。`Promise.all` で `supabase.from("sessions").select("*, characters(name)").order("created_at",{ascending:false}).limit(5)`・`supabase.from("scenarios").select("*").eq("status","ongoing").not("next_session_at","is",null).order("next_session_at").limit(5)`・`supabase.from("characters").select("*").order("updated_at",{ascending:false}).limit(6)`・`supabase.from("madness_records").select("*, characters(name)").eq("is_active",true).limit(5)` を並行取得し、各セクションをカード形式で縦に配置。追加DBなし。
 **コミット:** `feat: home dashboard with activity feed and upcoming sessions`
 
-## [TODO] Discord Webhook 自動通知（セッションイベント連携） — 優先度: 中
+## [DONE] Discord Webhook 自動通知（セッションイベント連携） — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに設定された `discord_webhook_url` へ、セッションログ追加・SAN5以上喪失・キャラクター死亡 のイベント発生時に自動でDiscord通知を送信する機能。現在はURLを保存するだけで実際の送信処理が未実装。
 **実装ヒント:** `src/lib/discordNotify.ts` を新規作成（`sendDiscordNotification(webhookUrl: string, content: string): Promise<void>` — `fetch` でDiscord Webhook エンドポイントにPOST）。`src/app/_components/SessionLogForm.tsx` のフォーム送信成功後に呼び出し（`san_loss >= 5` の場合は喪失警告メッセージ、それ以外はセッション記録通知）。`src/app/_components/CharacterForm.tsx` で status を `"dead"` に変更した際にも呼び出し。webhookUrlは `character → scenario_participants → scenarios` の連鎖取得、またはフォームに scenario_id を props 経由で渡して取得。追加DBなし（既存 `scenarios.discord_webhook_url` を利用）。

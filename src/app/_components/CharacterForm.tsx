@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Trash2, Plus, Upload, Dices, Download } from "lucide-react";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, SkillTemplate } from "@/lib/supabase";
+import { sendDiscordNotification } from "@/lib/discordNotify";
 import { generateRandomName, NameEra } from "@/lib/nameData";
 import {
   calcHpMax,
@@ -313,6 +314,22 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
           }))
         );
         if (skillErr) throw skillErr;
+      }
+
+      // キャラクター死亡時にDiscord通知
+      if (isEdit && initialData?.status !== "dead" && status === "dead" && scenarioName.trim()) {
+        const { data: scenarioData } = await supabase
+          .from("scenarios")
+          .select("discord_webhook_url")
+          .eq("title", scenarioName.trim())
+          .maybeSingle();
+        if (scenarioData?.discord_webhook_url) {
+          const label = name.trim() ? `**${name.trim()}**` : "探索者";
+          await sendDiscordNotification(
+            scenarioData.discord_webhook_url,
+            `💀 ${label} が死亡しました。`
+          );
+        }
       }
 
       router.push(`/characters/${charId}`);
