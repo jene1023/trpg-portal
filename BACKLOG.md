@@ -1018,7 +1018,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/dice-feed/page.tsx` を "use client" で新規作成。参加者の `character_id` 一覧を `scenario_participants` から取得後、`supabase.channel('dice-feed-${scenarioId}').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dice_rolls', filter: \`character_id=in.(${ids.join(',')})\` }, payload => setRolls(prev => [payload.new, ...prev].slice(0, 50)))` でリアルタイム購読（useEffect でサブスクライブ、アンマウントで `supabase.removeChannel`）。各ロールは「キャラ名・技能名・ロール値・成功度バッジ」のカードで表示（成功度別に色分け）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ダイスフィード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
 **コミット:** `feat: realtime dice roll feed for scenario participants via Supabase`
 
-## [TODO] PLフィードバック収集フォーム（セッション後アンケート） — 優先度: 中
+## [DONE] PLフィードバック収集フォーム（セッション後アンケート） — 優先度: 中
 **対象:** KP / 共通
 **概要:** セッション後にPLがKPへ感想・評価（楽しさ1〜5・印象的な場面・改善提案）を匿名で送れる公開フォーム。既存のKP自己評価（`session_reviews`、DONE済み）を補完し、PLの率直なフィードバックをKPが受け取れるようにする。
 **実装ヒント:** Supabaseに `player_feedback` テーブルを追加（id, scenario_id, session_label, player_name, fun_score: smallint, highlight, improvement, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成（認証不要・公開アクセス可）。フォームはシンプルな1ページ構成（fun_score の星評価UI・highlight と improvement のtextarea）。KPのシナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）には受信済みフィードバック件数バッジと閲覧リンクを追加。`src/app/scenarios/[id]/feedback/results/page.tsx` を新規作成し、KPが全フィードバックを一覧確認できるページを実装（認証済みユーザーのみ表示）。`src/lib/supabase.ts` に `PlayerFeedback` 型を追加。

@@ -757,3 +757,14 @@ export type SessionReview = {
   reviewed_at: string | null;
   created_at: string;
 };
+
+export type PlayerFeedback = {
+  id: string;
+  scenario_id: string;
+  session_label: string | null;
+  player_name: string;
+  fun_score: number;
+  highlight: string | null;
+  improvement: string | null;
+  created_at: string;
+};
