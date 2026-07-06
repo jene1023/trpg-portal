@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus } from "@/lib/supabase";
 import PartyMemberCard from "@/app/_components/PartyMemberCard";
 import PartySanCheck from "@/app/_components/PartySanCheck";
@@ -22,7 +22,7 @@ export default async function PartyViewPage({ params }: Props) {
 
   const { data: scenario } = await supabase
     .from("scenarios")
-    .select("id, title")
+    .select("id, title, game_current_date, game_current_time")
     .eq("id", id)
     .single();
 
@@ -64,6 +64,14 @@ export default async function PartyViewPage({ params }: Props) {
         <p className="text-xs text-coc-muted mb-1">{scenario.title}</p>
         <h1 className="font-cinzel text-xl font-bold text-coc-text">パーティービュー</h1>
         <p className="text-xs text-coc-muted mt-1">参加者全員のHP / MP / SANを一覧確認</p>
+        {(scenario.game_current_date || scenario.game_current_time) && (
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-coc-border bg-coc-surface px-3 py-1 text-xs text-coc-muted">
+            <Clock size={12} />
+            <span>
+              {[scenario.game_current_date, scenario.game_current_time].filter(Boolean).join(" ")}
+            </span>
+          </div>
+        )}
       </div>
 
       {xCardEnabled && (

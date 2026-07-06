@@ -173,6 +173,8 @@ export type Scenario = {
   content_tags: string[] | null;
   remind_enabled: boolean;
   remind_email: string | null;
+  game_current_date: string | null;
+  game_current_time: string | null;
   created_at: string;
 };
 

@@ -13,6 +13,7 @@ import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
 import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
+import GameClockEditor from "@/app/_components/GameClockEditor";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -156,6 +157,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
             })}
           </div>
         )}
+        <div className="mt-3">
+          <GameClockEditor
+            scenarioId={id}
+            initialDate={scenario.game_current_date ?? null}
+            initialTime={scenario.game_current_time ?? null}
+          />
+        </div>
+
         {scenario.vtt_url && (
           <div className="mt-3">
             <a

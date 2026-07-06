@@ -1048,7 +1048,7 @@
 **実装ヒント:** Supabaseに `scenario_safety_settings` テーブルを追加（id, scenario_id: uuid UNIQUE, x_card_enabled: boolean DEFAULT true, lines: text | null（絶対NGの事項・箇条書き）, veils: text | null（フェードアウト可の事項）, session_zero_notes: text | null, updated_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成（`supabase.from("scenario_safety_settings").upsert(...)` でシナリオ1件につき1レコード管理）。X-Card有効時はパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に目立つ「X（中断）」ボタンを追加し、クリック時に赤背景フラッシュと「シーンを一時中断します」テキストを全画面表示（Supabase Realtime の broadcast でシナリオ参加者全員に通知）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「安全設定」リンクと設定済みバッジを追加。`src/lib/supabase.ts` に `ScenarioSafetySettings` 型を追加。
 **コミット:** `feat: TRPG safety tools with X-Card and Lines/Veils for session safety`
 
-## [TODO] シナリオ内ゲーム内時刻管理（イン・ゲーム・クロック） — 優先度: 中
+## [DONE] シナリオ内ゲーム内時刻管理（イン・ゲーム・クロック） — 優先度: 中
 **対象:** KP / 共通
 **概要:** CoCシナリオ内の「架空の日付・時刻」（例: 1923年10月13日 午後3時）をKPが設定・進行させ、パーティービューや共有メモに表示できる機能。現実世界の `played_at` とは別に、シナリオ内の時間経過を追跡する。1920年代設定の没入感を高め、「夜になった」「3日が経過した」などの時間進行をKPが1クリックで共有できる。
 **実装ヒント:** `scenarios` テーブルに `game_current_date: text | null`（例: "1923-10-13"）と `game_current_time: text | null`（例: "15:00"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/GameClockEditor.tsx` を "use client" で新規作成（date/time input + 「更新」ボタン → `supabase.from("scenarios").update({ game_current_date, game_current_time })`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「ゲーム内時刻：[日付] [時刻]」を表示し、KPはクリックで `GameClockEditor` を展開して更新。パーティービュー（`src/app/scenarios/[id]/party/page.tsx`）にも同情報をバッジ表示（Supabase Realtimeで他クライアントにも即時反映）。追加DBカラムのみ（新テーブルなし）。
