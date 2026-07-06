@@ -918,7 +918,7 @@
 **実装ヒント:** `src/app/scenarios/stats/page.tsx` を新規作成（Server Component）。`Promise.all` で以下を並行取得: `supabase.from("scenarios").select("id, status, played_at")`、`supabase.from("scenario_participants").select("id, scenario_id")`、`supabase.from("sessions").select("san_loss, hp_loss")`、`supabase.from("characters").select("id, status").in("status", ["dead", "retired"])`。取得データをサーバー側でステータス別・月別に集計しカード表示（追加DBなし）。グラフはCSSのみの棒グラフ（`width: calc(${pct}%)`）で依存ライブラリ不要。シナリオ一覧（`src/app/scenarios/page.tsx`）に「統計」リンクを追加。
 **コミット:** `feat: KP scenario statistics summary dashboard`
 
-## [TODO] 死亡・引退キャラクター追悼ホール — 優先度: 低
+## [DONE] 死亡・引退キャラクター追悼ホール — 優先度: 低
 **対象:** PL / 共通
 **概要:** ステータスが "dead" または "retired" のキャラクターを専用の追悼ページで一覧表示し、`farewell_scene`・`farewell_message` を含む追悼カードとして並べる機能。個別の farewell ページ（`/characters/[id]/farewell`）は存在するが、全キャラを横断する「英雄の記念碑」ビューはない。
 **実装ヒント:** `src/app/characters/hall-of-fame/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*").in("status", ["dead", "retired"]).order("updated_at", {ascending: false})` で取得。各キャラをカード形式で表示（名前・職業・ステータスバッジ・`farewell_message` の先頭50文字プレビュー）。`farewell_scene` が入力済みのキャラは `<details>` 要素で展開可能にする。`src/app/characters/page.tsx`（キャラ一覧）フッターまたは `src/app/_components/NavBar.tsx` に「記念碑」リンクを追加。追加DBなし。
