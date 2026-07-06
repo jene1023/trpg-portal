@@ -3,9 +3,10 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, ScenarioParticipant } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus } from "@/lib/supabase";
 import PartyMemberCard from "@/app/_components/PartyMemberCard";
 import PartySanCheck from "@/app/_components/PartySanCheck";
+import AttendanceToggle from "@/app/_components/AttendanceToggle";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character;
@@ -34,6 +35,10 @@ export default async function PartyViewPage({ params }: Props) {
 
   const list = (participants ?? []) as ParticipantWithCharacter[];
 
+  const attendingCount = list.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length;
+  const absentCount = list.filter((p) => (p.attendance_status as AttendanceStatus) === "absent").length;
+  const unconfirmedCount = list.filter((p) => (p.attendance_status as AttendanceStatus) === "unconfirmed").length;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
@@ -52,6 +57,16 @@ export default async function PartyViewPage({ params }: Props) {
         <p className="text-xs text-coc-muted mt-1">参加者全員のHP / MP / SANを一覧確認</p>
       </div>
 
+      {list.length > 0 && (
+        <div className="mb-4 flex items-center gap-4 rounded-lg border border-coc-border bg-coc-surface px-4 py-2.5 text-sm">
+          <span className="text-green-400 font-semibold">参加 {attendingCount}名</span>
+          <span className="text-red-400 font-semibold">欠席 {absentCount}名</span>
+          {unconfirmedCount > 0 && (
+            <span className="text-yellow-400 font-semibold">未定 {unconfirmedCount}名</span>
+          )}
+        </div>
+      )}
+
       {list.length === 0 ? (
         <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-8 text-center">
           <p className="text-coc-muted text-sm">参加キャラクターが登録されていません。</p>
@@ -64,8 +79,16 @@ export default async function PartyViewPage({ params }: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {list.map(({ characters: char }) => (
-            <PartyMemberCard key={char.id} char={char} />
+          {list.map(({ id: participantId, attendance_status, characters: char }) => (
+            <div key={participantId} className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+              <PartyMemberCard char={char} />
+              <div className="mt-3 pt-3 border-t border-coc-border">
+                <AttendanceToggle
+                  participantId={participantId}
+                  initialStatus={(attendance_status as AttendanceStatus) ?? "unconfirmed"}
+                />
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -204,6 +204,21 @@ export default async function ScenarioDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {unconfirmedCount > 0 && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-yellow-800 bg-yellow-950/20 px-4 py-3">
+          <AlertTriangle size={15} className="text-yellow-400 flex-shrink-0" />
+          <p className="text-sm text-yellow-300">
+            出欠未確認の参加者が <span className="font-bold">{unconfirmedCount}名</span> います
+          </p>
+          <a
+            href={`/scenarios/${id}/participants`}
+            className="ml-auto text-xs text-yellow-400 hover:underline flex-shrink-0"
+          >
+            確認する →
+          </a>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
         <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-3 text-center">

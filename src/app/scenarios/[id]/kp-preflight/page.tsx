@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured, AttendanceStatus } from "@/lib/supabase";
 import HandoutDistributeToggle from "@/app/_components/HandoutDistributeToggle";
+import AttendanceToggle from "@/app/_components/AttendanceToggle";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -247,21 +248,10 @@ export default async function KpPreflightPage({ params }: Props) {
                       <span className="ml-1.5 text-xs text-coc-muted">({p.characters.player_name})</span>
                     )}
                   </Link>
-                  <span
-                    className={`text-xs font-semibold ${
-                      p.attendance_status === "attending"
-                        ? "text-green-400"
-                        : p.attendance_status === "absent"
-                        ? "text-red-400"
-                        : "text-yellow-400"
-                    }`}
-                  >
-                    {p.attendance_status === "attending"
-                      ? "参加"
-                      : p.attendance_status === "absent"
-                      ? "欠席"
-                      : "未定"}
-                  </span>
+                  <AttendanceToggle
+                    participantId={p.id}
+                    initialStatus={(p.attendance_status as AttendanceStatus) ?? "unconfirmed"}
+                  />
                 </li>
               ))}
             </ul>

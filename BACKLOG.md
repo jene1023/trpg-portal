@@ -1006,7 +1006,7 @@
 **実装ヒント:** `src/app/_components/SkillList.tsx` に「閾値表示」トグルボタン（useState で `showThresholds: boolean` を管理）を追加。`showThresholds` が true のとき、各技能行に `困難: ${Math.floor(skill.current_value / 2)}` / `極限: ${Math.floor(skill.current_value / 5)}` をグレーのサブテキストで表示。DiceRoller（`src/app/_components/DiceRoller.tsx`）でも技能選択後に選択技能の3段階閾値（通常/困難/極限）をインフォバーとして表示するとより便利。追加DBなし。
 **コミット:** `feat: show hard/extreme success thresholds in skill list`
 
-## [TODO] セッション参加者出欠確認管理 — 優先度: 高
+## [DONE] セッション参加者出欠確認管理 — 優先度: 高
 **対象:** KP / 共通
 **概要:** シナリオ参加者（`scenario_participants`）に出欠フラグ（確認済み/未確認/欠席）を追加し、KPが次回セッション前に参加確認漏れを防げるようにする。現在は参加者の登録のみで出欠状況の管理ができない。
 **実装ヒント:** `scenario_participants` テーブルに `attendance_status: text NOT NULL DEFAULT 'pending'` カラムを追加（ALTER TABLE、値は `"pending"|"confirmed"|"absent"`）。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `attendance_status: "pending" | "confirmed" | "absent"` を追加。`src/app/scenarios/[id]/party/page.tsx`（パーティービュー）内の `PartyStatAdjuster.tsx` または新規 `AttendanceToggle.tsx` コンポーネントで3択ボタンを追加し `supabase.from("scenario_participants").update({attendance_status}).eq("id", p.id)` で更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「⚠ 未確認あり」バナーを表示（`pending` 人数 > 0 のとき）。KP準備確認（`src/app/scenarios/[id]/kp-preflight/page.tsx`）にも出欠サマリーを追記。
