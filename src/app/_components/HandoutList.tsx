@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckSquare, Eye, EyeOff, Link as LinkIcon, Plus, Square, X } from "lucide-react";
 import { supabase, isSupabaseConfigured, Handout } from "@/lib/supabase";
+import QrCodeShare from "./QrCodeShare";
 
 type Props = {
   scenarioId: string;
@@ -251,6 +252,9 @@ export default function HandoutList({ scenarioId, initialHandouts }: Props) {
                     >
                       <LinkIcon size={15} />
                     </button>
+                    {shareUrls[h.id] && (
+                      <QrCodeShare url={shareUrls[h.id]} label={`handout-${h.id}`} />
+                    )}
                     <button
                       onClick={() => handleDelete(h.id)}
                       className="text-coc-faint hover:text-red-400 transition-colors"

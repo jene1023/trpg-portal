@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Globe, GlobeLock, Copy, Check } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import QrCodeShare from "./QrCodeShare";
 
 type Props = {
   characterId: string;
@@ -68,13 +69,16 @@ export default function PublicShareToggle({ characterId, isPublic: initialIsPubl
         {loading ? "処理中…" : isPublic ? "公開中" : "公開設定"}
       </button>
       {isPublic && publicUrl && (
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
-        >
-          {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-          {copied ? "コピー完了" : "URLをコピー"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+            {copied ? "コピー完了" : "URLをコピー"}
+          </button>
+          <QrCodeShare url={publicUrl} label="character-profile" />
+        </div>
       )}
     </div>
   );

@@ -969,7 +969,7 @@
 **実装ヒント:** `supabase/functions/session-reminder/index.ts` を新規作成（Deno Edge Function）。`supabase-js` でサービスロールキーを使い `scenarios` テーブルの `next_session_at` が翌日（`BETWEEN now()+23h AND now()+25h`）かつ `remind_enabled = true` のレコードを取得し、Resend API（または SMTP）でKPのメールアドレスへHTMLメールを送信。`scenarios` テーブルに `remind_enabled: boolean DEFAULT false`・`remind_email: text` カラムを追加（ALTER TABLE）。`src/app/scenarios/[id]/page.tsx` のシナリオ詳細に「リマインドメール設定」セクションを追加（`src/app/_components/ScenarioForm.tsx` に `remind_enabled` チェックボックス・`remind_email` 入力欄を追記）。Supabase Dashboard の pg_cron で毎日 JST 9:00 にEdge Functionを呼び出すCronジョブを設定。
 **コミット:** `feat: session reminder email via Supabase Edge Function`
 
-## [TODO] キャラクター/ハンドアウトQRコード出力 — 優先度: 低
+## [DONE] キャラクター/ハンドアウトQRコード出力 — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** 公開中のキャラクタープロフィールURL（`/p/[slug]`）やハンドアウト共有URL（`/share/[token]`）をQRコードとして画面表示・PNG保存できる機能。物理セッション・コンベンション参加時にスマートフォン同士でURLを瞬時に共有できる。
 **リサーチ根拠:** オフラインセッション向けのPDF出力需要（DONE済み）と並行して、スマートフォン間のURL共有をQRコード化することがコンベンション参加者に有効という声が国内TRPGコミュニティブログで確認された。ここフォリアのQRコマシェア機能も類似ニーズを示している。

@@ -66,7 +66,7 @@ export default async function CampaignStatsPage({ params }: Props) {
       ? supabase.from("scenarios").select("id, status").in("id", scenarioIds)
       : Promise.resolve({ data: [] }),
     scenarioIds.length > 0
-      ? supabase.from("scenario_participants").select("id, scenario_id").in("scenario_id", scenarioIds)
+      ? supabase.from("scenario_participants").select("id, scenario_id, character_id").in("scenario_id", scenarioIds)
       : Promise.resolve({ data: [] }),
     scenarioIds.length > 0
       ? (async () => {
