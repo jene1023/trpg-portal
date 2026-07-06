@@ -11,10 +11,15 @@ import {
   Calendar,
   Pin,
   Clock,
+  Brain,
+  BookMarked,
 } from "lucide-react";
-import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario, SessionLog, MadnessRecord } from "@/lib/supabase";
 import CharacterCard from "./_components/CharacterCard";
 import SectionDivider from "./_components/SectionDivider";
+
+type SessionWithCharacter = SessionLog & { characters: { name: string } | null };
+type MadnessWithCharacter = MadnessRecord & { characters: { name: string; id: string } | null };
 
 const tiles = [
   {
@@ -65,6 +70,8 @@ export default async function HomePage() {
   let recent: CharacterWithSkills[] | null = null;
   let pinned: CharacterWithSkills[] | null = null;
   let ongoingScenarios: Scenario[] | null = null;
+  let recentSessions: SessionWithCharacter[] | null = null;
+  let activeMadness: MadnessWithCharacter[] | null = null;
 
   const now = new Date();
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -72,12 +79,12 @@ export default async function HomePage() {
   const weekFromNowIso = weekFromNow.toISOString();
 
   if (isSupabaseConfigured) {
-    const [recentRes, pinnedRes, ongoingRes] = await Promise.all([
+    const [recentRes, pinnedRes, ongoingRes, sessionsRes, madnessRes] = await Promise.all([
       supabase
         .from("characters")
         .select("*, character_skills(*)")
         .order("updated_at", { ascending: false })
-        .limit(5),
+        .limit(6),
       supabase
         .from("characters")
         .select("*, character_skills(*)")
@@ -87,11 +94,25 @@ export default async function HomePage() {
         .from("scenarios")
         .select("*")
         .eq("status", "ongoing")
-        .order("next_session_at", { ascending: true }),
+        .not("next_session_at", "is", null)
+        .order("next_session_at", { ascending: true })
+        .limit(5),
+      supabase
+        .from("sessions")
+        .select("*, characters(name)")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("madness_records")
+        .select("*, characters(name, id)")
+        .eq("is_active", true)
+        .limit(5),
     ]);
     recent = recentRes.data as CharacterWithSkills[];
     pinned = pinnedRes.data as CharacterWithSkills[];
     ongoingScenarios = ongoingRes.data as Scenario[];
+    recentSessions = sessionsRes.data as SessionWithCharacter[];
+    activeMadness = madnessRes.data as MadnessWithCharacter[];
   }
 
   const configured = isSupabaseConfigured;
@@ -277,6 +298,80 @@ export default async function HomePage() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* 直近セッションログ */}
+      {recentSessions && recentSessions.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookMarked size={14} className="text-coc-gold" />
+              <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+                直近のセッションログ
+              </h2>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {recentSessions.map((session) => {
+              const date = session.created_at
+                ? new Date(session.created_at).toLocaleDateString("ja-JP", {
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "";
+              return (
+                <Link
+                  key={session.id}
+                  href={`/characters/${session.character_id}/sessions`}
+                  className="flex items-center justify-between rounded-lg border border-coc-border coc-card-bg px-4 py-3 hover:border-coc-border-glow transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-coc-text truncate">{session.title}</p>
+                    <p className="text-xs text-coc-muted mt-0.5">
+                      {session.characters?.name ?? "不明"} · {date}
+                      {session.san_loss > 0 && (
+                        <span className="ml-2 text-red-400">SAN -{session.san_loss}</span>
+                      )}
+                    </p>
+                  </div>
+                  <ChevronRight size={14} className="text-coc-faint flex-shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* アクティブ狂気状態 */}
+      {activeMadness && activeMadness.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Brain size={14} className="text-red-400" />
+            <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              アクティブな狂気状態
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {activeMadness.map((record) => (
+              <Link
+                key={record.id}
+                href={`/characters/${record.character_id}/madness`}
+                className="flex items-center justify-between rounded-lg border border-red-900/40 bg-red-950/20 px-4 py-3 hover:border-red-700/60 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-coc-text truncate">{record.symptom}</p>
+                  <p className="text-xs text-coc-muted mt-0.5">
+                    {record.characters?.name ?? "不明"} ·{" "}
+                    <span className={record.madness_type === "indefinite" ? "text-red-400" : "text-yellow-500"}>
+                      {record.madness_type === "indefinite" ? "不定の狂気" : "一時的狂気"}
+                    </span>
+                  </p>
+                </div>
+                <ChevronRight size={14} className="text-coc-faint flex-shrink-0" />
+              </Link>
+            ))}
           </div>
         </div>
       )}
