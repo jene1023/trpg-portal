@@ -1000,7 +1000,7 @@
 **実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("*").eq("id", sessionId).single()` でログ取得。YouTube URL（`youtube.com/watch?v=` または `youtu.be/`）から動画IDを抽出し `https://www.youtube.com/embed/{videoId}` に変換してiframe表示。ニコニコ動画URL（`nicovideo.jp/watch/`）は `https://embed.nicovideo.jp/watch/{smId}` に変換。recording_url が null の場合はセッション情報のみ表示。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「録画を見る」リンクを追加（recording_url が non-null の場合のみ）。追加DBなし。
 **コミット:** `feat: session recording embedded viewer for YouTube and Niconico`
 
-## [TODO] 困難/極限判定閾値インジケーター（技能リスト拡張） — 優先度: 高
+## [DONE] 困難/極限判定閾値インジケーター（技能リスト拡張） — 優先度: 高
 **対象:** PL / 共通
 **概要:** CoC7版の困難成功（技能値÷2）・極限成功（技能値÷5）の閾値を技能リストの各行にサブテキストで表示するトグルを追加する。KPから「困難成功で...」と指定されたとき、PLが即座に自分のターゲット値を把握できるようにする。
 **実装ヒント:** `src/app/_components/SkillList.tsx` に「閾値表示」トグルボタン（useState で `showThresholds: boolean` を管理）を追加。`showThresholds` が true のとき、各技能行に `困難: ${Math.floor(skill.current_value / 2)}` / `極限: ${Math.floor(skill.current_value / 5)}` をグレーのサブテキストで表示。DiceRoller（`src/app/_components/DiceRoller.tsx`）でも技能選択後に選択技能の3段階閾値（通常/困難/極限）をインフォバーとして表示するとより便利。追加DBなし。

@@ -47,6 +47,7 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStr, setEditStr] = useState<string>("");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [showThresholds, setShowThresholds] = useState(false);
 
   function startEdit(skill: CharacterSkill) {
     setEditingId(skill.id);
@@ -133,8 +134,8 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
         </p>
       )}
 
-      {/* カテゴリタブ */}
-      <div className="flex flex-wrap gap-1 mb-4 border-b border-coc-border">
+      {/* カテゴリタブ + 閾値表示トグル */}
+      <div className="flex flex-wrap items-center gap-1 mb-4 border-b border-coc-border">
         {cats.map((cat) => (
           <button
             key={cat}
@@ -148,6 +149,17 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
             {cat}
           </button>
         ))}
+        <button
+          onClick={() => setShowThresholds((v) => !v)}
+          className={`ml-auto px-2 py-1 text-xs rounded border transition-colors -mb-px ${
+            showThresholds
+              ? "border-coc-gold text-coc-gold bg-coc-gold/10"
+              : "border-coc-border text-coc-muted hover:text-coc-text"
+          }`}
+          title="困難・極限の閾値を表示"
+        >
+          閾値
+        </button>
       </div>
 
       {/* 技能リスト */}
@@ -164,16 +176,23 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
                   : "bg-coc-raised border-coc-border"
               }`}
             >
-              <span
-                className={`text-sm truncate ${
-                  skill.is_occupation ? "text-coc-gold font-medium" : "text-coc-text"
-                }`}
-              >
-                {skill.is_occupation && (
-                  <span className="text-coc-gold-dim mr-1">★</span>
+              <div className="min-w-0">
+                <span
+                  className={`text-sm truncate block ${
+                    skill.is_occupation ? "text-coc-gold font-medium" : "text-coc-text"
+                  }`}
+                >
+                  {skill.is_occupation && (
+                    <span className="text-coc-gold-dim mr-1">★</span>
+                  )}
+                  {skill.skill_name}
+                </span>
+                {showThresholds && (
+                  <span className="text-xs text-coc-muted tabular-nums">
+                    困難: {Math.floor((valueMap[skill.id] ?? skill.current_value) / 2)}　極限: {Math.floor((valueMap[skill.id] ?? skill.current_value) / 5)}
+                  </span>
                 )}
-                {skill.skill_name}
-              </span>
+              </div>
               <div className="flex items-center gap-2 ml-2 shrink-0">
                 {/* お気に入りトグル */}
                 <button

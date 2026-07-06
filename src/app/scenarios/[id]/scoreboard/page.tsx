@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Trophy, Skull, Star, Dices, TrendingUp } from "lucide-react";
@@ -40,7 +41,7 @@ function RankingSection({
   highlightColor,
 }: {
   title: string;
-  icon: unknown;
+  icon: React.ReactNode;
   items: { name: string; value: number }[];
   unit: string;
   highlightColor: string;

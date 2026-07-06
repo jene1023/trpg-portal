@@ -183,6 +183,14 @@ export default function DiceRoller({ skills, characterId, scenarioId, characterN
         </button>
       </div>
 
+      {selected && (
+        <div className="flex gap-3 text-xs text-coc-muted bg-coc-raised border border-coc-border rounded-md px-3 py-1.5">
+          <span>通常: <span className="text-coc-text font-medium">{selected.current_value}%</span></span>
+          <span>困難: <span className="text-coc-text font-medium">{Math.floor(selected.current_value / 2)}%</span></span>
+          <span>極限: <span className="text-coc-text font-medium">{Math.floor(selected.current_value / 5)}%</span></span>
+        </div>
+      )}
+
       {result && (
         <div
           className={`rounded-md border px-4 py-3 flex items-center justify-between transition-all ${DEGREE_STYLE[result.degree].border} ${DEGREE_STYLE[result.degree].bg}`}
