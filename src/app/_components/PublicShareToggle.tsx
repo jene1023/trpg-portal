@@ -17,7 +17,7 @@ export default function PublicShareToggle({ characterId, isPublic: initialIsPubl
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const publicUrl = slug ? `${typeof window !== "undefined" ? window.location.origin : ""}/public/${slug}` : "";
+  const publicUrl = slug ? `${typeof window !== "undefined" ? window.location.origin : ""}/c/${slug}` : "";
 
   async function handleToggle() {
     if (!isSupabaseConfigured) return;

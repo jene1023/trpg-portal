@@ -1024,7 +1024,7 @@
 **実装ヒント:** Supabaseに `player_feedback` テーブルを追加（id, scenario_id, session_label, player_name, fun_score: smallint, highlight, improvement, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成（認証不要・公開アクセス可）。フォームはシンプルな1ページ構成（fun_score の星評価UI・highlight と improvement のtextarea）。KPのシナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）には受信済みフィードバック件数バッジと閲覧リンクを追加。`src/app/scenarios/[id]/feedback/results/page.tsx` を新規作成し、KPが全フィードバックを一覧確認できるページを実装（認証済みユーザーのみ表示）。`src/lib/supabase.ts` に `PlayerFeedback` 型を追加。
 **コミット:** `feat: player feedback form for post-session KP improvement`
 
-## [TODO] 公開探索者プロフィールページ（/c/[slug]） — 優先度: 中
+## [DONE] 公開探索者プロフィールページ（/c/[slug]） — 優先度: 中
 **対象:** PL / 共通
 **概要:** `is_public=true` + `public_slug` 設定済みキャラクターをURLで誰でも閲覧できる専用ページ。SNSのプロフィールリンクやセッション募集時の自己紹介リンクとして使える。現在フィールドは存在するが閲覧ルートが未実装。
 **実装ヒント:** `src/app/c/[slug]/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("*, character_skills(*), character_traits(*), character_spells(*)").eq("public_slug", slug).eq("is_public", true).single()` でデータ取得（未設定または `is_public=false` の場合は 404）。キャラ詳細の読み取り専用ビュー（編集UI非表示）を実装。`<head>` に `og:title` / `og:description` の OGP メタタグを追加しSNSプレビューを最適化。`src/app/_components/PublicShareToggle.tsx`（既存）から生成するURLをこのルートに変更。追加DBなし。
