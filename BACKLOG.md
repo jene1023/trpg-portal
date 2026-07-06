@@ -1036,7 +1036,7 @@
 **実装ヒント:** `src/middleware.ts` を新規作成し未認証ユーザーを `/login` へリダイレクト。`src/app/login/page.tsx` を "use client" で実装（`supabase.auth.signInWithPassword` + `signUp`）。`src/app/_components/AuthProvider.tsx` を Context として作成しセッション状態を全体で共有。`characters`・`scenarios`・`npcs`・`handouts` 等の主要テーブルに `user_id uuid REFERENCES auth.users DEFAULT auth.uid()` を追加し `CREATE POLICY` で `auth.uid() = user_id` を設定。`src/app/_components/NavBar.tsx` にユーザーメニュー（表示名・ログアウト）を追加。`src/lib/supabase.ts` のクライアントを `@supabase/ssr` の `createBrowserClient` / `createServerClient` に移行。
 **コミット:** `feat: Supabase Auth with email login and per-user data isolation via RLS`
 
-## [TODO] キャラクター月次活動サマリーレポート — 優先度: 中
+## [DONE] キャラクター月次活動サマリーレポート — 優先度: 中
 **対象:** PL / 共通
 **概要:** 月単位でプレイしたセッション数・SAN喪失合計・成長した技能数・参加シナリオを集計した「月次レポート」ページ。過去の活動量を振り返りモチベーション向上に活用できる。
 **実装ヒント:** `src/app/characters/[id]/monthly-report/page.tsx` を新規作成（Server Component）。クエリパラメータ `?month=YYYY-MM` で対象月を指定（未指定時は当月）。`supabase.from("sessions").select("*").eq("character_id", id).gte("played_at", monthStart).lt("played_at", monthEnd)` でセッション取得し san_loss / hp_loss 合計・セッション数を集計。`supabase.from("growth_history").select("*").eq("character_id", id).gte("created_at", monthStart).lt("created_at", monthEnd)` から成長記録件数も取得。グラフはCSSのみのバー表示（既存 `stats-graph` と同方式）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「月次レポート」リンクを追加。追加DBなし。
