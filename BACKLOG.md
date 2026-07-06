@@ -947,3 +947,31 @@
 **概要:** シナリオの全参加キャラクターのセッションログ＋ファンブル/クリティカル判定（`dice_rolls`テーブル）を時系列にまとめたリプレイ振り返りページ。現在セッションログはキャラ単位でしか見られず、卓全体の流れを一つのストーリーとして振り返る手段がない。セッション後の感想会・SNSシェアに活用できる。
 **実装ヒント:** `src/app/scenarios/[id]/replay/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者取得後、`Promise.all` で各キャラの `sessions`（session_number・title・summary・san_loss・hp_loss）と `dice_rolls`（critical_success/fumbleのみ・rolled_at昇順）を取得。全イベントを `played_at`/`rolled_at` でソートし、キャラ名バッジ付きのタイムライン形式で表示（CSSの `border-left` で縦線）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ」リンクを追加。追加DBなし。
 **コミット:** `feat: scenario replay page combining all participant session logs`
+
+## [TODO] CoC 6版キャラクターシート対応 — 優先度: 高
+**対象:** PL / 共通
+**概要:** 現在のポータルはCoC 7版専用だが、日本国内では6版コミュニティが今も根強く活動している。キャラクター作成時に6版/7版を選択できるようにし、版ごとの技能ポイント計算式・技能基本値・技能リストの差異を吸収する。
+**リサーチ根拠:** クトゥルフWEBダイス・キャラクター保管所など主要ツールが「6版・7版両対応」をウリにしており、6版ユーザーが既存ツールを使い続ける最大の理由が版対応であることを複数サイトで確認した。
+**実装ヒント:** `characters` テーブルに `rule_edition: text NOT NULL DEFAULT '7th'` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `rule_edition: "6th" | "7th"` を追加。`src/lib/coc-calc.ts` に6版用関数（`calcOccupationPoints6th(edu) = edu * 20`、`calcPersonalPoints6th(int) = int * 10`）を追加。`src/app/_components/CharacterForm.tsx` にエディション選択 `<select>` を追加し、選択に応じてポイント計算と初期値ラベルを分岐。`src/app/rules/page.tsx` に6版タブを追加（技能基本値が7版と異なるため専用リストを `src/lib/occupationData.ts` に追記）。
+**コミット:** `feat: CoC 6th edition character sheet support`
+
+## [TODO] ランダム探索者名／NPC名生成 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** キャラクター作成・NPC追加時に、ボタン1つで日本人らしい名前をランダム生成して入力欄に反映できる機能。名前が思い浮かばないユーザーの詰まりを解消し、1920年代設定と現代設定の2種から選べるようにする。
+**リサーチ根拠:** 「TRPGでキャラを作る際、性格などが思いつかなくなる」というユーザーニーズが2025年の検索結果に明示されており、CharaXivほか複数ツールがランダム生成機能を提供している。ランダム名生成は最も実装コストが低く即効性が高い改善点として確認された。
+**実装ヒント:** `src/lib/nameData.ts` を新規作成し、1920年代向け姓100件・名100件と現代向け姓100件・名100件の静的配列を定義。`src/app/_components/CharacterForm.tsx` の名前フィールド横に「🎲」ボタンを追加（"use client" のまま onClick で配列からランダム取得しフォームstateを更新）。`src/app/_components/NpcForm.tsx` にも同様のボタンを追加し `nameData.ts` を流用。追加DBなし。
+**コミット:** `feat: random investigator and NPC name generator`
+
+## [TODO] セッション前日リマインド通知（Supabase Edge Function） — 優先度: 中
+**対象:** KP / 共通
+**概要:** 進行中シナリオの `next_session_at` が翌日に迫ったとき、Supabase Edge Function + メール送信でKPへリマインドを自動配信する機能。現在 next_session_at の表示（DONE）はあるが、ユーザーがポータルを開かないと気づけず「うっかり忘れ」が発生する。
+**リサーチ根拠:** TRPGセッションは月1〜2回程度の開催頻度のため「うっかり忘れた」ケースがコミュニティで散見されると複数のTRPG情報サイトで言及されており、日程調整ツールとの併用が前提になっている現状を改善する。
+**実装ヒント:** `supabase/functions/session-reminder/index.ts` を新規作成（Deno Edge Function）。`supabase-js` でサービスロールキーを使い `scenarios` テーブルの `next_session_at` が翌日（`BETWEEN now()+23h AND now()+25h`）かつ `remind_enabled = true` のレコードを取得し、Resend API（または SMTP）でKPのメールアドレスへHTMLメールを送信。`scenarios` テーブルに `remind_enabled: boolean DEFAULT false`・`remind_email: text` カラムを追加（ALTER TABLE）。`src/app/scenarios/[id]/page.tsx` のシナリオ詳細に「リマインドメール設定」セクションを追加（`src/app/_components/ScenarioForm.tsx` に `remind_enabled` チェックボックス・`remind_email` 入力欄を追記）。Supabase Dashboard の pg_cron で毎日 JST 9:00 にEdge Functionを呼び出すCronジョブを設定。
+**コミット:** `feat: session reminder email via Supabase Edge Function`
+
+## [TODO] キャラクター/ハンドアウトQRコード出力 — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** 公開中のキャラクタープロフィールURL（`/p/[slug]`）やハンドアウト共有URL（`/share/[token]`）をQRコードとして画面表示・PNG保存できる機能。物理セッション・コンベンション参加時にスマートフォン同士でURLを瞬時に共有できる。
+**リサーチ根拠:** オフラインセッション向けのPDF出力需要（DONE済み）と並行して、スマートフォン間のURL共有をQRコード化することがコンベンション参加者に有効という声が国内TRPGコミュニティブログで確認された。ここフォリアのQRコマシェア機能も類似ニーズを示している。
+**実装ヒント:** `src/app/_components/QrCodeShare.tsx` を "use client" で新規作成。`qrcode` npm パッケージ（軽量・ゼロ依存）でCanvas/SVGにQRコードを描画し、モーダルで表示。「PNGダウンロード」ボタンで `canvas.toBlob` → `URL.createObjectURL` でダウンロード。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の公開URLコピーボタン隣に「QR」ボタンとして追加（is_public が true のときのみ表示）。ハンドアウト一覧（`src/app/scenarios/[id]/handouts/page.tsx`）の共有リンク生成ボタン隣にも同様に追加。追加DBなし。
+**コミット:** `feat: QR code share for public character profile and handout URLs`
