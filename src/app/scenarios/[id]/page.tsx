@@ -71,6 +71,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { data: sessionReviewRows },
     { count: feedbackCount },
     { data: safetySettings },
+    { count: scheduleProposalCount },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
@@ -82,6 +83,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     supabase.from("session_reviews").select("fun_score, tension_score").eq("scenario_id", id),
     supabase.from("player_feedback").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_safety_settings").select("x_card_enabled").eq("scenario_id", id).single(),
+    supabase.from("schedule_proposals").select("*", { count: "exact", head: true }).eq("scenario_id", id),
   ]);
 
   const safetyConfigured = safetySettings !== null;
@@ -622,7 +624,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
               <p className="text-xs text-coc-muted">候補日程の投票・集計・次回予定の確定</p>
             </div>
           </div>
-          <span className="text-coc-muted">→</span>
+          <div className="flex items-center gap-2">
+            {(scheduleProposalCount ?? 0) > 0 && (
+              <span className="rounded-full bg-coc-gold/20 px-2 py-0.5 text-xs font-medium text-coc-gold">
+                投票受付中
+              </span>
+            )}
+            <span className="text-coc-muted">→</span>
+          </div>
         </Link>
 
         <Link

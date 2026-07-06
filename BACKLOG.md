@@ -1066,7 +1066,7 @@
 **実装ヒント:** `characters` テーブルに `successor_of: uuid | null REFERENCES characters(id)` カラムをALTER TABLEで追加（自己参照外部キー、ON DELETE SET NULL）。`src/lib/supabase.ts` の `Character` 型に `successor_of: string | null` を追加。`src/app/characters/[id]/page.tsx`（status が "dead" または "retired" のキャラ詳細）に「後継者を設定」ボタンを追加し（"use client" コンポーネント）、キャラクター選択UIから `supabase.from("characters").update({ successor_of: currentId }).eq("id", successorId)` で後継者に前任リンクを設定。後継者のキャラクター詳細ページで `successor_of` が設定されていれば「前任探索者: [名前] →」リンクを表示。「前任者の遺品を引き継ぐ」ボタンで `supabase.from("inventory_items").update({ character_id: successorId }).eq("character_id", currentId)` を実行するオプションを提供（確認ダイアログ必須）。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: character succession link for legacy narrative continuity in campaigns`
 
-## [TODO] セッション日程調整・参加可否投票 — 優先度: 高
+## [DONE] セッション日程調整・参加可否投票 — 優先度: 高
 **対象:** KP / 共通
 **概要:** KPが複数の候補日を提示し、PLが各候補に○×で回答することで最適なセッション日を確定できる日程調整機能。毎回のセッション日程決めをポータル内で完結させ、外部ツール（Doodle等）への依存をなくす。
 **実装ヒント:** `src/lib/supabase.ts` に `ScheduleProposal`・`ScheduleVote` 型はすでに定義済み（id, scenario_id / proposal_id, voter_name, is_available）。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成（候補日一覧 + 各日への○×投票UI）。KPは `supabase.from("schedule_proposals").insert({ scenario_id, proposed_at })` で候補追加、PLは `supabase.from("schedule_votes").upsert({ proposal_id, voter_name, is_available })` で回答。集計は proposed_at ごとに○票数/×票数を並べてバー表示（CSSのみ）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「日程調整」リンクと「投票受付中」バッジを追加。DBテーブルは `schedule_proposals`・`schedule_votes` を新規作成（Supabase ダッシュボードで実施）。
