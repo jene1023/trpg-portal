@@ -1012,7 +1012,7 @@
 **実装ヒント:** `scenario_participants` テーブルに `attendance_status: text NOT NULL DEFAULT 'pending'` カラムを追加（ALTER TABLE、値は `"pending"|"confirmed"|"absent"`）。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `attendance_status: "pending" | "confirmed" | "absent"` を追加。`src/app/scenarios/[id]/party/page.tsx`（パーティービュー）内の `PartyStatAdjuster.tsx` または新規 `AttendanceToggle.tsx` コンポーネントで3択ボタンを追加し `supabase.from("scenario_participants").update({attendance_status}).eq("id", p.id)` で更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「⚠ 未確認あり」バナーを表示（`pending` 人数 > 0 のとき）。KP準備確認（`src/app/scenarios/[id]/kp-preflight/page.tsx`）にも出欠サマリーを追記。
 **コミット:** `feat: session attendance status tracking for scenario participants`
 
-## [TODO] 卓内ダイスロールリアルタイムフィード（Supabase Realtime） — 優先度: 中
+## [DONE] 卓内ダイスロールリアルタイムフィード（Supabase Realtime） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** Supabase Realtimeを使い、シナリオ参加キャラクターのダイスロール（`dice_rolls`テーブル）をセッション中に全員がリアルタイム確認できるフィードページ。誰が何の技能を振り何が出たかをリアルタイムで共有し、オンセの臨場感を高める。
 **実装ヒント:** `src/app/scenarios/[id]/dice-feed/page.tsx` を "use client" で新規作成。参加者の `character_id` 一覧を `scenario_participants` から取得後、`supabase.channel('dice-feed-${scenarioId}').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dice_rolls', filter: \`character_id=in.(${ids.join(',')})\` }, payload => setRolls(prev => [payload.new, ...prev].slice(0, 50)))` でリアルタイム購読（useEffect でサブスクライブ、アンマウントで `supabase.removeChannel`）。各ロールは「キャラ名・技能名・ロール値・成功度バッジ」のカードで表示（成功度別に色分け）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ダイスフィード」リンクを追加。追加DBなし（既存 `dice_rolls`・`scenario_participants` を流用）。
