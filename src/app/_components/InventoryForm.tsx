@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dice6, Flame, BookMarked, X } from "lucide-react";
+import { Dice6, Flame, BookMarked, X, ArrowRightLeft } from "lucide-react";
 import {
   supabase,
   isSupabaseConfigured,
@@ -128,6 +128,73 @@ export default function InventoryForm({ characterId, initialItems, skills, damag
       notes: item.notes ?? "",
     });
     setCatalogOpen(false);
+  }
+
+  const [transferItemId, setTransferItemId] = useState<string | null>(null);
+  const [transferTargets, setTransferTargets] = useState<{ id: string; name: string }[]>([]);
+  const [transferTargetId, setTransferTargetId] = useState<string>("");
+  const [transferLoading, setTransferLoading] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+
+  async function openTransfer(itemId: string) {
+    if (!isSupabaseConfigured) return;
+    setTransferItemId(itemId);
+    setTransferTargetId("");
+    setTransferLoading(true);
+
+    // Try to find this character's scenario, then get participants; fallback to all characters
+    const { data: participations } = await supabase
+      .from("scenario_participants")
+      .select("scenario_id")
+      .eq("character_id", characterId)
+      .limit(1);
+
+    let targets: { id: string; name: string }[] = [];
+
+    if (participations && participations.length > 0) {
+      const scenarioId = participations[0].scenario_id;
+      const { data: participants } = await supabase
+        .from("scenario_participants")
+        .select("characters(id, name)")
+        .eq("scenario_id", scenarioId)
+        .neq("character_id", characterId);
+      if (participants) {
+        targets = participants
+          .flatMap((p) => {
+            const c = p.characters as unknown as { id: string; name: string } | null;
+            return c ? [{ id: c.id, name: c.name }] : [];
+          });
+      }
+    }
+
+    if (targets.length === 0) {
+      const { data: chars } = await supabase
+        .from("characters")
+        .select("id, name")
+        .neq("id", characterId)
+        .order("name", { ascending: true });
+      targets = (chars ?? []) as { id: string; name: string }[];
+    }
+
+    setTransferTargets(targets);
+    if (targets.length > 0) setTransferTargetId(targets[0].id);
+    setTransferLoading(false);
+  }
+
+  async function doTransfer() {
+    if (!transferItemId || !transferTargetId || !isSupabaseConfigured) return;
+    setTransferring(true);
+    const { error } = await supabase
+      .from("inventory_items")
+      .update({ character_id: transferTargetId })
+      .eq("id", transferItemId);
+    setTransferring(false);
+    if (!error) {
+      setItems((prev) => prev.filter((i) => i.id !== transferItemId));
+      if (rollWeaponId === transferItemId) { setRollWeaponId(null); setRollResult(null); }
+      if (damageResult?.weaponId === transferItemId) setDamageResult(null);
+      setTransferItemId(null);
+    }
   }
 
   const [rollWeaponId, setRollWeaponId] = useState<string | null>(null);
@@ -320,6 +387,13 @@ export default function InventoryForm({ characterId, initialItems, skills, damag
                     </button>
                   )}
                   <button
+                    onClick={() => openTransfer(item.id)}
+                    className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-coc-border text-coc-muted hover:border-blue-400 hover:text-blue-400 transition-colors"
+                  >
+                    <ArrowRightLeft size={12} />
+                    譲渡
+                  </button>
+                  <button
                     onClick={() => remove(item.id)}
                     className="text-coc-muted hover:text-red-400 text-xs transition-colors"
                   >
@@ -424,16 +498,77 @@ export default function InventoryForm({ characterId, initialItems, skills, damag
                   <p className="text-xs text-coc-muted mt-1 whitespace-pre-wrap">{item.notes}</p>
                 )}
               </div>
-              <button
-                onClick={() => remove(item.id)}
-                className="shrink-0 text-coc-muted hover:text-red-400 text-xs transition-colors"
-              >
-                削除
-              </button>
+              <div className="shrink-0 flex flex-col items-end gap-1">
+                <button
+                  onClick={() => openTransfer(item.id)}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-coc-border text-coc-muted hover:border-blue-400 hover:text-blue-400 transition-colors"
+                >
+                  <ArrowRightLeft size={12} />
+                  譲渡
+                </button>
+                <button
+                  onClick={() => remove(item.id)}
+                  className="text-coc-muted hover:text-red-400 text-xs transition-colors"
+                >
+                  削除
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* 譲渡モーダル */}
+      {transferItemId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-xl border border-coc-border bg-coc-surface p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-cinzel text-sm font-bold text-coc-text">アイテムを譲渡</h3>
+              <button
+                onClick={() => setTransferItemId(null)}
+                className="text-coc-muted hover:text-coc-text transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            {transferLoading ? (
+              <p className="text-sm text-coc-muted text-center py-4">読み込み中…</p>
+            ) : transferTargets.length === 0 ? (
+              <p className="text-sm text-coc-muted text-center py-4">譲渡先のキャラクターが存在しません。</p>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs text-coc-muted mb-1">譲渡先キャラクター</label>
+                  <select
+                    value={transferTargetId}
+                    onChange={(e) => setTransferTargetId(e.target.value)}
+                    className="w-full rounded-md border border-coc-border bg-coc-void px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold"
+                  >
+                    {transferTargets.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={doTransfer}
+                    disabled={transferring || !transferTargetId}
+                    className="flex-1 rounded-lg bg-blue-600 text-white font-semibold text-sm py-2 hover:bg-blue-500 disabled:opacity-40 transition-colors"
+                  >
+                    {transferring ? "譲渡中…" : "譲渡する"}
+                  </button>
+                  <button
+                    onClick={() => setTransferItemId(null)}
+                    className="px-4 rounded-lg border border-coc-border text-coc-muted hover:text-coc-text text-sm transition-colors"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 追加フォーム */}
       {open ? (

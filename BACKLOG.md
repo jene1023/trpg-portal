@@ -1054,7 +1054,7 @@
 **実装ヒント:** `scenarios` テーブルに `game_current_date: text | null`（例: "1923-10-13"）と `game_current_time: text | null`（例: "15:00"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/GameClockEditor.tsx` を "use client" で新規作成（date/time input + 「更新」ボタン → `supabase.from("scenarios").update({ game_current_date, game_current_time })`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「ゲーム内時刻：[日付] [時刻]」を表示し、KPはクリックで `GameClockEditor` を展開して更新。パーティービュー（`src/app/scenarios/[id]/party/page.tsx`）にも同情報をバッジ表示（Supabase Realtimeで他クライアントにも即時反映）。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: in-game clock and date tracking for scenario immersion`
 
-## [TODO] パーティー間アイテム譲渡（キャラクターインベントリ移転） — 優先度: 中
+## [DONE] パーティー間アイテム譲渡（キャラクターインベントリ移転） — 優先度: 中
 **対象:** PL / 共通
 **概要:** シナリオ参加キャラクター間でインベントリのアイテムを譲渡できる機能。「この銃をあなたに渡す」などのパーティー内物品のやり取りをポータル内で完結させる。現在 `inventory_items` は固定の `character_id` を持つため、他キャラへの移転が削除→再追加という手間のかかる操作しかできない。
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「譲渡」ボタンを追加（"use client" のまま）。クリックで「譲渡先キャラクター選択」モーダルを表示し、同シナリオの参加者（`supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", scenarioId)`）から選択。シナリオ不参加の場合は全キャラ一覧（`supabase.from("characters").select("id, name")`）を代替として表示。確認後に `supabase.from("inventory_items").update({ character_id: targetCharacterId }).eq("id", itemId)` で更新しリスト再取得。追加DBなし（既存 `inventory_items` テーブルのみ使用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「所持品」リンク先で即座に使えるよう、インベントリページ内に自然に配置する。
