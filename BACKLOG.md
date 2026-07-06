@@ -1065,3 +1065,27 @@
 **概要:** 長期キャンペーンで旧探索者が死亡・引退した際、後継の新探索者を「前任キャラクターの後継者」としてリンクできる機能。旧キャラの遺品（アイテム）を後継者に引き継ぐオプションも提供し、シナリオをまたいだ物語の連続性を記録する。
 **実装ヒント:** `characters` テーブルに `successor_of: uuid | null REFERENCES characters(id)` カラムをALTER TABLEで追加（自己参照外部キー、ON DELETE SET NULL）。`src/lib/supabase.ts` の `Character` 型に `successor_of: string | null` を追加。`src/app/characters/[id]/page.tsx`（status が "dead" または "retired" のキャラ詳細）に「後継者を設定」ボタンを追加し（"use client" コンポーネント）、キャラクター選択UIから `supabase.from("characters").update({ successor_of: currentId }).eq("id", successorId)` で後継者に前任リンクを設定。後継者のキャラクター詳細ページで `successor_of` が設定されていれば「前任探索者: [名前] →」リンクを表示。「前任者の遺品を引き継ぐ」ボタンで `supabase.from("inventory_items").update({ character_id: successorId }).eq("character_id", currentId)` を実行するオプションを提供（確認ダイアログ必須）。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: character succession link for legacy narrative continuity in campaigns`
+
+## [TODO] セッション日程調整・参加可否投票 — 優先度: 高
+**対象:** KP / 共通
+**概要:** KPが複数の候補日を提示し、PLが各候補に○×で回答することで最適なセッション日を確定できる日程調整機能。毎回のセッション日程決めをポータル内で完結させ、外部ツール（Doodle等）への依存をなくす。
+**実装ヒント:** `src/lib/supabase.ts` に `ScheduleProposal`・`ScheduleVote` 型はすでに定義済み（id, scenario_id / proposal_id, voter_name, is_available）。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成（候補日一覧 + 各日への○×投票UI）。KPは `supabase.from("schedule_proposals").insert({ scenario_id, proposed_at })` で候補追加、PLは `supabase.from("schedule_votes").upsert({ proposal_id, voter_name, is_available })` で回答。集計は proposed_at ごとに○票数/×票数を並べてバー表示（CSSのみ）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「日程調整」リンクと「投票受付中」バッジを追加。DBテーブルは `schedule_proposals`・`schedule_votes` を新規作成（Supabase ダッシュボードで実施）。
+**コミット:** `feat: session schedule voting with candidate dates for scenario planning`
+
+## [TODO] 探索者「絆」スコア管理（DG/CoC7版絆ルール） — 優先度: 中
+**対象:** PL
+**概要:** Delta Green・CoC7版の「絆」ルールに基づき、キャラクターが持つ絆相手（家族・友人等）のスコア・ダメージ・喪失フラグを記録・管理できる機能。CharacterRelation（一行メモ）とは別に数値スコアで追跡し、ダメージを受けた絆の回復やセッション中の絆喪失を記録する。
+**実装ヒント:** `src/lib/supabase.ts` に `CharacterBond` 型はすでに定義済み（id, character_id, target_name, bond_score, damage_taken, is_lost, notes）。Supabaseに `character_bonds` テーブルを新規作成（上記カラム構成）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（一覧 + 追加・更新フォーム）。各絆カードに「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置し `supabase.from("character_bonds").update({ damage_taken, is_lost }).eq("id", id)` で即時更新。is_lost の絆はグレーアウト表示で残し「記録」として保持。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加し、ダメージを受けた絆がある場合は警告バッジを表示。`src/lib/supabase.ts` の `CharacterBond` 型に `created_at` を確認して型追記（未定義なら追加）。
+**コミット:** `feat: character bond score management for DG/CoC7 bond mechanics`
+
+## [TODO] クトゥルフ神話技能 → SAN 上限自動連動チェック — 優先度: 高
+**対象:** PL / 共通
+**概要:** CoC7版のコアルール「SAN最大値 = 99 − クトゥルフ神話技能の現在値」を自動でチェックし、神話技能値が上がった際に san_max の更新を提案するUI。現在は san_max と神話技能が独立管理されており、ルール上の制約が手動管理になっている。
+**実装ヒント:** `src/app/_components/SkillList.tsx` で技能名が「クトゥルフ神話」または "Cthulhu Mythos" のとき、current_value 変更後に `const newSanMax = 99 - newValue` を算出し、現在の `san_max` と異なる場合は「SAN最大値を ${newSanMax} に更新しますか？」のインラインバナーを表示。確認後に `supabase.from("characters").update({ san_max: newSanMax }).eq("id", characterId)` を実行（`san_current > newSanMax` のときは san_current も newSanMax にクランプする旨を警告）。キャラクター詳細ページのSANサマリーセクションにも「神話技能: X → SAN上限: ${99 - X}」インジケーターを追加（`character_skills` から「クトゥルフ神話」を検索）。追加DBなし。
+**コミット:** `feat: auto SAN max cap from Cthulhu Mythos skill per CoC7 rules`
+
+## [TODO] タグ横断フィルタ（キャラクター・シナリオ・NPC共通タグ検索） — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** `Tag` テーブルと `EntityTag`（entity_type: character/scenario/npc に対応）を活用して、タグクリック1つでキャラクター・シナリオ・NPCをまたいで絞り込める横断タグブラウザページを提供する。既存グローバル検索（名前・テキスト検索）を補完し、「ホラー」「現代」「一人用」などのジャンルタグで素早く目的のデータを発見できるようにする。
+**実装ヒント:** `src/app/tags/page.tsx` を Server Component で新規作成。`supabase.from("tags").select("*")` でタグ一覧を取得しタグクラウド表示。各タグをクリックすると `src/app/tags/[tagId]/page.tsx`（Server Component）へ遷移し、`supabase.from("entity_tags").select("entity_type, entity_id").eq("tag_id", tagId)` で紐づく全エンティティを取得し、entity_type ごとにセクション分けして character / scenario / npc の詳細をカード表示（各テーブルへの追加クエリで名前等を補完）。`src/app/_components/NavBar.tsx` に「タグ」リンクを追加。`TagSelector.tsx`（既存）での選択結果をこのページへ誘導するリンクも追加。追加DBなし（既存 `tags`・`entity_tags` テーブルを活用）。
+**コミット:** `feat: cross-entity tag browser for filtering characters, scenarios, and NPCs`
