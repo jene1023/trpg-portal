@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Dices } from "lucide-react";
 import { supabase, isSupabaseConfigured, NpcPreset } from "@/lib/supabase";
+import { generateRandomName, NameEra } from "@/lib/nameData";
 
 type StatKey = "str" | "con" | "pow" | "dex" | "app" | "siz" | "int_stat" | "edu" | "hp" | "mp";
 
@@ -26,6 +27,7 @@ export default function NpcForm() {
   const [error, setError] = useState<string | null>(null);
   const [showStats, setShowStats] = useState(false);
   const [presets, setPresets] = useState<NpcPreset[]>([]);
+  const [nameEra, setNameEra] = useState<NameEra>("1920s");
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -209,9 +211,29 @@ export default function NpcForm() {
       </div>
 
       <div>
-        <label htmlFor="name" className={labelClass}>
-          NPC名 <span className="text-coc-gold">*</span>
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="name" className="text-xs font-medium text-coc-muted">
+            NPC名 <span className="text-coc-gold">*</span>
+          </label>
+          <div className="flex items-center gap-1.5">
+            <select
+              value={nameEra}
+              onChange={(e) => setNameEra(e.target.value as NameEra)}
+              className="text-xs rounded border border-coc-border bg-coc-raised text-coc-muted px-1 py-0.5 focus:outline-none focus:border-coc-gold transition-colors"
+            >
+              <option value="1920s">1920年代</option>
+              <option value="modern">現代</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, name: generateRandomName(nameEra) }))}
+              className="flex items-center gap-0.5 text-xs text-coc-gold hover:text-coc-text transition-colors"
+              title="ランダムな名前を生成"
+            >
+              <Dices size={12} /> 生成
+            </button>
+          </div>
+        </div>
         <input
           id="name"
           name="name"

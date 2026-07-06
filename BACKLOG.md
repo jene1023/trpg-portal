@@ -955,7 +955,7 @@
 **実装ヒント:** `characters` テーブルに `rule_edition: text NOT NULL DEFAULT '7th'` カラムを追加（ALTER TABLE）。`src/lib/supabase.ts` の `Character` 型に `rule_edition: "6th" | "7th"` を追加。`src/lib/coc-calc.ts` に6版用関数（`calcOccupationPoints6th(edu) = edu * 20`、`calcPersonalPoints6th(int) = int * 10`）を追加。`src/app/_components/CharacterForm.tsx` にエディション選択 `<select>` を追加し、選択に応じてポイント計算と初期値ラベルを分岐。`src/app/rules/page.tsx` に6版タブを追加（技能基本値が7版と異なるため専用リストを `src/lib/occupationData.ts` に追記）。
 **コミット:** `feat: CoC 6th edition character sheet support`
 
-## [TODO] ランダム探索者名／NPC名生成 — 優先度: 中
+## [DONE] ランダム探索者名／NPC名生成 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** キャラクター作成・NPC追加時に、ボタン1つで日本人らしい名前をランダム生成して入力欄に反映できる機能。名前が思い浮かばないユーザーの詰まりを解消し、1920年代設定と現代設定の2種から選べるようにする。
 **リサーチ根拠:** 「TRPGでキャラを作る際、性格などが思いつかなくなる」というユーザーニーズが2025年の検索結果に明示されており、CharaXivほか複数ツールがランダム生成機能を提供している。ランダム名生成は最も実装コストが低く即効性が高い改善点として確認された。

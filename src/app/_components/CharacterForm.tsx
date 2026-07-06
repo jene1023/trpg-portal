@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Trash2, Plus, Upload, Dices, Download } from "lucide-react";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, SkillTemplate } from "@/lib/supabase";
+import { generateRandomName, NameEra } from "@/lib/nameData";
 import {
   calcHpMax,
   calcMpMax,
@@ -66,6 +67,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   const [ruleEdition, setRuleEdition] = useState<"6th" | "7th">(
     (initialData?.rule_edition as "6th" | "7th") ?? "7th"
   );
+  const [nameEra, setNameEra] = useState<NameEra>("1920s");
 
   // --- 能力値 ---
   const [str, setStr] = useState(initialData?.str ?? 50);
@@ -365,7 +367,27 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         <h2 className={sectionTitle}>基本情報</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>キャラクター名 *</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-coc-muted">キャラクター名 *</label>
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={nameEra}
+                  onChange={(e) => setNameEra(e.target.value as NameEra)}
+                  className="text-xs rounded border border-coc-border bg-coc-void text-coc-muted px-1 py-0.5 focus:outline-none focus:border-coc-gold transition-colors"
+                >
+                  <option value="1920s">1920年代</option>
+                  <option value="modern">現代</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setName(generateRandomName(nameEra))}
+                  className="flex items-center gap-0.5 text-xs text-coc-gold hover:text-coc-text transition-colors"
+                  title="ランダムな名前を生成"
+                >
+                  <Dices size={12} /> 生成
+                </button>
+              </div>
+            </div>
             <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="田中一郎" required />
           </div>
           <div>
