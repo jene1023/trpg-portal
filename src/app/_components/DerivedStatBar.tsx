@@ -33,14 +33,16 @@ export default function DerivedStatBar({ label, current, max, color, compact = f
         </span>
       </div>
       <div className="w-full rounded-full overflow-hidden bg-coc-void h-1.5">
-        <div
-          className={`h-full rounded-full transition-all duration-300 ${isLow ? "coc-stat-low-pulse" : ""}`}
-          style={{
-            width: `${pct}%`,
-            background: `linear-gradient(90deg, rgba(${glowRgb[color]}, 0.55), ${colorMap[color]})`,
-            boxShadow: pct > 0 ? `0 0 ${isLow ? 7 : 3}px rgba(${glowRgb[color]}, ${isLow ? 0.8 : 0.4})` : undefined,
-          }}
-        />
+        <div className="coc-bar-enter h-full w-full">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${isLow ? "coc-stat-low-pulse" : ""}`}
+            style={{
+              width: `${pct}%`,
+              background: `linear-gradient(90deg, rgba(${glowRgb[color]}, 0.55), ${colorMap[color]})`,
+              boxShadow: pct > 0 ? `0 0 ${isLow ? 7 : 3}px rgba(${glowRgb[color]}, ${isLow ? 0.8 : 0.4})` : undefined,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

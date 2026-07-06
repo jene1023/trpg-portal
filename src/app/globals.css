@@ -533,6 +533,19 @@ body {
     );
 }
 
+/* ステータスバー入場: カード出現と連動してバーが左から満ちていく */
+@keyframes coc-bar-enter {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-bar-enter {
+    transform-origin: left center;
+    animation: coc-bar-enter 0.7s cubic-bezier(0.23, 1, 0.32, 1) 0.15s both;
+  }
+}
+
 /* ツールリンクグリッド: ホバー時に → 矢印が右へ引き寄せられるように微スライド */
 .coc-tool-grid a > span:last-child {
   display: inline-block;
