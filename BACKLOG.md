@@ -1041,3 +1041,27 @@
 **概要:** 月単位でプレイしたセッション数・SAN喪失合計・成長した技能数・参加シナリオを集計した「月次レポート」ページ。過去の活動量を振り返りモチベーション向上に活用できる。
 **実装ヒント:** `src/app/characters/[id]/monthly-report/page.tsx` を新規作成（Server Component）。クエリパラメータ `?month=YYYY-MM` で対象月を指定（未指定時は当月）。`supabase.from("sessions").select("*").eq("character_id", id).gte("played_at", monthStart).lt("played_at", monthEnd)` でセッション取得し san_loss / hp_loss 合計・セッション数を集計。`supabase.from("growth_history").select("*").eq("character_id", id).gte("created_at", monthStart).lt("created_at", monthEnd)` から成長記録件数も取得。グラフはCSSのみのバー表示（既存 `stats-graph` と同方式）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「月次レポート」リンクを追加。追加DBなし。
 **コミット:** `feat: monthly activity summary report per character`
+
+## [TODO] セッション安全ツール（X-Card・ライン＆ヴェール） — 優先度: 高
+**対象:** KP / 共通
+**概要:** セッション内で不快な場面を即座に止める「X-Card」シグナルと、セッション前にKPとPL全員がコンテンツの「ライン（絶対NG）」「ヴェール（フェードアウト可）」を合意できるフォームをシナリオに紐づけて管理する機能。TRPGの安全ツールとして国際的に普及している仕組みを日本語UIで提供し、参加者全員が安心して卓を楽しめるようにする。
+**実装ヒント:** Supabaseに `scenario_safety_settings` テーブルを追加（id, scenario_id: uuid UNIQUE, x_card_enabled: boolean DEFAULT true, lines: text | null（絶対NGの事項・箇条書き）, veils: text | null（フェードアウト可の事項）, session_zero_notes: text | null, updated_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成（`supabase.from("scenario_safety_settings").upsert(...)` でシナリオ1件につき1レコード管理）。X-Card有効時はパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に目立つ「X（中断）」ボタンを追加し、クリック時に赤背景フラッシュと「シーンを一時中断します」テキストを全画面表示（Supabase Realtime の broadcast でシナリオ参加者全員に通知）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「安全設定」リンクと設定済みバッジを追加。`src/lib/supabase.ts` に `ScenarioSafetySettings` 型を追加。
+**コミット:** `feat: TRPG safety tools with X-Card and Lines/Veils for session safety`
+
+## [TODO] シナリオ内ゲーム内時刻管理（イン・ゲーム・クロック） — 優先度: 中
+**対象:** KP / 共通
+**概要:** CoCシナリオ内の「架空の日付・時刻」（例: 1923年10月13日 午後3時）をKPが設定・進行させ、パーティービューや共有メモに表示できる機能。現実世界の `played_at` とは別に、シナリオ内の時間経過を追跡する。1920年代設定の没入感を高め、「夜になった」「3日が経過した」などの時間進行をKPが1クリックで共有できる。
+**実装ヒント:** `scenarios` テーブルに `game_current_date: text | null`（例: "1923-10-13"）と `game_current_time: text | null`（例: "15:00"）カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Scenario` 型に両カラムを追加。`src/app/_components/GameClockEditor.tsx` を "use client" で新規作成（date/time input + 「更新」ボタン → `supabase.from("scenarios").update({ game_current_date, game_current_time })`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のヘッダーに「ゲーム内時刻：[日付] [時刻]」を表示し、KPはクリックで `GameClockEditor` を展開して更新。パーティービュー（`src/app/scenarios/[id]/party/page.tsx`）にも同情報をバッジ表示（Supabase Realtimeで他クライアントにも即時反映）。追加DBカラムのみ（新テーブルなし）。
+**コミット:** `feat: in-game clock and date tracking for scenario immersion`
+
+## [TODO] パーティー間アイテム譲渡（キャラクターインベントリ移転） — 優先度: 中
+**対象:** PL / 共通
+**概要:** シナリオ参加キャラクター間でインベントリのアイテムを譲渡できる機能。「この銃をあなたに渡す」などのパーティー内物品のやり取りをポータル内で完結させる。現在 `inventory_items` は固定の `character_id` を持つため、他キャラへの移転が削除→再追加という手間のかかる操作しかできない。
+**実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「譲渡」ボタンを追加（"use client" のまま）。クリックで「譲渡先キャラクター選択」モーダルを表示し、同シナリオの参加者（`supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", scenarioId)`）から選択。シナリオ不参加の場合は全キャラ一覧（`supabase.from("characters").select("id, name")`）を代替として表示。確認後に `supabase.from("inventory_items").update({ character_id: targetCharacterId }).eq("id", itemId)` で更新しリスト再取得。追加DBなし（既存 `inventory_items` テーブルのみ使用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「所持品」リンク先で即座に使えるよう、インベントリページ内に自然に配置する。
+**コミット:** `feat: item transfer between party characters for in-session inventory management`
+
+## [TODO] 探索者「後継者」リンク（前任キャラクター接続） — 優先度: 低
+**対象:** PL / 共通
+**概要:** 長期キャンペーンで旧探索者が死亡・引退した際、後継の新探索者を「前任キャラクターの後継者」としてリンクできる機能。旧キャラの遺品（アイテム）を後継者に引き継ぐオプションも提供し、シナリオをまたいだ物語の連続性を記録する。
+**実装ヒント:** `characters` テーブルに `successor_of: uuid | null REFERENCES characters(id)` カラムをALTER TABLEで追加（自己参照外部キー、ON DELETE SET NULL）。`src/lib/supabase.ts` の `Character` 型に `successor_of: string | null` を追加。`src/app/characters/[id]/page.tsx`（status が "dead" または "retired" のキャラ詳細）に「後継者を設定」ボタンを追加し（"use client" コンポーネント）、キャラクター選択UIから `supabase.from("characters").update({ successor_of: currentId }).eq("id", successorId)` で後継者に前任リンクを設定。後継者のキャラクター詳細ページで `successor_of` が設定されていれば「前任探索者: [名前] →」リンクを表示。「前任者の遺品を引き継ぐ」ボタンで `supabase.from("inventory_items").update({ character_id: successorId }).eq("character_id", currentId)` を実行するオプションを提供（確認ダイアログ必須）。追加DBカラムのみ（新テーブルなし）。
+**コミット:** `feat: character succession link for legacy narrative continuity in campaigns`
