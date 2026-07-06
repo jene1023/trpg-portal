@@ -364,3 +364,17 @@ alter table characters alter column user_id set default auth.uid();
 alter table scenarios  alter column user_id set default auth.uid();
 alter table npcs       alter column user_id set default auth.uid();
 alter table handouts   alter column user_id set default auth.uid();
+
+-- 探索者「絆」スコア管理（DG/CoC7版絆ルール）
+create table if not exists character_bonds (
+  id uuid primary key default gen_random_uuid(),
+  character_id uuid references characters(id) on delete cascade not null,
+  target_name text not null,
+  bond_score integer not null default 0,
+  damage_taken integer not null default 0,
+  is_lost boolean not null default false,
+  notes text,
+  created_at timestamptz default now()
+);
+alter table character_bonds enable row level security;
+create policy "allow all for anon" on character_bonds for all using (true) with check (true);

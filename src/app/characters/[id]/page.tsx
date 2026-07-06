@@ -81,6 +81,13 @@ export default async function CharacterDetailPage({ params }: Props) {
     .eq("recipient_character_id", id)
     .eq("is_read", false);
 
+  const { count: damagedBondCount } = await supabase
+    .from("character_bonds")
+    .select("id", { count: "exact", head: true })
+    .eq("character_id", id)
+    .eq("is_lost", false)
+    .gt("damage_taken", 0);
+
   const db = calcDamageBonus(char.str, char.siz);
   const build = calcBuild(char.str, char.siz);
   const mov = calcMov(char.str, char.dex, char.siz);
@@ -426,7 +433,14 @@ export default async function CharacterDetailPage({ params }: Props) {
                 className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
                 <span>絆（Bonds）</span>
-                <span className="text-coc-gold">→</span>
+                <span className="flex items-center gap-1.5">
+                  {(damagedBondCount ?? 0) > 0 && (
+                    <span className="rounded bg-yellow-900/40 border border-yellow-700/60 px-1.5 py-0.5 text-xs text-yellow-400">
+                      ダメージ {damagedBondCount}
+                    </span>
+                  )}
+                  <span className="text-coc-gold">→</span>
+                </span>
               </Link>
               <Link
                 href={`/characters/${id}/inventory`}

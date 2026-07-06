@@ -1072,7 +1072,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に `ScheduleProposal`・`ScheduleVote` 型はすでに定義済み（id, scenario_id / proposal_id, voter_name, is_available）。`src/app/scenarios/[id]/schedule/page.tsx` を "use client" で新規作成（候補日一覧 + 各日への○×投票UI）。KPは `supabase.from("schedule_proposals").insert({ scenario_id, proposed_at })` で候補追加、PLは `supabase.from("schedule_votes").upsert({ proposal_id, voter_name, is_available })` で回答。集計は proposed_at ごとに○票数/×票数を並べてバー表示（CSSのみ）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「日程調整」リンクと「投票受付中」バッジを追加。DBテーブルは `schedule_proposals`・`schedule_votes` を新規作成（Supabase ダッシュボードで実施）。
 **コミット:** `feat: session schedule voting with candidate dates for scenario planning`
 
-## [TODO] 探索者「絆」スコア管理（DG/CoC7版絆ルール） — 優先度: 中
+## [DONE] 探索者「絆」スコア管理（DG/CoC7版絆ルール） — 優先度: 中
 **対象:** PL
 **概要:** Delta Green・CoC7版の「絆」ルールに基づき、キャラクターが持つ絆相手（家族・友人等）のスコア・ダメージ・喪失フラグを記録・管理できる機能。CharacterRelation（一行メモ）とは別に数値スコアで追跡し、ダメージを受けた絆の回復やセッション中の絆喪失を記録する。
 **実装ヒント:** `src/lib/supabase.ts` に `CharacterBond` 型はすでに定義済み（id, character_id, target_name, bond_score, damage_taken, is_lost, notes）。Supabaseに `character_bonds` テーブルを新規作成（上記カラム構成）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（一覧 + 追加・更新フォーム）。各絆カードに「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置し `supabase.from("character_bonds").update({ damage_taken, is_lost }).eq("id", id)` で即時更新。is_lost の絆はグレーアウト表示で残し「記録」として保持。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加し、ダメージを受けた絆がある場合は警告バッジを表示。`src/lib/supabase.ts` の `CharacterBond` 型に `created_at` を確認して型追記（未定義なら追加）。
