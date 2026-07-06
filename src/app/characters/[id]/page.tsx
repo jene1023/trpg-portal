@@ -23,6 +23,7 @@ import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
 import DiceShortcutPad from "@/app/_components/DiceShortcutPad";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
+import SuccessionButton from "@/app/_components/SuccessionButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -57,6 +58,16 @@ export default async function CharacterDetailPage({ params }: Props) {
         .eq("title", char.scenario_name)
         .maybeSingle()
         .then((r) => r.data?.discord_webhook_url ?? null)
+    : null;
+
+  // 前任探索者（このキャラが後継者である場合）
+  const predecessor = char.successor_of
+    ? await supabase
+        .from("characters")
+        .select("id, name, status")
+        .eq("id", char.successor_of)
+        .maybeSingle()
+        .then((r) => r.data)
     : null;
 
   const { count: galleryCount } = await supabase
@@ -675,6 +686,34 @@ export default async function CharacterDetailPage({ params }: Props) {
                 最終章を記録する
               </span>
               <span className="text-coc-gold">→</span>
+            </Link>
+          )}
+
+          {/* 後継者設定（死亡・引退のみ） */}
+          {char.status !== "alive" && (
+            <SuccessionButton
+              currentCharacterId={id}
+              currentCharacterName={char.name}
+            />
+          )}
+
+          {/* 前任探索者リンク（このキャラが後継者の場合） */}
+          {predecessor && (
+            <Link
+              href={`/characters/${predecessor.id}`}
+              className="flex items-center justify-between rounded-lg border border-purple-800/50 bg-purple-950/20 px-4 py-3 text-sm text-purple-300 hover:text-purple-200 hover:border-purple-700 transition-colors motion-safe:active:scale-[0.98]"
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-base leading-none">⟵</span>
+                前任探索者: {predecessor.name}
+                {predecessor.status === "dead" && (
+                  <span className="rounded bg-red-900/40 border border-red-800/60 px-1.5 py-0.5 text-xs">死亡</span>
+                )}
+                {predecessor.status === "retired" && (
+                  <span className="rounded bg-gray-700/40 border border-gray-600/60 px-1.5 py-0.5 text-xs">引退</span>
+                )}
+              </span>
+              <span className="text-purple-400">→</span>
             </Link>
           )}
 

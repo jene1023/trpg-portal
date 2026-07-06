@@ -1060,7 +1060,7 @@
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「譲渡」ボタンを追加（"use client" のまま）。クリックで「譲渡先キャラクター選択」モーダルを表示し、同シナリオの参加者（`supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", scenarioId)`）から選択。シナリオ不参加の場合は全キャラ一覧（`supabase.from("characters").select("id, name")`）を代替として表示。確認後に `supabase.from("inventory_items").update({ character_id: targetCharacterId }).eq("id", itemId)` で更新しリスト再取得。追加DBなし（既存 `inventory_items` テーブルのみ使用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「所持品」リンク先で即座に使えるよう、インベントリページ内に自然に配置する。
 **コミット:** `feat: item transfer between party characters for in-session inventory management`
 
-## [TODO] 探索者「後継者」リンク（前任キャラクター接続） — 優先度: 低
+## [DONE] 探索者「後継者」リンク（前任キャラクター接続） — 優先度: 低
 **対象:** PL / 共通
 **概要:** 長期キャンペーンで旧探索者が死亡・引退した際、後継の新探索者を「前任キャラクターの後継者」としてリンクできる機能。旧キャラの遺品（アイテム）を後継者に引き継ぐオプションも提供し、シナリオをまたいだ物語の連続性を記録する。
 **実装ヒント:** `characters` テーブルに `successor_of: uuid | null REFERENCES characters(id)` カラムをALTER TABLEで追加（自己参照外部キー、ON DELETE SET NULL）。`src/lib/supabase.ts` の `Character` 型に `successor_of: string | null` を追加。`src/app/characters/[id]/page.tsx`（status が "dead" または "retired" のキャラ詳細）に「後継者を設定」ボタンを追加し（"use client" コンポーネント）、キャラクター選択UIから `supabase.from("characters").update({ successor_of: currentId }).eq("id", successorId)` で後継者に前任リンクを設定。後継者のキャラクター詳細ページで `successor_of` が設定されていれば「前任探索者: [名前] →」リンクを表示。「前任者の遺品を引き継ぐ」ボタンで `supabase.from("inventory_items").update({ character_id: successorId }).eq("character_id", currentId)` を実行するオプションを提供（確認ダイアログ必須）。追加DBカラムのみ（新テーブルなし）。

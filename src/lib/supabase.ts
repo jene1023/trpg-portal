@@ -61,6 +61,7 @@ export type Character = {
   weight_kg: number | null;
   mythos_books_read: number;
   rule_edition: "6th" | "7th";
+  successor_of: string | null;
   created_at: string;
   updated_at: string;
 };
