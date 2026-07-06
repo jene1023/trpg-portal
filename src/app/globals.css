@@ -508,6 +508,21 @@ body {
   }
 }
 
+/* ポートレート未設定フォールバック: 古い写真が失われた後の羊皮紙調背景 */
+/* 燭台の暖光が上から差し込む大気感を与え、coc-card-bg と同じ世界観を保つ */
+.coc-portrait-fallback {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.70' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.040'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 72% 58% at 50% 20%, rgba(201, 133, 58, 0.060) 0%, transparent 65%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(7, 5, 3, 0.30) 100%),
+    linear-gradient(
+      165deg,
+      var(--color-coc-raised)  0%,
+      var(--color-coc-surface) 50%,
+      var(--color-coc-bg)      100%
+    );
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }

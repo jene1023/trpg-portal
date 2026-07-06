@@ -21,9 +21,17 @@ export default function PortraitImage({ url, name, className = "" }: Props) {
 
   return (
     <div
-      className={`flex items-center justify-center bg-coc-surface text-coc-muted ${className}`}
+      className={`coc-portrait-fallback flex items-center justify-center ${className}`}
     >
-      <span className="font-cinzel text-4xl select-none opacity-40">
+      <span
+        className="font-cinzel text-5xl select-none"
+        style={{
+          color: "var(--color-coc-gold-dim)",
+          opacity: 0.42,
+          textShadow: "0 0 28px rgba(201,133,58,0.22), 0 2px 8px rgba(0,0,0,0.50)",
+          letterSpacing: "0.05em",
+        }}
+      >
         {name.charAt(0)}
       </span>
     </div>
