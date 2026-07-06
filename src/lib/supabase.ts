@@ -53,6 +53,7 @@ export type Character = {
   height_cm: number | null;
   weight_kg: number | null;
   mythos_books_read: number;
+  rule_edition: "6th" | "7th";
   created_at: string;
   updated_at: string;
 };

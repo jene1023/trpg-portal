@@ -14,6 +14,8 @@ import {
   calcDamageBonus,
   calcBuild,
   calcMov,
+  calcOccupationPoints6th,
+  calcPersonalPoints6th,
 } from "@/lib/coc-calc";
 
 type SkillRow = Omit<CharacterSkill, "id" | "character_id"> & { tempId: string };
@@ -61,6 +63,9 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   const [gender, setGender] = useState(initialData?.gender ?? "");
   const [scenarioName, setScenarioName] = useState(initialData?.scenario_name ?? "");
   const [status, setStatus] = useState<CharacterStatus>(initialData?.status ?? "alive");
+  const [ruleEdition, setRuleEdition] = useState<"6th" | "7th">(
+    (initialData?.rule_edition as "6th" | "7th") ?? "7th"
+  );
 
   // --- 能力値 ---
   const [str, setStr] = useState(initialData?.str ?? 50);
@@ -169,7 +174,9 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
     }
   }, [con, pow, siz, isEdit]);
 
-  // 能力値オートロール（CoC7版: STR/CON/POW/DEX/APP=3D6×5, SIZ/INT/EDU=2D6×5+6）
+  // 能力値オートロール
+  // 7版: STR/CON/POW/DEX/APP=3D6×5, SIZ/INT/EDU=(2D6+6)×5
+  // 6版: STR/CON/POW/DEX/APP=3D6×5, SIZ/INT=2D6×5+6, EDU=3D6×5+6
   function rollDice(count: number, sides: number) {
     let total = 0;
     for (let i = 0; i < count; i++) {
@@ -183,9 +190,17 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
     setPow(rollDice(3, 6) * 5);
     setDex(rollDice(3, 6) * 5);
     setApp(rollDice(3, 6) * 5);
-    setSiz(rollDice(2, 6) * 5 + 6);
-    setIntStat(rollDice(2, 6) * 5 + 6);
-    setEdu(rollDice(2, 6) * 5 + 6);
+    if (ruleEdition === "6th") {
+      // 6版: SIZ/INT = 2D6×5+6、EDU = 3D6×5+6
+      setSiz(rollDice(2, 6) * 5 + 6);
+      setIntStat(rollDice(2, 6) * 5 + 6);
+      setEdu(rollDice(3, 6) * 5 + 6);
+    } else {
+      // 7版: SIZ/INT/EDU = (2D6+6)×5
+      setSiz(rollDice(2, 6) * 5 + 6);
+      setIntStat(rollDice(2, 6) * 5 + 6);
+      setEdu(rollDice(2, 6) * 5 + 6);
+    }
   }
 
   // ポートレートファイル選択
@@ -269,6 +284,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         height_cm: heightCm ? parseInt(heightCm) : null,
         weight_kg: weightKg ? parseFloat(weightKg) : null,
         mythos_books_read: parseInt(mythosBooks) || 0,
+        rule_edition: ruleEdition,
       };
 
       if (isEdit) {
@@ -384,6 +400,17 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
               ))}
             </select>
           </div>
+          <div>
+            <label className={labelClass}>ルールエディション</label>
+            <select
+              value={ruleEdition}
+              onChange={(e) => setRuleEdition(e.target.value as "6th" | "7th")}
+              className={inputClass}
+            >
+              <option value="7th">CoC 7版</option>
+              <option value="6th">CoC 6版</option>
+            </select>
+          </div>
         </div>
 
         {/* ポートレートアップロード */}
@@ -469,6 +496,22 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
           <div>ダメージボーナス: <span className="text-coc-text font-bold">{calcDamageBonus(str, siz)}</span></div>
           <div>ビルド: <span className="text-coc-text font-bold">{calcBuild(str, siz)}</span></div>
           <div>移動力: <span className="text-coc-text font-bold">{calcMov(str, dex, siz)}</span></div>
+        </div>
+        {/* 版別技能ポイント */}
+        <div className="rounded-md border border-coc-border bg-coc-void px-3 py-2 text-xs text-coc-muted space-y-1">
+          {ruleEdition === "6th" ? (
+            <>
+              <p className="text-coc-gold font-semibold">CoC 6版 — 技能ポイント配分</p>
+              <p>職業技能ポイント（EDU×20）: <span className="text-coc-text font-bold">{calcOccupationPoints6th(edu)}</span></p>
+              <p>趣味技能ポイント（INT×10）: <span className="text-coc-text font-bold">{calcPersonalPoints6th(intStat)}</span></p>
+            </>
+          ) : (
+            <>
+              <p className="text-coc-gold font-semibold">CoC 7版 — 技能ポイント配分</p>
+              <p>職業技能ポイント（職業による。例: EDU×4＝<span className="text-coc-text font-bold">{edu * 4}</span>）</p>
+              <p>趣味技能ポイント（INT×2）: <span className="text-coc-text font-bold">{intStat * 2}</span></p>
+            </>
+          )}
         </div>
       </div>
 

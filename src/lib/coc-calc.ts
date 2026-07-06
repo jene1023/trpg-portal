@@ -43,3 +43,13 @@ export function half(value: number): number {
 export function fifth(value: number): number {
   return Math.floor(value / 5);
 }
+
+// CoC 6版用: 職業技能ポイント = EDU × 20
+export function calcOccupationPoints6th(edu: number): number {
+  return edu * 20;
+}
+
+// CoC 6版用: 趣味技能ポイント = INT × 10
+export function calcPersonalPoints6th(int: number): number {
+  return int * 10;
+}

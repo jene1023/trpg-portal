@@ -948,7 +948,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/replay/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("character_id, characters(name)").eq("scenario_id", id)` で参加者取得後、`Promise.all` で各キャラの `sessions`（session_number・title・summary・san_loss・hp_loss）と `dice_rolls`（critical_success/fumbleのみ・rolled_at昇順）を取得。全イベントを `played_at`/`rolled_at` でソートし、キャラ名バッジ付きのタイムライン形式で表示（CSSの `border-left` で縦線）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「リプレイ」リンクを追加。追加DBなし。
 **コミット:** `feat: scenario replay page combining all participant session logs`
 
-## [TODO] CoC 6版キャラクターシート対応 — 優先度: 高
+## [DONE] CoC 6版キャラクターシート対応 — 優先度: 高
 **対象:** PL / 共通
 **概要:** 現在のポータルはCoC 7版専用だが、日本国内では6版コミュニティが今も根強く活動している。キャラクター作成時に6版/7版を選択できるようにし、版ごとの技能ポイント計算式・技能基本値・技能リストの差異を吸収する。
 **リサーチ根拠:** クトゥルフWEBダイス・キャラクター保管所など主要ツールが「6版・7版両対応」をウリにしており、6版ユーザーが既存ツールを使い続ける最大の理由が版対応であることを複数サイトで確認した。
