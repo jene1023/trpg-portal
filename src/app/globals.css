@@ -204,7 +204,7 @@ body {
   background: linear-gradient(
     105deg,
     transparent 40%,
-    rgba(201, 133, 58, 0.09) 50%,
+    rgba(201, 133, 58, 0.13) 50%,
     transparent 60%
   );
   transform: translateX(-130%) skewX(-20deg);
@@ -374,6 +374,7 @@ body {
 }
 
 /* アルケイン・コーナーフレーム: 古文書の対角線の二隅を飾る細い金線 */
+/* ホバー時に角線が 14px → 22px へ伸び、扉が開くように迎え入れる */
 .coc-corner-frame {
   position: relative;
 }
@@ -391,7 +392,16 @@ body {
 
 .coc-corner-frame:hover::before,
 .coc-corner-frame:hover::after {
-  opacity: 0.68;
+  opacity: 0.75;
+  width: 22px;
+  height: 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-corner-frame::before,
+  .coc-corner-frame::after {
+    transition: opacity 0.5s ease, width 0.45s cubic-bezier(0.23, 1, 0.32, 1), height 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+  }
 }
 
 .coc-corner-frame::before {
@@ -521,6 +531,21 @@ body {
       var(--color-coc-surface) 50%,
       var(--color-coc-bg)      100%
     );
+}
+
+/* ツールリンクグリッド: ホバー時に → 矢印が右へ引き寄せられるように微スライド */
+.coc-tool-grid a > span:last-child {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-tool-grid a > span:last-child {
+    transition: transform 0.25s ease-out;
+  }
+
+  .coc-tool-grid a:hover > span:last-child {
+    transform: translateX(4px);
+  }
 }
 
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
