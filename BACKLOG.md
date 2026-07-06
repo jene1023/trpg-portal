@@ -1042,7 +1042,7 @@
 **実装ヒント:** `src/app/characters/[id]/monthly-report/page.tsx` を新規作成（Server Component）。クエリパラメータ `?month=YYYY-MM` で対象月を指定（未指定時は当月）。`supabase.from("sessions").select("*").eq("character_id", id).gte("played_at", monthStart).lt("played_at", monthEnd)` でセッション取得し san_loss / hp_loss 合計・セッション数を集計。`supabase.from("growth_history").select("*").eq("character_id", id).gte("created_at", monthStart).lt("created_at", monthEnd)` から成長記録件数も取得。グラフはCSSのみのバー表示（既存 `stats-graph` と同方式）で依存ライブラリ不要。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「月次レポート」リンクを追加。追加DBなし。
 **コミット:** `feat: monthly activity summary report per character`
 
-## [TODO] セッション安全ツール（X-Card・ライン＆ヴェール） — 優先度: 高
+## [DONE] セッション安全ツール（X-Card・ライン＆ヴェール） — 優先度: 高
 **対象:** KP / 共通
 **概要:** セッション内で不快な場面を即座に止める「X-Card」シグナルと、セッション前にKPとPL全員がコンテンツの「ライン（絶対NG）」「ヴェール（フェードアウト可）」を合意できるフォームをシナリオに紐づけて管理する機能。TRPGの安全ツールとして国際的に普及している仕組みを日本語UIで提供し、参加者全員が安心して卓を楽しめるようにする。
 **実装ヒント:** Supabaseに `scenario_safety_settings` テーブルを追加（id, scenario_id: uuid UNIQUE, x_card_enabled: boolean DEFAULT true, lines: text | null（絶対NGの事項・箇条書き）, veils: text | null（フェードアウト可の事項）, session_zero_notes: text | null, updated_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成（`supabase.from("scenario_safety_settings").upsert(...)` でシナリオ1件につき1レコード管理）。X-Card有効時はパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に目立つ「X（中断）」ボタンを追加し、クリック時に赤背景フラッシュと「シーンを一時中断します」テキストを全画面表示（Supabase Realtime の broadcast でシナリオ参加者全員に通知）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「安全設定」リンクと設定済みバッジを追加。`src/lib/supabase.ts` に `ScenarioSafetySettings` 型を追加。

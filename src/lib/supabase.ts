@@ -775,3 +775,13 @@ export type PlayerFeedback = {
   improvement: string | null;
   created_at: string;
 };
+
+export type ScenarioSafetySettings = {
+  id: string;
+  scenario_id: string;
+  x_card_enabled: boolean;
+  lines: string | null;
+  veils: string | null;
+  session_zero_notes: string | null;
+  updated_at: string;
+};

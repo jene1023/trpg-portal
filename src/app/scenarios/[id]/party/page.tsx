@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, Attenda
 import PartyMemberCard from "@/app/_components/PartyMemberCard";
 import PartySanCheck from "@/app/_components/PartySanCheck";
 import AttendanceToggle from "@/app/_components/AttendanceToggle";
+import XCardButton from "@/app/_components/XCardButton";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character;
@@ -27,13 +28,21 @@ export default async function PartyViewPage({ params }: Props) {
 
   if (!scenario) notFound();
 
-  const { data: participants } = await supabase
-    .from("scenario_participants")
-    .select("*, characters(*)")
-    .eq("scenario_id", id)
-    .order("created_at", { ascending: true });
+  const [{ data: participants }, { data: safetySettings }] = await Promise.all([
+    supabase
+      .from("scenario_participants")
+      .select("*, characters(*)")
+      .eq("scenario_id", id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("scenario_safety_settings")
+      .select("x_card_enabled")
+      .eq("scenario_id", id)
+      .single(),
+  ]);
 
   const list = (participants ?? []) as ParticipantWithCharacter[];
+  const xCardEnabled = safetySettings?.x_card_enabled ?? false;
 
   const attendingCount = list.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length;
   const absentCount = list.filter((p) => (p.attendance_status as AttendanceStatus) === "absent").length;
@@ -56,6 +65,12 @@ export default async function PartyViewPage({ params }: Props) {
         <h1 className="font-cinzel text-xl font-bold text-coc-text">パーティービュー</h1>
         <p className="text-xs text-coc-muted mt-1">参加者全員のHP / MP / SANを一覧確認</p>
       </div>
+
+      {xCardEnabled && (
+        <div className="mb-5">
+          <XCardButton scenarioId={id} />
+        </div>
+      )}
 
       {list.length > 0 && (
         <div className="mb-4 flex items-center gap-4 rounded-lg border border-coc-border bg-coc-surface px-4 py-2.5 text-sm">
