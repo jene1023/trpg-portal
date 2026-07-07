@@ -1117,3 +1117,27 @@
 **リサーチ根拠:** Charaenoの「公開URLで誰でもキャラシートを閲覧できる」機能がユーザーレビューで高評価を得ており、キャラクター保管所でも公開/非公開設定が標準機能として定着していることを確認した。
 **実装ヒント:** `characters` テーブルに `public_token: uuid | null DEFAULT null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `public_token: string | null` を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「公開URLを生成」ボタン（"use client" コンポーネント `PublicShareButton.tsx` として新規作成）を追加し、クリックで `crypto.randomUUID()` を生成して `supabase.from("characters").update({ public_token })` で保存後にURLをクリップボードにコピー。`src/app/public/characters/[token]/page.tsx` を新規作成（Server Component、Supabase認証不要）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*)").eq("public_token", token)` で取得し閲覧専用レイアウト（編集UIなし）で表示。「公開を無効化」ボタンで `public_token: null` にリセット。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: public read-only character sheet URL for sharing without login`
+
+## [TODO] 派生ステータス自動計算補助（キャラクター作成UI改善） — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクター作成・編集フォームで能力値（STR/CON/POW/DEX/SIZ等）を入力した後に「派生値を自動計算」ボタンを押すと、CoC7版の計算式に基づいてHP_max・MP_max・SAN_start・ダメージボーナスを自動計算してフォームに反映する機能。既存の「能力値オートロール」はダイス振り機能のみでHP等の派生値は手動入力のままという不便を解消する。
+**実装ヒント:** `src/app/_components/CharacterForm.tsx` に「派生値を自動計算」ボタンを追加（"use client"のまま）。クリック時に `hp_max = Math.floor((con + siz) / 10)` (CoC7版)、`mp_max = pow`、`san_start = pow * 5`、DBは STR+SIZの範囲表でダメージボーナス文字列を算出してstateに反映。手動修正も引き続き可能なよう上書き可能な入力欄のまま。6版キャラ（`rule_edition === "6th"`）では `hp_max = Math.floor((con + siz) / 2)` の別計算式を使う。追加DBなし。
+**コミット:** `feat: auto-calculate derived stats from ability scores in character form`
+
+## [TODO] シナリオ別探索者パーソナルフック管理 — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** シナリオ参加者（`scenario_participants`）ごとに「なぜこの探索者がシナリオに関わることになったか」という個人導入テキスト（パーソナルフック）を登録できる機能。ハンドアウトはKP→PL全体向けの情報配布だが、こちらはキャラクター単位の参加動機メモ。KPが各PLの動機を把握し、PL自身もセッション前に自分のキャラクターの立ち位置を確認するために使う。
+**実装ヒント:** `scenario_participants` テーブルに `hook_text: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `hook_text: string | null` を追加。`src/app/scenarios/[id]/participants/page.tsx` の各参加者行に「フックを編集」インラインテキストエリア（"use client"）を追加し、`supabase.from("scenario_participants").update({ hook_text }).eq("id", id)` で保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のパーティーセクションにフックが設定済みの参加者数バッジを追加。
+**コミット:** `feat: personal hook text per participant for scenario intro management`
+
+## [TODO] セッションタイマーウィジェット（KP用時間管理） — 優先度: 低
+**対象:** KP / 共通
+**概要:** セッション全体の経過時間をリアルタイムで計測できるシンプルなタイマーウィジェット。既存の `ScenePacingList.tsx` は場面の開始/終了の手動記録だが、こちらはリアルタイムのカウントアップタイマー。セッション残り時間を把握し、KPがペース管理に使う。ページリロードしても状態が保持されるよう `localStorage` に保存する。
+**実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。`useState` でタイマーの状態（running/paused/stopped, elapsed_seconds, lap_times）を管理し、`useEffect` で `setInterval` を使った秒刻みカウントアップを実装。`localStorage` の `session_timer_<scenario_id>` キーに elapsed_seconds と started_at を保存し、リロード後もタイマーが継続する。ラップ機能で場面ごとの経過時間も記録可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし。
+**コミット:** `feat: session timer widget with localStorage persistence for KP pacing`
+
+## [TODO] AIシナリオシノプシス生成（KP向けシナリオ概要自動下書き） — 優先度: 中
+**対象:** KP
+**概要:** KPがシナリオのタイトル・舞台・主要キーワード（例：「1920年代ボストン、行方不明の教授、イカれた儀式」）を入力するとClaude APIがシノプシス（synopsis）とGMメモ下書きを生成してくれる機能。既存の `AIBackstoryGenerator.tsx`（探索者バックストーリー自動生成）のシナリオ版。白紙状態のシナリオ作成を加速する。
+**実装ヒント:** `src/app/_components/AIScenarioDraftGenerator.tsx` を "use client" で新規作成。タイトル・舞台・時代・キーワード・プレイ人数入力 → `/api/ai/scenario-draft/route.ts`（POST）に送信 → Anthropic SDK `claude-sonnet-5` で「CoCシナリオのシノプシスとGMメモを日本語で生成」プロンプトを呼ぶ → 結果をテキストエリアに表示し「このシノプシスを使う」ボタンで `ScenarioForm` の synopsis フィールドに反映。`src/app/scenarios/new/page.tsx` に「AIで概要を下書き」ボタンとして組み込む。追加DBなし。
+**コミット:** `feat: AI scenario synopsis draft generator for KP using Claude API`
