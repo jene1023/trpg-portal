@@ -1154,7 +1154,7 @@
 **実装ヒント:** `src/app/_components/SessionSummaryGenerator.tsx` を "use client" で新規作成。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「AIでまとめを生成」ボタンを配置。`/api/ai/session-summary/route.ts`（POST）で `{ sessionId, characterId }` を受け取り、`supabase.from("sessions").select("*").eq("id", sessionId)` + `supabase.from("dice_rolls").select("*").eq("character_id", characterId).gte("rolled_at", session.played_at)` でデータ取得後、`claude-haiku-4-5-20251001` で「TRPGリプレイ風の短い語り」を生成。結果をテキストエリアに表示し「このサマリーで更新」ボタンで `sessions.summary` に上書き保存するオプションを提供。追加DBなし。
 **コミット:** `feat: AI session summary generator for narrative log recap`
 
-## [TODO] スナップショット前後比較ビュー（セッション成長差分） — 優先度: 中
+## [DONE] スナップショット前後比較ビュー（セッション成長差分） — 優先度: 中
 **対象:** PL
 **概要:** 既存のキャラクタースナップショット保存機能（`CharacterSnapshot`、SnapshotSaveButton.tsx DONE）を活用し、任意の2スナップショットを選択して能力値・技能値・HP/SANの変化を差分表示するビュー。「セッション前スナップショット vs 現在」を比較することで、セッション中の成長・損失を一目で確認できる。
 **実装ヒント:** `src/app/characters/[id]/snapshot-compare/page.tsx` を "use client" で新規作成。`supabase.from("character_snapshots").select("*").eq("character_id", id).order("created_at", {ascending: false})` でスナップショット一覧を取得し、2件をプルダウンで選択。`snapshot_data`（JSONB）に保存されている能力値・技能値を比較し、変化した項目を色分け表示（増加→緑、減少→赤、変化なし→グレー）。追加DBなし（既存 `character_snapshots` テーブルを流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット比較」リンクを追加。
