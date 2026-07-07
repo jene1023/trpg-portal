@@ -1207,3 +1207,27 @@
 **概要:** PLがセッション前に「今回のキャラクター紹介」を定型フォーマット（動機・秘密の目標）で書いてシナリオ参加者全員で共有できるページ。参加者同士が互いのキャラクターを事前に把握してセッションをスムーズに始められる。
 **実装ヒント:** Supabaseに `session_introductions` テーブルを追加（id, scenario_id, character_id, motivation, secret_goal, created_at）。`src/app/scenarios/[id]/introductions/page.tsx` を新規作成。各参加キャラの紹介カードを横並び表示し、キャラクター既存フィールド（catchphrase, speech_style, occupation）と新規 `motivation`/`secret_goal` を組み合わせて表示。編集はキャラクター所有者のみ（認証チェック）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「自己紹介シート」リンクを追加。`src/lib/supabase.ts` に `SessionIntroduction` 型を追加。
 **コミット:** `feat: pre-session character introduction sheet for party sharing`
+
+## [TODO] キャラクター神話遭遇記録 — 優先度: 高
+**対象:** PL
+**概要:** キャラクターが直接遭遇した神話生物・神格・アーティファクトをセッション単位で記録し、キャラクター固有の「神話体験ログ」として蓄積できる機能。既存の `mythos/page.tsx` はグローバル参照ページだが、こちらはキャラクターの体験値としての遭遇履歴に特化する。
+**実装ヒント:** Supabaseに `character_mythos_encounters` テーブルを追加（id, character_id, entity_name, entity_type: "creature"|"deity"|"artifact"|"spell"|"other", session_label, san_lost, notes, encountered_at, created_at）。`src/app/characters/[id]/mythos-log/page.tsx` を新規作成（一覧＋追加フォーム）。既存クリーチャーテーブル（`creatures`）からの参照選択と、自由入力の両方を提供。遭遇エンティティごとにSAN喪失累計を集計表示。`src/lib/supabase.ts` に `CharacterMythosEncounter` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）と `preflight/page.tsx` に「神話遭遇ログ」リンクを追加。
+**コミット:** `feat: character mythos encounter log per investigator`
+
+## [TODO] セッションハイライト投票（ベストシーン記録） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション終了後にKP・PLが「最も印象的だったシーン/瞬間」を自由テキストで投稿し合い、シナリオ単位でハイライト集として閲覧できる機能。既存の `session-review/page.tsx` や `reflections/page.tsx` はログ/振り返りだが、こちらは参加者全員が「名シーン投票」として盛り上がれる一覧を指向する。
+**実装ヒント:** Supabaseに `session_highlights` テーブルを追加（id, scenario_id, author_name, character_name, scene_description, category: "roll"|"rp"|"story"|"comedy"|"tragedy"|"other", liked_count: int DEFAULT 0, created_at）。`src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成（カード一覧＋投稿フォーム）。いいね数は `supabase.from("session_highlights").update({ liked_count: prev + 1 }).eq("id", id)` で楽観的更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。`src/lib/supabase.ts` に `SessionHighlight` 型を追加。
+**コミット:** `feat: session highlight voting for memorable scene collection`
+
+## [TODO] GMメモ全文検索（グローバル検索拡張） — 優先度: 中
+**対象:** KP
+**概要:** 現在のグローバル検索（`src/app/search/page.tsx`）はシナリオのタイトル・キャラクター名・NPC名が対象で、シナリオの `gm_notes`（GMメモ）本文は検索できない。シナリオが増えると過去のGMメモを探すのに時間がかかるため、gm_notes内テキスト検索を追加する。
+**実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内 `Promise.all` に `supabase.from("scenarios").select("id, title, gm_notes, status").ilike("gm_notes", \`%${q}%\`)` を追加。結果セクションに「GMメモ」セクションを追加し、マッチ箇所前後50文字を抜粋表示（キーワードをハイライト）。各結果はシナリオ詳細ページ（`/scenarios/[id]`）へリンク。追加DBなし。
+**コミット:** `feat: extend global search to include scenario GM notes content`
+
+## [TODO] 技能カテゴリ別レーダービュー（スキルバランス可視化） — 優先度: 低
+**対象:** PL
+**概要:** キャラクターの技能値をカテゴリ別（戦闘/探索/対人/学術/芸術・製作/その他）に平均集計し、各軸の強み・弱みをレーダーチャート風のCSSビジュアルで表示するページ。現在の `dice-stats/page.tsx` はロール頻度・成功率の集計だが、こちらは「育て方のバランス」を一目で俯瞰する用途に特化する。
+**実装ヒント:** `src/app/characters/[id]/skill-radar/page.tsx` を新規作成（Server Component）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得後、技能名に基づいてカテゴリに分類（例: 格闘/射撃/回避/鎧→戦闘、目星/聴耳/図書館→探索、説得/心理学/言いくるめ→対人、etc.）してカテゴリ平均を算出。レーダーチャートはCSSの clip-path またはSVG polygon で依存ライブラリ不要。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スキルレーダー」リンクを追加。
+**コミット:** `feat: skill category radar view for character balance visualization`
