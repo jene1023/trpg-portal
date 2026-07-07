@@ -63,9 +63,17 @@ export default function PlayersPage() {
               key={player.id}
               className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4"
             >
-              <h2 className="font-cinzel font-semibold text-coc-text text-lg leading-tight mb-2">
-                {player.display_name}
-              </h2>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="font-cinzel font-semibold text-coc-text text-lg leading-tight">
+                  {player.display_name}
+                </h2>
+                <Link
+                  href={`/players/${player.id}`}
+                  className="text-xs text-coc-gold hover:underline"
+                >
+                  詳細 →
+                </Link>
+              </div>
               <div className="flex flex-col gap-1.5">
                 {player.contact_discord && (
                   <div>

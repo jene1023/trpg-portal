@@ -1172,7 +1172,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id).order("created_at")` でシナリオに紐づく手がかりを全取得（`scenario_clues`のscenario_idカラムを使用）。status（`found`/`investigating`/`resolved`）をselectで変更できる行内UIを実装し `supabase.from("scenario_clues").update({status}).eq("id", clueId)` で即時更新。手がかり追加フォーム（title, content, character_id任意）もインラインで提供。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存 `scenario_clues` と `ScenarioClue` 型を流用）。
 **コミット:** `feat: scenario clue board for KP to track investigation progress`
 
-## [TODO] プレイヤー詳細ページ — 優先度: 中
+## [DONE] プレイヤー詳細ページ — 優先度: 中
 **対象:** KP
 **概要:** `players/page.tsx` でプレイヤー一覧は表示できるが、個人詳細ページが存在しない。KPが特定プレイヤーの連絡先（Discord・その他）・嗜好ジャンル・過去参加シナリオ・使用してきた探索者を一画面で確認できるプロフィールページ。セッション招集や配役選定に使う。
 **実装ヒント:** `src/app/players/[id]/page.tsx` を Server Component で新規作成。`supabase.from("players").select("*").eq("id", id)` でプレイヤー取得。`supabase.from("scenario_participants").select("*, scenarios(title, status), characters(name, occupation)").eq("player_id", id).order("created_at", {ascending: false})` で参加履歴を取得。contact_discord・contact_other・preferred_genre・notesをセクション分けして表示。`src/app/players/page.tsx` の各プレイヤー行に `/players/[id]` へのリンクを追加。`src/lib/supabase.ts` の `Player` 型はそのまま流用。追加DBなし。
