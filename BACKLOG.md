@@ -1078,7 +1078,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に `CharacterBond` 型はすでに定義済み（id, character_id, target_name, bond_score, damage_taken, is_lost, notes）。Supabaseに `character_bonds` テーブルを新規作成（上記カラム構成）。`src/app/characters/[id]/bonds/page.tsx` を新規作成（一覧 + 追加・更新フォーム）。各絆カードに「ダメージを受ける（-1）」「回復（+1）」「喪失」ボタンを配置し `supabase.from("character_bonds").update({ damage_taken, is_lost }).eq("id", id)` で即時更新。is_lost の絆はグレーアウト表示で残し「記録」として保持。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆」リンクを追加し、ダメージを受けた絆がある場合は警告バッジを表示。`src/lib/supabase.ts` の `CharacterBond` 型に `created_at` を確認して型追記（未定義なら追加）。
 **コミット:** `feat: character bond score management for DG/CoC7 bond mechanics`
 
-## [TODO] クトゥルフ神話技能 → SAN 上限自動連動チェック — 優先度: 高
+## [DONE] クトゥルフ神話技能 → SAN 上限自動連動チェック — 優先度: 高
 **対象:** PL / 共通
 **概要:** CoC7版のコアルール「SAN最大値 = 99 − クトゥルフ神話技能の現在値」を自動でチェックし、神話技能値が上がった際に san_max の更新を提案するUI。現在は san_max と神話技能が独立管理されており、ルール上の制約が手動管理になっている。
 **実装ヒント:** `src/app/_components/SkillList.tsx` で技能名が「クトゥルフ神話」または "Cthulhu Mythos" のとき、current_value 変更後に `const newSanMax = 99 - newValue` を算出し、現在の `san_max` と異なる場合は「SAN最大値を ${newSanMax} に更新しますか？」のインラインバナーを表示。確認後に `supabase.from("characters").update({ san_max: newSanMax }).eq("id", characterId)` を実行（`san_current > newSanMax` のときは san_current も newSanMax にクランプする旨を警告）。キャラクター詳細ページのSANサマリーセクションにも「神話技能: X → SAN上限: ${99 - X}」インジケーターを追加（`character_skills` から「クトゥルフ神話」を検索）。追加DBなし。

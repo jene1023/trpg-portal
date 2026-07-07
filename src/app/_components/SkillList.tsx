@@ -48,6 +48,10 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
   const [editStr, setEditStr] = useState<string>("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [showThresholds, setShowThresholds] = useState(false);
+  const [sanMaxPrompt, setSanMaxPrompt] = useState<{
+    newSanMax: number;
+    willClampSanCurrent: boolean;
+  } | null>(null);
 
   function startEdit(skill: CharacterSkill) {
     setEditingId(skill.id);
@@ -72,14 +76,24 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
 
     if (skill.skill_name.startsWith("クトゥルフ神話")) {
       const newSanMax = Math.max(0, 99 - newVal);
-      const updates: Record<string, number> = { san_max: newSanMax };
-      if (sanCurrent !== undefined && sanCurrent > newSanMax) {
-        updates.san_current = newSanMax;
-      }
-      await supabase.from("characters").update(updates).eq("id", characterId);
+      const willClamp = sanCurrent !== undefined && sanCurrent > newSanMax;
+      setSanMaxPrompt({ newSanMax, willClampSanCurrent: willClamp });
     }
 
     setSavingId(null);
+  }
+
+  async function applySanMaxUpdate() {
+    if (!sanMaxPrompt || !isSupabaseConfigured) {
+      setSanMaxPrompt(null);
+      return;
+    }
+    const updates: Record<string, number> = { san_max: sanMaxPrompt.newSanMax };
+    if (sanMaxPrompt.willClampSanCurrent) {
+      updates.san_current = sanMaxPrompt.newSanMax;
+    }
+    await supabase.from("characters").update(updates).eq("id", characterId);
+    setSanMaxPrompt(null);
   }
 
   async function toggleGrowth(skillId: string) {
@@ -121,6 +135,35 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
 
   return (
     <div>
+      {/* クトゥルフ神話技能→SAN上限更新バナー */}
+      {sanMaxPrompt && (
+        <div className="rounded-md border border-purple-600/60 bg-purple-950/20 p-3 mb-4 space-y-2">
+          <p className="text-sm text-purple-300">
+            クトゥルフ神話技能が更新されました。CoC7版ルールに従いSAN最大値を{" "}
+            <strong className="text-purple-200">{sanMaxPrompt.newSanMax}</strong> に更新しますか？
+          </p>
+          {sanMaxPrompt.willClampSanCurrent && (
+            <p className="text-xs text-yellow-300">
+              ⚠ 現在のSAN値がSAN上限を超えているため、SAN現在値も {sanMaxPrompt.newSanMax} に切り下げられます。
+            </p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={applySanMaxUpdate}
+              className="px-3 py-1 text-xs rounded bg-purple-800/60 border border-purple-600/60 text-purple-200 hover:bg-purple-700/60 transition-colors"
+            >
+              更新する
+            </button>
+            <button
+              onClick={() => setSanMaxPrompt(null)}
+              className="px-3 py-1 text-xs rounded border border-coc-border text-coc-muted hover:text-coc-text transition-colors"
+            >
+              後で
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* お気に入り件数バッジ */}
       {favoriteCount > 0 && (
         <p className="text-xs text-yellow-400 mb-1">
