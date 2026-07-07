@@ -791,3 +791,15 @@ export type ScenarioSafetySettings = {
   session_zero_notes: string | null;
   updated_at: string;
 };
+
+export type NpcDispositionType = "friendly" | "neutral" | "hostile" | "unknown";
+
+export type NpcDisposition = {
+  id: string;
+  npc_id: string;
+  scenario_id: string;
+  disposition: NpcDispositionType;
+  notes: string | null;
+  updated_at: string;
+  created_at: string;
+};

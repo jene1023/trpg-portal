@@ -1196,7 +1196,7 @@
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「渡す」ボタンを追加（"use client" 化）。シナリオ参加者リストを `supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", ...)` で取得してターゲットを選択、`supabase.from("inventory_items").update({ character_id: targetId }).eq("id", itemId)` で移転。対象シナリオが未設定のキャラは全キャラ一覧から選択するフォールバックを提供。追加DBなし。
 **コミット:** `feat: item transfer between characters within a party`
 
-## [TODO] NPC感情状態トラッカー — 優先度: 中
+## [DONE] NPC感情状態トラッカー — 優先度: 中
 **対象:** KP
 **概要:** シナリオ中にNPCのPLへの態度（好意的/中立/敵対的/未知）をリアルタイム更新・管理できる機能。NPCとの関係推移をセッション中に一画面で俯瞰でき、KPが台詞トーンや行動選択の判断に役立てられる。
 **実装ヒント:** Supabaseに `npc_dispositions` テーブルを追加（id, npc_id, scenario_id, disposition: "friendly"|"neutral"|"hostile"|"unknown", notes, updated_at, created_at）。シナリオNPC管理ページ（`src/app/scenarios/[id]/npcs/page.tsx`）の各NPCカードに態度セレクター（色付きバッジ切り替え）を追加し `supabase.from("npc_dispositions").upsert(...)` で即時保存。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）にも直近シナリオでの態度を表示。`src/lib/supabase.ts` に `NpcDisposition` 型を追加。

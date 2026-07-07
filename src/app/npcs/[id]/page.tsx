@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel, NpcDispositionType } from "@/lib/supabase";
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
@@ -82,6 +82,22 @@ export default async function NpcDetailPage({ params }: Props) {
     .limit(10);
 
   const rollHistory: NpcDiceRoll[] = rolls ?? [];
+
+  const { data: dispositionRows } = await supabase
+    .from("npc_dispositions")
+    .select("id, scenario_id, disposition, updated_at, scenarios(id, title)")
+    .eq("npc_id", id)
+    .order("updated_at", { ascending: false });
+
+  const dispositions = (
+    (dispositionRows ?? []) as unknown as {
+      id: string;
+      scenario_id: string;
+      disposition: NpcDispositionType;
+      updated_at: string;
+      scenarios: { id: string; title: string } | null;
+    }[]
+  ).filter((d) => d.scenarios !== null);
 
   const { data: encounterRows } = await supabase
     .from("session_npc_encounters")
@@ -169,6 +185,51 @@ export default async function NpcDetailPage({ params }: Props) {
                 <p className="text-sm text-coc-text whitespace-pre-wrap">{npc.notes}</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* シナリオ別態度 */}
+        {dispositions.length > 0 && (
+          <div className="rounded-lg border border-coc-border bg-coc-surface p-4 space-y-3">
+            <h2 className="font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              シナリオ別態度
+            </h2>
+            <ul className="space-y-2">
+              {dispositions.map((d) => {
+                const badgeClass =
+                  d.disposition === "friendly"
+                    ? "border-green-700 bg-green-500/20 text-green-400"
+                    : d.disposition === "neutral"
+                    ? "border-blue-700 bg-blue-500/20 text-blue-400"
+                    : d.disposition === "hostile"
+                    ? "border-red-700 bg-red-500/20 text-red-400"
+                    : "border-gray-600 bg-gray-500/20 text-gray-400";
+                const label =
+                  d.disposition === "friendly"
+                    ? "好意的"
+                    : d.disposition === "neutral"
+                    ? "中立"
+                    : d.disposition === "hostile"
+                    ? "敵対的"
+                    : "未知";
+                return (
+                  <li
+                    key={d.id}
+                    className="flex items-center justify-between gap-3 rounded-md border border-coc-border bg-coc-raised px-3 py-2 text-sm"
+                  >
+                    <Link
+                      href={`/scenarios/${d.scenario_id}/npcs`}
+                      className="text-coc-text hover:text-coc-gold transition-colors truncate"
+                    >
+                      {d.scenarios!.title}
+                    </Link>
+                    <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium shrink-0 ${badgeClass}`}>
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 

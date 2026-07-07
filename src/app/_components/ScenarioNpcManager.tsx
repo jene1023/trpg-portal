@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2, X, ChevronRight } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc } from "@/lib/supabase";
+import NpcDispositionSelector from "./NpcDispositionSelector";
 
 type Props = {
   scenarioId: string;
@@ -107,6 +108,7 @@ export default function ScenarioNpcManager({ scenarioId, scenarioName, initialNp
                     {npc.faction}
                   </span>
                 )}
+                <NpcDispositionSelector npcId={npc.id} scenarioId={scenarioId} />
               </div>
               {npc.purpose && (
                 <p className="text-xs text-coc-muted line-clamp-2">{npc.purpose}</p>
