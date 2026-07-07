@@ -217,7 +217,7 @@ export default async function HomePage() {
                 <Link
                   key={scenario.id}
                   href={`/scenarios/${scenario.id}`}
-                  className="flex items-center justify-between rounded-lg border border-coc-gold-dim bg-coc-raised px-4 py-3 hover:border-coc-gold transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-coc-gold-dim bg-coc-raised px-4 py-3 transition-all duration-200 ease-out hover:border-coc-gold hover:shadow-[0_2px_12px_rgba(201,133,58,0.18)] motion-safe:hover:-translate-y-px"
                 >
                   <div>
                     <p className="text-sm font-medium text-coc-text">{scenario.title}</p>
@@ -284,7 +284,7 @@ export default async function HomePage() {
                 <Link
                   key={scenario.id}
                   href={`/scenarios/${scenario.id}`}
-                  className="group rounded-lg border border-coc-border coc-card-bg p-4 space-y-2 hover:border-coc-border-glow transition-colors"
+                  className="group relative rounded-lg border border-coc-border coc-card-bg p-4 space-y-2 coc-tile-shimmer transition-all duration-300 ease-out hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.20),inset_0_1px_0_rgba(201,133,58,0.08)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]"
                 >
                   <p className="font-cinzel text-sm font-semibold text-coc-text group-hover:text-coc-gold transition-colors">
                     {scenario.title}
@@ -325,7 +325,7 @@ export default async function HomePage() {
                 <Link
                   key={session.id}
                   href={`/characters/${session.character_id}/sessions`}
-                  className="flex items-center justify-between rounded-lg border border-coc-border coc-card-bg px-4 py-3 hover:border-coc-border-glow transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-coc-border coc-card-bg px-4 py-3 transition-all duration-200 ease-out hover:border-coc-border-glow hover:shadow-[0_2px_10px_rgba(201,133,58,0.15)] motion-safe:hover:-translate-y-px"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-coc-text truncate">{session.title}</p>
@@ -358,7 +358,7 @@ export default async function HomePage() {
               <Link
                 key={record.id}
                 href={`/characters/${record.character_id}/madness`}
-                className="flex items-center justify-between rounded-lg border border-red-900/40 bg-red-950/20 px-4 py-3 hover:border-red-700/60 transition-colors"
+                className="flex items-center justify-between rounded-lg border border-red-900/40 bg-red-950/20 px-4 py-3 transition-all duration-200 ease-out hover:border-red-700/60 hover:shadow-[0_2px_10px_rgba(180,40,40,0.18)] motion-safe:hover:-translate-y-px"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-coc-text truncate">{record.symptom}</p>
