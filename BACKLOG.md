@@ -1130,7 +1130,7 @@
 **実装ヒント:** `scenario_participants` テーブルに `hook_text: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `hook_text: string | null` を追加。`src/app/scenarios/[id]/participants/page.tsx` の各参加者行に「フックを編集」インラインテキストエリア（"use client"）を追加し、`supabase.from("scenario_participants").update({ hook_text }).eq("id", id)` で保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のパーティーセクションにフックが設定済みの参加者数バッジを追加。
 **コミット:** `feat: personal hook text per participant for scenario intro management`
 
-## [TODO] セッションタイマーウィジェット（KP用時間管理） — 優先度: 低
+## [DONE] セッションタイマーウィジェット（KP用時間管理） — 優先度: 低
 **対象:** KP / 共通
 **概要:** セッション全体の経過時間をリアルタイムで計測できるシンプルなタイマーウィジェット。既存の `ScenePacingList.tsx` は場面の開始/終了の手動記録だが、こちらはリアルタイムのカウントアップタイマー。セッション残り時間を把握し、KPがペース管理に使う。ページリロードしても状態が保持されるよう `localStorage` に保存する。
 **実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。`useState` でタイマーの状態（running/paused/stopped, elapsed_seconds, lap_times）を管理し、`useEffect` で `setInterval` を使った秒刻みカウントアップを実装。`localStorage` の `session_timer_<scenario_id>` キーに elapsed_seconds と started_at を保存し、リロード後もタイマーが継続する。ラップ機能で場面ごとの経過時間も記録可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし。
