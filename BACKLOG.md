@@ -1165,3 +1165,21 @@
 **概要:** KPがシナリオの公開告知ページ（タイトル・あらすじ概要・開催予定日・プレイ人数・難易度・タグ）を生成し、URLをDiscord/SNSで共有してプレイヤーを募集できる機能。現在シナリオ情報はKP専用ダッシュボード内にのみ存在し、外部の潜在プレイヤーへ告知する手段がない。
 **実装ヒント:** `src/app/scenarios/[id]/recruit/page.tsx` を Server Component で新規作成（Supabase認証不要・公開アクセス可）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, min_players, max_players, content_tags, next_session_at").eq("id", id)` でパブリックに必要なフィールドのみ取得（`gm_notes` は非表示）。難易度バッジ・タグチップ・参加定員・次回予定日をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「募集ページを共有」ボタンを追加しURLをクリップボードにコピー。追加DBなし（既存Scenarioフィールドを活用）。
 **コミット:** `feat: public scenario recruitment page for gathering players via shared link`
+
+## [TODO] シナリオ手がかりボード（KP視点） — 優先度: 高
+**対象:** KP
+**概要:** KPがシナリオ全体の手がかり（ScenarioClue）を一覧管理し、「誰が何を発見したか・調査中か・解決済みか」をセッション進行に合わせてリアルタイム更新できるKP専用ページ。既存の `characters/[id]/clues/page.tsx` は各PL自身の手がかり記録用だが、こちらはKPが全参加者の進捗を俯瞰するビューとなる。
+**実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id).order("created_at")` でシナリオに紐づく手がかりを全取得（`scenario_clues`のscenario_idカラムを使用）。status（`found`/`investigating`/`resolved`）をselectで変更できる行内UIを実装し `supabase.from("scenario_clues").update({status}).eq("id", clueId)` で即時更新。手がかり追加フォーム（title, content, character_id任意）もインラインで提供。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存 `scenario_clues` と `ScenarioClue` 型を流用）。
+**コミット:** `feat: scenario clue board for KP to track investigation progress`
+
+## [TODO] プレイヤー詳細ページ — 優先度: 中
+**対象:** KP
+**概要:** `players/page.tsx` でプレイヤー一覧は表示できるが、個人詳細ページが存在しない。KPが特定プレイヤーの連絡先（Discord・その他）・嗜好ジャンル・過去参加シナリオ・使用してきた探索者を一画面で確認できるプロフィールページ。セッション招集や配役選定に使う。
+**実装ヒント:** `src/app/players/[id]/page.tsx` を Server Component で新規作成。`supabase.from("players").select("*").eq("id", id)` でプレイヤー取得。`supabase.from("scenario_participants").select("*, scenarios(title, status), characters(name, occupation)").eq("player_id", id).order("created_at", {ascending: false})` で参加履歴を取得。contact_discord・contact_other・preferred_genre・notesをセクション分けして表示。`src/app/players/page.tsx` の各プレイヤー行に `/players/[id]` へのリンクを追加。`src/lib/supabase.ts` の `Player` 型はそのまま流用。追加DBなし。
+**コミット:** `feat: player profile page with scenario history and contact info`
+
+## [TODO] 探索者コンディション管理ページ — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッション中に発生する一時的状態異常（毒・失血・束縛・恐怖・盲目・衰弱等）をキャラクター単位で管理する専用ページ。現在 `ConditionBadgeEditor.tsx` がキャラクター詳細ページに埋め込まれているが、状態が多い場合に一覧管理・ON/OFFトグル・カラーコード表示ができる独立ページが不足している。
+**実装ヒント:** `src/app/characters/[id]/conditions/page.tsx` を "use client" で新規作成。`supabase.from("character_conditions").select("*").eq("character_id", id).order("is_active", {ascending: false})` で取得し、アクティブなコンディションを上部に表示。各カードにON/OFFトグル（`supabase.from("character_conditions").update({is_active}).eq("id", id)`）と削除ボタンを配置。新規追加フォームは condition_name（テキスト）・color（カラーピッカーまたはselectで「赤/黄/青/緑」）・notes（任意）を入力。既存の `CharacterCondition` 型を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コンディション」リンクを追加し、アクティブ件数をバッジ表示。追加DBなし。
+**コミット:** `feat: character condition management page for in-session status tracking`
