@@ -131,6 +131,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               characterId={char.id}
               portraitUrl={char.portrait_url}
               characterName={char.name}
+              avatarUrl={char.avatar_url}
             />
             <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           </div>

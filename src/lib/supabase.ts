@@ -50,6 +50,7 @@ export type Character = {
   is_pinned: boolean;
   is_public: boolean;
   public_slug: string | null;
+  avatar_url: string | null;
   farewell_scene: string | null;
   farewell_message: string | null;
   speech_style: string | null;

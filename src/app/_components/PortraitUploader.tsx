@@ -10,17 +10,19 @@ type Props = {
   characterId: string;
   portraitUrl: string | null;
   characterName: string;
+  avatarUrl?: string | null;
 };
 
 export default function PortraitUploader({
   characterId,
   portraitUrl,
   characterName,
+  avatarUrl,
 }: Props) {
   const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(portraitUrl);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(portraitUrl ?? avatarUrl ?? null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

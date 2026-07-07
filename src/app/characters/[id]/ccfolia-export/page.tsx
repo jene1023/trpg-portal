@@ -103,7 +103,7 @@ export default function CcfoliaExportPage() {
             { label: "幸運", value: String(c.luck) },
           ],
           commands: generateCommands(c, s),
-          imageUrl: c.portrait_url ?? "",
+          imageUrl: c.avatar_url ?? c.portrait_url ?? "",
         },
       };
     },

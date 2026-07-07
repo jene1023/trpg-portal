@@ -1097,7 +1097,7 @@
 **実装ヒント:** `src/app/characters/[id]/ccfolia-export/page.tsx` を "use client" で新規作成。CCFOLIAのCharacter Room Object仕様（`{"kind":"character","data":{"name":...,"status":[{"label":"HP","value":X,"max":Y},{"label":"MP",...},{"label":"SAN",...}],"params":[{"label":"STR","value":"X"},...],"commands":"...","imageUrl":""}}`）に従いJSONを構築。`supabase.from("characters").select("*, character_skills(*)")` で全データ取得し、`character_skills` からBCDiceコマンドを生成して `commands` フィールドに連結。JSONをテキストエリアに表示しコピーボタン＋.jsonファイルダウンロードボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「CCFOLIAコマ出力」リンクを追加。追加DBなし（既存 `characters`, `character_skills` を流用）。
 **コミット:** `feat: CCFOLIA character piece JSON export for VTT import`
 
-## [TODO] キャラクター/探索者アバター画像登録 — 優先度: 中
+## [DONE] キャラクター/探索者アバター画像登録 — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターに外部URLまたはSupabase Storageへのアップロードで立ち絵・アバター画像を登録し、キャラクター詳細・プロフィールカード・CCFOLIA コマ出力の `imageUrl` フィールドに反映できる機能。
 **リサーチ根拠:** いあキャラ ver2.0.0 の大型アップデートで画像登録が最も歓迎された機能であり、Charaeno・キャラ保管所を含む主要CoC管理ツール全てが画像登録機能を持つことが確認された。

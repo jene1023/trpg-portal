@@ -150,6 +150,9 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
   const [notes, setNotes] = useState(initialData?.notes ?? "");
   const [speechStyle, setSpeechStyle] = useState(initialData?.speech_style ?? "");
 
+  // --- アバターURL ---
+  const [avatarUrl, setAvatarUrl] = useState(initialData?.avatar_url ?? "");
+
   // --- ポートレート ---
   const [portraitFile, setPortraitFile] = useState<File | null>(null);
   const [portraitPreview, setPortraitPreview] = useState<string | null>(
@@ -280,6 +283,7 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
         background: background.trim() || null,
         notes: notes.trim() || null,
         speech_style: speechStyle.trim() || null,
+        avatar_url: avatarUrl.trim() || null,
         furigana: furigana.trim() || null,
         birthday: birthday || null,
         eye_color: eyeColor.trim() || null,
@@ -466,6 +470,24 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
               画像を選択
               <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePortraitChange} className="hidden" />
             </label>
+          </div>
+        </div>
+
+        {/* アバターURL */}
+        <div>
+          <label className={labelClass}>アバター画像URL（外部URLで画像を指定）</label>
+          <div className="flex items-center gap-2">
+            {avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="アバタープレビュー" className="w-12 h-12 rounded-full object-cover border border-coc-border shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            )}
+            <input
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              className={inputClass}
+              placeholder="https://example.com/avatar.png"
+              type="url"
+            />
           </div>
         </div>
       </div>

@@ -71,6 +71,14 @@ export default function ProfileCard({ character: c, skills }: Props) {
       >
         {/* ヘッダー */}
         <div className="text-center border-b border-coc-border pb-4">
+          {(c.avatar_url ?? c.portrait_url) && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={(c.avatar_url ?? c.portrait_url) as string}
+              alt={c.name}
+              className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-coc-gold-dim"
+            />
+          )}
           <p className="text-xs text-coc-muted tracking-widest uppercase mb-1">
             Call of Cthulhu
           </p>
