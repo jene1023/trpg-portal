@@ -1208,7 +1208,7 @@
 **実装ヒント:** Supabaseに `session_introductions` テーブルを追加（id, scenario_id, character_id, motivation, secret_goal, created_at）。`src/app/scenarios/[id]/introductions/page.tsx` を新規作成。各参加キャラの紹介カードを横並び表示し、キャラクター既存フィールド（catchphrase, speech_style, occupation）と新規 `motivation`/`secret_goal` を組み合わせて表示。編集はキャラクター所有者のみ（認証チェック）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「自己紹介シート」リンクを追加。`src/lib/supabase.ts` に `SessionIntroduction` 型を追加。
 **コミット:** `feat: pre-session character introduction sheet for party sharing`
 
-## [TODO] キャラクター神話遭遇記録 — 優先度: 高
+## [DONE] キャラクター神話遭遇記録 — 優先度: 高
 **対象:** PL
 **概要:** キャラクターが直接遭遇した神話生物・神格・アーティファクトをセッション単位で記録し、キャラクター固有の「神話体験ログ」として蓄積できる機能。既存の `mythos/page.tsx` はグローバル参照ページだが、こちらはキャラクターの体験値としての遭遇履歴に特化する。
 **実装ヒント:** Supabaseに `character_mythos_encounters` テーブルを追加（id, character_id, entity_name, entity_type: "creature"|"deity"|"artifact"|"spell"|"other", session_label, san_lost, notes, encountered_at, created_at）。`src/app/characters/[id]/mythos-log/page.tsx` を新規作成（一覧＋追加フォーム）。既存クリーチャーテーブル（`creatures`）からの参照選択と、自由入力の両方を提供。遭遇エンティティごとにSAN喪失累計を集計表示。`src/lib/supabase.ts` に `CharacterMythosEncounter` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）と `preflight/page.tsx` に「神話遭遇ログ」リンクを追加。

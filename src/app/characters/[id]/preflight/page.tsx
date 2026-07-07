@@ -587,6 +587,15 @@ export default async function PreflightPage({ params }: Props) {
         <span>関係メモを確認する</span>
         <span className="text-coc-gold">→</span>
       </Link>
+
+      {/* 神話遭遇ログへのリンク */}
+      <Link
+        href={`/characters/${id}/mythos-log`}
+        className="flex items-center justify-between rounded-lg border border-purple-800/40 bg-purple-950/10 px-4 py-3 text-sm text-purple-300/80 hover:text-purple-200 hover:border-purple-700 transition-colors"
+      >
+        <span>神話遭遇ログを確認する</span>
+        <span className="text-coc-gold">→</span>
+      </Link>
     </div>
   );
 }

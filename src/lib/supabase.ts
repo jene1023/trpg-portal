@@ -812,3 +812,17 @@ export type SessionIntroduction = {
   secret_goal: string | null;
   created_at: string;
 };
+
+export type MythosEntityType = "creature" | "deity" | "artifact" | "spell" | "other";
+
+export type CharacterMythosEncounter = {
+  id: string;
+  character_id: string;
+  entity_name: string;
+  entity_type: MythosEntityType;
+  session_label: string | null;
+  san_lost: number;
+  notes: string | null;
+  encountered_at: string | null;
+  created_at: string;
+};
