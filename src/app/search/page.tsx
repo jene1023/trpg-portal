@@ -9,6 +9,35 @@ import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, Q
 type SessionResult = SessionLog & { characters: { name: string } | null };
 type QuickNoteResult = QuickNote & { characters: { name: string } | null };
 type ScenarioNoteResult = ScenarioNote & { scenarios: { title: string } | null };
+type GmNotesScenarioResult = Pick<Scenario, "id" | "title" | "status"> & { gm_notes: string | null };
+
+function extractExcerpt(text: string, keyword: string, contextChars = 50): string {
+  const lower = text.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
+  const idx = lower.indexOf(lowerKeyword);
+  if (idx === -1) return text.slice(0, 100);
+  const start = Math.max(0, idx - contextChars);
+  const end = Math.min(text.length, idx + keyword.length + contextChars);
+  let excerpt = text.slice(start, end);
+  if (start > 0) excerpt = "…" + excerpt;
+  if (end < text.length) excerpt = excerpt + "…";
+  return excerpt;
+}
+
+function HighlightedExcerpt({ text, keyword }: { text: string; keyword: string }) {
+  const excerpt = extractExcerpt(text, keyword);
+  const lower = excerpt.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
+  const idx = lower.indexOf(lowerKeyword);
+  if (idx === -1) return <span className="text-xs text-coc-muted">{excerpt}</span>;
+  return (
+    <span className="text-xs text-coc-muted">
+      {excerpt.slice(0, idx)}
+      <mark className="bg-coc-gold/20 text-coc-text font-semibold not-italic">{excerpt.slice(idx, idx + keyword.length)}</mark>
+      {excerpt.slice(idx + keyword.length)}
+    </span>
+  );
+}
 
 function SearchPageInner() {
   const router = useRouter();
@@ -24,6 +53,7 @@ function SearchPageInner() {
   const [sessions, setSessions] = useState<SessionResult[]>([]);
   const [quickNotes, setQuickNotes] = useState<QuickNoteResult[]>([]);
   const [scenarioNotes, setScenarioNotes] = useState<ScenarioNoteResult[]>([]);
+  const [gmNoteScenarios, setGmNoteScenarios] = useState<GmNotesScenarioResult[]>([]);
 
   useEffect(() => {
     setInputValue(initialQuery);
@@ -34,6 +64,7 @@ function SearchPageInner() {
       setSessions([]);
       setQuickNotes([]);
       setScenarioNotes([]);
+      setGmNoteScenarios([]);
       setSearched(false);
       return;
     }
@@ -51,6 +82,7 @@ function SearchPageInner() {
         { data: quickNotesData },
         { data: scenarioNotesData },
         { data: matchingTagsData },
+        { data: gmNotesScenariosData },
       ] = await Promise.all([
         supabase.from("characters").select("*").ilike("name", `%${q}%`),
         supabase.from("npcs").select("*").ilike("name", `%${q}%`),
@@ -59,6 +91,7 @@ function SearchPageInner() {
         supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`),
         supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`),
         supabase.from("tags").select("id, name").ilike("name", `%${q}%`),
+        supabase.from("scenarios").select("id, title, gm_notes, status").ilike("gm_notes", `%${q}%`),
       ]);
 
       let mergedChars = (charactersData as Character[]) ?? [];
@@ -122,12 +155,18 @@ function SearchPageInner() {
         }
       }
 
+      const titleScenarioIds = new Set(mergedScenarios.map((s) => s.id));
+      const gmNotesOnly = ((gmNotesScenariosData as GmNotesScenarioResult[]) ?? []).filter(
+        (s) => !titleScenarioIds.has(s.id)
+      );
+
       setCharacters(mergedChars);
       setNpcs(mergedNpcs);
       setScenarios(mergedScenarios);
       setSessions((sessionsData as SessionResult[]) ?? []);
       setQuickNotes((quickNotesData as QuickNoteResult[]) ?? []);
       setScenarioNotes((scenarioNotesData as ScenarioNoteResult[]) ?? []);
+      setGmNoteScenarios(gmNotesOnly);
       setLoading(false);
       setSearched(true);
     }
@@ -143,7 +182,7 @@ function SearchPageInner() {
   }
 
   const totalResults =
-    characters.length + npcs.length + scenarios.length + sessions.length + quickNotes.length + scenarioNotes.length;
+    characters.length + npcs.length + scenarios.length + sessions.length + quickNotes.length + scenarioNotes.length + gmNoteScenarios.length;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -246,6 +285,30 @@ function SearchPageInner() {
                     className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
                   >
                     <p className="text-sm font-medium text-coc-text">{s.title}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {gmNoteScenarios.length > 0 && (
+            <section>
+              <h2 className="font-cinzel text-sm font-semibold text-coc-gold mb-3">
+                GMメモ ({gmNoteScenarios.length})
+              </h2>
+              <div className="flex flex-col gap-2">
+                {gmNoteScenarios.map((s) => (
+                  <Link
+                    key={`gm-${s.id}`}
+                    href={`/scenarios/${s.id}`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-sm font-medium text-coc-text">{s.title}</p>
+                    {s.gm_notes && (
+                      <p className="mt-1">
+                        <HighlightedExcerpt text={s.gm_notes} keyword={initialQuery} />
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>

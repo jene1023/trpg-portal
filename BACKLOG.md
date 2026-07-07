@@ -1220,7 +1220,7 @@
 **実装ヒント:** Supabaseに `session_highlights` テーブルを追加（id, scenario_id, author_name, character_name, scene_description, category: "roll"|"rp"|"story"|"comedy"|"tragedy"|"other", liked_count: int DEFAULT 0, created_at）。`src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成（カード一覧＋投稿フォーム）。いいね数は `supabase.from("session_highlights").update({ liked_count: prev + 1 }).eq("id", id)` で楽観的更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。`src/lib/supabase.ts` に `SessionHighlight` 型を追加。
 **コミット:** `feat: session highlight voting for memorable scene collection`
 
-## [TODO] GMメモ全文検索（グローバル検索拡張） — 優先度: 中
+## [DONE] GMメモ全文検索（グローバル検索拡張） — 優先度: 中
 **対象:** KP
 **概要:** 現在のグローバル検索（`src/app/search/page.tsx`）はシナリオのタイトル・キャラクター名・NPC名が対象で、シナリオの `gm_notes`（GMメモ）本文は検索できない。シナリオが増えると過去のGMメモを探すのに時間がかかるため、gm_notes内テキスト検索を追加する。
 **実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内 `Promise.all` に `supabase.from("scenarios").select("id, title, gm_notes, status").ilike("gm_notes", \`%${q}%\`)` を追加。結果セクションに「GMメモ」セクションを追加し、マッチ箇所前後50文字を抜粋表示（キーワードをハイライト）。各結果はシナリオ詳細ページ（`/scenarios/[id]`）へリンク。追加DBなし。
