@@ -803,3 +803,12 @@ export type NpcDisposition = {
   updated_at: string;
   created_at: string;
 };
+
+export type SessionIntroduction = {
+  id: string;
+  scenario_id: string;
+  character_id: string;
+  motivation: string | null;
+  secret_goal: string | null;
+  created_at: string;
+};

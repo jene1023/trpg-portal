@@ -1202,7 +1202,7 @@
 **実装ヒント:** Supabaseに `npc_dispositions` テーブルを追加（id, npc_id, scenario_id, disposition: "friendly"|"neutral"|"hostile"|"unknown", notes, updated_at, created_at）。シナリオNPC管理ページ（`src/app/scenarios/[id]/npcs/page.tsx`）の各NPCカードに態度セレクター（色付きバッジ切り替え）を追加し `supabase.from("npc_dispositions").upsert(...)` で即時保存。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）にも直近シナリオでの態度を表示。`src/lib/supabase.ts` に `NpcDisposition` 型を追加。
 **コミット:** `feat: NPC disposition tracker for real-time attitude management`
 
-## [TODO] セッション前キャラクター自己紹介シート — 優先度: 低
+## [DONE] セッション前キャラクター自己紹介シート — 優先度: 低
 **対象:** PL / 共通
 **概要:** PLがセッション前に「今回のキャラクター紹介」を定型フォーマット（動機・秘密の目標）で書いてシナリオ参加者全員で共有できるページ。参加者同士が互いのキャラクターを事前に把握してセッションをスムーズに始められる。
 **実装ヒント:** Supabaseに `session_introductions` テーブルを追加（id, scenario_id, character_id, motivation, secret_goal, created_at）。`src/app/scenarios/[id]/introductions/page.tsx` を新規作成。各参加キャラの紹介カードを横並び表示し、キャラクター既存フィールド（catchphrase, speech_style, occupation）と新規 `motivation`/`secret_goal` を組み合わせて表示。編集はキャラクター所有者のみ（認証チェック）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「自己紹介シート」リンクを追加。`src/lib/supabase.ts` に `SessionIntroduction` 型を追加。
