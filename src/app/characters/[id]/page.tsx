@@ -52,6 +52,8 @@ export default async function CharacterDetailPage({ params }: Props) {
     .eq("character_id", id)
     .order("created_at", { ascending: true });
 
+  const activeConditionCount = (conditions ?? []).filter((c) => c.is_active).length;
+
   const discordWebhookUrl = char.scenario_name
     ? await supabase
         .from("scenarios")
@@ -696,6 +698,24 @@ export default async function CharacterDetailPage({ params }: Props) {
                   </Link>
                 );
               })()}
+              <Link
+                href={`/characters/${id}/conditions`}
+                className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors motion-safe:active:scale-[0.98] ${
+                  activeConditionCount > 0
+                    ? "border-red-800/60 bg-red-950/20 text-red-300 hover:text-red-200 hover:border-red-700"
+                    : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  コンディション
+                  {activeConditionCount > 0 && (
+                    <span className="rounded bg-red-900/40 border border-red-700/60 px-1.5 py-0.5 text-xs font-semibold text-red-300">
+                      {activeConditionCount}件
+                    </span>
+                  )}
+                </span>
+                <span className={activeConditionCount > 0 ? "text-red-400" : "text-coc-gold"}>→</span>
+              </Link>
             </div>
           </div>
 

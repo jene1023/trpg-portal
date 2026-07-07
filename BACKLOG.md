@@ -1178,7 +1178,7 @@
 **実装ヒント:** `src/app/players/[id]/page.tsx` を Server Component で新規作成。`supabase.from("players").select("*").eq("id", id)` でプレイヤー取得。`supabase.from("scenario_participants").select("*, scenarios(title, status), characters(name, occupation)").eq("player_id", id).order("created_at", {ascending: false})` で参加履歴を取得。contact_discord・contact_other・preferred_genre・notesをセクション分けして表示。`src/app/players/page.tsx` の各プレイヤー行に `/players/[id]` へのリンクを追加。`src/lib/supabase.ts` の `Player` 型はそのまま流用。追加DBなし。
 **コミット:** `feat: player profile page with scenario history and contact info`
 
-## [TODO] 探索者コンディション管理ページ — 優先度: 中
+## [DONE] 探索者コンディション管理ページ — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッション中に発生する一時的状態異常（毒・失血・束縛・恐怖・盲目・衰弱等）をキャラクター単位で管理する専用ページ。現在 `ConditionBadgeEditor.tsx` がキャラクター詳細ページに埋め込まれているが、状態が多い場合に一覧管理・ON/OFFトグル・カラーコード表示ができる独立ページが不足している。
 **実装ヒント:** `src/app/characters/[id]/conditions/page.tsx` を "use client" で新規作成。`supabase.from("character_conditions").select("*").eq("character_id", id).order("is_active", {ascending: false})` で取得し、アクティブなコンディションを上部に表示。各カードにON/OFFトグル（`supabase.from("character_conditions").update({is_active}).eq("id", id)`）と削除ボタンを配置。新規追加フォームは condition_name（テキスト）・color（カラーピッカーまたはselectで「赤/黄/青/緑」）・notes（任意）を入力。既存の `CharacterCondition` 型を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コンディション」リンクを追加し、アクティブ件数をバッジ表示。追加DBなし。
