@@ -1183,3 +1183,27 @@
 **概要:** セッション中に発生する一時的状態異常（毒・失血・束縛・恐怖・盲目・衰弱等）をキャラクター単位で管理する専用ページ。現在 `ConditionBadgeEditor.tsx` がキャラクター詳細ページに埋め込まれているが、状態が多い場合に一覧管理・ON/OFFトグル・カラーコード表示ができる独立ページが不足している。
 **実装ヒント:** `src/app/characters/[id]/conditions/page.tsx` を "use client" で新規作成。`supabase.from("character_conditions").select("*").eq("character_id", id).order("is_active", {ascending: false})` で取得し、アクティブなコンディションを上部に表示。各カードにON/OFFトグル（`supabase.from("character_conditions").update({is_active}).eq("id", id)`）と削除ボタンを配置。新規追加フォームは condition_name（テキスト）・color（カラーピッカーまたはselectで「赤/黄/青/緑」）・notes（任意）を入力。既存の `CharacterCondition` 型を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コンディション」リンクを追加し、アクティブ件数をバッジ表示。追加DBなし。
 **コミット:** `feat: character condition management page for in-session status tracking`
+
+## [TODO] クリーチャー遭遇SANチェック一括ロール — 優先度: 高
+**対象:** KP / 共通
+**概要:** クリーチャー詳細ページからシナリオを選択し、参加者全員にクリーチャーのSAN喪失値（成功/失敗）でSANチェックを一括実行してキャラクターのsan_currentを即時更新できる機能。遭遇するたびに手動でSANチェックを個別実行する手間を1クリック化する。
+**実装ヒント:** `src/app/creatures/[id]/page.tsx` に「パーティーSANチェック」ボタンを持つ "use client" コンポーネント（`src/app/_components/CreatureSanCheckButton.tsx`）を追加。モーダルでシナリオを選択後、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", scenarioId)` で参加者取得。各キャラの `san_current` に対して `creature.san_loss_success` / `san_loss_failure` のダイス式をパースして振り、判定結果と喪失量を一覧表示しつつ `supabase.from("characters").update({ san_current })` を並列更新。`Creature.san_loss_success` / `san_loss_failure` フィールドを流用。追加DBなし。
+**コミット:** `feat: batch SAN check from creature encounter for whole party`
+
+## [TODO] PC間アイテム受け渡し — 優先度: 中
+**対象:** PL / 共通
+**概要:** インベントリのアイテムを同シナリオの別キャラクターへ譲渡できる機能。パーティー内でのリソース共有（包帯・懐中電灯・拳銃の貸し借り）をセッション中に記録できる。現在は各自のインベントリが独立しており、移動手段がない。
+**実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「渡す」ボタンを追加（"use client" 化）。シナリオ参加者リストを `supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", ...)` で取得してターゲットを選択、`supabase.from("inventory_items").update({ character_id: targetId }).eq("id", itemId)` で移転。対象シナリオが未設定のキャラは全キャラ一覧から選択するフォールバックを提供。追加DBなし。
+**コミット:** `feat: item transfer between characters within a party`
+
+## [TODO] NPC感情状態トラッカー — 優先度: 中
+**対象:** KP
+**概要:** シナリオ中にNPCのPLへの態度（好意的/中立/敵対的/未知）をリアルタイム更新・管理できる機能。NPCとの関係推移をセッション中に一画面で俯瞰でき、KPが台詞トーンや行動選択の判断に役立てられる。
+**実装ヒント:** Supabaseに `npc_dispositions` テーブルを追加（id, npc_id, scenario_id, disposition: "friendly"|"neutral"|"hostile"|"unknown", notes, updated_at, created_at）。シナリオNPC管理ページ（`src/app/scenarios/[id]/npcs/page.tsx`）の各NPCカードに態度セレクター（色付きバッジ切り替え）を追加し `supabase.from("npc_dispositions").upsert(...)` で即時保存。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）にも直近シナリオでの態度を表示。`src/lib/supabase.ts` に `NpcDisposition` 型を追加。
+**コミット:** `feat: NPC disposition tracker for real-time attitude management`
+
+## [TODO] セッション前キャラクター自己紹介シート — 優先度: 低
+**対象:** PL / 共通
+**概要:** PLがセッション前に「今回のキャラクター紹介」を定型フォーマット（動機・秘密の目標）で書いてシナリオ参加者全員で共有できるページ。参加者同士が互いのキャラクターを事前に把握してセッションをスムーズに始められる。
+**実装ヒント:** Supabaseに `session_introductions` テーブルを追加（id, scenario_id, character_id, motivation, secret_goal, created_at）。`src/app/scenarios/[id]/introductions/page.tsx` を新規作成。各参加キャラの紹介カードを横並び表示し、キャラクター既存フィールド（catchphrase, speech_style, occupation）と新規 `motivation`/`secret_goal` を組み合わせて表示。編集はキャラクター所有者のみ（認証チェック）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「自己紹介シート」リンクを追加。`src/lib/supabase.ts` に `SessionIntroduction` 型を追加。
+**コミット:** `feat: pre-session character introduction sheet for party sharing`
