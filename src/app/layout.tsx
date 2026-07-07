@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import NavBar from "./_components/NavBar";
+import Footer from "./_components/Footer";
 import ServiceWorkerRegistrar from "./_components/ServiceWorkerRegistrar";
 import AuthProvider from "./_components/AuthProvider";
 
@@ -48,6 +49,7 @@ export default function RootLayout({
           <ServiceWorkerRegistrar />
           <NavBar />
           <main className="flex-1">{children}</main>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
