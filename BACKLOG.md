@@ -1166,7 +1166,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/recruit/page.tsx` を Server Component で新規作成（Supabase認証不要・公開アクセス可）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, min_players, max_players, content_tags, next_session_at").eq("id", id)` でパブリックに必要なフィールドのみ取得（`gm_notes` は非表示）。難易度バッジ・タグチップ・参加定員・次回予定日をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「募集ページを共有」ボタンを追加しURLをクリップボードにコピー。追加DBなし（既存Scenarioフィールドを活用）。
 **コミット:** `feat: public scenario recruitment page for gathering players via shared link`
 
-## [TODO] シナリオ手がかりボード（KP視点） — 優先度: 高
+## [DONE] シナリオ手がかりボード（KP視点） — 優先度: 高
 **対象:** KP
 **概要:** KPがシナリオ全体の手がかり（ScenarioClue）を一覧管理し、「誰が何を発見したか・調査中か・解決済みか」をセッション進行に合わせてリアルタイム更新できるKP専用ページ。既存の `characters/[id]/clues/page.tsx` は各PL自身の手がかり記録用だが、こちらはKPが全参加者の進捗を俯瞰するビューとなる。
 **実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id).order("created_at")` でシナリオに紐づく手がかりを全取得（`scenario_clues`のscenario_idカラムを使用）。status（`found`/`investigating`/`resolved`）をselectで変更できる行内UIを実装し `supabase.from("scenario_clues").update({status}).eq("id", clueId)` で即時更新。手がかり追加フォーム（title, content, character_id任意）もインラインで提供。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存 `scenario_clues` と `ScenarioClue` 型を流用）。
