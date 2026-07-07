@@ -8,6 +8,7 @@ import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
+import NpcDialogueGenerator from "@/app/_components/NpcDialogueGenerator";
 
 const LEVEL_LABEL: Record<SuccessLevel, string> = {
   critical_success: "決定的成功",
@@ -233,6 +234,9 @@ export default async function NpcDetailPage({ params }: Props) {
           </h2>
           <NpcQuickRoller presetSkills={presetSkills} npcId={npc.id} />
         </div>
+
+        {/* AI発話例生成 */}
+        <NpcDialogueGenerator npcId={npc.id} npcName={npc.name} />
 
         {/* 判定履歴 */}
         {rollHistory.length > 0 && (

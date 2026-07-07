@@ -1142,7 +1142,7 @@
 **実装ヒント:** `src/app/_components/AIScenarioDraftGenerator.tsx` を "use client" で新規作成。タイトル・舞台・時代・キーワード・プレイ人数入力 → `/api/ai/scenario-draft/route.ts`（POST）に送信 → Anthropic SDK `claude-sonnet-5` で「CoCシナリオのシノプシスとGMメモを日本語で生成」プロンプトを呼ぶ → 結果をテキストエリアに表示し「このシノプシスを使う」ボタンで `ScenarioForm` の synopsis フィールドに反映。`src/app/scenarios/new/page.tsx` に「AIで概要を下書き」ボタンとして組み込む。追加DBなし。
 **コミット:** `feat: AI scenario synopsis draft generator for KP using Claude API`
 
-## [TODO] AI NPC会話サンプル生成（セッション中発話サポート） — 優先度: 中
+## [DONE] AI NPC会話サンプル生成（セッション中発話サポート） — 優先度: 中
 **対象:** KP
 **概要:** NPCの `speech_style`・`purpose`・`sample_quotes` を元に、特定シチュエーション（例:「尋問される」「緊急事態に遭遇」）での発話例をClaude APIが自動生成し、KPがセッション中の即興ロールプレイに即座に使える機能。AI探索者バックストーリー（DONE）・AIシナリオシノプシス（TODO）に続くAI支援シリーズとして、NPC発話の即興コストを大幅に下げる。
 **実装ヒント:** `src/app/_components/NpcDialogueGenerator.tsx` を "use client" で新規作成。状況テキスト入力 → `/api/ai/npc-dialogue/route.ts`（POST）に `{ npcId, situation }` を送信 → Supabaseで NPC の `speech_style`・`purpose`・`sample_quotes` を取得し、`claude-haiku-4-5-20251001` モデルで「このNPCならどう言うか」を日本語で3パターン生成 → テキストエリアに表示。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）の下部に「発話例を生成」ボタンとして配置。追加DBなし。
