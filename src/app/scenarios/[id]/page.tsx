@@ -74,7 +74,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { count: scheduleProposalCount },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
-    supabase.from("scenario_participants").select("id, attendance_status").eq("scenario_id", id),
+    supabase.from("scenario_participants").select("id, attendance_status, hook_text").eq("scenario_id", id),
     supabase.from("npcs").select("*", { count: "exact", head: true }).eq("scenario_name", scenario.title),
     supabase.from("creatures").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_player_ratings").select("fun_rating, horror_rating, mystery_rating, character_rating").eq("scenario_id", id),
@@ -106,6 +106,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
   const attendingCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length ?? 0;
   const absentCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "absent").length ?? 0;
   const unconfirmedCount = participantCount - attendingCount - absentCount;
+  const hookSetCount = participantRows?.filter((p) => p.hook_text).length ?? 0;
 
   return (
     <div className="coc-page-enter mx-auto max-w-2xl px-4 py-8">
@@ -279,7 +280,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
               <p className="text-xs text-coc-muted">PLキャラクターの登録・確認</p>
             </div>
           </div>
-          <span className="text-coc-muted">→</span>
+          <div className="flex items-center gap-2">
+            {hookSetCount > 0 && (
+              <span className="rounded-full bg-coc-gold/20 px-2 py-0.5 text-xs font-medium text-coc-gold">
+                フック {hookSetCount}件
+              </span>
+            )}
+            <span className="text-coc-muted">→</span>
+          </div>
         </Link>
 
         <Link

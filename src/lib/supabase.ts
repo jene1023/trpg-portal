@@ -216,6 +216,7 @@ export type ScenarioParticipant = {
   character_id: string;
   attendance_status: AttendanceStatus;
   player_id: string | null;
+  hook_text: string | null;
   created_at: string;
 };
 

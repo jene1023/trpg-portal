@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ChevronDown, ChevronUp, Save } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, ScenarioParticipant, AttendanceStatus, Player } from "@/lib/supabase";
 
 type CharacterSummary = Pick<Character, "id" | "name" | "player_name" | "occupation">;
@@ -35,6 +35,11 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
   const [adding, setAdding] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [expandedHookId, setExpandedHookId] = useState<string | null>(null);
+  const [hookTexts, setHookTexts] = useState<Record<string, string>>(
+    Object.fromEntries(initialParticipants.map((p) => [p.id, p.hook_text ?? ""]))
+  );
+  const [savingHookId, setSavingHookId] = useState<string | null>(null);
 
   const participantIds = new Set(participants.map((p) => p.character_id));
   const available = allCharacters.filter((c) => !participantIds.has(c.id));
@@ -91,6 +96,23 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
       );
     }
     setUpdatingId(null);
+  }
+
+  async function handleHookSave(participantId: string) {
+    if (!isSupabaseConfigured) return;
+    setSavingHookId(participantId);
+    const text = hookTexts[participantId] ?? "";
+    const { error } = await supabase
+      .from("scenario_participants")
+      .update({ hook_text: text || null })
+      .eq("id", participantId);
+    if (!error) {
+      setParticipants((prev) =>
+        prev.map((p) => (p.id === participantId ? { ...p, hook_text: text || null } : p))
+      );
+      setExpandedHookId(null);
+    }
+    setSavingHookId(null);
   }
 
   const attendingCount = participants.filter((p) => p.attendance_status === "attending").length;
@@ -226,6 +248,38 @@ export default function ParticipantList({ scenarioId, initialParticipants, allCh
                       )}
                     </div>
                   )}
+                  {/* パーソナルフック */}
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setExpandedHookId(expandedHookId === p.id ? null : p.id)}
+                      className="flex items-center gap-1 text-xs text-coc-muted hover:text-coc-text transition-colors"
+                    >
+                      {expandedHookId === p.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      <span>パーソナルフック</span>
+                      {p.hook_text && (
+                        <span className="ml-1 rounded-full bg-coc-gold-dim px-1.5 text-coc-gold">設定済</span>
+                      )}
+                    </button>
+                    {expandedHookId === p.id && (
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          value={hookTexts[p.id] ?? ""}
+                          onChange={(e) => setHookTexts((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                          placeholder="このシナリオへの参加動機・導入フックを入力..."
+                          rows={3}
+                          className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-faint focus:outline-none focus:border-coc-gold transition-colors resize-none"
+                        />
+                        <button
+                          onClick={() => handleHookSave(p.id)}
+                          disabled={savingHookId === p.id}
+                          className="flex items-center gap-1.5 rounded-lg border border-coc-gold-dim bg-coc-raised px-3 py-1.5 text-xs text-coc-gold hover:bg-coc-surface hover:border-coc-gold transition-colors disabled:opacity-50"
+                        >
+                          <Save size={13} />
+                          {savingHookId === p.id ? "保存中..." : "保存"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

@@ -1124,7 +1124,7 @@
 **実装ヒント:** `src/app/_components/CharacterForm.tsx` に「派生値を自動計算」ボタンを追加（"use client"のまま）。クリック時に `hp_max = Math.floor((con + siz) / 10)` (CoC7版)、`mp_max = pow`、`san_start = pow * 5`、DBは STR+SIZの範囲表でダメージボーナス文字列を算出してstateに反映。手動修正も引き続き可能なよう上書き可能な入力欄のまま。6版キャラ（`rule_edition === "6th"`）では `hp_max = Math.floor((con + siz) / 2)` の別計算式を使う。追加DBなし。
 **コミット:** `feat: auto-calculate derived stats from ability scores in character form`
 
-## [TODO] シナリオ別探索者パーソナルフック管理 — 優先度: 中
+## [DONE] シナリオ別探索者パーソナルフック管理 — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** シナリオ参加者（`scenario_participants`）ごとに「なぜこの探索者がシナリオに関わることになったか」という個人導入テキスト（パーソナルフック）を登録できる機能。ハンドアウトはKP→PL全体向けの情報配布だが、こちらはキャラクター単位の参加動機メモ。KPが各PLの動機を把握し、PL自身もセッション前に自分のキャラクターの立ち位置を確認するために使う。
 **実装ヒント:** `scenario_participants` テーブルに `hook_text: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `ScenarioParticipant` 型に `hook_text: string | null` を追加。`src/app/scenarios/[id]/participants/page.tsx` の各参加者行に「フックを編集」インラインテキストエリア（"use client"）を追加し、`supabase.from("scenario_participants").update({ hook_text }).eq("id", id)` で保存。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のパーティーセクションにフックが設定済みの参加者数バッジを追加。
