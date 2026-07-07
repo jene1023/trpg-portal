@@ -1090,7 +1090,7 @@
 **実装ヒント:** `src/app/tags/page.tsx` を Server Component で新規作成。`supabase.from("tags").select("*")` でタグ一覧を取得しタグクラウド表示。各タグをクリックすると `src/app/tags/[tagId]/page.tsx`（Server Component）へ遷移し、`supabase.from("entity_tags").select("entity_type, entity_id").eq("tag_id", tagId)` で紐づく全エンティティを取得し、entity_type ごとにセクション分けして character / scenario / npc の詳細をカード表示（各テーブルへの追加クエリで名前等を補完）。`src/app/_components/NavBar.tsx` に「タグ」リンクを追加。`TagSelector.tsx`（既存）での選択結果をこのページへ誘導するリンクも追加。追加DBなし（既存 `tags`・`entity_tags` テーブルを活用）。
 **コミット:** `feat: cross-entity tag browser for filtering characters, scenarios, and NPCs`
 
-## [TODO] ここフォリア（CCFOLIA）キャラクターコマJSON出力 — 優先度: 高
+## [DONE] ここフォリア（CCFOLIA）キャラクターコマJSON出力 — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクターのHP/MP/SAN・能力値・チャットパレットをCCFOLIA（ここフォリア）のキャラクターコマ仕様JSON形式で出力し、VTTツールへ直接インポートできる機能。既存のBCDiceチャットパレット（テキスト出力）を補完し、コマデータごと書き出せるようにする。
 **リサーチ根拠:** Charaenoの「ここふぉりあコマ出力」が最も多く言及される差別化機能であり、オンセ勢の標準的なワークフローに組み込まれていることが複数記事・レビューで確認された。
