@@ -1190,7 +1190,7 @@
 **実装ヒント:** `src/app/creatures/[id]/page.tsx` に「パーティーSANチェック」ボタンを持つ "use client" コンポーネント（`src/app/_components/CreatureSanCheckButton.tsx`）を追加。モーダルでシナリオを選択後、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", scenarioId)` で参加者取得。各キャラの `san_current` に対して `creature.san_loss_success` / `san_loss_failure` のダイス式をパースして振り、判定結果と喪失量を一覧表示しつつ `supabase.from("characters").update({ san_current })` を並列更新。`Creature.san_loss_success` / `san_loss_failure` フィールドを流用。追加DBなし。
 **コミット:** `feat: batch SAN check from creature encounter for whole party`
 
-## [TODO] PC間アイテム受け渡し — 優先度: 中
+## [DONE] PC間アイテム受け渡し — 優先度: 中
 **対象:** PL / 共通
 **概要:** インベントリのアイテムを同シナリオの別キャラクターへ譲渡できる機能。パーティー内でのリソース共有（包帯・懐中電灯・拳銃の貸し借り）をセッション中に記録できる。現在は各自のインベントリが独立しており、移動手段がない。
 **実装ヒント:** `src/app/characters/[id]/inventory/page.tsx` の各アイテムカードに「渡す」ボタンを追加（"use client" 化）。シナリオ参加者リストを `supabase.from("scenario_participants").select("*, characters(id, name)").eq("scenario_id", ...)` で取得してターゲットを選択、`supabase.from("inventory_items").update({ character_id: targetId }).eq("id", itemId)` で移転。対象シナリオが未設定のキャラは全キャラ一覧から選択するフォールバックを提供。追加DBなし。
