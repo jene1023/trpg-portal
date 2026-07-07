@@ -129,18 +129,26 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
           {/* 特技スキル Top3 */}
           {top.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-0.5">
-              {top.map((skill) => (
-                <span
-                  key={skill.id}
-                  className={`rounded-full px-2 py-0.5 text-xs border transition-all duration-200 ${
-                    skill.is_occupation
-                      ? "text-coc-gold border-coc-gold-dim bg-coc-void hover:border-coc-gold hover:shadow-[0_0_8px_rgba(201,133,58,0.45)]"
-                      : "text-coc-muted border-coc-border bg-coc-void hover:text-coc-text hover:border-coc-border-glow"
-                  }`}
-                >
-                  {skill.skill_name} {skill.current_value}%
-                </span>
-              ))}
+              {top.map((skill) => {
+                const isMaster = skill.current_value >= 80;
+                const tagClass = skill.is_occupation
+                  ? isMaster
+                    ? "text-coc-gold border-coc-gold bg-coc-void coc-skill-master"
+                    : "text-coc-gold border-coc-gold-dim bg-coc-void hover:border-coc-gold hover:shadow-[0_0_8px_rgba(201,133,58,0.45)]"
+                  : isMaster
+                    ? "text-coc-text border-coc-border-glow bg-coc-void coc-skill-expert"
+                    : "text-coc-muted border-coc-border bg-coc-void hover:text-coc-text hover:border-coc-border-glow";
+                return (
+                  <span
+                    key={skill.id}
+                    className={`rounded-full px-2 py-0.5 text-xs border transition-all duration-300 ${tagClass}`}
+                    title={isMaster ? `達人 (${skill.current_value}%)` : undefined}
+                  >
+                    {isMaster && <span className="mr-0.5 opacity-70">✦</span>}
+                    {skill.skill_name} {skill.current_value}%
+                  </span>
+                );
+              })}
             </div>
           )}
 

@@ -583,6 +583,27 @@ body {
   }
 }
 
+/* 達人スキルタグ: 燭台の炎のように脈打つ黄金の微光（職業技能で80%以上） */
+@keyframes coc-skill-master-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(201, 133, 58, 0.30), inset 0 0 4px rgba(201, 133, 58, 0.08); }
+  50%       { box-shadow: 0 0 10px rgba(201, 133, 58, 0.55), inset 0 0 8px rgba(201, 133, 58, 0.14); }
+}
+
+/* 高スキルタグ: 銅板のような鈍い輝き（非職業技能で80%以上） */
+@keyframes coc-skill-expert-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(122, 90, 42, 0.22); }
+  50%       { box-shadow: 0 0 8px rgba(122, 90, 42, 0.40); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-skill-master {
+    animation: coc-skill-master-glow 2.8s ease-in-out infinite;
+  }
+  .coc-skill-expert {
+    animation: coc-skill-expert-glow 3.5s ease-in-out infinite;
+  }
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }
