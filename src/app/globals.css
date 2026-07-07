@@ -561,6 +561,28 @@ body {
   }
 }
 
+/* ポートレートフィルム効果: 古写真のような色調で息づき、ホバー時に燭台の光を受けて鮮明になる */
+/* transform はここで管理し、CharacterCard の group-hover:scale-105 を置き換える */
+.coc-portrait-film {
+  filter: sepia(0.28) saturate(0.82) brightness(0.88);
+}
+
+.group:hover .coc-portrait-film,
+.group:focus-within .coc-portrait-film {
+  filter: sepia(0) saturate(1) brightness(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-portrait-film {
+    transition: filter 0.6s ease-out, transform 0.35s ease-out;
+  }
+
+  .group:hover .coc-portrait-film,
+  .group:focus-within .coc-portrait-film {
+    transform: scale(1.05);
+  }
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }

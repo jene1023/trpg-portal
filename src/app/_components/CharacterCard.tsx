@@ -41,7 +41,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
           <PortraitImage
             url={character.portrait_url}
             name={character.name}
-            className="transition-transform duration-300 group-hover:scale-105"
+            className="coc-portrait-film"
           />
           {/* 燭台ホバーグロー: ポートレート上部から降り注ぐ暖色の光 */}
           <div
