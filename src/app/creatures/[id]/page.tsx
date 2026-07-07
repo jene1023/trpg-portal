@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Skull } from "lucide-react";
 import { supabase, isSupabaseConfigured, Creature, Scenario } from "@/lib/supabase";
+import CreatureSanCheckButton from "@/app/_components/CreatureSanCheckButton";
 
 const STAT_DISPLAY: { key: keyof Creature; label: string }[] = [
   { key: "str", label: "STR" },
@@ -79,8 +80,8 @@ export default async function CreatureDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {typedCreature.scenario_id && typedCreature.hp !== null && (
-        <div className="mb-5">
+      <div className="mb-5 flex flex-wrap gap-3">
+        {typedCreature.scenario_id && typedCreature.hp !== null && (
           <Link
             href={`/scenarios/${typedCreature.scenario_id}/enemy-tracker?name=${encodeURIComponent(typedCreature.name)}&hp=${typedCreature.hp}`}
             className="inline-flex items-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-4 py-2 text-sm font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
@@ -88,8 +89,14 @@ export default async function CreatureDetailPage({ params }: Props) {
             <Skull size={15} />
             このシナリオの戦闘トラッカーに敵として追加
           </Link>
-        </div>
-      )}
+        )}
+        {(typedCreature.san_loss_success || typedCreature.san_loss_failure) && (
+          <CreatureSanCheckButton
+            sanLossSuccess={typedCreature.san_loss_success}
+            sanLossFailure={typedCreature.san_loss_failure}
+          />
+        )}
+      </div>
 
       <div className="space-y-4">
         {typedCreature.mythos_background && (

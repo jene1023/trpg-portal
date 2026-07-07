@@ -1184,7 +1184,7 @@
 **実装ヒント:** `src/app/characters/[id]/conditions/page.tsx` を "use client" で新規作成。`supabase.from("character_conditions").select("*").eq("character_id", id).order("is_active", {ascending: false})` で取得し、アクティブなコンディションを上部に表示。各カードにON/OFFトグル（`supabase.from("character_conditions").update({is_active}).eq("id", id)`）と削除ボタンを配置。新規追加フォームは condition_name（テキスト）・color（カラーピッカーまたはselectで「赤/黄/青/緑」）・notes（任意）を入力。既存の `CharacterCondition` 型を流用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「コンディション」リンクを追加し、アクティブ件数をバッジ表示。追加DBなし。
 **コミット:** `feat: character condition management page for in-session status tracking`
 
-## [TODO] クリーチャー遭遇SANチェック一括ロール — 優先度: 高
+## [DONE] クリーチャー遭遇SANチェック一括ロール — 優先度: 高
 **対象:** KP / 共通
 **概要:** クリーチャー詳細ページからシナリオを選択し、参加者全員にクリーチャーのSAN喪失値（成功/失敗）でSANチェックを一括実行してキャラクターのsan_currentを即時更新できる機能。遭遇するたびに手動でSANチェックを個別実行する手間を1クリック化する。
 **実装ヒント:** `src/app/creatures/[id]/page.tsx` に「パーティーSANチェック」ボタンを持つ "use client" コンポーネント（`src/app/_components/CreatureSanCheckButton.tsx`）を追加。モーダルでシナリオを選択後、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", scenarioId)` で参加者取得。各キャラの `san_current` に対して `creature.san_loss_success` / `san_loss_failure` のダイス式をパースして振り、判定結果と喪失量を一覧表示しつつ `supabase.from("characters").update({ san_current })` を並列更新。`Creature.san_loss_success` / `san_loss_failure` フィールドを流用。追加DBなし。
