@@ -1089,3 +1089,31 @@
 **概要:** `Tag` テーブルと `EntityTag`（entity_type: character/scenario/npc に対応）を活用して、タグクリック1つでキャラクター・シナリオ・NPCをまたいで絞り込める横断タグブラウザページを提供する。既存グローバル検索（名前・テキスト検索）を補完し、「ホラー」「現代」「一人用」などのジャンルタグで素早く目的のデータを発見できるようにする。
 **実装ヒント:** `src/app/tags/page.tsx` を Server Component で新規作成。`supabase.from("tags").select("*")` でタグ一覧を取得しタグクラウド表示。各タグをクリックすると `src/app/tags/[tagId]/page.tsx`（Server Component）へ遷移し、`supabase.from("entity_tags").select("entity_type, entity_id").eq("tag_id", tagId)` で紐づく全エンティティを取得し、entity_type ごとにセクション分けして character / scenario / npc の詳細をカード表示（各テーブルへの追加クエリで名前等を補完）。`src/app/_components/NavBar.tsx` に「タグ」リンクを追加。`TagSelector.tsx`（既存）での選択結果をこのページへ誘導するリンクも追加。追加DBなし（既存 `tags`・`entity_tags` テーブルを活用）。
 **コミット:** `feat: cross-entity tag browser for filtering characters, scenarios, and NPCs`
+
+## [TODO] ここフォリア（CCFOLIA）キャラクターコマJSON出力 — 優先度: 高
+**対象:** PL / 共通
+**概要:** キャラクターのHP/MP/SAN・能力値・チャットパレットをCCFOLIA（ここフォリア）のキャラクターコマ仕様JSON形式で出力し、VTTツールへ直接インポートできる機能。既存のBCDiceチャットパレット（テキスト出力）を補完し、コマデータごと書き出せるようにする。
+**リサーチ根拠:** Charaenoの「ここふぉりあコマ出力」が最も多く言及される差別化機能であり、オンセ勢の標準的なワークフローに組み込まれていることが複数記事・レビューで確認された。
+**実装ヒント:** `src/app/characters/[id]/ccfolia-export/page.tsx` を "use client" で新規作成。CCFOLIAのCharacter Room Object仕様（`{"kind":"character","data":{"name":...,"status":[{"label":"HP","value":X,"max":Y},{"label":"MP",...},{"label":"SAN",...}],"params":[{"label":"STR","value":"X"},...],"commands":"...","imageUrl":""}}`）に従いJSONを構築。`supabase.from("characters").select("*, character_skills(*)")` で全データ取得し、`character_skills` からBCDiceコマンドを生成して `commands` フィールドに連結。JSONをテキストエリアに表示しコピーボタン＋.jsonファイルダウンロードボタンを配置。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「CCFOLIAコマ出力」リンクを追加。追加DBなし（既存 `characters`, `character_skills` を流用）。
+**コミット:** `feat: CCFOLIA character piece JSON export for VTT import`
+
+## [TODO] キャラクター/探索者アバター画像登録 — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターに外部URLまたはSupabase Storageへのアップロードで立ち絵・アバター画像を登録し、キャラクター詳細・プロフィールカード・CCFOLIA コマ出力の `imageUrl` フィールドに反映できる機能。
+**リサーチ根拠:** いあキャラ ver2.0.0 の大型アップデートで画像登録が最も歓迎された機能であり、Charaeno・キャラ保管所を含む主要CoC管理ツール全てが画像登録機能を持つことが確認された。
+**実装ヒント:** `characters` テーブルに `avatar_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `avatar_url: string | null` を追加。`src/app/_components/CharacterForm.tsx` にURL入力欄を追加（まずはURL入力のみ、後でSupabase Storage対応可）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに `<img>` タグで表示（未設定時はデフォルトシルエット）。プロフィールカード（`src/app/characters/[id]/profile-card/page.tsx`）にも画像を反映。CCFOLIAコマ出力の `imageUrl` にも連携。追加DBカラムのみ（新テーブルなし）。
+**コミット:** `feat: character avatar image registration for profile and VTT integration`
+
+## [TODO] AI探索者バックストーリー自動生成（Claude API） — 優先度: 中
+**対象:** PL / 共通
+**概要:** 職業・能力値・時代設定を入力するとClaude APIが探索者のバックストーリー・性格特質・外見描写の下書きを自動生成するAI支援機能。キャラ作成の中で最も時間がかかる「設定考え」フェーズを支援する。
+**リサーチ根拠:** CS CAT（2025年登場、trpg-japan.com掲載）とCthulhu Helper App（App Store）がAI支援キャラ作成を実装して注目を集めており、AIでCoC探索者の設定を補完する需要が明確に高まっていることを確認した。
+**実装ヒント:** `src/app/api/characters/generate-background/route.ts` をAPI Routeで新規作成。リクエストBODYで `{ occupation, era, str, con, pow, dex, app, siz, int, edu }` を受け取り、`@anthropic-ai/sdk` の `anthropic.messages.create()` で `claude-haiku-4-5-20251001` モデルを使用（コスト重視）。プロンプト例: 「CoC7版探索者として [occupation]・[era]設定の背景（100字）・性格特質（50字）・外見（50字）を日本語で提案してください」。`src/app/characters/[id]/traits/page.tsx`（探索者特質ページ）に「AIで設定を生成」ボタンを追加し、生成結果をフォームのtextareaにプレビュー表示後にユーザーが編集・確定できる形にする。`.env.local` に `ANTHROPIC_API_KEY` が必要（READMEに追記）。追加DBなし（既存 `character_traits` テーブルを流用）。
+**コミット:** `feat: AI-assisted backstory generation for investigators using Claude API`
+
+## [TODO] キャラクターシート閲覧専用URL公開 — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターシートを「読み取り専用の公開URL」として生成し、アカウントなしで閲覧できるページを提供する。KPがPLのキャラシートを事前確認したり、セッション募集時に自分のキャラを他者に見せたりする用途に使える。ハンドアウト共有URL（`share_tokens`）とは独立したキャラシート専用フロー。
+**リサーチ根拠:** Charaenoの「公開URLで誰でもキャラシートを閲覧できる」機能がユーザーレビューで高評価を得ており、キャラクター保管所でも公開/非公開設定が標準機能として定着していることを確認した。
+**実装ヒント:** `characters` テーブルに `public_token: uuid | null DEFAULT null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `public_token: string | null` を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「公開URLを生成」ボタン（"use client" コンポーネント `PublicShareButton.tsx` として新規作成）を追加し、クリックで `crypto.randomUUID()` を生成して `supabase.from("characters").update({ public_token })` で保存後にURLをクリップボードにコピー。`src/app/public/characters/[token]/page.tsx` を新規作成（Server Component、Supabase認証不要）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*)").eq("public_token", token)` で取得し閲覧専用レイアウト（編集UIなし）で表示。「公開を無効化」ボタンで `public_token: null` にリセット。追加DBカラムのみ（新テーブルなし）。
+**コミット:** `feat: public read-only character sheet URL for sharing without login`
