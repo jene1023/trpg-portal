@@ -1141,3 +1141,27 @@
 **概要:** KPがシナリオのタイトル・舞台・主要キーワード（例：「1920年代ボストン、行方不明の教授、イカれた儀式」）を入力するとClaude APIがシノプシス（synopsis）とGMメモ下書きを生成してくれる機能。既存の `AIBackstoryGenerator.tsx`（探索者バックストーリー自動生成）のシナリオ版。白紙状態のシナリオ作成を加速する。
 **実装ヒント:** `src/app/_components/AIScenarioDraftGenerator.tsx` を "use client" で新規作成。タイトル・舞台・時代・キーワード・プレイ人数入力 → `/api/ai/scenario-draft/route.ts`（POST）に送信 → Anthropic SDK `claude-sonnet-5` で「CoCシナリオのシノプシスとGMメモを日本語で生成」プロンプトを呼ぶ → 結果をテキストエリアに表示し「このシノプシスを使う」ボタンで `ScenarioForm` の synopsis フィールドに反映。`src/app/scenarios/new/page.tsx` に「AIで概要を下書き」ボタンとして組み込む。追加DBなし。
 **コミット:** `feat: AI scenario synopsis draft generator for KP using Claude API`
+
+## [TODO] AI NPC会話サンプル生成（セッション中発話サポート） — 優先度: 中
+**対象:** KP
+**概要:** NPCの `speech_style`・`purpose`・`sample_quotes` を元に、特定シチュエーション（例:「尋問される」「緊急事態に遭遇」）での発話例をClaude APIが自動生成し、KPがセッション中の即興ロールプレイに即座に使える機能。AI探索者バックストーリー（DONE）・AIシナリオシノプシス（TODO）に続くAI支援シリーズとして、NPC発話の即興コストを大幅に下げる。
+**実装ヒント:** `src/app/_components/NpcDialogueGenerator.tsx` を "use client" で新規作成。状況テキスト入力 → `/api/ai/npc-dialogue/route.ts`（POST）に `{ npcId, situation }` を送信 → Supabaseで NPC の `speech_style`・`purpose`・`sample_quotes` を取得し、`claude-haiku-4-5-20251001` モデルで「このNPCならどう言うか」を日本語で3パターン生成 → テキストエリアに表示。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）の下部に「発話例を生成」ボタンとして配置。追加DBなし。
+**コミット:** `feat: AI NPC dialogue sample generator for in-session roleplay support`
+
+## [TODO] AIセッションサマリー自動生成（プレイログ語り直し） — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッションログ（`sessions`テーブル）の summary・san_loss・hp_loss と、そのセッション中のダイスロールハイライト（クリティカル/ファンブル）をインプットに、Claude APIがリプレイ風のナラティブ要約（200〜300字）を自動生成する機能。手書き要約の負担を減らし、後から見返したときに読み応えある記録として残せる。
+**実装ヒント:** `src/app/_components/SessionSummaryGenerator.tsx` を "use client" で新規作成。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「AIでまとめを生成」ボタンを配置。`/api/ai/session-summary/route.ts`（POST）で `{ sessionId, characterId }` を受け取り、`supabase.from("sessions").select("*").eq("id", sessionId)` + `supabase.from("dice_rolls").select("*").eq("character_id", characterId).gte("rolled_at", session.played_at)` でデータ取得後、`claude-haiku-4-5-20251001` で「TRPGリプレイ風の短い語り」を生成。結果をテキストエリアに表示し「このサマリーで更新」ボタンで `sessions.summary` に上書き保存するオプションを提供。追加DBなし。
+**コミット:** `feat: AI session summary generator for narrative log recap`
+
+## [TODO] スナップショット前後比較ビュー（セッション成長差分） — 優先度: 中
+**対象:** PL
+**概要:** 既存のキャラクタースナップショット保存機能（`CharacterSnapshot`、SnapshotSaveButton.tsx DONE）を活用し、任意の2スナップショットを選択して能力値・技能値・HP/SANの変化を差分表示するビュー。「セッション前スナップショット vs 現在」を比較することで、セッション中の成長・損失を一目で確認できる。
+**実装ヒント:** `src/app/characters/[id]/snapshot-compare/page.tsx` を "use client" で新規作成。`supabase.from("character_snapshots").select("*").eq("character_id", id).order("created_at", {ascending: false})` でスナップショット一覧を取得し、2件をプルダウンで選択。`snapshot_data`（JSONB）に保存されている能力値・技能値を比較し、変化した項目を色分け表示（増加→緑、減少→赤、変化なし→グレー）。追加DBなし（既存 `character_snapshots` テーブルを流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット比較」リンクを追加。
+**コミット:** `feat: snapshot diff view to compare character state before and after session`
+
+## [TODO] シナリオ参加者募集ページ（公開告知リンク） — 優先度: 低
+**対象:** KP / 共通
+**概要:** KPがシナリオの公開告知ページ（タイトル・あらすじ概要・開催予定日・プレイ人数・難易度・タグ）を生成し、URLをDiscord/SNSで共有してプレイヤーを募集できる機能。現在シナリオ情報はKP専用ダッシュボード内にのみ存在し、外部の潜在プレイヤーへ告知する手段がない。
+**実装ヒント:** `src/app/scenarios/[id]/recruit/page.tsx` を Server Component で新規作成（Supabase認証不要・公開アクセス可）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, min_players, max_players, content_tags, next_session_at").eq("id", id)` でパブリックに必要なフィールドのみ取得（`gm_notes` は非表示）。難易度バッジ・タグチップ・参加定員・次回予定日をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「募集ページを共有」ボタンを追加しURLをクリップボードにコピー。追加DBなし（既存Scenarioフィールドを活用）。
+**コミット:** `feat: public scenario recruitment page for gathering players via shared link`
