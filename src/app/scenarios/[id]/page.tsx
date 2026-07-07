@@ -2,10 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
+import RecruitShareButton from "@/app/_components/RecruitShareButton";
 import ScenarioDiscordWebhookEditor from "@/app/_components/ScenarioDiscordWebhookEditor";
 import ScenarioReminderEditor from "@/app/_components/ScenarioReminderEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
@@ -859,6 +860,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
           </div>
           <span className="text-coc-muted">→</span>
         </Link>
+
+        <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <UserPlus size={20} className="text-coc-gold" />
+              <div>
+                <p className="font-medium text-coc-text">参加者募集ページ</p>
+                <p className="text-xs text-coc-muted">タイトル・あらすじ・難易度・日程を公開して参加者を募集</p>
+              </div>
+            </div>
+            <RecruitShareButton scenarioId={id} />
+          </div>
+        </div>
 
         <div className="rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4">
           <div className="flex items-center gap-3 mb-3">

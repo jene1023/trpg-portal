@@ -1160,7 +1160,7 @@
 **実装ヒント:** `src/app/characters/[id]/snapshot-compare/page.tsx` を "use client" で新規作成。`supabase.from("character_snapshots").select("*").eq("character_id", id).order("created_at", {ascending: false})` でスナップショット一覧を取得し、2件をプルダウンで選択。`snapshot_data`（JSONB）に保存されている能力値・技能値を比較し、変化した項目を色分け表示（増加→緑、減少→赤、変化なし→グレー）。追加DBなし（既存 `character_snapshots` テーブルを流用）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スナップショット比較」リンクを追加。
 **コミット:** `feat: snapshot diff view to compare character state before and after session`
 
-## [TODO] シナリオ参加者募集ページ（公開告知リンク） — 優先度: 低
+## [DONE] シナリオ参加者募集ページ（公開告知リンク） — 優先度: 低
 **対象:** KP / 共通
 **概要:** KPがシナリオの公開告知ページ（タイトル・あらすじ概要・開催予定日・プレイ人数・難易度・タグ）を生成し、URLをDiscord/SNSで共有してプレイヤーを募集できる機能。現在シナリオ情報はKP専用ダッシュボード内にのみ存在し、外部の潜在プレイヤーへ告知する手段がない。
 **実装ヒント:** `src/app/scenarios/[id]/recruit/page.tsx` を Server Component で新規作成（Supabase認証不要・公開アクセス可）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, min_players, max_players, content_tags, next_session_at").eq("id", id)` でパブリックに必要なフィールドのみ取得（`gm_notes` は非表示）。難易度バッジ・タグチップ・参加定員・次回予定日をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「募集ページを共有」ボタンを追加しURLをクリップボードにコピー。追加DBなし（既存Scenarioフィールドを活用）。
