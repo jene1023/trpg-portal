@@ -6,6 +6,7 @@ import { ExternalLink, Play } from "lucide-react";
 import { SessionLog } from "@/lib/supabase";
 import SessionLogForm from "./SessionLogForm";
 import SessionNpcEncounters from "./SessionNpcEncounters";
+import SessionSummaryGenerator from "./SessionSummaryGenerator";
 
 type EncounterEntry = {
   id: string;
@@ -98,6 +99,18 @@ export default function SessionLogList({
                   {log.summary}
                 </p>
               )}
+
+              <SessionSummaryGenerator
+                sessionId={log.id}
+                characterId={characterId}
+                onSummaryUpdated={(newSummary) =>
+                  setLogs((prev) =>
+                    prev.map((l) =>
+                      l.id === log.id ? { ...l, summary: newSummary } : l
+                    )
+                  )
+                }
+              />
 
               {log.recording_url && (
                 <div className="flex items-center gap-3">

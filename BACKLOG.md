@@ -1148,7 +1148,7 @@
 **実装ヒント:** `src/app/_components/NpcDialogueGenerator.tsx` を "use client" で新規作成。状況テキスト入力 → `/api/ai/npc-dialogue/route.ts`（POST）に `{ npcId, situation }` を送信 → Supabaseで NPC の `speech_style`・`purpose`・`sample_quotes` を取得し、`claude-haiku-4-5-20251001` モデルで「このNPCならどう言うか」を日本語で3パターン生成 → テキストエリアに表示。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）の下部に「発話例を生成」ボタンとして配置。追加DBなし。
 **コミット:** `feat: AI NPC dialogue sample generator for in-session roleplay support`
 
-## [TODO] AIセッションサマリー自動生成（プレイログ語り直し） — 優先度: 中
+## [DONE] AIセッションサマリー自動生成（プレイログ語り直し） — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッションログ（`sessions`テーブル）の summary・san_loss・hp_loss と、そのセッション中のダイスロールハイライト（クリティカル/ファンブル）をインプットに、Claude APIがリプレイ風のナラティブ要約（200〜300字）を自動生成する機能。手書き要約の負担を減らし、後から見返したときに読み応えある記録として残せる。
 **実装ヒント:** `src/app/_components/SessionSummaryGenerator.tsx` を "use client" で新規作成。セッションログ一覧（`src/app/characters/[id]/sessions/page.tsx`）の各ログカードに「AIでまとめを生成」ボタンを配置。`/api/ai/session-summary/route.ts`（POST）で `{ sessionId, characterId }` を受け取り、`supabase.from("sessions").select("*").eq("id", sessionId)` + `supabase.from("dice_rolls").select("*").eq("character_id", characterId).gte("rolled_at", session.played_at)` でデータ取得後、`claude-haiku-4-5-20251001` で「TRPGリプレイ風の短い語り」を生成。結果をテキストエリアに表示し「このサマリーで更新」ボタンで `sessions.summary` に上書き保存するオプションを提供。追加DBなし。
