@@ -604,6 +604,18 @@ body {
   }
 }
 
+/* サブタイトル字間呼吸: 燭台の光の揺らぎに合わせて文字間隔が静かに開閉する */
+@keyframes coc-tracking-breathe {
+  0%, 100% { letter-spacing: 0.20em; opacity: 0.65; }
+  50%       { letter-spacing: 0.34em; opacity: 0.90; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-tracking-breathe {
+    animation: coc-tracking-breathe 8s ease-in-out infinite;
+  }
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }
