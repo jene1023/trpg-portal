@@ -1118,7 +1118,7 @@
 **実装ヒント:** `characters` テーブルに `public_token: uuid | null DEFAULT null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `public_token: string | null` を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「公開URLを生成」ボタン（"use client" コンポーネント `PublicShareButton.tsx` として新規作成）を追加し、クリックで `crypto.randomUUID()` を生成して `supabase.from("characters").update({ public_token })` で保存後にURLをクリップボードにコピー。`src/app/public/characters/[token]/page.tsx` を新規作成（Server Component、Supabase認証不要）。`supabase.from("characters").select("*, character_skills(*), inventory_items(*)").eq("public_token", token)` で取得し閲覧専用レイアウト（編集UIなし）で表示。「公開を無効化」ボタンで `public_token: null` にリセット。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: public read-only character sheet URL for sharing without login`
 
-## [TODO] 派生ステータス自動計算補助（キャラクター作成UI改善） — 優先度: 高
+## [DONE] 派生ステータス自動計算補助（キャラクター作成UI改善） — 優先度: 高
 **対象:** PL / 共通
 **概要:** キャラクター作成・編集フォームで能力値（STR/CON/POW/DEX/SIZ等）を入力した後に「派生値を自動計算」ボタンを押すと、CoC7版の計算式に基づいてHP_max・MP_max・SAN_start・ダメージボーナスを自動計算してフォームに反映する機能。既存の「能力値オートロール」はダイス振り機能のみでHP等の派生値は手動入力のままという不便を解消する。
 **実装ヒント:** `src/app/_components/CharacterForm.tsx` に「派生値を自動計算」ボタンを追加（"use client"のまま）。クリック時に `hp_max = Math.floor((con + siz) / 10)` (CoC7版)、`mp_max = pow`、`san_start = pow * 5`、DBは STR+SIZの範囲表でダメージボーナス文字列を算出してstateに反映。手動修正も引き続き可能なよう上書き可能な入力欄のまま。6版キャラ（`rule_edition === "6th"`）では `hp_max = Math.floor((con + siz) / 2)` の別計算式を使う。追加DBなし。

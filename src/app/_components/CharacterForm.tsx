@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
-import { Trash2, Plus, Upload, Dices, Download } from "lucide-react";
+import { Trash2, Plus, Upload, Dices, Download, Calculator } from "lucide-react";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, SkillTemplate } from "@/lib/supabase";
 import { sendDiscordNotification } from "@/lib/discordNotify";
@@ -166,7 +166,9 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
 
   // 能力値変更時に派生ステータスを自動計算
   useEffect(() => {
-    const newHpMax = calcHpMax(con, siz);
+    const newHpMax = ruleEdition === "6th"
+      ? Math.floor((con + siz) / 2)
+      : calcHpMax(con, siz);
     const newMpMax = calcMpMax(pow);
     const newSanStart = calcSanStart(pow);
     setHpMax(newHpMax);
@@ -178,7 +180,23 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
       setMpCurrent(newMpMax);
       setSanCurrent(newSanStart);
     }
-  }, [con, pow, siz, isEdit]);
+  }, [con, pow, siz, isEdit, ruleEdition]);
+
+  // 派生値を能力値から再計算して現在ステータスにも反映（編集時もmax=currentに合わせる）
+  function applyDerivedStats() {
+    const newHpMax = ruleEdition === "6th"
+      ? Math.floor((con + siz) / 2)
+      : calcHpMax(con, siz);
+    const newMpMax = calcMpMax(pow);
+    const newSanStart = calcSanStart(pow);
+    setHpMax(newHpMax);
+    setHpCurrent(newHpMax);
+    setMpMax(newMpMax);
+    setMpCurrent(newMpMax);
+    setSanStart(newSanStart);
+    setSanCurrent(newSanStart);
+    setSanMax(99);
+  }
 
   // 能力値オートロール
   // 7版: STR/CON/POW/DEX/APP=3D6×5, SIZ/INT/EDU=(2D6+6)×5
@@ -531,13 +549,23 @@ export default function CharacterForm({ initialData, initialSkills }: Props) {
       <div className={sectionClass}>
         <div className="flex items-center justify-between">
           <h2 className={sectionTitle}>能力値</h2>
-          <button
-            type="button"
-            onClick={rollAbilityScores}
-            className="flex items-center gap-1 text-xs text-coc-gold hover:text-coc-text transition-colors"
-          >
-            <Dices size={14} /> 能力値を振る
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={applyDerivedStats}
+              className="flex items-center gap-1 text-xs text-coc-muted hover:text-coc-text transition-colors"
+              title="HP/MP/SAN初期値を能力値から自動計算して現在ステータスに反映"
+            >
+              <Calculator size={14} /> 派生値を計算
+            </button>
+            <button
+              type="button"
+              onClick={rollAbilityScores}
+              className="flex items-center gap-1 text-xs text-coc-gold hover:text-coc-text transition-colors"
+            >
+              <Dices size={14} /> 能力値を振る
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-4 gap-3">
           {statField("STR", str, setStr)}
