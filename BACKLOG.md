@@ -1214,7 +1214,7 @@
 **実装ヒント:** Supabaseに `character_mythos_encounters` テーブルを追加（id, character_id, entity_name, entity_type: "creature"|"deity"|"artifact"|"spell"|"other", session_label, san_lost, notes, encountered_at, created_at）。`src/app/characters/[id]/mythos-log/page.tsx` を新規作成（一覧＋追加フォーム）。既存クリーチャーテーブル（`creatures`）からの参照選択と、自由入力の両方を提供。遭遇エンティティごとにSAN喪失累計を集計表示。`src/lib/supabase.ts` に `CharacterMythosEncounter` 型を追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）と `preflight/page.tsx` に「神話遭遇ログ」リンクを追加。
 **コミット:** `feat: character mythos encounter log per investigator`
 
-## [TODO] セッションハイライト投票（ベストシーン記録） — 優先度: 中
+## [DONE] セッションハイライト投票（ベストシーン記録） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション終了後にKP・PLが「最も印象的だったシーン/瞬間」を自由テキストで投稿し合い、シナリオ単位でハイライト集として閲覧できる機能。既存の `session-review/page.tsx` や `reflections/page.tsx` はログ/振り返りだが、こちらは参加者全員が「名シーン投票」として盛り上がれる一覧を指向する。
 **実装ヒント:** Supabaseに `session_highlights` テーブルを追加（id, scenario_id, author_name, character_name, scene_description, category: "roll"|"rp"|"story"|"comedy"|"tragedy"|"other", liked_count: int DEFAULT 0, created_at）。`src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成（カード一覧＋投稿フォーム）。いいね数は `supabase.from("session_highlights").update({ liked_count: prev + 1 }).eq("id", id)` で楽観的更新。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。`src/lib/supabase.ts` に `SessionHighlight` 型を追加。

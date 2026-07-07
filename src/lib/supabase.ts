@@ -826,3 +826,16 @@ export type CharacterMythosEncounter = {
   encountered_at: string | null;
   created_at: string;
 };
+
+export type HighlightCategory = "roll" | "rp" | "story" | "comedy" | "tragedy" | "other";
+
+export type SessionHighlight = {
+  id: string;
+  scenario_id: string;
+  author_name: string | null;
+  character_name: string | null;
+  scene_description: string;
+  category: HighlightCategory;
+  liked_count: number;
+  created_at: string;
+};
