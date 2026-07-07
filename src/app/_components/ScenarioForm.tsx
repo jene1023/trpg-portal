@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType } from "@/lib/supabase";
+import AIScenarioDraftGenerator from "@/app/_components/AIScenarioDraftGenerator";
 
 export default function ScenarioForm() {
   const router = useRouter();
@@ -332,6 +333,12 @@ export default function ScenarioForm() {
           />
         </div>
       </div>
+
+      <AIScenarioDraftGenerator
+        currentTitle={form.title}
+        onApplySynopsis={(synopsis) => setForm((prev) => ({ ...prev, synopsis }))}
+        onApplyGmNotes={(gm_notes) => setForm((prev) => ({ ...prev, gm_notes }))}
+      />
 
       <div>
         <label htmlFor="synopsis" className={labelClass}>

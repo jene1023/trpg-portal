@@ -1136,7 +1136,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。`useState` でタイマーの状態（running/paused/stopped, elapsed_seconds, lap_times）を管理し、`useEffect` で `setInterval` を使った秒刻みカウントアップを実装。`localStorage` の `session_timer_<scenario_id>` キーに elapsed_seconds と started_at を保存し、リロード後もタイマーが継続する。ラップ機能で場面ごとの経過時間も記録可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし。
 **コミット:** `feat: session timer widget with localStorage persistence for KP pacing`
 
-## [TODO] AIシナリオシノプシス生成（KP向けシナリオ概要自動下書き） — 優先度: 中
+## [DONE] AIシナリオシノプシス生成（KP向けシナリオ概要自動下書き） — 優先度: 中
 **対象:** KP
 **概要:** KPがシナリオのタイトル・舞台・主要キーワード（例：「1920年代ボストン、行方不明の教授、イカれた儀式」）を入力するとClaude APIがシノプシス（synopsis）とGMメモ下書きを生成してくれる機能。既存の `AIBackstoryGenerator.tsx`（探索者バックストーリー自動生成）のシナリオ版。白紙状態のシナリオ作成を加速する。
 **実装ヒント:** `src/app/_components/AIScenarioDraftGenerator.tsx` を "use client" で新規作成。タイトル・舞台・時代・キーワード・プレイ人数入力 → `/api/ai/scenario-draft/route.ts`（POST）に送信 → Anthropic SDK `claude-sonnet-5` で「CoCシナリオのシノプシスとGMメモを日本語で生成」プロンプトを呼ぶ → 結果をテキストエリアに表示し「このシノプシスを使う」ボタンで `ScenarioForm` の synopsis フィールドに反映。`src/app/scenarios/new/page.tsx` に「AIで概要を下書き」ボタンとして組み込む。追加DBなし。
