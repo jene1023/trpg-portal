@@ -1111,7 +1111,7 @@
 **実装ヒント:** `src/app/api/characters/generate-background/route.ts` をAPI Routeで新規作成。リクエストBODYで `{ occupation, era, str, con, pow, dex, app, siz, int, edu }` を受け取り、`@anthropic-ai/sdk` の `anthropic.messages.create()` で `claude-haiku-4-5-20251001` モデルを使用（コスト重視）。プロンプト例: 「CoC7版探索者として [occupation]・[era]設定の背景（100字）・性格特質（50字）・外見（50字）を日本語で提案してください」。`src/app/characters/[id]/traits/page.tsx`（探索者特質ページ）に「AIで設定を生成」ボタンを追加し、生成結果をフォームのtextareaにプレビュー表示後にユーザーが編集・確定できる形にする。`.env.local` に `ANTHROPIC_API_KEY` が必要（READMEに追記）。追加DBなし（既存 `character_traits` テーブルを流用）。
 **コミット:** `feat: AI-assisted backstory generation for investigators using Claude API`
 
-## [TODO] キャラクターシート閲覧専用URL公開 — 優先度: 中
+## [DONE] キャラクターシート閲覧専用URL公開 — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターシートを「読み取り専用の公開URL」として生成し、アカウントなしで閲覧できるページを提供する。KPがPLのキャラシートを事前確認したり、セッション募集時に自分のキャラを他者に見せたりする用途に使える。ハンドアウト共有URL（`share_tokens`）とは独立したキャラシート専用フロー。
 **リサーチ根拠:** Charaenoの「公開URLで誰でもキャラシートを閲覧できる」機能がユーザーレビューで高評価を得ており、キャラクター保管所でも公開/非公開設定が標準機能として定着していることを確認した。

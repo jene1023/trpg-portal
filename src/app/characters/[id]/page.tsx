@@ -24,6 +24,7 @@ import DiceShortcutPad from "@/app/_components/DiceShortcutPad";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import SuccessionButton from "@/app/_components/SuccessionButton";
+import PublicShareButton from "@/app/_components/PublicShareButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -110,6 +111,7 @@ export default async function CharacterDetailPage({ params }: Props) {
         </Link>
         <div className="flex items-center gap-2">
           <PublicShareToggle characterId={id} isPublic={char.is_public ?? false} publicSlug={char.public_slug ?? null} />
+          <PublicShareButton characterId={id} publicToken={char.public_token ?? null} />
           <PdfExportButton characterId={id} />
           <ExportButton characterId={id} characterName={char.name} />
           <DuplicateButton characterId={id} />

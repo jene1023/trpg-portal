@@ -1,0 +1,297 @@
+export const dynamic = "force-dynamic";
+
+import { notFound } from "next/navigation";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { calcDamageBonus, calcBuild, calcMov } from "@/lib/coc-calc";
+import StatBlock from "@/app/_components/StatBlock";
+import StatusBadge from "@/app/_components/StatusBadge";
+import PortraitImage from "@/app/_components/PortraitImage";
+import SectionDivider from "@/app/_components/SectionDivider";
+
+type Props = { params: Promise<{ token: string }> };
+
+export default async function PublicCharacterSheetPage({ params }: Props) {
+  const { token } = await params;
+
+  if (!isSupabaseConfigured) notFound();
+
+  const { data: char } = await supabase
+    .from("characters")
+    .select("*, character_skills(*), inventory_items(*)")
+    .eq("public_token", token)
+    .single();
+
+  if (!char) notFound();
+
+  const skills = char.character_skills ?? [];
+  const items = char.inventory_items ?? [];
+
+  const db = calcDamageBonus(char.str, char.siz);
+  const build = calcBuild(char.str, char.siz);
+  const mov = calcMov(char.str, char.dex, char.siz);
+
+  const sectionClass = "rounded-lg border border-coc-border coc-card-bg p-4 space-y-4";
+  const sectionTitle =
+    "coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest";
+
+  const occupationSkills = skills.filter((s: { is_occupation: boolean }) => s.is_occupation);
+  const otherSkills = skills.filter(
+    (s: { is_occupation: boolean; current_value: number }) =>
+      !s.is_occupation && s.current_value > 0
+  );
+  const weapons = items.filter((i: { item_type: string }) => i.item_type === "weapon");
+  const otherItems = items.filter((i: { item_type: string }) => i.item_type !== "weapon");
+
+  return (
+    <div className="coc-page-enter mx-auto max-w-5xl px-4 py-8">
+      <div className="mb-6 flex items-center gap-2">
+        <span className="rounded-full border border-blue-700 bg-blue-950/30 px-2.5 py-0.5 text-xs text-blue-400">
+          閲覧専用キャラクターシート
+        </span>
+        <span className="text-xs text-coc-muted">このページはリンクを知っている全員が閲覧できます</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
+        {/* 左カラム */}
+        <div className="space-y-4">
+          <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-coc-border">
+            <PortraitImage url={char.portrait_url} name={char.name} />
+            <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
+          </div>
+
+          <div className={sectionClass}>
+            <div>
+              <h1 className="font-cinzel text-xl font-bold text-coc-text leading-tight coc-name-glow">
+                {char.name}
+              </h1>
+              <div className="flex items-center gap-2 mt-1.5">
+                <StatusBadge status={char.status} />
+                {char.occupation && (
+                  <span className="text-xs text-coc-muted">{char.occupation}</span>
+                )}
+              </div>
+            </div>
+
+            {char.catchphrase && (
+              <p className="font-crimson italic text-coc-gold text-sm leading-relaxed border-l-2 border-coc-gold-dim pl-3">
+                &ldquo;{char.catchphrase}&rdquo;
+              </p>
+            )}
+
+            <SectionDivider className="my-2" />
+
+            <dl className="space-y-1.5 text-sm">
+              {char.furigana && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">ふりがな</dt>
+                  <dd className="text-coc-text">{char.furigana}</dd>
+                </div>
+              )}
+              {char.age && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">年齢</dt>
+                  <dd className="text-coc-text">{char.age}歳</dd>
+                </div>
+              )}
+              {char.birthday && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">誕生日</dt>
+                  <dd className="text-coc-text">{char.birthday}</dd>
+                </div>
+              )}
+              {char.gender && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">性別</dt>
+                  <dd className="text-coc-text">{char.gender}</dd>
+                </div>
+              )}
+              {(char.height_cm || char.weight_kg) && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">体格</dt>
+                  <dd className="text-coc-text">
+                    {char.height_cm ? `${char.height_cm}cm` : ""}
+                    {char.height_cm && char.weight_kg ? " / " : ""}
+                    {char.weight_kg ? `${char.weight_kg}kg` : ""}
+                  </dd>
+                </div>
+              )}
+              {(char.eye_color || char.hair_color) && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">外見</dt>
+                  <dd className="text-coc-text text-right leading-tight">
+                    {char.eye_color ? `目：${char.eye_color}` : ""}
+                    {char.eye_color && char.hair_color ? " / " : ""}
+                    {char.hair_color ? `髪：${char.hair_color}` : ""}
+                  </dd>
+                </div>
+              )}
+              {(char.mythos_books_read ?? 0) > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">神話書読了</dt>
+                  <dd className="text-coc-text">{char.mythos_books_read}冊</dd>
+                </div>
+              )}
+              {char.player_name && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">PL</dt>
+                  <dd className="text-coc-text">{char.player_name}</dd>
+                </div>
+              )}
+              {char.scenario_name && (
+                <div className="flex justify-between">
+                  <dt className="text-coc-muted">シナリオ</dt>
+                  <dd className="text-coc-text text-right max-w-[140px] leading-tight">
+                    {char.scenario_name}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <dt className="text-coc-muted">版</dt>
+                <dd className="text-coc-text">{char.rule_edition === "6th" ? "第6版" : "第7版"}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        {/* 右カラム */}
+        <div className="space-y-4">
+          {/* 能力値 */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>能力値</h2>
+            <StatBlock character={char} />
+          </div>
+
+          {/* 派生ステータス */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>派生ステータス</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "HP", current: char.hp_current, max: char.hp_max },
+                { label: "MP", current: char.mp_current, max: char.mp_max },
+                { label: "SAN", current: char.san_current, max: char.san_max },
+              ].map(({ label, current, max }) => (
+                <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-3 text-center">
+                  <p className="text-xs text-coc-muted mb-1">{label}</p>
+                  <p className="text-2xl font-bold text-coc-text tabular-nums">{current}</p>
+                  <p className="text-xs text-coc-faint">/{max}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              {[
+                { label: "幸運", value: char.luck },
+                { label: "ダメージボーナス", value: db },
+                { label: "ビルド", value: build },
+                { label: "移動力", value: mov },
+              ].map(({ label, value }) => (
+                <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-2 text-center">
+                  <p className="text-xs text-coc-muted">{label}</p>
+                  <p className="text-lg font-bold text-coc-text tabular-nums">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 技能 */}
+          {skills.length > 0 && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>技能</h2>
+              {occupationSkills.length > 0 && (
+                <div>
+                  <p className="text-xs text-coc-muted font-semibold mb-2">職業技能</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {occupationSkills.map((s: { id: string; skill_name: string; current_value: number }) => (
+                      <div key={s.id} className="rounded border border-coc-gold/30 bg-coc-gold/5 px-2 py-1.5 text-sm">
+                        <span className="text-coc-text">{s.skill_name}</span>
+                        <span className="ml-auto float-right font-bold text-coc-gold tabular-nums">{s.current_value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {otherSkills.length > 0 && (
+                <div>
+                  <p className="text-xs text-coc-muted font-semibold mb-2">その他の技能</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {otherSkills.map((s: { id: string; skill_name: string; current_value: number }) => (
+                      <div key={s.id} className="rounded border border-coc-border bg-coc-surface px-2 py-1.5 text-sm">
+                        <span className="text-coc-muted">{s.skill_name}</span>
+                        <span className="ml-auto float-right font-bold text-coc-text tabular-nums">{s.current_value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 武器・所持品 */}
+          {items.length > 0 && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>武器・所持品</h2>
+              {weapons.length > 0 && (
+                <div>
+                  <p className="text-xs text-coc-muted font-semibold mb-2">武器</p>
+                  <div className="flex flex-col gap-1.5">
+                    {weapons.map((item: { id: string; name: string; damage: string | null; range: string | null; ammo_current: number | null; ammo_max: number | null; notes: string | null }) => (
+                      <div key={item.id} className="rounded border border-red-900/40 bg-red-950/10 px-3 py-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-coc-text">{item.name}</span>
+                          <div className="flex gap-2 text-xs text-coc-muted">
+                            {item.damage && <span>ダメージ: {item.damage}</span>}
+                            {item.range && <span>射程: {item.range}</span>}
+                            {item.ammo_max != null && (
+                              <span>弾: {item.ammo_current}/{item.ammo_max}</span>
+                            )}
+                          </div>
+                        </div>
+                        {item.notes && (
+                          <p className="text-xs text-coc-muted mt-0.5 whitespace-pre-wrap">{item.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {otherItems.length > 0 && (
+                <div>
+                  <p className="text-xs text-coc-muted font-semibold mb-2">アイテム</p>
+                  <div className="flex flex-col gap-1.5">
+                    {otherItems.map((item: { id: string; name: string; notes: string | null }) => (
+                      <div key={item.id} className="rounded border border-coc-border bg-coc-surface px-3 py-2 text-sm">
+                        <span className="text-coc-text">{item.name}</span>
+                        {item.notes && (
+                          <p className="text-xs text-coc-muted mt-0.5 whitespace-pre-wrap">{item.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 口調・ロールプレイ */}
+          {char.speech_style && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>口調・ロールプレイ</h2>
+              <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
+                {char.speech_style}
+              </p>
+            </div>
+          )}
+
+          {/* 背景・経歴 */}
+          {char.background && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>背景・経歴</h2>
+              <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
+                {char.background}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
