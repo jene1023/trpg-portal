@@ -1231,3 +1231,27 @@
 **概要:** キャラクターの技能値をカテゴリ別（戦闘/探索/対人/学術/芸術・製作/その他）に平均集計し、各軸の強み・弱みをレーダーチャート風のCSSビジュアルで表示するページ。現在の `dice-stats/page.tsx` はロール頻度・成功率の集計だが、こちらは「育て方のバランス」を一目で俯瞰する用途に特化する。
 **実装ヒント:** `src/app/characters/[id]/skill-radar/page.tsx` を新規作成（Server Component）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得後、技能名に基づいてカテゴリに分類（例: 格闘/射撃/回避/鎧→戦闘、目星/聴耳/図書館→探索、説得/心理学/言いくるめ→対人、etc.）してカテゴリ平均を算出。レーダーチャートはCSSの clip-path またはSVG polygon で依存ライブラリ不要。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スキルレーダー」リンクを追加。
 **コミット:** `feat: skill category radar view for character balance visualization`
+
+## [TODO] パーティー能力値比較テーブル — 優先度: 高
+**対象:** KP / 共通
+**概要:** シナリオ参加者全員の8能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）を横並びの表で一覧表示するビュー。既存のパーティービューはHP/MP/SANのみで、戦闘時の対抗判定・難易度調整に必要な能力値が確認できない。KPが即座に参照できるようにする。
+**実装ヒント:** `src/app/scenarios/[id]/party-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値を縦軸・キャラを横軸にした `<table>` でグリッド表示。行ごとに最大値のセルを強調（`font-bold text-emerald-600`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値比較」リンクを追加。追加DBなし（既存 `scenario_participants`, `characters` を流用）。
+**コミット:** `feat: party ability score comparison table per scenario`
+
+## [TODO] NPCプリセットライブラリ管理 — 優先度: 中
+**対象:** KP
+**概要:** よく使うNPCの雛形（職業・能力値・外見メモ込み）をプリセットとして保存・管理し、シナリオ作成時に1クリックでNPCとして展開できるライブラリ機能。`NpcPreset` 型は `src/lib/supabase.ts` に定義済みだが管理UIが存在しない。
+**実装ヒント:** `src/app/npc-presets/page.tsx`（一覧）と `src/app/npc-presets/new/page.tsx`（作成フォーム）を新規作成。フォームは `NpcForm.tsx` を参考に `NpcPreset` 型に合わせた occupation_name・能力値・外見入力欄で構成。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）またはNPC一覧ページ（`src/app/npcs/page.tsx`）に「プリセットとして保存」ボタンを追加し `supabase.from("npc_presets").insert(...)` で保存。NPC新規作成ページ（`src/app/npcs/new/page.tsx`）にプリセット選択 select を追加して選択値をフォームに自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。追加DBなし（`npc_presets` テーブルは既存想定）。
+**コミット:** `feat: NPC preset library for quick NPC deployment`
+
+## [TODO] 探索者心理統合ビュー（フォビア・狂気・SAN推移一覧） — 優先度: 高
+**対象:** PL
+**概要:** 現在フォビア（phobia）・狂気記録（madness_records）・SAN推移グラフはそれぞれ別ページに分散しており、セッション中にキャラクターの精神状態を素早く把握しにくい。これら3種の情報を1ページに統合した「心理プロファイル」ページを追加する。
+**実装ヒント:** `src/app/characters/[id]/mental-health/page.tsx` を新規作成（Server Component + "use client" 子）。`Promise.all` で `supabase.from("character_phobias").select("*").eq("character_id", id)`・`supabase.from("madness_records").select("*").eq("character_id", id)`・`supabase.from("sessions").select("session_number, san_loss").eq("character_id", id).order("session_number")` を並行取得。ページ上部にアクティブな狂気バッジ（赤）とフォビア（橙）を横並びで表示、中段にSAN残量の推移バー（セッション番号順）、下部に狂気・フォビアの全履歴を並べる。既存の `PhobiaList.tsx`・`MadnessList.tsx` コンポーネントを import して流用。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心理プロファイル」リンクを追加。
+**コミット:** `feat: integrated mental health profile combining phobias, madness, and SAN trend`
+
+## [TODO] シナリオ開始前参加確認ハブ（出席確認・フック配布一括） — 優先度: 中
+**対象:** KP / 共通
+**概要:** セッション当日にKPが「誰が来るか」「各PLのフックを渡したか」を一画面で管理できるハブページ。現在 `AttendanceToggle.tsx` と `hook_text`（ScenarioParticipant）は実装済みだが、参加者全員の出欠＋フック配布状況を一覧できるKP専用ページが存在しない。
+**実装ヒント:** `src/app/scenarios/[id]/session-prep/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(name, hp_current, hp_max, san_current, san_max), players(display_name, contact_discord)").eq("scenario_id", id)` で全参加者データ取得。参加者ごとに ①出欠ステータス（attending/absent/unconfirmed）トグル（`AttendanceToggle.tsx` 流用）、②フックテキスト表示・インライン編集、③キャラHP/SAN残量バッジを横一列で表示。参加人数サマリー（出席N/全体M）をページ上部に表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備」リンクを追加。追加DBなし。
+**コミット:** `feat: session prep hub with attendance confirmation and hook distribution`
