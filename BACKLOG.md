@@ -1104,7 +1104,7 @@
 **実装ヒント:** `characters` テーブルに `avatar_url: text | null` カラムをALTER TABLEで追加。`src/lib/supabase.ts` の `Character` 型に `avatar_url: string | null` を追加。`src/app/_components/CharacterForm.tsx` にURL入力欄を追加（まずはURL入力のみ、後でSupabase Storage対応可）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）のヘッダーに `<img>` タグで表示（未設定時はデフォルトシルエット）。プロフィールカード（`src/app/characters/[id]/profile-card/page.tsx`）にも画像を反映。CCFOLIAコマ出力の `imageUrl` にも連携。追加DBカラムのみ（新テーブルなし）。
 **コミット:** `feat: character avatar image registration for profile and VTT integration`
 
-## [TODO] AI探索者バックストーリー自動生成（Claude API） — 優先度: 中
+## [DONE] AI探索者バックストーリー自動生成（Claude API） — 優先度: 中
 **対象:** PL / 共通
 **概要:** 職業・能力値・時代設定を入力するとClaude APIが探索者のバックストーリー・性格特質・外見描写の下書きを自動生成するAI支援機能。キャラ作成の中で最も時間がかかる「設定考え」フェーズを支援する。
 **リサーチ根拠:** CS CAT（2025年登場、trpg-japan.com掲載）とCthulhu Helper App（App Store）がAI支援キャラ作成を実装して注目を集めており、AIでCoC探索者の設定を補完する需要が明確に高まっていることを確認した。

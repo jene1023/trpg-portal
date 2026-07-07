@@ -14,11 +14,13 @@ const TRAIT_SECTIONS: { type: TraitType; label: string; placeholder: string }[] 
 
 type Props = {
   characterId: string;
-  initialTraits: CharacterTrait[];
+  /** Controlled: current list of traits. */
+  traits: CharacterTrait[];
+  /** Called whenever traits are added or removed. */
+  onTraitsChange: (traits: CharacterTrait[]) => void;
 };
 
-export default function TraitsManager({ characterId, initialTraits }: Props) {
-  const [traits, setTraits] = useState<CharacterTrait[]>(initialTraits);
+export default function TraitsManager({ characterId, traits, onTraitsChange }: Props) {
   const [openSection, setOpenSection] = useState<TraitType | null>(null);
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
@@ -33,7 +35,7 @@ export default function TraitsManager({ characterId, initialTraits }: Props) {
       .single();
     setSaving(false);
     if (!error && data) {
-      setTraits((prev) => [...prev, data as CharacterTrait]);
+      onTraitsChange([...traits, data as CharacterTrait]);
       setContent("");
       setOpenSection(null);
     }
@@ -42,7 +44,7 @@ export default function TraitsManager({ characterId, initialTraits }: Props) {
   async function removeTrait(id: string) {
     if (!isSupabaseConfigured) return;
     await supabase.from("character_traits").delete().eq("id", id);
-    setTraits((prev) => prev.filter((t) => t.id !== id));
+    onTraitsChange(traits.filter((t) => t.id !== id));
   }
 
   function openAdd(type: TraitType) {

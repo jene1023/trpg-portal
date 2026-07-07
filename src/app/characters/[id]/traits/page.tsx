@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import TraitsManager from "@/app/_components/TraitsManager";
+import AIBackstoryGeneratorWrapper from "@/app/_components/AIBackstoryGeneratorWrapper";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -15,7 +15,7 @@ export default async function TraitsPage({ params }: Props) {
 
   const { data: char } = await supabase
     .from("characters")
-    .select("id, name")
+    .select("id, name, occupation, rule_edition, str, con, pow, dex, app, siz, int_stat, edu")
     .eq("id", id)
     .single();
 
@@ -46,7 +46,7 @@ export default async function TraitsPage({ params }: Props) {
         CoC7版の「重要な人物」「大切な宝物」「性格的特質」などをカテゴリ別に記録します。
       </p>
 
-      <TraitsManager characterId={id} initialTraits={traits ?? []} />
+      <AIBackstoryGeneratorWrapper character={char} initialTraits={traits ?? []} />
     </div>
   );
 }
