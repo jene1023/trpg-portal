@@ -1262,7 +1262,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id)` で手がかり一覧取得（character_idはNULL許容のため全シナリオClueをselectし`scenario_id`で絞る形でも可）。手がかりカードはステータス（found=緑/investigating=黄/resolved=灰）と担当キャラ名を表示。インライン追加フォームで title・content・status・character_id（select）を入力。ステータス変更は各カードのボタンで `supabase.from("scenario_clues").update({status})` を呼ぶ。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存`scenario_clues`テーブルを流用）。
 **コミット:** `feat: scenario clue tracker for mystery investigation management`
 
-## [TODO] 神話遭遇記録（ミュトス遭遇ログ） — 優先度: 中
+## [DONE] 神話遭遇記録（ミュトス遭遇ログ） — 優先度: 中
 **対象:** PL
 **概要:** キャラクターがクトゥルフ神話的存在（クリーチャー・神格・遺物・呪文等）と遭遇した記録を残せる機能。`CharacterMythosEncounter`型（entity_name, entity_type, san_lost, session_label等）がsupabase.tsに定義済みだが専用ページが存在しない。神話知識（Cthulhu Mythos技能）成長の背景を記録し、キャラクターの「知ってしまった者」としての履歴を可視化する。
 **実装ヒント:** `src/app/characters/[id]/mythos/page.tsx` を新規作成（Server Component + "use client" フォーム子コンポーネント）。`supabase.from("character_mythos_encounters").select("*").eq("character_id", id).order("encountered_at", {ascending: false})` で遭遇履歴取得。各カードに entity_name・entity_type バッジ・san_lost・session_label・notes を表示。entity_typeは "creature"|"deity"|"artifact"|"spell"|"other" の select で実装。追加フォームはインライン。`src/lib/supabase.ts` の `CharacterMythosEncounter` 型は既存のまま使用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「神話遭遇記録」リンクを追加。追加DBなし。
