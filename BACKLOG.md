@@ -1286,7 +1286,7 @@
 **実装ヒント:** `src/app/dashboard/page.tsx` を新規作成（Server Component）。`Promise.all` で `characters`（is_pinned=true）、`scenarios`（status="ongoing"）、`sessions`（最新5件）、`character_messages`（is_read=false のカウント）を並行取得。各セクションをカード形式で縦スタック配置。`src/app/_components/NavBar.tsx` のナビリンクに「ダッシュボード」を先頭追加。追加DBなし。
 **コミット:** `feat: home dashboard aggregating characters, scenarios, and recent activity`
 
-## [TODO] シナリオNPC相関マップ — 優先度: 中
+## [DONE] シナリオNPC相関マップ — 優先度: 中
 **対象:** KP
 **概要:** シナリオに登場するNPC同士・NPCとキャラクター間の関係をビジュアル相関図で確認できる機能。現在キャラクター単位の関係グラフ（`relation-graph/page.tsx`）は存在するが、シナリオ内の全NPC相関を俯瞰するビューが欠如しており、複雑な人間関係のシナリオでKPが設定を見失いやすい。
 **実装ヒント:** `src/app/scenarios/[id]/npc-map/page.tsx` を新規作成（"use client"）。`supabase.from("npcs").select("*").eq("scenario_name", scenario.title)` でNPC取得。各NPCを絶対位置配置のカード（`position: absolute`）として表示し、NPCの `purpose` や `faction` をツールチップで参照できる簡易マップを構成。NPC間の線は `faction` が同じものをグループ色で表示（SVG `<line>` 要素）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「NPC相関マップ」リンクを追加。追加DBなし。
