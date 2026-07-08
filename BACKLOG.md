@@ -1327,3 +1327,27 @@
 **概要:** 既存の3種のフィードバック収集機能（`scenario_player_ratings` の4軸評価・`session_reflections` の合同振り返り・`player_feedback` のPLアンケート）を1ページに集約し、KPがシナリオ全体の受け取り方を一画面で総合的に把握できるダッシュボード。現在は3種が別ページに分散しており、KPが全フィードバックを俯瞰する手段がない。
 **実装ヒント:** `src/app/scenarios/[id]/feedback-summary/page.tsx` を新規作成（Server Component）。`Promise.all` で `supabase.from("scenario_player_ratings").select("*").eq("scenario_id", id)`・`supabase.from("session_reflections").select("*")`（scenario_idに紐づくsession_idを介して取得）・`supabase.from("player_feedback").select("*").eq("scenario_id", id)` を並行取得。4軸評価の平均スコアをCSSバーで表示、振り返りコメントとフィードバックコメントを統合一覧で created_at 降順表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「フィードバック総括」リンクを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: KP feedback summary dashboard integrating ratings, reflections, and player feedback`
+
+## [TODO] セッション進行ライブコントロール（参加者全員ステータス更新パネル） — 優先度: 高
+**対象:** KP
+**概要:** セッション中にKPが参加全PCのHP/SAN/MPをリアルタイムで一覧・即時更新できるコントロールパネル。現状 `QuickStatEditor.tsx` はキャラクター個別ページに存在するが、全キャラ分を行き来する必要があり、セッション中の負荷が高い。
+**実装ヒント:** `src/app/scenarios/[id]/live/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, hp_max, mp_current, mp_max, san_current, san_max, status)").eq("scenario_id", id)` で参加者＋キャラデータ取得。各キャラカードに既存の `QuickStatEditor.tsx` を props で埋め込み（characterId・各stat値を渡す）。変更は即時 `supabase.from("characters").update(...)` で保存。全キャラのHP/SAN危険ライン（残25%以下）は赤枠ハイライト。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ライブ進行」リンクを追加。追加DBなし。
+**コミット:** `feat: live session control panel for real-time party stat management`
+
+## [TODO] ポストセッションウィザード（成長チェックと各種記録の一括案内） — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッション終了後にPLが行うべき作業（技能成長チェック・狂気記録更新・HP/SAN現在値修正・セッションログ記録）をステップ形式で案内するウィザードUI。記録漏れを防ぎ、セッション後処理の標準化を図る。
+**実装ヒント:** `src/app/characters/[id]/post-session/page.tsx` を "use client" で新規作成。useState で currentStep (0〜3) を管理し、ステップごとに ①成長チェック付き技能一覧（`character_skills` の `growth_checked=true` を抽出）→ ②HP/SAN/MP現在値入力（`QuickStatEditor.tsx` 流用）→ ③狂気記録確認・追加（`MadnessList.tsx` 流用）→ ④セッションログ入力（`SessionLogForm.tsx` 流用）を順に表示。最終ステップ完了後「記録完了」バナーを表示しキャラ詳細ページへリダイレクト。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション後記録」ボタンを追加。追加DBなし（既存テーブルのみ）。
+**コミット:** `feat: post-session wizard guiding growth check and stat updates`
+
+## [TODO] キャラクターアーカイブ（死亡・引退・発狂探索者追悼ページ） — 優先度: 中
+**対象:** PL / 共通
+**概要:** ステータスが `dead` / `insane` / `retired` のキャラクターを専用ページに一覧し、`farewell_scene` と `farewell_message` フィールドを大きく表示する追悼・記録ページ。現状メインのキャラ一覧に混在しており、過去キャラを振り返る場所がない。公開されているキャラはリンクも表示する。
+**実装ヒント:** `src/app/archive/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, public_slug, scenario_name").in("status", ["dead", "insane", "retired"]).order("updated_at", {ascending: false})` で取得。ステータスごとにセクション分け（死亡🕯/発狂🌀/引退🌸）。各カードは portrait_url サムネイル・名前・職業・farewell_message を表示。公開スラグがあれば `/c/[slug]` へのリンクを付ける。`src/app/_components/NavBar.tsx` に「アーカイブ」リンクを追加。追加DBなし。
+**コミット:** `feat: character archive page for dead, insane, and retired investigators`
+
+## [TODO] シナリオ素材・資料ライブラリ（BGM/マップ/参考画像リンク管理） — 優先度: 低
+**対象:** KP
+**概要:** KPがシナリオ準備時に収集した参考資料URL・BGMリンク・地図画像URLをタグと種別付きで一覧管理できるライブラリ機能。既存の `Material` 型（portrait/background/other）をシナリオ別に管理する専用UIとして実装し、セッション当日に素材を素早く呼び出せるようにする。
+**実装ヒント:** `src/app/scenarios/[id]/materials/page.tsx` を "use client" で新規作成。`supabase.from("materials").select("*").contains("tags", [id])` でシナリオIDをタグとして絞り込むか、または `materials` テーブルに `scenario_id` カラムを追加する形で実装。インライン追加フォームで name・type（portrait/background/other）・storage_url（外部URLも可）・tags を入力し `supabase.from("materials").insert(...)` で保存。一覧はカード形式でstorage_urlを画像プレビュー（画像URL）またはリンク表示（その他URL）で分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「素材ライブラリ」リンクを追加。`Material` 型は `src/lib/supabase.ts` に定義済み。
+**コミット:** `feat: scenario material library for organizing BGM, maps, and reference links`
