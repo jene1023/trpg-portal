@@ -662,6 +662,56 @@ body {
   box-shadow: 0 2px 18px rgba(107, 21, 21, 0.42);
 }
 
+/* テキスト選択: 金泥に触れるような黄金のハイライト */
+::selection {
+  background-color: rgba(201, 133, 58, 0.22);
+  color: var(--color-coc-text);
+}
+
+/* ポートレートイニシャルリング: 頭文字を囲む封印の内輪（静かに明滅） */
+@keyframes coc-initial-ring-pulse {
+  0%, 100% { opacity: 0.22; box-shadow: 0 0 10px rgba(201, 133, 58, 0.08); }
+  50%       { opacity: 0.40; box-shadow: 0 0 18px rgba(201, 133, 58, 0.18); }
+}
+
+/* ポートレートイニシャル外輪: 古い封蝋印のようにゆっくりと回転する外環 */
+@keyframes coc-initial-ring-outer-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.coc-initial-ring,
+.coc-initial-ring-outer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid var(--color-coc-gold-dim);
+  pointer-events: none;
+}
+
+.coc-initial-ring {
+  width: 4rem;
+  height: 4rem;
+  opacity: 0.22;
+}
+
+.coc-initial-ring-outer {
+  width: 5.5rem;
+  height: 5.5rem;
+  opacity: 0.10;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-initial-ring {
+    animation: coc-initial-ring-pulse 5s ease-in-out infinite;
+  }
+  .coc-initial-ring-outer {
+    animation: coc-initial-ring-outer-spin 32s linear infinite;
+  }
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }
