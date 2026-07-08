@@ -1303,3 +1303,27 @@
 **概要:** シナリオに登録されたクリーチャーとパーティーキャラクターのステータスを比較し、エンカウンターの大まかな難易度（安全/普通/危険/壊滅）を推定するKP支援ツール。クリーチャー（`creatures`テーブル）と参加キャラ（`scenario_participants`→`characters`）の既存データを活用するため追加DBなし。
 **実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（"use client"）。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` でキャラデータ取得。クリーチャー総HP合計 vs パーティー平均HP・ダメージボーナス等の簡易計算で難易度スコアを算出（ヒューリスティックな数式でOK）。結果を「安全🟢/普通🟡/危険🟠/壊滅🔴」の4段階バッジで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「難易度チェック」リンクを追加。
 **コミット:** `feat: encounter difficulty checker comparing creatures vs party stats`
+
+## [TODO] 探索者名言録（キャラクター語録・名セリフ集） — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッション中のキャラクターの名セリフ・印象的な行動・決め台詞をシナリオ単位で記録・管理できる機能。`session_highlights`（セッション全体向け）とは異なりキャラクター個人の語録として蓄積する。公開プロフィールページ（`/c/[slug]`）にも表示してキャラクターの個性を伝える。
+**実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, scenario_name, quote_text, context, session_label, created_at）。`src/app/characters/[id]/quotes/page.tsx` を新規作成（一覧＋追加フォーム）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「名言録」リンクを追加。公開ページ（`src/app/c/[slug]/page.tsx`）にも抜粋表示。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DBあり（`character_quotes` テーブル）。
+**コミット:** `feat: character quote log for memorable in-session lines`
+
+## [TODO] セッション前チェックイン（参加者コンディション確認） — 優先度: 中
+**対象:** KP / 共通
+**概要:** セッション開始前にPLが「今日の体力・気分（1〜5段階）」と「一言（期待・懸念事項）」をシナリオに紐づけて報告できるフォーム。KPがセッション前に参加者全員のコンディションを把握し、必要なら内容調整ができる。セッション安全ツール（X-Card / `scenario_safety_settings`）の補完として機能する。
+**実装ヒント:** Supabaseに `player_checkins` テーブルを追加（id, scenario_id, character_id, energy_level: smallint 1-5, comment: text | null, checked_in_at: timestamptz）。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLがキャラクターを選択してenergy_level（星UI）とcommentを入力し `supabase.from("player_checkins").upsert(...)` で保存。KP向けに全参加者のチェックイン結果を一覧表示するセクションを同ページに配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」リンクを追加。`src/lib/supabase.ts` に `PlayerCheckin` 型を追加。追加DBあり（`player_checkins` テーブル）。
+**コミット:** `feat: pre-session player check-in for wellbeing and expectation sharing`
+
+## [TODO] セッションカレンダーiCalエクスポート（外部カレンダーアプリ連携） — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** シナリオの `next_session_at` を RFC 5545 準拠の .ics ファイルとしてエクスポートし、Google Calendar・Apple Calendar等の外部カレンダーアプリにセッション予定を1クリックで登録できる機能。既存のカレンダービュー（`/calendar/page.tsx`）を補完し、普段使いのカレンダーとの連携でセッション忘れを防ぐ。
+**実装ヒント:** `src/app/api/calendar/ical/route.ts` を新規作成（GET APIルート）。`supabase.from("scenarios").select("id, title, next_session_at, synopsis").not("next_session_at", "is", null)` で取得し、RFC 5545形式（BEGIN:VCALENDAR → BEGIN:VEVENT × N件 → END:VCALENDAR）のテキストを生成して `Content-Type: text/calendar` レスポンスとして返す。`src/app/calendar/page.tsx` に「カレンダーに登録（.ics）」ダウンロードボタンを追加（`<a href="/api/calendar/ical" download="trpg-sessions.ics">`）。個別シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）にも単一シナリオ用iCalダウンロードボタンを追加（クエリパラメータ `?id=` で絞り込み）。追加DBなし（既存 `scenarios.next_session_at` を流用）。
+**コミット:** `feat: iCal export for syncing session dates to external calendar apps`
+
+## [TODO] KP向けフィードバック集計ダッシュボード（複数フィードバック統合ビュー） — 優先度: 中
+**対象:** KP
+**概要:** 既存の3種のフィードバック収集機能（`scenario_player_ratings` の4軸評価・`session_reflections` の合同振り返り・`player_feedback` のPLアンケート）を1ページに集約し、KPがシナリオ全体の受け取り方を一画面で総合的に把握できるダッシュボード。現在は3種が別ページに分散しており、KPが全フィードバックを俯瞰する手段がない。
+**実装ヒント:** `src/app/scenarios/[id]/feedback-summary/page.tsx` を新規作成（Server Component）。`Promise.all` で `supabase.from("scenario_player_ratings").select("*").eq("scenario_id", id)`・`supabase.from("session_reflections").select("*")`（scenario_idに紐づくsession_idを介して取得）・`supabase.from("player_feedback").select("*").eq("scenario_id", id)` を並行取得。4軸評価の平均スコアをCSSバーで表示、振り返りコメントとフィードバックコメントを統合一覧で created_at 降順表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「フィードバック総括」リンクを追加。追加DBなし（既存テーブルのみ）。
+**コミット:** `feat: KP feedback summary dashboard integrating ratings, reflections, and player feedback`
