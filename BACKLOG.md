@@ -1351,3 +1351,27 @@
 **概要:** KPがシナリオ準備時に収集した参考資料URL・BGMリンク・地図画像URLをタグと種別付きで一覧管理できるライブラリ機能。既存の `Material` 型（portrait/background/other）をシナリオ別に管理する専用UIとして実装し、セッション当日に素材を素早く呼び出せるようにする。
 **実装ヒント:** `src/app/scenarios/[id]/materials/page.tsx` を "use client" で新規作成。`supabase.from("materials").select("*").contains("tags", [id])` でシナリオIDをタグとして絞り込むか、または `materials` テーブルに `scenario_id` カラムを追加する形で実装。インライン追加フォームで name・type（portrait/background/other）・storage_url（外部URLも可）・tags を入力し `supabase.from("materials").insert(...)` で保存。一覧はカード形式でstorage_urlを画像プレビュー（画像URL）またはリンク表示（その他URL）で分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「素材ライブラリ」リンクを追加。`Material` 型は `src/lib/supabase.ts` に定義済み。
 **コミット:** `feat: scenario material library for organizing BGM, maps, and reference links`
+
+## [TODO] キャラクター一括ロングレスト（HP/MP/SAN最大値回復） — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション間の休息や拠点帰還時に、HP・MP・SANをまとめて最大値に回復できる「ロングレスト」ボタン。現在はQuickStatEditorで+/-を繰り返す必要があり手間がかかる。セッション前チェックリストやモバイルクイックダッシュボードから1タップで全ステータスをリセットできるようにする。
+**実装ヒント:** `src/app/_components/LongRestButton.tsx` を "use client" で新規作成。props: characterId, hpMax, mpMax, sanMax。確認ダイアログ表示後に `supabase.from("characters").update({ hp_current: hpMax, mp_current: mpMax, san_current: sanMax }).eq("id", characterId)` を実行。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）と `src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）に配置。追加DBなし（既存`characters`テーブルのみ）。
+**コミット:** `feat: long rest button to restore HP/MP/SAN to max in one click`
+
+## [TODO] シナリオ完結エピローグ記録（各探索者の物語的結末） — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** シナリオ `status = "completed"` 後に、KPがシナリオ全体のエピローグテキストと各参加キャラクターのエンディングコメントを記録できるナラティブ記念ページ。KP振り返りノート（評価・改善点）とは異なり、「物語の結末」そのものを残す。
+**実装ヒント:** Supabaseに `scenario_epilogues`テーブル（id, scenario_id UNIQUE, main_epilogue: text | null, created_at）と `character_endings`テーブル（id, scenario_id, character_id, ending_text: text | null, created_at）を追加。`src/app/scenarios/[id]/epilogue/page.tsx` を "use client" で新規作成（メインエピローグ入力＋参加者全員分のエンディング記述フォームを1ページに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の `status === "completed"` 時のみ「エピローグを記録」リンクを表示。`supabase.from("scenario_epilogues").upsert(...)` でシナリオ1件につき1レコード管理。
+**コミット:** `feat: scenario epilogue page for recording narrative endings per investigator`
+
+## [TODO] エンカウンターテンプレート管理（複数クリーチャーセット保存） — 優先度: 中
+**対象:** KP
+**概要:** 「深きものども×3・星の落とし子×1」のような複数クリーチャーのセットをテンプレートとして名前付き保存し、戦闘管理ページへワンクリックで展開できる機能。クリーチャーカタログは個体の登録に特化しているが、こちらはエンカウンター単位の構成管理に特化する。
+**実装ヒント:** Supabaseに `encounter_templates`テーブル（id, name, created_at）と `encounter_template_entries`テーブル（id, template_id, creature_id, count: integer DEFAULT 1, created_at）を追加。`src/app/encounter-templates/page.tsx` を新規作成（一覧＋作成フォーム、クリーチャーをselectして件数入力）。戦闘管理ページ（`src/app/scenarios/[id]/combat/page.tsx`）の「敵を追加」フォームに「テンプレートから追加」ボタンを配置し、選択したテンプレートのエントリをローカル敵リストにまとめてセット。追加DB2テーブル。
+**コミット:** `feat: encounter template manager for bundling creature sets in combat`
+
+## [TODO] パーティー共有アイテムボックス（シナリオ共有インベントリ） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** シナリオ参加者全員がアクセスできる「共有アイテムBOX」機能。PC間アイテム受け渡し（所有権移転）とは異なり、誰でも出し入れできる共有ストレージとして管理する。予備の弾薬・医療品・情報メモなどパーティー共有リソースの管理に使う。
+**実装ヒント:** Supabaseに `scenario_shared_items`テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item", damage: text | null, notes: text | null, added_by: text | null, created_at）。`src/app/scenarios/[id]/shared-inventory/page.tsx` を "use client" で新規作成（一覧＋追加フォーム＋削除ボタン）。インライン入力フォームで name・item_type・damage・notes を入力し `supabase.from("scenario_shared_items").insert(...)` で追加。削除は `supabase.from("scenario_shared_items").delete().eq("id", id)` で実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有装備BOX」リンクを追加。既存の `InventoryForm.tsx` を参考に実装。
+**コミット:** `feat: party shared item box for scenario-scoped communal inventory`
