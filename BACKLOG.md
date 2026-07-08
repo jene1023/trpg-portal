@@ -1298,7 +1298,7 @@
 **実装ヒント:** `src/app/characters/[id]/career-report/page.tsx` を新規作成（Server Component）。`Promise.all` で `sessions`（character_id）と `dice_rolls`（character_id）を並行取得。sessions から累計san_loss・hp_lossと総セッション数を集計。dice_rollsから技能別の成功数/総判定数を計算し成功率ランキングを生成。ファンブル（success_level="fumble"）カウントも別掲。CSSのみで表示（追加ライブラリなし）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「活躍レポート」リンクを追加。追加DBなし。
 **コミット:** `feat: character career report summarizing lifetime stats across all sessions`
 
-## [TODO] エンカウンター難易度チェッカー — 優先度: 低
+## [DONE] エンカウンター難易度チェッカー — 優先度: 低
 **対象:** KP
 **概要:** シナリオに登録されたクリーチャーとパーティーキャラクターのステータスを比較し、エンカウンターの大まかな難易度（安全/普通/危険/壊滅）を推定するKP支援ツール。クリーチャー（`creatures`テーブル）と参加キャラ（`scenario_participants`→`characters`）の既存データを活用するため追加DBなし。
 **実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（"use client"）。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` でキャラデータ取得。クリーチャー総HP合計 vs パーティー平均HP・ダメージボーナス等の簡易計算で難易度スコアを算出（ヒューリスティックな数式でOK）。結果を「安全🟢/普通🟡/危険🟠/壊滅🔴」の4段階バッジで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「難易度チェック」リンクを追加。
