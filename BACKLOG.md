@@ -1280,7 +1280,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成。`supabase.from("session_highlights").select("*").eq("scenario_id", id).order("liked_count", {ascending: false})` でハイライト一覧取得。category（roll=ダイス/rp=RP/story=物語/comedy=笑い/tragedy=感動/other）のタブフィルタを設置。各カードにいいねボタン（`supabase.from("session_highlights").update({liked_count: liked_count+1})`）と author_name・character_name を表示。追加フォームは scene_description（テキストエリア）・category（select）・author_name・character_name の入力のみでシンプルに実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。追加DBなし（既存`session_highlights`テーブルを流用）。
 **コミット:** `feat: session highlight board for post-session reflection and sharing`
 
-## [TODO] ホームダッシュボード（マイページ） — 優先度: 高
+## [DONE] ホームダッシュボード（マイページ） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** ポータル全体の起点となるホーム画面。ピン留めキャラ・進行中シナリオ・直近のセッション予定・最近のダイスロール・未読メッセージ数を一画面に集約し、セッション前後の素早いナビゲーションを提供する。現状はトップページがキャラ一覧になっており、複数機能を持つヘビーユーザーに入口が不足している。
 **実装ヒント:** `src/app/dashboard/page.tsx` を新規作成（Server Component）。`Promise.all` で `characters`（is_pinned=true）、`scenarios`（status="ongoing"）、`sessions`（最新5件）、`character_messages`（is_read=false のカウント）を並行取得。各セクションをカード形式で縦スタック配置。`src/app/_components/NavBar.tsx` のナビリンクに「ダッシュボード」を先頭追加。追加DBなし。

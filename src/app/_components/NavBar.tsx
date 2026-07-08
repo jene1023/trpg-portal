@@ -8,6 +8,7 @@ import { useAuth } from "./AuthProvider";
 import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
 
 const navLinks = [
+  { href: "/dashboard", label: "ダッシュボード" },
   { href: "/characters", label: "キャラクター" },
   { href: "/scenarios", label: "シナリオ" },
   { href: "/campaigns", label: "キャンペーン" },
