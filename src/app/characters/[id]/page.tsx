@@ -376,6 +376,15 @@ export default async function CharacterDetailPage({ params }: Props) {
             <span className="text-coc-gold">→</span>
           </Link>
 
+          {/* ポストセッション記録ウィザード */}
+          <Link
+            href={`/characters/${id}/post-session`}
+            className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+          >
+            <span className="font-semibold">セッション後記録</span>
+            <span className="text-coc-gold">→</span>
+          </Link>
+
           {/* その他のツールリンク */}
           <div className="space-y-3">
             <h2 className={sectionTitle}>ツール</h2>

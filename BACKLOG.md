@@ -1334,7 +1334,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/live/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, hp_max, mp_current, mp_max, san_current, san_max, status)").eq("scenario_id", id)` で参加者＋キャラデータ取得。各キャラカードに既存の `QuickStatEditor.tsx` を props で埋め込み（characterId・各stat値を渡す）。変更は即時 `supabase.from("characters").update(...)` で保存。全キャラのHP/SAN危険ライン（残25%以下）は赤枠ハイライト。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ライブ進行」リンクを追加。追加DBなし。
 **コミット:** `feat: live session control panel for real-time party stat management`
 
-## [TODO] ポストセッションウィザード（成長チェックと各種記録の一括案内） — 優先度: 中
+## [DONE] ポストセッションウィザード（成長チェックと各種記録の一括案内） — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッション終了後にPLが行うべき作業（技能成長チェック・狂気記録更新・HP/SAN現在値修正・セッションログ記録）をステップ形式で案内するウィザードUI。記録漏れを防ぎ、セッション後処理の標準化を図る。
 **実装ヒント:** `src/app/characters/[id]/post-session/page.tsx` を "use client" で新規作成。useState で currentStep (0〜3) を管理し、ステップごとに ①成長チェック付き技能一覧（`character_skills` の `growth_checked=true` を抽出）→ ②HP/SAN/MP現在値入力（`QuickStatEditor.tsx` 流用）→ ③狂気記録確認・追加（`MadnessList.tsx` 流用）→ ④セッションログ入力（`SessionLogForm.tsx` 流用）を順に表示。最終ステップ完了後「記録完了」バナーを表示しキャラ詳細ページへリダイレクト。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション後記録」ボタンを追加。追加DBなし（既存テーブルのみ）。
