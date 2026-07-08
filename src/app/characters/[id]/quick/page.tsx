@@ -8,6 +8,7 @@ import QuickStatEditor from "@/app/_components/QuickStatEditor";
 import QuickStatsDisplay from "@/app/_components/QuickStatsDisplay";
 import DiceRoller from "@/app/_components/DiceRoller";
 import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
+import LongRestButton from "@/app/_components/LongRestButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -71,6 +72,15 @@ export default async function QuickDashboardPage({ params }: Props) {
             mpCurrent={char.mp_current}
             mpMax={char.mp_max}
             sanCurrent={char.san_current}
+            sanMax={char.san_max}
+          />
+        </div>
+
+        <div className="border-t border-coc-border pt-4">
+          <LongRestButton
+            characterId={char.id}
+            hpMax={char.hp_max}
+            mpMax={char.mp_max}
             sanMax={char.san_max}
           />
         </div>

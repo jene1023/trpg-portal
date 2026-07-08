@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldAlert, Swords, ScrollText, Brain, Sparkles, AlertTriangle, Coffee, Target, Zap, Heart } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import SnapshotSaveButton from "@/app/_components/SnapshotSaveButton";
+import LongRestButton from "@/app/_components/LongRestButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -127,6 +128,15 @@ export default async function PreflightPage({ params }: Props) {
 
       {/* スナップショット保存ボタン */}
       <SnapshotSaveButton characterId={id} />
+
+      <div className="mt-3">
+        <LongRestButton
+          characterId={id}
+          hpMax={char.hp_max}
+          mpMax={char.mp_max}
+          sanMax={char.san_max}
+        />
+      </div>
 
       <div className="mt-4">
         <Link

@@ -1352,7 +1352,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/materials/page.tsx` を "use client" で新規作成。`supabase.from("materials").select("*").contains("tags", [id])` でシナリオIDをタグとして絞り込むか、または `materials` テーブルに `scenario_id` カラムを追加する形で実装。インライン追加フォームで name・type（portrait/background/other）・storage_url（外部URLも可）・tags を入力し `supabase.from("materials").insert(...)` で保存。一覧はカード形式でstorage_urlを画像プレビュー（画像URL）またはリンク表示（その他URL）で分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「素材ライブラリ」リンクを追加。`Material` 型は `src/lib/supabase.ts` に定義済み。
 **コミット:** `feat: scenario material library for organizing BGM, maps, and reference links`
 
-## [TODO] キャラクター一括ロングレスト（HP/MP/SAN最大値回復） — 優先度: 高
+## [DONE] キャラクター一括ロングレスト（HP/MP/SAN最大値回復） — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション間の休息や拠点帰還時に、HP・MP・SANをまとめて最大値に回復できる「ロングレスト」ボタン。現在はQuickStatEditorで+/-を繰り返す必要があり手間がかかる。セッション前チェックリストやモバイルクイックダッシュボードから1タップで全ステータスをリセットできるようにする。
 **実装ヒント:** `src/app/_components/LongRestButton.tsx` を "use client" で新規作成。props: characterId, hpMax, mpMax, sanMax。確認ダイアログ表示後に `supabase.from("characters").update({ hp_current: hpMax, mp_current: mpMax, san_current: sanMax }).eq("id", characterId)` を実行。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）と `src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）に配置。追加DBなし（既存`characters`テーブルのみ）。
