@@ -839,3 +839,13 @@ export type SessionHighlight = {
   liked_count: number;
   created_at: string;
 };
+
+export type CharacterQuote = {
+  id: string;
+  character_id: string;
+  scenario_name: string | null;
+  quote_text: string;
+  context: string | null;
+  session_label: string | null;
+  created_at: string;
+};

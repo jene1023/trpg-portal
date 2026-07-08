@@ -65,6 +65,13 @@ export default async function PublicCharacterPage({ params }: Props) {
     .eq("character_id", char.id)
     .order("created_at", { ascending: false });
 
+  const { data: quotes } = await supabase
+    .from("character_quotes")
+    .select("*")
+    .eq("character_id", char.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
   const skills = char.character_skills ?? [];
   const traits = char.character_traits ?? [];
   const spells = char.character_spells ?? [];
@@ -296,6 +303,27 @@ export default async function PublicCharacterPage({ params }: Props) {
               <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
                 {char.background}
               </p>
+            </div>
+          )}
+
+          {/* 名言録 */}
+          {(quotes ?? []).length > 0 && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>名言録</h2>
+              <div className="space-y-3">
+                {(quotes ?? []).map((q: { id: string; quote_text: string; scenario_name: string | null; session_label: string | null; context: string | null }) => (
+                  <div key={q.id} className="space-y-1">
+                    <p className="font-crimson italic text-coc-gold text-base leading-relaxed border-l-2 border-coc-gold-dim pl-3 whitespace-pre-wrap">
+                      &ldquo;{q.quote_text}&rdquo;
+                    </p>
+                    <div className="flex flex-wrap gap-x-3 text-xs text-coc-muted pl-3">
+                      {q.scenario_name && <span>📖 {q.scenario_name}</span>}
+                      {q.session_label && <span>🎲 {q.session_label}</span>}
+                      {q.context && <span>— {q.context}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

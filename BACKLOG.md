@@ -1304,7 +1304,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（"use client"）。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` でキャラデータ取得。クリーチャー総HP合計 vs パーティー平均HP・ダメージボーナス等の簡易計算で難易度スコアを算出（ヒューリスティックな数式でOK）。結果を「安全🟢/普通🟡/危険🟠/壊滅🔴」の4段階バッジで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「難易度チェック」リンクを追加。
 **コミット:** `feat: encounter difficulty checker comparing creatures vs party stats`
 
-## [TODO] 探索者名言録（キャラクター語録・名セリフ集） — 優先度: 中
+## [DONE] 探索者名言録（キャラクター語録・名セリフ集） — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッション中のキャラクターの名セリフ・印象的な行動・決め台詞をシナリオ単位で記録・管理できる機能。`session_highlights`（セッション全体向け）とは異なりキャラクター個人の語録として蓄積する。公開プロフィールページ（`/c/[slug]`）にも表示してキャラクターの個性を伝える。
 **実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, scenario_name, quote_text, context, session_label, created_at）。`src/app/characters/[id]/quotes/page.tsx` を新規作成（一覧＋追加フォーム）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「名言録」リンクを追加。公開ページ（`src/app/c/[slug]/page.tsx`）にも抜粋表示。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DBあり（`character_quotes` テーブル）。
