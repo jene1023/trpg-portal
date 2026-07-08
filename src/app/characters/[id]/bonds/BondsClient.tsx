@@ -48,6 +48,21 @@ export default function BondsClient({ characterId, initialBonds }: Props) {
     setNotes("");
   }
 
+  async function adjustScore(bondId: string, delta: number) {
+    if (!isSupabaseConfigured) return;
+    const bond = bonds.find((b) => b.id === bondId);
+    if (!bond) return;
+    const newScore = Math.max(0, bond.bond_score + delta);
+    const { data, error: err } = await supabase
+      .from("character_bonds")
+      .update({ bond_score: newScore })
+      .eq("id", bondId)
+      .select()
+      .single();
+    if (err || !data) return;
+    setBonds((prev) => prev.map((b) => (b.id === bondId ? (data as CharacterBond) : b)));
+  }
+
   async function adjustDamage(bondId: string, delta: number) {
     if (!isSupabaseConfigured) return;
     const bond = bonds.find((b) => b.id === bondId);
@@ -140,6 +155,7 @@ export default function BondsClient({ characterId, initialBonds }: Props) {
             <BondCard
               key={bond.id}
               bond={bond}
+              onAdjustScore={adjustScore}
               onAdjustDamage={adjustDamage}
               onMarkLost={markLost}
               onRestore={restoreBond}
@@ -165,6 +181,7 @@ export default function BondsClient({ characterId, initialBonds }: Props) {
             <BondCard
               key={bond.id}
               bond={bond}
+              onAdjustScore={adjustScore}
               onAdjustDamage={adjustDamage}
               onMarkLost={markLost}
               onRestore={restoreBond}
@@ -179,12 +196,14 @@ export default function BondsClient({ characterId, initialBonds }: Props) {
 
 function BondCard({
   bond,
+  onAdjustScore,
   onAdjustDamage,
   onMarkLost,
   onRestore,
   onDelete,
 }: {
   bond: CharacterBond;
+  onAdjustScore: (id: string, delta: number) => Promise<void>;
   onAdjustDamage: (id: string, delta: number) => Promise<void>;
   onMarkLost: (id: string) => Promise<void>;
   onRestore: (id: string) => Promise<void>;
@@ -204,7 +223,7 @@ function BondCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm text-coc-text leading-snug">
+          <p className={`font-semibold text-sm leading-snug ${bond.is_lost ? "line-through text-coc-muted" : "text-coc-text"}`}>
             {bond.target_name}
           </p>
           {bond.notes && (
@@ -227,39 +246,67 @@ function BondCard({
           </p>
           {bond.damage_taken > 0 && (
             <p className="text-xs text-coc-muted mt-0.5">
-              {bond.bond_score} − {bond.damage_taken}
+              {bond.bond_score}
+              <span className="inline-flex items-center mx-1 rounded bg-red-900/60 border border-red-700/60 px-1 text-red-300 font-semibold">
+                −{bond.damage_taken}
+              </span>
             </p>
           )}
         </div>
       </div>
 
       {!bond.is_lost && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => onAdjustDamage(bond.id, 1)}
-            className="rounded border border-red-800/60 px-2.5 py-1 text-xs text-red-400 hover:bg-red-950/30 transition-colors"
-          >
-            ダメージ −1
-          </button>
-          <button
-            onClick={() => onAdjustDamage(bond.id, -1)}
-            disabled={bond.damage_taken === 0}
-            className="rounded border border-green-700/60 px-2.5 py-1 text-xs text-green-400 hover:bg-green-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            回復 +1
-          </button>
-          <button
-            onClick={() => onMarkLost(bond.id)}
-            className="rounded border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-red-300 hover:border-red-800/60 transition-colors"
-          >
-            喪失
-          </button>
-          <button
-            onClick={() => onDelete(bond.id)}
-            className="ml-auto text-xs text-red-500/50 hover:text-red-400 transition-colors"
-          >
-            削除
-          </button>
+        <div className="space-y-2">
+          {/* 絆スコア +/- */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-coc-muted w-20 shrink-0">絆スコア</span>
+            <button
+              onClick={() => onAdjustScore(bond.id, -1)}
+              disabled={bond.bond_score <= 0}
+              className="rounded border border-coc-border px-2 py-0.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors disabled:opacity-40"
+            >
+              −
+            </button>
+            <span className="text-sm font-bold text-coc-text tabular-nums w-8 text-center">{bond.bond_score}</span>
+            <button
+              onClick={() => onAdjustScore(bond.id, 1)}
+              className="rounded border border-coc-border px-2 py-0.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+            >
+              ＋
+            </button>
+          </div>
+          {/* ダメージ +/- */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-coc-muted w-20 shrink-0">ダメージ</span>
+            <button
+              onClick={() => onAdjustDamage(bond.id, -1)}
+              disabled={bond.damage_taken === 0}
+              className="rounded border border-green-700/60 px-2 py-0.5 text-xs text-green-400 hover:bg-green-950/30 transition-colors disabled:opacity-40"
+            >
+              −
+            </button>
+            <span className="text-sm font-bold text-red-400 tabular-nums w-8 text-center">{bond.damage_taken}</span>
+            <button
+              onClick={() => onAdjustDamage(bond.id, 1)}
+              className="rounded border border-red-800/60 px-2 py-0.5 text-xs text-red-400 hover:bg-red-950/30 transition-colors"
+            >
+              ＋
+            </button>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={() => onMarkLost(bond.id)}
+              className="rounded border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-red-300 hover:border-red-800/60 transition-colors"
+            >
+              喪失
+            </button>
+            <button
+              onClick={() => onDelete(bond.id)}
+              className="ml-auto text-xs text-red-500/50 hover:text-red-400 transition-colors"
+            >
+              削除
+            </button>
+          </div>
         </div>
       )}
 

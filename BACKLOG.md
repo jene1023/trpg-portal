@@ -1268,7 +1268,7 @@
 **実装ヒント:** `src/app/characters/[id]/mythos/page.tsx` を新規作成（Server Component + "use client" フォーム子コンポーネント）。`supabase.from("character_mythos_encounters").select("*").eq("character_id", id).order("encountered_at", {ascending: false})` で遭遇履歴取得。各カードに entity_name・entity_type バッジ・san_lost・session_label・notes を表示。entity_typeは "creature"|"deity"|"artifact"|"spell"|"other" の select で実装。追加フォームはインライン。`src/lib/supabase.ts` の `CharacterMythosEncounter` 型は既存のまま使用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「神話遭遇記録」リンクを追加。追加DBなし。
 **コミット:** `feat: mythos encounter log tracking character's cosmic horror experiences`
 
-## [TODO] キャラクター絆スコア管理 — 優先度: 中
+## [DONE] キャラクター絆スコア管理 — 優先度: 中
 **対象:** PL
 **概要:** キャラクターが大切にする人物との「絆スコア」「絆ダメージ」「喪失済みフラグ」を管理できる機能。`CharacterBond`型（bond_score, damage_taken, is_lost, target_name, notes）がsupabase.tsに定義済みだが専用ページが存在しない。CoC7版の絆ルールやDG系ルールに対応し、セッションを通じた絆の変化を追跡する。
 **実装ヒント:** `src/app/characters/[id]/bonds/page.tsx` を "use client" で新規作成。`supabase.from("character_bonds").select("*").eq("character_id", id).order("created_at")` で絆一覧取得。各絆カードに target_name・bond_score（大きな数字表示）・damage_taken（赤バッジ）・is_lost（打ち消し線＋グレーアウト）・notes を表示。bond_score と damage_taken はインライン+/-ボタンで即時更新（`supabase.from("character_bonds").update(...)`）。is_lost のトグルで絆喪失状態を記録。追加フォームで新規絆追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆管理」リンクを追加。追加DBなし（既存`character_bonds`テーブルを流用）。
