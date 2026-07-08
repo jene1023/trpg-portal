@@ -1226,7 +1226,7 @@
 **実装ヒント:** `src/app/search/page.tsx` の `runSearch` 内 `Promise.all` に `supabase.from("scenarios").select("id, title, gm_notes, status").ilike("gm_notes", \`%${q}%\`)` を追加。結果セクションに「GMメモ」セクションを追加し、マッチ箇所前後50文字を抜粋表示（キーワードをハイライト）。各結果はシナリオ詳細ページ（`/scenarios/[id]`）へリンク。追加DBなし。
 **コミット:** `feat: extend global search to include scenario GM notes content`
 
-## [TODO] 技能カテゴリ別レーダービュー（スキルバランス可視化） — 優先度: 低
+## [DONE] 技能カテゴリ別レーダービュー（スキルバランス可視化） — 優先度: 低
 **対象:** PL
 **概要:** キャラクターの技能値をカテゴリ別（戦闘/探索/対人/学術/芸術・製作/その他）に平均集計し、各軸の強み・弱みをレーダーチャート風のCSSビジュアルで表示するページ。現在の `dice-stats/page.tsx` はロール頻度・成功率の集計だが、こちらは「育て方のバランス」を一目で俯瞰する用途に特化する。
 **実装ヒント:** `src/app/characters/[id]/skill-radar/page.tsx` を新規作成（Server Component）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得後、技能名に基づいてカテゴリに分類（例: 格闘/射撃/回避/鎧→戦闘、目星/聴耳/図書館→探索、説得/心理学/言いくるめ→対人、etc.）してカテゴリ平均を算出。レーダーチャートはCSSの clip-path またはSVG polygon で依存ライブラリ不要。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スキルレーダー」リンクを追加。
