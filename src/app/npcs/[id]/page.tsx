@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel, NpcDispositionType } from "@/lib/supabase";
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
+import NpcSaveAsPresetButton from "@/app/_components/NpcSaveAsPresetButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import NpcDialogueGenerator from "@/app/_components/NpcDialogueGenerator";
@@ -151,7 +152,10 @@ export default async function NpcDetailPage({ params }: Props) {
             )}
           </div>
         </div>
-        <NpcDuplicateButton npcId={npc.id} />
+        <div className="flex items-center gap-2">
+          <NpcSaveAsPresetButton npc={npc as Npc} />
+          <NpcDuplicateButton npcId={npc.id} />
+        </div>
       </div>
 
       <div className="space-y-4">

@@ -1238,7 +1238,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値を縦軸・キャラを横軸にした `<table>` でグリッド表示。行ごとに最大値のセルを強調（`font-bold text-emerald-600`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値比較」リンクを追加。追加DBなし（既存 `scenario_participants`, `characters` を流用）。
 **コミット:** `feat: party ability score comparison table per scenario`
 
-## [TODO] NPCプリセットライブラリ管理 — 優先度: 中
+## [DONE] NPCプリセットライブラリ管理 — 優先度: 中
 **対象:** KP
 **概要:** よく使うNPCの雛形（職業・能力値・外見メモ込み）をプリセットとして保存・管理し、シナリオ作成時に1クリックでNPCとして展開できるライブラリ機能。`NpcPreset` 型は `src/lib/supabase.ts` に定義済みだが管理UIが存在しない。
 **実装ヒント:** `src/app/npc-presets/page.tsx`（一覧）と `src/app/npc-presets/new/page.tsx`（作成フォーム）を新規作成。フォームは `NpcForm.tsx` を参考に `NpcPreset` 型に合わせた occupation_name・能力値・外見入力欄で構成。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）またはNPC一覧ページ（`src/app/npcs/page.tsx`）に「プリセットとして保存」ボタンを追加し `supabase.from("npc_presets").insert(...)` で保存。NPC新規作成ページ（`src/app/npcs/new/page.tsx`）にプリセット選択 select を追加して選択値をフォームに自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。追加DBなし（`npc_presets` テーブルは既存想定）。
