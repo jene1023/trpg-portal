@@ -32,6 +32,8 @@ export default function HighlightsPage() {
   const [highlights, setHighlights] = useState<SessionHighlight[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [activeCategory, setActiveCategory] = useState<HighlightCategory | "all">("all");
+
   const [authorName, setAuthorName] = useState("");
   const [characterName, setCharacterName] = useState("");
   const [category, setCategory] = useState<HighlightCategory>("rp");
@@ -193,6 +195,39 @@ export default function HighlightsPage() {
         </button>
       </form>
 
+      {/* カテゴリタブ */}
+      {highlights.length > 0 && (
+        <div className="flex gap-2 flex-wrap mb-4">
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              activeCategory === "all"
+                ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-text"
+            }`}
+          >
+            すべて ({highlights.length})
+          </button>
+          {(Object.keys(CATEGORY_LABELS) as HighlightCategory[]).map((c) => {
+            const count = highlights.filter((h) => h.category === c).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={c}
+                onClick={() => setActiveCategory(c)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  activeCategory === c
+                    ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                    : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-text"
+                }`}
+              >
+                {CATEGORY_LABELS[c]} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {loading ? (
         <p className="text-center text-coc-muted text-sm py-8">読み込み中...</p>
       ) : highlights.length === 0 ? (
@@ -201,7 +236,7 @@ export default function HighlightsPage() {
         </p>
       ) : (
         <div className="space-y-3">
-          {highlights.map((h) => (
+          {(activeCategory === "all" ? highlights : highlights.filter((h) => h.category === activeCategory)).map((h) => (
             <div
               key={h.id}
               className="rounded-xl border border-coc-border bg-coc-surface p-4 space-y-2"

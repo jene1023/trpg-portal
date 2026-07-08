@@ -1274,7 +1274,7 @@
 **実装ヒント:** `src/app/characters/[id]/bonds/page.tsx` を "use client" で新規作成。`supabase.from("character_bonds").select("*").eq("character_id", id).order("created_at")` で絆一覧取得。各絆カードに target_name・bond_score（大きな数字表示）・damage_taken（赤バッジ）・is_lost（打ち消し線＋グレーアウト）・notes を表示。bond_score と damage_taken はインライン+/-ボタンで即時更新（`supabase.from("character_bonds").update(...)`）。is_lost のトグルで絆喪失状態を記録。追加フォームで新規絆追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆管理」リンクを追加。追加DBなし（既存`character_bonds`テーブルを流用）。
 **コミット:** `feat: character bond score management for CoC7 bond mechanics`
 
-## [TODO] セッションハイライト記録 — 優先度: 低
+## [DONE] セッションハイライト記録 — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** セッション後に「この名場面・名判定・名台詞が最高だった」という瞬間をシナリオ単位で投稿し、参加者全員でいいねして振り返れる機能。`SessionHighlight`型（scene_description, category, liked_count, author_name, character_name等）がsupabase.tsに定義済みだが専用ページが存在しない。セッション後のアフタートークを盛り上げ、記録として残す。
 **実装ヒント:** `src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成。`supabase.from("session_highlights").select("*").eq("scenario_id", id).order("liked_count", {ascending: false})` でハイライト一覧取得。category（roll=ダイス/rp=RP/story=物語/comedy=笑い/tragedy=感動/other）のタブフィルタを設置。各カードにいいねボタン（`supabase.from("session_highlights").update({liked_count: liked_count+1})`）と author_name・character_name を表示。追加フォームは scene_description（テキストエリア）・category（select）・author_name・character_name の入力のみでシンプルに実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。追加DBなし（既存`session_highlights`テーブルを流用）。
