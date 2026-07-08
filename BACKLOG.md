@@ -1255,3 +1255,27 @@
 **概要:** セッション当日にKPが「誰が来るか」「各PLのフックを渡したか」を一画面で管理できるハブページ。現在 `AttendanceToggle.tsx` と `hook_text`（ScenarioParticipant）は実装済みだが、参加者全員の出欠＋フック配布状況を一覧できるKP専用ページが存在しない。
 **実装ヒント:** `src/app/scenarios/[id]/session-prep/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(name, hp_current, hp_max, san_current, san_max), players(display_name, contact_discord)").eq("scenario_id", id)` で全参加者データ取得。参加者ごとに ①出欠ステータス（attending/absent/unconfirmed）トグル（`AttendanceToggle.tsx` 流用）、②フックテキスト表示・インライン編集、③キャラHP/SAN残量バッジを横一列で表示。参加人数サマリー（出席N/全体M）をページ上部に表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備」リンクを追加。追加DBなし。
 **コミット:** `feat: session prep hub with attendance confirmation and hook distribution`
+
+## [TODO] シナリオ手がかり管理（クルートラッカー） — 優先度: 高
+**対象:** KP / PL / 共通
+**概要:** シナリオ内の手がかりを「未発見／調査中／解決済み」で追跡できる機能。`ScenarioClue`型（found/investigating/resolved, character_id）がsupabase.tsに定義済みだが管理UIが存在しない。謎解きシナリオで「どのPLがどの手がかりを持っているか」をKPとPL双方が把握できる。
+**実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id)` で手がかり一覧取得（character_idはNULL許容のため全シナリオClueをselectし`scenario_id`で絞る形でも可）。手がかりカードはステータス（found=緑/investigating=黄/resolved=灰）と担当キャラ名を表示。インライン追加フォームで title・content・status・character_id（select）を入力。ステータス変更は各カードのボタンで `supabase.from("scenario_clues").update({status})` を呼ぶ。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存`scenario_clues`テーブルを流用）。
+**コミット:** `feat: scenario clue tracker for mystery investigation management`
+
+## [TODO] 神話遭遇記録（ミュトス遭遇ログ） — 優先度: 中
+**対象:** PL
+**概要:** キャラクターがクトゥルフ神話的存在（クリーチャー・神格・遺物・呪文等）と遭遇した記録を残せる機能。`CharacterMythosEncounter`型（entity_name, entity_type, san_lost, session_label等）がsupabase.tsに定義済みだが専用ページが存在しない。神話知識（Cthulhu Mythos技能）成長の背景を記録し、キャラクターの「知ってしまった者」としての履歴を可視化する。
+**実装ヒント:** `src/app/characters/[id]/mythos/page.tsx` を新規作成（Server Component + "use client" フォーム子コンポーネント）。`supabase.from("character_mythos_encounters").select("*").eq("character_id", id).order("encountered_at", {ascending: false})` で遭遇履歴取得。各カードに entity_name・entity_type バッジ・san_lost・session_label・notes を表示。entity_typeは "creature"|"deity"|"artifact"|"spell"|"other" の select で実装。追加フォームはインライン。`src/lib/supabase.ts` の `CharacterMythosEncounter` 型は既存のまま使用。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「神話遭遇記録」リンクを追加。追加DBなし。
+**コミット:** `feat: mythos encounter log tracking character's cosmic horror experiences`
+
+## [TODO] キャラクター絆スコア管理 — 優先度: 中
+**対象:** PL
+**概要:** キャラクターが大切にする人物との「絆スコア」「絆ダメージ」「喪失済みフラグ」を管理できる機能。`CharacterBond`型（bond_score, damage_taken, is_lost, target_name, notes）がsupabase.tsに定義済みだが専用ページが存在しない。CoC7版の絆ルールやDG系ルールに対応し、セッションを通じた絆の変化を追跡する。
+**実装ヒント:** `src/app/characters/[id]/bonds/page.tsx` を "use client" で新規作成。`supabase.from("character_bonds").select("*").eq("character_id", id).order("created_at")` で絆一覧取得。各絆カードに target_name・bond_score（大きな数字表示）・damage_taken（赤バッジ）・is_lost（打ち消し線＋グレーアウト）・notes を表示。bond_score と damage_taken はインライン+/-ボタンで即時更新（`supabase.from("character_bonds").update(...)`）。is_lost のトグルで絆喪失状態を記録。追加フォームで新規絆追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「絆管理」リンクを追加。追加DBなし（既存`character_bonds`テーブルを流用）。
+**コミット:** `feat: character bond score management for CoC7 bond mechanics`
+
+## [TODO] セッションハイライト記録 — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** セッション後に「この名場面・名判定・名台詞が最高だった」という瞬間をシナリオ単位で投稿し、参加者全員でいいねして振り返れる機能。`SessionHighlight`型（scene_description, category, liked_count, author_name, character_name等）がsupabase.tsに定義済みだが専用ページが存在しない。セッション後のアフタートークを盛り上げ、記録として残す。
+**実装ヒント:** `src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成。`supabase.from("session_highlights").select("*").eq("scenario_id", id).order("liked_count", {ascending: false})` でハイライト一覧取得。category（roll=ダイス/rp=RP/story=物語/comedy=笑い/tragedy=感動/other）のタブフィルタを設置。各カードにいいねボタン（`supabase.from("session_highlights").update({liked_count: liked_count+1})`）と author_name・character_name を表示。追加フォームは scene_description（テキストエリア）・category（select）・author_name・character_name の入力のみでシンプルに実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。追加DBなし（既存`session_highlights`テーブルを流用）。
+**コミット:** `feat: session highlight board for post-session reflection and sharing`
