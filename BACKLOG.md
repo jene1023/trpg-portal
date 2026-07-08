@@ -1322,7 +1322,7 @@
 **実装ヒント:** `src/app/api/calendar/ical/route.ts` を新規作成（GET APIルート）。`supabase.from("scenarios").select("id, title, next_session_at, synopsis").not("next_session_at", "is", null)` で取得し、RFC 5545形式（BEGIN:VCALENDAR → BEGIN:VEVENT × N件 → END:VCALENDAR）のテキストを生成して `Content-Type: text/calendar` レスポンスとして返す。`src/app/calendar/page.tsx` に「カレンダーに登録（.ics）」ダウンロードボタンを追加（`<a href="/api/calendar/ical" download="trpg-sessions.ics">`）。個別シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）にも単一シナリオ用iCalダウンロードボタンを追加（クエリパラメータ `?id=` で絞り込み）。追加DBなし（既存 `scenarios.next_session_at` を流用）。
 **コミット:** `feat: iCal export for syncing session dates to external calendar apps`
 
-## [TODO] KP向けフィードバック集計ダッシュボード（複数フィードバック統合ビュー） — 優先度: 中
+## [DONE] KP向けフィードバック集計ダッシュボード（複数フィードバック統合ビュー） — 優先度: 中
 **対象:** KP
 **概要:** 既存の3種のフィードバック収集機能（`scenario_player_ratings` の4軸評価・`session_reflections` の合同振り返り・`player_feedback` のPLアンケート）を1ページに集約し、KPがシナリオ全体の受け取り方を一画面で総合的に把握できるダッシュボード。現在は3種が別ページに分散しており、KPが全フィードバックを俯瞰する手段がない。
 **実装ヒント:** `src/app/scenarios/[id]/feedback-summary/page.tsx` を新規作成（Server Component）。`Promise.all` で `supabase.from("scenario_player_ratings").select("*").eq("scenario_id", id)`・`supabase.from("session_reflections").select("*")`（scenario_idに紐づくsession_idを介して取得）・`supabase.from("player_feedback").select("*").eq("scenario_id", id)` を並行取得。4軸評価の平均スコアをCSSバーで表示、振り返りコメントとフィードバックコメントを統合一覧で created_at 降順表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「フィードバック総括」リンクを追加。追加DBなし（既存テーブルのみ）。

@@ -675,6 +675,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/feedback-summary`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <BarChart2 size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">フィードバック総括</p>
+              <p className="text-xs text-coc-muted">感想投票・合同振り返り・PLフィードバックを1画面で俯瞰</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/damage-summary`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
