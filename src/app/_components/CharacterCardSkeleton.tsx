@@ -1,6 +1,6 @@
 export default function CharacterCardSkeleton() {
   return (
-    <div className="rounded-lg border border-coc-border bg-coc-surface overflow-hidden">
+    <div className="coc-corner-frame rounded-lg border border-coc-border coc-card-bg overflow-hidden">
       <div className="aspect-[3/4] coc-skeleton" />
       <div className="px-3 py-3 space-y-2.5">
         <div className="h-3 w-2/3 rounded coc-skeleton" />

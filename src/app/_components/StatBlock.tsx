@@ -27,12 +27,12 @@ export default function StatBlock({ character }: Props) {
         return (
           <div
             key={key}
-            className="group rounded-md border border-coc-border bg-coc-surface p-2 text-center transition-colors duration-200 hover:border-coc-border-glow hover:bg-coc-raised"
+            className="group rounded-md border border-coc-border bg-coc-surface p-2 text-center transition-all duration-300 ease-out hover:border-coc-border-glow hover:bg-coc-raised hover:shadow-[0_2px_12px_rgba(201,133,58,0.22),inset_0_1px_0_rgba(201,133,58,0.08)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.97]"
           >
-            <p className="text-xs text-coc-muted mb-1 tracking-wide group-hover:text-coc-gold transition-colors duration-200">
+            <p className="font-cinzel text-[10px] text-coc-muted mb-1 tracking-widest uppercase group-hover:text-coc-gold transition-colors duration-200">
               {label}
             </p>
-            <p className="text-2xl font-bold text-coc-text leading-none">{val}</p>
+            <p className="text-2xl font-bold text-coc-text leading-none group-hover:text-coc-gold transition-colors duration-300">{val}</p>
             <div className="mt-1.5 pt-1 border-t border-coc-border/60">
               <p className="text-xs text-coc-faint tabular-nums">
                 {half(val)} / {fifth(val)}
