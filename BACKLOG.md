@@ -1328,7 +1328,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/feedback-summary/page.tsx` を新規作成（Server Component）。`Promise.all` で `supabase.from("scenario_player_ratings").select("*").eq("scenario_id", id)`・`supabase.from("session_reflections").select("*")`（scenario_idに紐づくsession_idを介して取得）・`supabase.from("player_feedback").select("*").eq("scenario_id", id)` を並行取得。4軸評価の平均スコアをCSSバーで表示、振り返りコメントとフィードバックコメントを統合一覧で created_at 降順表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「フィードバック総括」リンクを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: KP feedback summary dashboard integrating ratings, reflections, and player feedback`
 
-## [TODO] セッション進行ライブコントロール（参加者全員ステータス更新パネル） — 優先度: 高
+## [DONE] セッション進行ライブコントロール（参加者全員ステータス更新パネル） — 優先度: 高
 **対象:** KP
 **概要:** セッション中にKPが参加全PCのHP/SAN/MPをリアルタイムで一覧・即時更新できるコントロールパネル。現状 `QuickStatEditor.tsx` はキャラクター個別ページに存在するが、全キャラ分を行き来する必要があり、セッション中の負荷が高い。
 **実装ヒント:** `src/app/scenarios/[id]/live/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, hp_max, mp_current, mp_max, san_current, san_max, status)").eq("scenario_id", id)` で参加者＋キャラデータ取得。各キャラカードに既存の `QuickStatEditor.tsx` を props で埋め込み（characterId・各stat値を渡す）。変更は即時 `supabase.from("characters").update(...)` で保存。全キャラのHP/SAN危険ライン（残25%以下）は赤枠ハイライト。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ライブ進行」リンクを追加。追加DBなし。

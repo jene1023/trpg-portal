@@ -580,6 +580,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/live`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Radio size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">ライブ進行</p>
+              <p className="text-xs text-coc-muted">参加者全員のHP/SAN/MPをリアルタイムで一覧・即時更新（KP用コントロールパネル）</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/retrospective`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
