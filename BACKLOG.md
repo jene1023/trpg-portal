@@ -1346,7 +1346,7 @@
 **実装ヒント:** `src/app/archive/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, public_slug, scenario_name").in("status", ["dead", "insane", "retired"]).order("updated_at", {ascending: false})` で取得。ステータスごとにセクション分け（死亡🕯/発狂🌀/引退🌸）。各カードは portrait_url サムネイル・名前・職業・farewell_message を表示。公開スラグがあれば `/c/[slug]` へのリンクを付ける。`src/app/_components/NavBar.tsx` に「アーカイブ」リンクを追加。追加DBなし。
 **コミット:** `feat: character archive page for dead, insane, and retired investigators`
 
-## [TODO] シナリオ素材・資料ライブラリ（BGM/マップ/参考画像リンク管理） — 優先度: 低
+## [DONE] シナリオ素材・資料ライブラリ（BGM/マップ/参考画像リンク管理） — 優先度: 低
 **対象:** KP
 **概要:** KPがシナリオ準備時に収集した参考資料URL・BGMリンク・地図画像URLをタグと種別付きで一覧管理できるライブラリ機能。既存の `Material` 型（portrait/background/other）をシナリオ別に管理する専用UIとして実装し、セッション当日に素材を素早く呼び出せるようにする。
 **実装ヒント:** `src/app/scenarios/[id]/materials/page.tsx` を "use client" で新規作成。`supabase.from("materials").select("*").contains("tags", [id])` でシナリオIDをタグとして絞り込むか、または `materials` テーブルに `scenario_id` カラムを追加する形で実装。インライン追加フォームで name・type（portrait/background/other）・storage_url（外部URLも可）・tags を入力し `supabase.from("materials").insert(...)` で保存。一覧はカード形式でstorage_urlを画像プレビュー（画像URL）またはリンク表示（その他URL）で分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「素材ライブラリ」リンクを追加。`Material` 型は `src/lib/supabase.ts` に定義済み。
