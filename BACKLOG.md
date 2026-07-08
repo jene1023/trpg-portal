@@ -1292,7 +1292,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/npc-map/page.tsx` を新規作成（"use client"）。`supabase.from("npcs").select("*").eq("scenario_name", scenario.title)` でNPC取得。各NPCを絶対位置配置のカード（`position: absolute`）として表示し、NPCの `purpose` や `faction` をツールチップで参照できる簡易マップを構成。NPC間の線は `faction` が同じものをグループ色で表示（SVG `<line>` 要素）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「NPC相関マップ」リンクを追加。追加DBなし。
 **コミット:** `feat: scenario NPC relationship map for KP reference`
 
-## [TODO] キャラクター活躍統計レポート — 優先度: 中
+## [DONE] キャラクター活躍統計レポート — 優先度: 中
 **対象:** PL
 **概要:** 全セッションを通じたキャラクターの「総セッション数・累計SAN喪失量・累計HP喪失量・最多使用技能・成功率トップ3・ファンブル回数」を集計し、キャラクターの冒険の軌跡を数字で振り返れるレポートページ。既存のタイムライン・判定統計とは異なり、「通算成績」に特化したサマリービュー。
 **実装ヒント:** `src/app/characters/[id]/career-report/page.tsx` を新規作成（Server Component）。`Promise.all` で `sessions`（character_id）と `dice_rolls`（character_id）を並行取得。sessions から累計san_loss・hp_lossと総セッション数を集計。dice_rollsから技能別の成功数/総判定数を計算し成功率ランキングを生成。ファンブル（success_level="fumble"）カウントも別掲。CSSのみで表示（追加ライブラリなし）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「活躍レポート」リンクを追加。追加DBなし。
