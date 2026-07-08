@@ -1279,3 +1279,27 @@
 **概要:** セッション後に「この名場面・名判定・名台詞が最高だった」という瞬間をシナリオ単位で投稿し、参加者全員でいいねして振り返れる機能。`SessionHighlight`型（scene_description, category, liked_count, author_name, character_name等）がsupabase.tsに定義済みだが専用ページが存在しない。セッション後のアフタートークを盛り上げ、記録として残す。
 **実装ヒント:** `src/app/scenarios/[id]/highlights/page.tsx` を "use client" で新規作成。`supabase.from("session_highlights").select("*").eq("scenario_id", id).order("liked_count", {ascending: false})` でハイライト一覧取得。category（roll=ダイス/rp=RP/story=物語/comedy=笑い/tragedy=感動/other）のタブフィルタを設置。各カードにいいねボタン（`supabase.from("session_highlights").update({liked_count: liked_count+1})`）と author_name・character_name を表示。追加フォームは scene_description（テキストエリア）・category（select）・author_name・character_name の入力のみでシンプルに実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ハイライト」リンクを追加。追加DBなし（既存`session_highlights`テーブルを流用）。
 **コミット:** `feat: session highlight board for post-session reflection and sharing`
+
+## [TODO] ホームダッシュボード（マイページ） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** ポータル全体の起点となるホーム画面。ピン留めキャラ・進行中シナリオ・直近のセッション予定・最近のダイスロール・未読メッセージ数を一画面に集約し、セッション前後の素早いナビゲーションを提供する。現状はトップページがキャラ一覧になっており、複数機能を持つヘビーユーザーに入口が不足している。
+**実装ヒント:** `src/app/dashboard/page.tsx` を新規作成（Server Component）。`Promise.all` で `characters`（is_pinned=true）、`scenarios`（status="ongoing"）、`sessions`（最新5件）、`character_messages`（is_read=false のカウント）を並行取得。各セクションをカード形式で縦スタック配置。`src/app/_components/NavBar.tsx` のナビリンクに「ダッシュボード」を先頭追加。追加DBなし。
+**コミット:** `feat: home dashboard aggregating characters, scenarios, and recent activity`
+
+## [TODO] シナリオNPC相関マップ — 優先度: 中
+**対象:** KP
+**概要:** シナリオに登場するNPC同士・NPCとキャラクター間の関係をビジュアル相関図で確認できる機能。現在キャラクター単位の関係グラフ（`relation-graph/page.tsx`）は存在するが、シナリオ内の全NPC相関を俯瞰するビューが欠如しており、複雑な人間関係のシナリオでKPが設定を見失いやすい。
+**実装ヒント:** `src/app/scenarios/[id]/npc-map/page.tsx` を新規作成（"use client"）。`supabase.from("npcs").select("*").eq("scenario_name", scenario.title)` でNPC取得。各NPCを絶対位置配置のカード（`position: absolute`）として表示し、NPCの `purpose` や `faction` をツールチップで参照できる簡易マップを構成。NPC間の線は `faction` が同じものをグループ色で表示（SVG `<line>` 要素）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「NPC相関マップ」リンクを追加。追加DBなし。
+**コミット:** `feat: scenario NPC relationship map for KP reference`
+
+## [TODO] キャラクター活躍統計レポート — 優先度: 中
+**対象:** PL
+**概要:** 全セッションを通じたキャラクターの「総セッション数・累計SAN喪失量・累計HP喪失量・最多使用技能・成功率トップ3・ファンブル回数」を集計し、キャラクターの冒険の軌跡を数字で振り返れるレポートページ。既存のタイムライン・判定統計とは異なり、「通算成績」に特化したサマリービュー。
+**実装ヒント:** `src/app/characters/[id]/career-report/page.tsx` を新規作成（Server Component）。`Promise.all` で `sessions`（character_id）と `dice_rolls`（character_id）を並行取得。sessions から累計san_loss・hp_lossと総セッション数を集計。dice_rollsから技能別の成功数/総判定数を計算し成功率ランキングを生成。ファンブル（success_level="fumble"）カウントも別掲。CSSのみで表示（追加ライブラリなし）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「活躍レポート」リンクを追加。追加DBなし。
+**コミット:** `feat: character career report summarizing lifetime stats across all sessions`
+
+## [TODO] エンカウンター難易度チェッカー — 優先度: 低
+**対象:** KP
+**概要:** シナリオに登録されたクリーチャーとパーティーキャラクターのステータスを比較し、エンカウンターの大まかな難易度（安全/普通/危険/壊滅）を推定するKP支援ツール。クリーチャー（`creatures`テーブル）と参加キャラ（`scenario_participants`→`characters`）の既存データを活用するため追加DBなし。
+**実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（"use client"）。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得、`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` でキャラデータ取得。クリーチャー総HP合計 vs パーティー平均HP・ダメージボーナス等の簡易計算で難易度スコアを算出（ヒューリスティックな数式でOK）。結果を「安全🟢/普通🟡/危険🟠/壊滅🔴」の4段階バッジで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「難易度チェック」リンクを追加。
+**コミット:** `feat: encounter difficulty checker comparing creatures vs party stats`
