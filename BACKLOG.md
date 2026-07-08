@@ -1256,7 +1256,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/session-prep/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(name, hp_current, hp_max, san_current, san_max), players(display_name, contact_discord)").eq("scenario_id", id)` で全参加者データ取得。参加者ごとに ①出欠ステータス（attending/absent/unconfirmed）トグル（`AttendanceToggle.tsx` 流用）、②フックテキスト表示・インライン編集、③キャラHP/SAN残量バッジを横一列で表示。参加人数サマリー（出席N/全体M）をページ上部に表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備」リンクを追加。追加DBなし。
 **コミット:** `feat: session prep hub with attendance confirmation and hook distribution`
 
-## [TODO] シナリオ手がかり管理（クルートラッカー） — 優先度: 高
+## [DONE] シナリオ手がかり管理（クルートラッカー） — 優先度: 高
 **対象:** KP / PL / 共通
 **概要:** シナリオ内の手がかりを「未発見／調査中／解決済み」で追跡できる機能。`ScenarioClue`型（found/investigating/resolved, character_id）がsupabase.tsに定義済みだが管理UIが存在しない。謎解きシナリオで「どのPLがどの手がかりを持っているか」をKPとPL双方が把握できる。
 **実装ヒント:** `src/app/scenarios/[id]/clues/page.tsx` を "use client" で新規作成。`supabase.from("scenario_clues").select("*, characters(name)").eq("scenario_id", id)` で手がかり一覧取得（character_idはNULL許容のため全シナリオClueをselectし`scenario_id`で絞る形でも可）。手がかりカードはステータス（found=緑/investigating=黄/resolved=灰）と担当キャラ名を表示。インライン追加フォームで title・content・status・character_id（select）を入力。ステータス変更は各カードのボタンで `supabase.from("scenario_clues").update({status})` を呼ぶ。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「手がかり管理」リンクを追加。追加DBなし（既存`scenario_clues`テーブルを流用）。
