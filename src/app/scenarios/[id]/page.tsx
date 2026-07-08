@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -149,16 +149,26 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <p className="text-xs text-coc-muted">プレイ日: {scenario.played_at}</p>
         )}
         {scenario.next_session_at && (
-          <div className="mt-3 flex items-center gap-1.5 w-fit rounded-full border border-coc-gold-dim bg-coc-raised px-3 py-1 text-xs font-medium text-coc-gold">
-            <CalendarClock size={13} />
-            次回セッション予定:{" "}
-            {new Date(scenario.next_session_at).toLocaleString("ja-JP", {
-              year: "numeric",
-              month: "numeric",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 rounded-full border border-coc-gold-dim bg-coc-raised px-3 py-1 text-xs font-medium text-coc-gold">
+              <CalendarClock size={13} />
+              次回セッション予定:{" "}
+              {new Date(scenario.next_session_at).toLocaleString("ja-JP", {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+            <a
+              href={`/api/calendar/ical?id=${id}`}
+              download="trpg-session.ics"
+              className="flex items-center gap-1 rounded-full border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+            >
+              <Download size={11} />
+              カレンダーに登録
+            </a>
           </div>
         )}
         <div className="mt-3">

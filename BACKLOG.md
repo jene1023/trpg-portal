@@ -1316,7 +1316,7 @@
 **実装ヒント:** Supabaseに `player_checkins` テーブルを追加（id, scenario_id, character_id, energy_level: smallint 1-5, comment: text | null, checked_in_at: timestamptz）。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLがキャラクターを選択してenergy_level（星UI）とcommentを入力し `supabase.from("player_checkins").upsert(...)` で保存。KP向けに全参加者のチェックイン結果を一覧表示するセクションを同ページに配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」リンクを追加。`src/lib/supabase.ts` に `PlayerCheckin` 型を追加。追加DBあり（`player_checkins` テーブル）。
 **コミット:** `feat: pre-session player check-in for wellbeing and expectation sharing`
 
-## [TODO] セッションカレンダーiCalエクスポート（外部カレンダーアプリ連携） — 優先度: 低
+## [DONE] セッションカレンダーiCalエクスポート（外部カレンダーアプリ連携） — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** シナリオの `next_session_at` を RFC 5545 準拠の .ics ファイルとしてエクスポートし、Google Calendar・Apple Calendar等の外部カレンダーアプリにセッション予定を1クリックで登録できる機能。既存のカレンダービュー（`/calendar/page.tsx`）を補完し、普段使いのカレンダーとの連携でセッション忘れを防ぐ。
 **実装ヒント:** `src/app/api/calendar/ical/route.ts` を新規作成（GET APIルート）。`supabase.from("scenarios").select("id, title, next_session_at, synopsis").not("next_session_at", "is", null)` で取得し、RFC 5545形式（BEGIN:VCALENDAR → BEGIN:VEVENT × N件 → END:VCALENDAR）のテキストを生成して `Content-Type: text/calendar` レスポンスとして返す。`src/app/calendar/page.tsx` に「カレンダーに登録（.ics）」ダウンロードボタンを追加（`<a href="/api/calendar/ical" download="trpg-sessions.ics">`）。個別シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）にも単一シナリオ用iCalダウンロードボタンを追加（クエリパラメータ `?id=` で絞り込み）。追加DBなし（既存 `scenarios.next_session_at` を流用）。

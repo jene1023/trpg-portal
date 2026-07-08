@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario } from "@/lib/supabase";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -80,6 +80,14 @@ export default function CalendarPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-coc-text font-cinzel">セッションカレンダー</h1>
         <div className="flex items-center gap-3">
+          <a
+            href="/api/calendar/ical"
+            download="trpg-sessions.ics"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          >
+            <Download size={14} />
+            .ics
+          </a>
           <button
             onClick={prevMonth}
             className="p-2 rounded-lg border border-coc-border text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
