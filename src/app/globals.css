@@ -616,6 +616,23 @@ body {
   }
 }
 
+/* ヒーロータイトル letter-spacing 呼吸: タイトルが古文書の記述のように静かに拡縮する */
+/* サブタイトルの coc-tracking-breathe(8s) と周期をずらして位相ドリフトを生む */
+@keyframes coc-title-tracking-breathe {
+  0%, 100% { letter-spacing: 0.04em; }
+  50%       { letter-spacing: 0.16em; }
+}
+
+.coc-title-tracking-breathe {
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-title-tracking-breathe {
+    animation: coc-title-tracking-breathe 11s ease-in-out infinite;
+  }
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }
