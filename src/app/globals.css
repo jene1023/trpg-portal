@@ -633,6 +633,35 @@ body {
   }
 }
 
+/* 狂気記録カード: 血の滲みが波打つ如く脈動する血色グロー */
+@keyframes coc-madness-card-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(107, 21, 21, 0.28), inset 0 0 14px rgba(107, 21, 21, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(107, 21, 21, 0.55), inset 0 0 24px rgba(107, 21, 21, 0.11);
+  }
+}
+
+.coc-madness-card {
+  background:
+    radial-gradient(ellipse 75% 55% at 50% -8%, rgba(107, 21, 21, 0.10) 0%, transparent 62%),
+    radial-gradient(ellipse 100% 100% at 50% 108%, rgba(7, 5, 3, 0.30) 0%, transparent 65%),
+    rgba(14, 5, 5, 0.55);
+  border-color: rgba(107, 21, 21, 0.42);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-madness-card {
+    animation: coc-madness-card-pulse 4.5s ease-in-out infinite;
+  }
+}
+
+.coc-madness-card:hover {
+  border-color: rgba(154, 48, 16, 0.70);
+  box-shadow: 0 2px 18px rgba(107, 21, 21, 0.42);
+}
+
 /* ヒーロー引用文: 深淵の彼方からほのかに届く幽冥の光（金の炎と対比するcoolな紫青） */
 @keyframes coc-hero-quote-glow {
   0%, 100% { text-shadow: 0 0 10px rgba(160, 138, 191, 0.08); }

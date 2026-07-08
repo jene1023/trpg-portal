@@ -358,7 +358,7 @@ export default async function HomePage() {
               <Link
                 key={record.id}
                 href={`/characters/${record.character_id}/madness`}
-                className="flex items-center justify-between rounded-lg border border-red-900/40 bg-red-950/20 px-4 py-3 transition-all duration-200 ease-out hover:border-red-700/60 hover:shadow-[0_2px_10px_rgba(180,40,40,0.18)] motion-safe:hover:-translate-y-px"
+                className="coc-madness-card flex items-center justify-between rounded-lg border px-4 py-3 transition-[border-color,transform] duration-300 ease-out motion-safe:hover:-translate-y-px"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-coc-text truncate">{record.symptom}</p>
