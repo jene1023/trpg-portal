@@ -849,3 +849,12 @@ export type CharacterQuote = {
   session_label: string | null;
   created_at: string;
 };
+
+export type PlayerCheckin = {
+  id: string;
+  scenario_id: string;
+  character_id: string;
+  energy_level: number;
+  comment: string | null;
+  checked_in_at: string;
+};

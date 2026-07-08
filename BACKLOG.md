@@ -1310,7 +1310,7 @@
 **実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, scenario_name, quote_text, context, session_label, created_at）。`src/app/characters/[id]/quotes/page.tsx` を新規作成（一覧＋追加フォーム）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「名言録」リンクを追加。公開ページ（`src/app/c/[slug]/page.tsx`）にも抜粋表示。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DBあり（`character_quotes` テーブル）。
 **コミット:** `feat: character quote log for memorable in-session lines`
 
-## [TODO] セッション前チェックイン（参加者コンディション確認） — 優先度: 中
+## [DONE] セッション前チェックイン（参加者コンディション確認） — 優先度: 中
 **対象:** KP / 共通
 **概要:** セッション開始前にPLが「今日の体力・気分（1〜5段階）」と「一言（期待・懸念事項）」をシナリオに紐づけて報告できるフォーム。KPがセッション前に参加者全員のコンディションを把握し、必要なら内容調整ができる。セッション安全ツール（X-Card / `scenario_safety_settings`）の補完として機能する。
 **実装ヒント:** Supabaseに `player_checkins` テーブルを追加（id, scenario_id, character_id, energy_level: smallint 1-5, comment: text | null, checked_in_at: timestamptz）。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLがキャラクターを選択してenergy_level（星UI）とcommentを入力し `supabase.from("player_checkins").upsert(...)` で保存。KP向けに全参加者のチェックイン結果を一覧表示するセクションを同ページに配置。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」リンクを追加。`src/lib/supabase.ts` に `PlayerCheckin` 型を追加。追加DBあり（`player_checkins` テーブル）。
