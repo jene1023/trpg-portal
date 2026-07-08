@@ -23,6 +23,7 @@ const navLinks = [
   { href: "/dice-calc", label: "確率計算" },
   { href: "/item-catalog", label: "装備カタログ" },
   { href: "/tags", label: "タグ" },
+  { href: "/archive", label: "アーカイブ" },
 ];
 
 export default function NavBar() {

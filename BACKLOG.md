@@ -1340,7 +1340,7 @@
 **実装ヒント:** `src/app/characters/[id]/post-session/page.tsx` を "use client" で新規作成。useState で currentStep (0〜3) を管理し、ステップごとに ①成長チェック付き技能一覧（`character_skills` の `growth_checked=true` を抽出）→ ②HP/SAN/MP現在値入力（`QuickStatEditor.tsx` 流用）→ ③狂気記録確認・追加（`MadnessList.tsx` 流用）→ ④セッションログ入力（`SessionLogForm.tsx` 流用）を順に表示。最終ステップ完了後「記録完了」バナーを表示しキャラ詳細ページへリダイレクト。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「セッション後記録」ボタンを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: post-session wizard guiding growth check and stat updates`
 
-## [TODO] キャラクターアーカイブ（死亡・引退・発狂探索者追悼ページ） — 優先度: 中
+## [DONE] キャラクターアーカイブ（死亡・引退・発狂探索者追悼ページ） — 優先度: 中
 **対象:** PL / 共通
 **概要:** ステータスが `dead` / `insane` / `retired` のキャラクターを専用ページに一覧し、`farewell_scene` と `farewell_message` フィールドを大きく表示する追悼・記録ページ。現状メインのキャラ一覧に混在しており、過去キャラを振り返る場所がない。公開されているキャラはリンクも表示する。
 **実装ヒント:** `src/app/archive/page.tsx` を新規作成（Server Component）。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, public_slug, scenario_name").in("status", ["dead", "insane", "retired"]).order("updated_at", {ascending: false})` で取得。ステータスごとにセクション分け（死亡🕯/発狂🌀/引退🌸）。各カードは portrait_url サムネイル・名前・職業・farewell_message を表示。公開スラグがあれば `/c/[slug]` へのリンクを付ける。`src/app/_components/NavBar.tsx` に「アーカイブ」リンクを追加。追加DBなし。
