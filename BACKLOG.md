@@ -1232,7 +1232,7 @@
 **実装ヒント:** `src/app/characters/[id]/skill-radar/page.tsx` を新規作成（Server Component）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得後、技能名に基づいてカテゴリに分類（例: 格闘/射撃/回避/鎧→戦闘、目星/聴耳/図書館→探索、説得/心理学/言いくるめ→対人、etc.）してカテゴリ平均を算出。レーダーチャートはCSSの clip-path またはSVG polygon で依存ライブラリ不要。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「スキルレーダー」リンクを追加。
 **コミット:** `feat: skill category radar view for character balance visualization`
 
-## [TODO] パーティー能力値比較テーブル — 優先度: 高
+## [DONE] パーティー能力値比較テーブル — 優先度: 高
 **対象:** KP / 共通
 **概要:** シナリオ参加者全員の8能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）を横並びの表で一覧表示するビュー。既存のパーティービューはHP/MP/SANのみで、戦闘時の対抗判定・難易度調整に必要な能力値が確認できない。KPが即座に参照できるようにする。
 **実装ヒント:** `src/app/scenarios/[id]/party-stats/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加者＋キャラデータを一括取得。各能力値を縦軸・キャラを横軸にした `<table>` でグリッド表示。行ごとに最大値のセルを強調（`font-bold text-emerald-600`）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「能力値比較」リンクを追加。追加DBなし（既存 `scenario_participants`, `characters` を流用）。

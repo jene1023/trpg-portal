@@ -362,6 +362,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/party-stats`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <ListChecks size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">能力値比較テーブル</p>
+              <p className="text-xs text-coc-muted">STR/CON/POW/DEX/APP/SIZ/INT/EDUを全員横並びで比較</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/combat`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
