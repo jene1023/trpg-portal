@@ -1244,7 +1244,7 @@
 **実装ヒント:** `src/app/npc-presets/page.tsx`（一覧）と `src/app/npc-presets/new/page.tsx`（作成フォーム）を新規作成。フォームは `NpcForm.tsx` を参考に `NpcPreset` 型に合わせた occupation_name・能力値・外見入力欄で構成。NPC詳細ページ（`src/app/npcs/[id]/page.tsx`）またはNPC一覧ページ（`src/app/npcs/page.tsx`）に「プリセットとして保存」ボタンを追加し `supabase.from("npc_presets").insert(...)` で保存。NPC新規作成ページ（`src/app/npcs/new/page.tsx`）にプリセット選択 select を追加して選択値をフォームに自動入力。`src/app/_components/NavBar.tsx` に「NPCプリセット」リンクを追加。追加DBなし（`npc_presets` テーブルは既存想定）。
 **コミット:** `feat: NPC preset library for quick NPC deployment`
 
-## [TODO] 探索者心理統合ビュー（フォビア・狂気・SAN推移一覧） — 優先度: 高
+## [DONE] 探索者心理統合ビュー（フォビア・狂気・SAN推移一覧） — 優先度: 高
 **対象:** PL
 **概要:** 現在フォビア（phobia）・狂気記録（madness_records）・SAN推移グラフはそれぞれ別ページに分散しており、セッション中にキャラクターの精神状態を素早く把握しにくい。これら3種の情報を1ページに統合した「心理プロファイル」ページを追加する。
 **実装ヒント:** `src/app/characters/[id]/mental-health/page.tsx` を新規作成（Server Component + "use client" 子）。`Promise.all` で `supabase.from("character_phobias").select("*").eq("character_id", id)`・`supabase.from("madness_records").select("*").eq("character_id", id)`・`supabase.from("sessions").select("session_number, san_loss").eq("character_id", id).order("session_number")` を並行取得。ページ上部にアクティブな狂気バッジ（赤）とフォビア（橙）を横並びで表示、中段にSAN残量の推移バー（セッション番号順）、下部に狂気・フォビアの全履歴を並べる。既存の `PhobiaList.tsx`・`MadnessList.tsx` コンポーネントを import して流用。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心理プロファイル」リンクを追加。

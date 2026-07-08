@@ -409,7 +409,7 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
-                href={`/characters/${id}/madness`}
+                href={`/characters/${id}/mental-health`}
                 className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm transition-colors motion-safe:active:scale-[0.98] ${
                   char.san_current <= Math.floor(char.san_max / 5)
                     ? "border-red-800 bg-red-950/20 text-red-300 hover:text-red-200 hover:border-red-700"
@@ -417,7 +417,7 @@ export default async function CharacterDetailPage({ params }: Props) {
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  狂気記録
+                  心理プロファイル
                   {char.san_current <= Math.floor(char.san_max / 5) && (
                     <span className="rounded bg-red-900/60 border border-red-700 px-1.5 py-0.5 text-xs font-semibold">
                       SAN危険
@@ -425,6 +425,13 @@ export default async function CharacterDetailPage({ params }: Props) {
                   )}
                 </span>
                 <span className={char.san_current <= Math.floor(char.san_max / 5) ? "text-red-400" : "text-coc-gold"}>→</span>
+              </Link>
+              <Link
+                href={`/characters/${id}/madness`}
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>狂気記録</span>
+                <span className="text-coc-gold">→</span>
               </Link>
               <Link
                 href={`/characters/${id}/phobias`}
