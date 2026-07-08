@@ -1250,7 +1250,7 @@
 **実装ヒント:** `src/app/characters/[id]/mental-health/page.tsx` を新規作成（Server Component + "use client" 子）。`Promise.all` で `supabase.from("character_phobias").select("*").eq("character_id", id)`・`supabase.from("madness_records").select("*").eq("character_id", id)`・`supabase.from("sessions").select("session_number, san_loss").eq("character_id", id).order("session_number")` を並行取得。ページ上部にアクティブな狂気バッジ（赤）とフォビア（橙）を横並びで表示、中段にSAN残量の推移バー（セッション番号順）、下部に狂気・フォビアの全履歴を並べる。既存の `PhobiaList.tsx`・`MadnessList.tsx` コンポーネントを import して流用。追加DBなし。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心理プロファイル」リンクを追加。
 **コミット:** `feat: integrated mental health profile combining phobias, madness, and SAN trend`
 
-## [TODO] シナリオ開始前参加確認ハブ（出席確認・フック配布一括） — 優先度: 中
+## [DONE] シナリオ開始前参加確認ハブ（出席確認・フック配布一括） — 優先度: 中
 **対象:** KP / 共通
 **概要:** セッション当日にKPが「誰が来るか」「各PLのフックを渡したか」を一画面で管理できるハブページ。現在 `AttendanceToggle.tsx` と `hook_text`（ScenarioParticipant）は実装済みだが、参加者全員の出欠＋フック配布状況を一覧できるKP専用ページが存在しない。
 **実装ヒント:** `src/app/scenarios/[id]/session-prep/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(name, hp_current, hp_max, san_current, san_max), players(display_name, contact_discord)").eq("scenario_id", id)` で全参加者データ取得。参加者ごとに ①出欠ステータス（attending/absent/unconfirmed）トグル（`AttendanceToggle.tsx` 流用）、②フックテキスト表示・インライン編集、③キャラHP/SAN残量バッジを横一列で表示。参加人数サマリー（出席N/全体M）をページ上部に表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「セッション準備」リンクを追加。追加DBなし。
