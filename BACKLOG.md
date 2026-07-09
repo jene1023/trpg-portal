@@ -1375,3 +1375,27 @@
 **概要:** シナリオ参加者全員がアクセスできる「共有アイテムBOX」機能。PC間アイテム受け渡し（所有権移転）とは異なり、誰でも出し入れできる共有ストレージとして管理する。予備の弾薬・医療品・情報メモなどパーティー共有リソースの管理に使う。
 **実装ヒント:** Supabaseに `scenario_shared_items`テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item", damage: text | null, notes: text | null, added_by: text | null, created_at）。`src/app/scenarios/[id]/shared-inventory/page.tsx` を "use client" で新規作成（一覧＋追加フォーム＋削除ボタン）。インライン入力フォームで name・item_type・damage・notes を入力し `supabase.from("scenario_shared_items").insert(...)` で追加。削除は `supabase.from("scenario_shared_items").delete().eq("id", id)` で実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有装備BOX」リンクを追加。既存の `InventoryForm.tsx` を参考に実装。
 **コミット:** `feat: party shared item box for scenario-scoped communal inventory`
+
+## [TODO] グローバルキーワード検索（キャラクター・シナリオ・NPC横断） — 優先度: 高
+**対象:** 共通
+**概要:** キャラクター名・シナリオ名・NPCメモを1つの検索窓から横断的に検索できるページ。個別の一覧ページ内フィルタでは見つからない情報を素早く発見できるようにする。
+**実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。input の onChange で `supabase.from("characters").select("id,name").ilike("name", \`%${q}%\`)` / `supabase.from("scenarios").select("id,title").ilike("title", \`%${q}%\`)` / `supabase.from("npcs").select("id,name,notes").or(\`name.ilike.%${q}%,notes.ilike.%${q}%\`)` を並行実行し結果をセクション別にレンダリング。各結果からキャラ詳細・シナリオ詳細・NPC詳細へリンク。Navbarに検索アイコン or リンクを追加（`src/app/_components/NavBar.tsx`）。追加DBなし。
+**コミット:** `feat: global keyword search across characters, scenarios, and NPCs`
+
+## [TODO] カスタムランダム表（再利用可能なd6〜d100ルックアップ表） — 優先度: 中
+**対象:** KP
+**概要:** 「邂逅する怪異の容貌」「戦利品種別」など、KPが独自作成した多面ダイス対応のランダムイベント表を保存・管理できる機能。既存のシナリオ別ランダムイベント（RandomEventList）はシナリオ限定だが、こちらはキャンペーンをまたいで再利用できるグローバルライブラリ。
+**実装ヒント:** Supabaseに `random_tables`テーブル（id, name, dice_type: "d6"|"d8"|"d10"|"d12"|"d20"|"d100", created_at）と `random_table_entries`テーブル（id, table_id, roll_min: integer, roll_max: integer, result_text: text）を追加。`src/app/random-tables/page.tsx`（表一覧）と `src/app/random-tables/[id]/page.tsx`（エントリ編集＋ロールボタン）を新規作成。ロールは `Math.ceil(Math.random() * diceMax)` で実装し結果に対応する `result_text` をハイライト表示。`src/app/_components/DiceRoller.tsx` の実装を参考に。追加DB2テーブル。
+**コミット:** `feat: custom random table library for reusable KP lookup tables`
+
+## [TODO] 探索者の秘密メモ（PL専用の非公開キャラクター情報） — 優先度: 中
+**対象:** PL
+**概要:** PLが「キャラクターだけが知っている秘密の過去」「他のPCに隠している事実」などをキャラクター単位で記録できる非公開メモ機能。既存のクイックメモ（quick-notes）とは異なり、秘密の性質・重要度・KP共有フラグを持つ構造化データとして管理する。
+**実装ヒント:** Supabaseに `character_secrets`テーブルを追加（id, character_id, title: text, content: text, severity: "minor"|"major"|"critical", share_with_kp: boolean DEFAULT false, created_at）。`src/app/characters/[id]/secrets/page.tsx` を "use client" で新規作成（一覧表示＋インライン追加フォーム＋削除）。severity をバッジ表示、share_with_kp のトグルは `supabase.from("character_secrets").update({ share_with_kp: v }).eq("id", id)` で更新。キャラ詳細ページ（`src/app/characters/[id]/page.tsx`）に「秘密メモ」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: character secrets memo for PL-private backstory and hidden facts`
+
+## [TODO] 欠席探索者行動記録（セッション欠席キャラクターの在処ログ） — 優先度: 中
+**対象:** KP / 共通
+**概要:** PLが欠席したセッションで、そのキャラクターがシナリオ内でどう行動していたか（離脱理由・代理行動・復帰条件）をKPが記録できる機能。欠席管理をトグルで行うAttendanceToggleと組み合わせ、欠席者ごとに物語的整合性のあるメモを残す。
+**実装ヒント:** Supabaseに `character_absences`テーブルを追加（id, scenario_id, character_id, session_number: integer | null, reason: text | null, action_taken: text | null, return_condition: text | null, created_at）。`src/app/scenarios/[id]/absences/page.tsx` を "use client" で新規作成。`supabase.from("campaign_participants").select("character_id, characters(name)")` で参加者を取得し、各キャラの欠席エントリを accordion 形式で表示。既存の `AttendanceToggle.tsx`（`src/app/_components/AttendanceToggle.tsx`）と `ParticipantList.tsx` を参考に実装。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「欠席者記録」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: absent character action log for in-fiction absence management`
