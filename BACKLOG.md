@@ -1394,7 +1394,7 @@
 **実装ヒント:** Supabaseに `character_secrets`テーブルを追加（id, character_id, title: text, content: text, severity: "minor"|"major"|"critical", share_with_kp: boolean DEFAULT false, created_at）。`src/app/characters/[id]/secrets/page.tsx` を "use client" で新規作成（一覧表示＋インライン追加フォーム＋削除）。severity をバッジ表示、share_with_kp のトグルは `supabase.from("character_secrets").update({ share_with_kp: v }).eq("id", id)` で更新。キャラ詳細ページ（`src/app/characters/[id]/page.tsx`）に「秘密メモ」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: character secrets memo for PL-private backstory and hidden facts`
 
-## [TODO] 欠席探索者行動記録（セッション欠席キャラクターの在処ログ） — 優先度: 中
+## [DONE] 欠席探索者行動記録（セッション欠席キャラクターの在処ログ） — 優先度: 中
 **対象:** KP / 共通
 **概要:** PLが欠席したセッションで、そのキャラクターがシナリオ内でどう行動していたか（離脱理由・代理行動・復帰条件）をKPが記録できる機能。欠席管理をトグルで行うAttendanceToggleと組み合わせ、欠席者ごとに物語的整合性のあるメモを残す。
 **実装ヒント:** Supabaseに `character_absences`テーブルを追加（id, scenario_id, character_id, session_number: integer | null, reason: text | null, action_taken: text | null, return_condition: text | null, created_at）。`src/app/scenarios/[id]/absences/page.tsx` を "use client" で新規作成。`supabase.from("campaign_participants").select("character_id, characters(name)")` で参加者を取得し、各キャラの欠席エントリを accordion 形式で表示。既存の `AttendanceToggle.tsx`（`src/app/_components/AttendanceToggle.tsx`）と `ParticipantList.tsx` を参考に実装。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「欠席者記録」リンクを追加。追加DB1テーブル。

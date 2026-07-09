@@ -934,3 +934,14 @@ export type CharacterSecret = {
   share_with_kp: boolean;
   created_at: string;
 };
+
+export type CharacterAbsence = {
+  id: string;
+  scenario_id: string;
+  character_id: string;
+  session_number: number | null;
+  reason: string | null;
+  action_taken: string | null;
+  return_condition: string | null;
+  created_at: string;
+};
