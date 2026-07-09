@@ -135,7 +135,7 @@ export default async function HomePage() {
       )}
 
       {/* ヒーロー */}
-      <div className="coc-corner-frame coc-panel-atmospheric rounded-lg text-center space-y-3 py-6 px-5">
+      <div className="coc-corner-frame coc-panel-atmospheric coc-hero-breathe rounded-lg text-center space-y-3 py-6 px-5">
         <p className="text-coc-muted text-sm tracking-[0.2em] uppercase font-cinzel coc-tracking-breathe">
           Cthulhu Mythos TRPG
         </p>

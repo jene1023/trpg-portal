@@ -770,3 +770,37 @@ body {
     animation-delay: 1.5s;
   }
 }
+
+/* ヒーローパネル環境光呼吸: ランタンの温かい光が古扉の隙間から静かに滲み出るように */
+/* 内側のアニメーション群（タイトル11s・サブタイトル8s・引用7s）と周期をずらして位相ドリフトを生む */
+@keyframes coc-hero-breathe {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(201, 133, 58, 0.09),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+      0 0 0 1px var(--color-coc-border),
+      0 6px 48px rgba(201, 133, 58, 0.07);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(201, 133, 58, 0.20),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.44),
+      0 0 0 1px rgba(122, 90, 42, 0.72),
+      0 6px 72px rgba(201, 133, 58, 0.18),
+      0 14px 100px rgba(201, 133, 58, 0.07);
+  }
+}
+
+.coc-hero-breathe {
+  box-shadow:
+    inset 0 1px 0 rgba(201, 133, 58, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0 0 0 1px var(--color-coc-border),
+    0 6px 48px rgba(201, 133, 58, 0.07);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-hero-breathe {
+    animation: coc-hero-breathe 9s ease-in-out infinite;
+  }
+}
