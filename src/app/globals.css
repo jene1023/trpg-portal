@@ -533,6 +533,33 @@ body {
   }
 }
 
+/* ヒーロータイトル メタリックグラデーション: 古文書の黄金表題 — 羊皮紙の地に黄金の炎が宿る */
+/* filter: drop-shadow で囲む wrapper に適用すること（text-shadow は透過テキストに効かないため） */
+.coc-hero-title {
+  background: linear-gradient(
+    125deg,
+    var(--color-coc-gold-dim) 0%,
+    var(--color-coc-text)      28%,
+    var(--color-coc-gold)      50%,
+    var(--color-coc-text)      72%,
+    var(--color-coc-gold-dim) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes coc-hero-title-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(201, 133, 58, 0.18)) drop-shadow(0 0 28px rgba(201, 133, 58, 0.06)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(201, 133, 58, 0.38)) drop-shadow(0 0 48px rgba(201, 133, 58, 0.13)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-hero-title {
+    animation: coc-hero-title-glow 5s ease-in-out infinite;
+  }
+}
+
 /* ポートレート未設定フォールバック: 古い写真が失われた後の羊皮紙調背景 */
 /* 燭台の暖光が上から差し込む大気感を与え、coc-card-bg と同じ世界観を保つ */
 .coc-portrait-fallback {

@@ -139,7 +139,7 @@ export default async function HomePage() {
         <p className="text-coc-muted text-sm tracking-[0.2em] uppercase font-cinzel coc-tracking-breathe">
           Cthulhu Mythos TRPG
         </p>
-        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-coc-text coc-title-glow coc-title-tracking-breathe">
+        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold coc-hero-title coc-title-tracking-breathe">
           CoC Portal
         </h1>
         <div className="flex items-center justify-center gap-4">
