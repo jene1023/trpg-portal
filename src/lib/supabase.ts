@@ -858,3 +858,18 @@ export type PlayerCheckin = {
   comment: string | null;
   checked_in_at: string;
 };
+
+export type ScenarioEpilogue = {
+  id: string;
+  scenario_id: string;
+  main_epilogue: string | null;
+  created_at: string;
+};
+
+export type CharacterEnding = {
+  id: string;
+  scenario_id: string;
+  character_id: string;
+  ending_text: string | null;
+  created_at: string;
+};

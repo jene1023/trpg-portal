@@ -1358,7 +1358,7 @@
 **実装ヒント:** `src/app/_components/LongRestButton.tsx` を "use client" で新規作成。props: characterId, hpMax, mpMax, sanMax。確認ダイアログ表示後に `supabase.from("characters").update({ hp_current: hpMax, mp_current: mpMax, san_current: sanMax }).eq("id", characterId)` を実行。`src/app/characters/[id]/preflight/page.tsx`（セッション前チェックリスト）と `src/app/characters/[id]/quick/page.tsx`（モバイルクイックダッシュボード）に配置。追加DBなし（既存`characters`テーブルのみ）。
 **コミット:** `feat: long rest button to restore HP/MP/SAN to max in one click`
 
-## [TODO] シナリオ完結エピローグ記録（各探索者の物語的結末） — 優先度: 中
+## [DONE] シナリオ完結エピローグ記録（各探索者の物語的結末） — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** シナリオ `status = "completed"` 後に、KPがシナリオ全体のエピローグテキストと各参加キャラクターのエンディングコメントを記録できるナラティブ記念ページ。KP振り返りノート（評価・改善点）とは異なり、「物語の結末」そのものを残す。
 **実装ヒント:** Supabaseに `scenario_epilogues`テーブル（id, scenario_id UNIQUE, main_epilogue: text | null, created_at）と `character_endings`テーブル（id, scenario_id, character_id, ending_text: text | null, created_at）を追加。`src/app/scenarios/[id]/epilogue/page.tsx` を "use client" で新規作成（メインエピローグ入力＋参加者全員分のエンディング記述フォームを1ページに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の `status === "completed"` 時のみ「エピローグを記録」リンクを表示。`supabase.from("scenario_epilogues").upsert(...)` でシナリオ1件につき1レコード管理。

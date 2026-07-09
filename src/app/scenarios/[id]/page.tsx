@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -617,6 +617,22 @@ export default async function ScenarioDetailPage({ params }: Props) {
               <div>
                 <p className="font-medium text-coc-gold">KP振り返りレポート</p>
                 <p className="text-xs text-coc-muted">5段階評価・感想・改善点をKP成長ログとして記録</p>
+              </div>
+            </div>
+            <span className="text-coc-muted">→</span>
+          </Link>
+        )}
+
+        {scenario.status === "completed" && (
+          <Link
+            href={`/scenarios/${id}/epilogue`}
+            className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <ScrollText size={20} className="text-coc-gold" />
+              <div>
+                <p className="font-medium text-coc-gold">エピローグを記録</p>
+                <p className="text-xs text-coc-muted">シナリオの物語的結末と各探索者のエンディングを残す</p>
               </div>
             </div>
             <span className="text-coc-muted">→</span>
