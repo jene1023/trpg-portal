@@ -85,7 +85,7 @@ function SearchPageInner() {
         { data: gmNotesScenariosData },
       ] = await Promise.all([
         supabase.from("characters").select("*").ilike("name", `%${q}%`),
-        supabase.from("npcs").select("*").ilike("name", `%${q}%`),
+        supabase.from("npcs").select("*").or(`name.ilike.%${q}%,notes.ilike.%${q}%`),
         supabase.from("scenarios").select("*").ilike("title", `%${q}%`),
         supabase.from("sessions").select("*, characters(name)").ilike("summary", `%${q}%`),
         supabase.from("quick_notes").select("*, characters(name)").ilike("content", `%${q}%`),
@@ -265,6 +265,11 @@ function SearchPageInner() {
                     <p className="text-sm font-medium text-coc-text">{n.name}</p>
                     {n.scenario_name && (
                       <p className="text-xs text-coc-muted mt-0.5">{n.scenario_name}</p>
+                    )}
+                    {n.notes && !n.name.toLowerCase().includes(initialQuery.toLowerCase()) && (
+                      <p className="mt-1">
+                        <HighlightedExcerpt text={n.notes} keyword={initialQuery} />
+                      </p>
                     )}
                   </Link>
                 ))}

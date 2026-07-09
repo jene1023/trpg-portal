@@ -1376,7 +1376,7 @@
 **実装ヒント:** Supabaseに `scenario_shared_items`テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item", damage: text | null, notes: text | null, added_by: text | null, created_at）。`src/app/scenarios/[id]/shared-inventory/page.tsx` を "use client" で新規作成（一覧＋追加フォーム＋削除ボタン）。インライン入力フォームで name・item_type・damage・notes を入力し `supabase.from("scenario_shared_items").insert(...)` で追加。削除は `supabase.from("scenario_shared_items").delete().eq("id", id)` で実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有装備BOX」リンクを追加。既存の `InventoryForm.tsx` を参考に実装。
 **コミット:** `feat: party shared item box for scenario-scoped communal inventory`
 
-## [TODO] グローバルキーワード検索（キャラクター・シナリオ・NPC横断） — 優先度: 高
+## [DONE] グローバルキーワード検索（キャラクター・シナリオ・NPC横断） — 優先度: 高
 **対象:** 共通
 **概要:** キャラクター名・シナリオ名・NPCメモを1つの検索窓から横断的に検索できるページ。個別の一覧ページ内フィルタでは見つからない情報を素早く発見できるようにする。
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。input の onChange で `supabase.from("characters").select("id,name").ilike("name", \`%${q}%\`)` / `supabase.from("scenarios").select("id,title").ilike("title", \`%${q}%\`)` / `supabase.from("npcs").select("id,name,notes").or(\`name.ilike.%${q}%,notes.ilike.%${q}%\`)` を並行実行し結果をセクション別にレンダリング。各結果からキャラ詳細・シナリオ詳細・NPC詳細へリンク。Navbarに検索アイコン or リンクを追加（`src/app/_components/NavBar.tsx`）。追加DBなし。
