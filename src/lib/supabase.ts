@@ -873,3 +873,23 @@ export type CharacterEnding = {
   ending_text: string | null;
   created_at: string;
 };
+
+export type EncounterTemplate = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type EncounterTemplateEntry = {
+  id: string;
+  template_id: string;
+  creature_id: string;
+  count: number;
+  created_at: string;
+};
+
+export type EncounterTemplateWithEntries = EncounterTemplate & {
+  encounter_template_entries: (EncounterTemplateEntry & {
+    creatures: Pick<Creature, "id" | "name" | "hp" | "dex">;
+  })[];
+};

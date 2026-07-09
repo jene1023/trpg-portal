@@ -12,6 +12,7 @@ import {
   Trash2,
   Bug,
   Skull,
+  Layers,
 } from "lucide-react";
 import {
   supabase,
@@ -19,6 +20,7 @@ import {
   Character,
   ScenarioParticipant,
   Creature,
+  EncounterTemplateWithEntries,
 } from "@/lib/supabase";
 
 type ParticipantWithCharacter = ScenarioParticipant & {
@@ -49,6 +51,7 @@ export default function CombatPage() {
   const [loading, setLoading] = useState(true);
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [creatures, setCreatures] = useState<CreatureRow[]>([]);
+  const [templates, setTemplates] = useState<EncounterTemplateWithEntries[]>([]);
   const [round, setRound] = useState(1);
   const [newName, setNewName] = useState("");
   const [newDex, setNewDex] = useState("");
@@ -93,6 +96,13 @@ export default function CombatPage() {
       setCreatures(
         ((creatureData ?? []) as CreatureRow[]).filter((c) => c.hp !== null)
       );
+
+      const { data: tplData } = await supabase
+        .from("encounter_templates")
+        .select("*, encounter_template_entries(*, creatures(id, name, hp, dex))")
+        .order("created_at", { ascending: false });
+
+      setTemplates((tplData ?? []) as EncounterTemplateWithEntries[]);
 
       setCombatants(pcCombatants.sort((a, b) => b.dex - a.dex));
       setLoading(false);
@@ -161,6 +171,25 @@ export default function CombatPage() {
         acted: false,
       },
     ]);
+  }
+
+  function addFromTemplate(tpl: EncounterTemplateWithEntries) {
+    const newCombatants: Combatant[] = [];
+    for (const entry of tpl.encounter_template_entries) {
+      if (!entry.creatures.hp) continue;
+      for (let i = 0; i < entry.count; i++) {
+        newCombatants.push({
+          id: crypto.randomUUID(),
+          type: "enemy" as const,
+          name: entry.count > 1 ? `${entry.creatures.name} ${i + 1}` : entry.creatures.name,
+          dex: entry.creatures.dex ?? 0,
+          hpCurrent: entry.creatures.hp,
+          hpMax: entry.creatures.hp,
+          acted: false,
+        });
+      }
+    }
+    setCombatants((prev) => [...prev, ...newCombatants]);
   }
 
   function nextRound() {
@@ -250,6 +279,27 @@ export default function CombatPage() {
                 {c.hp !== null && (
                   <span className="ml-1 text-coc-muted">HP{c.hp}</span>
                 )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Template quick-add */}
+      {templates.length > 0 && (
+        <div className="mb-4 rounded-xl border border-coc-border bg-coc-surface px-4 py-3">
+          <p className="text-xs font-medium text-coc-muted mb-2 flex items-center gap-1.5">
+            <Layers size={13} />
+            テンプレートから一括追加
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {templates.map((tpl) => (
+              <button
+                key={tpl.id}
+                onClick={() => addFromTemplate(tpl)}
+                className="rounded-full border border-coc-border bg-coc-raised px-3 py-1 text-xs text-coc-text hover:border-coc-gold hover:text-coc-gold transition-colors"
+              >
+                {tpl.name}
               </button>
             ))}
           </div>

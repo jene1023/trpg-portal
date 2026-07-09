@@ -1364,7 +1364,7 @@
 **実装ヒント:** Supabaseに `scenario_epilogues`テーブル（id, scenario_id UNIQUE, main_epilogue: text | null, created_at）と `character_endings`テーブル（id, scenario_id, character_id, ending_text: text | null, created_at）を追加。`src/app/scenarios/[id]/epilogue/page.tsx` を "use client" で新規作成（メインエピローグ入力＋参加者全員分のエンディング記述フォームを1ページに統合）。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の `status === "completed"` 時のみ「エピローグを記録」リンクを表示。`supabase.from("scenario_epilogues").upsert(...)` でシナリオ1件につき1レコード管理。
 **コミット:** `feat: scenario epilogue page for recording narrative endings per investigator`
 
-## [TODO] エンカウンターテンプレート管理（複数クリーチャーセット保存） — 優先度: 中
+## [DONE] エンカウンターテンプレート管理（複数クリーチャーセット保存） — 優先度: 中
 **対象:** KP
 **概要:** 「深きものども×3・星の落とし子×1」のような複数クリーチャーのセットをテンプレートとして名前付き保存し、戦闘管理ページへワンクリックで展開できる機能。クリーチャーカタログは個体の登録に特化しているが、こちらはエンカウンター単位の構成管理に特化する。
 **実装ヒント:** Supabaseに `encounter_templates`テーブル（id, name, created_at）と `encounter_template_entries`テーブル（id, template_id, creature_id, count: integer DEFAULT 1, created_at）を追加。`src/app/encounter-templates/page.tsx` を新規作成（一覧＋作成フォーム、クリーチャーをselectして件数入力）。戦闘管理ページ（`src/app/scenarios/[id]/combat/page.tsx`）の「敵を追加」フォームに「テンプレートから追加」ボタンを配置し、選択したテンプレートのエントリをローカル敵リストにまとめてセット。追加DB2テーブル。
