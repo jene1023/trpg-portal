@@ -1370,7 +1370,7 @@
 **実装ヒント:** Supabaseに `encounter_templates`テーブル（id, name, created_at）と `encounter_template_entries`テーブル（id, template_id, creature_id, count: integer DEFAULT 1, created_at）を追加。`src/app/encounter-templates/page.tsx` を新規作成（一覧＋作成フォーム、クリーチャーをselectして件数入力）。戦闘管理ページ（`src/app/scenarios/[id]/combat/page.tsx`）の「敵を追加」フォームに「テンプレートから追加」ボタンを配置し、選択したテンプレートのエントリをローカル敵リストにまとめてセット。追加DB2テーブル。
 **コミット:** `feat: encounter template manager for bundling creature sets in combat`
 
-## [TODO] パーティー共有アイテムボックス（シナリオ共有インベントリ） — 優先度: 中
+## [DONE] パーティー共有アイテムボックス（シナリオ共有インベントリ） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** シナリオ参加者全員がアクセスできる「共有アイテムBOX」機能。PC間アイテム受け渡し（所有権移転）とは異なり、誰でも出し入れできる共有ストレージとして管理する。予備の弾薬・医療品・情報メモなどパーティー共有リソースの管理に使う。
 **実装ヒント:** Supabaseに `scenario_shared_items`テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item", damage: text | null, notes: text | null, added_by: text | null, created_at）。`src/app/scenarios/[id]/shared-inventory/page.tsx` を "use client" で新規作成（一覧＋追加フォーム＋削除ボタン）。インライン入力フォームで name・item_type・damage・notes を入力し `supabase.from("scenario_shared_items").insert(...)` で追加。削除は `supabase.from("scenario_shared_items").delete().eq("id", id)` で実装。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有装備BOX」リンクを追加。既存の `InventoryForm.tsx` を参考に実装。

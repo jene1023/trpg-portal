@@ -893,3 +893,14 @@ export type EncounterTemplateWithEntries = EncounterTemplate & {
     creatures: Pick<Creature, "id" | "name" | "hp" | "dex">;
   })[];
 };
+
+export type ScenarioSharedItem = {
+  id: string;
+  scenario_id: string;
+  name: string;
+  item_type: ItemType;
+  damage: string | null;
+  notes: string | null;
+  added_by: string | null;
+  created_at: string;
+};
