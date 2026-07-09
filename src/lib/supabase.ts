@@ -904,3 +904,21 @@ export type ScenarioSharedItem = {
   added_by: string | null;
   created_at: string;
 };
+
+export type DiceType = "d6" | "d8" | "d10" | "d12" | "d20" | "d100";
+
+export type RandomTable = {
+  id: string;
+  name: string;
+  dice_type: DiceType;
+  created_at: string;
+};
+
+export type RandomTableEntry = {
+  id: string;
+  table_id: string;
+  roll_min: number;
+  roll_max: number;
+  result_text: string;
+  created_at: string;
+};

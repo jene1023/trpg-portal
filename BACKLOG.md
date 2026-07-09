@@ -1382,7 +1382,7 @@
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。input の onChange で `supabase.from("characters").select("id,name").ilike("name", \`%${q}%\`)` / `supabase.from("scenarios").select("id,title").ilike("title", \`%${q}%\`)` / `supabase.from("npcs").select("id,name,notes").or(\`name.ilike.%${q}%,notes.ilike.%${q}%\`)` を並行実行し結果をセクション別にレンダリング。各結果からキャラ詳細・シナリオ詳細・NPC詳細へリンク。Navbarに検索アイコン or リンクを追加（`src/app/_components/NavBar.tsx`）。追加DBなし。
 **コミット:** `feat: global keyword search across characters, scenarios, and NPCs`
 
-## [TODO] カスタムランダム表（再利用可能なd6〜d100ルックアップ表） — 優先度: 中
+## [DONE] カスタムランダム表（再利用可能なd6〜d100ルックアップ表） — 優先度: 中
 **対象:** KP
 **概要:** 「邂逅する怪異の容貌」「戦利品種別」など、KPが独自作成した多面ダイス対応のランダムイベント表を保存・管理できる機能。既存のシナリオ別ランダムイベント（RandomEventList）はシナリオ限定だが、こちらはキャンペーンをまたいで再利用できるグローバルライブラリ。
 **実装ヒント:** Supabaseに `random_tables`テーブル（id, name, dice_type: "d6"|"d8"|"d10"|"d12"|"d20"|"d100", created_at）と `random_table_entries`テーブル（id, table_id, roll_min: integer, roll_max: integer, result_text: text）を追加。`src/app/random-tables/page.tsx`（表一覧）と `src/app/random-tables/[id]/page.tsx`（エントリ編集＋ロールボタン）を新規作成。ロールは `Math.ceil(Math.random() * diceMax)` で実装し結果に対応する `result_text` をハイライト表示。`src/app/_components/DiceRoller.tsx` の実装を参考に。追加DB2テーブル。
