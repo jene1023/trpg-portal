@@ -922,3 +922,15 @@ export type RandomTableEntry = {
   result_text: string;
   created_at: string;
 };
+
+export type SecretSeverity = "minor" | "major" | "critical";
+
+export type CharacterSecret = {
+  id: string;
+  character_id: string;
+  title: string;
+  content: string;
+  severity: SecretSeverity;
+  share_with_kp: boolean;
+  created_at: string;
+};

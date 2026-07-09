@@ -1388,7 +1388,7 @@
 **実装ヒント:** Supabaseに `random_tables`テーブル（id, name, dice_type: "d6"|"d8"|"d10"|"d12"|"d20"|"d100", created_at）と `random_table_entries`テーブル（id, table_id, roll_min: integer, roll_max: integer, result_text: text）を追加。`src/app/random-tables/page.tsx`（表一覧）と `src/app/random-tables/[id]/page.tsx`（エントリ編集＋ロールボタン）を新規作成。ロールは `Math.ceil(Math.random() * diceMax)` で実装し結果に対応する `result_text` をハイライト表示。`src/app/_components/DiceRoller.tsx` の実装を参考に。追加DB2テーブル。
 **コミット:** `feat: custom random table library for reusable KP lookup tables`
 
-## [TODO] 探索者の秘密メモ（PL専用の非公開キャラクター情報） — 優先度: 中
+## [DONE] 探索者の秘密メモ（PL専用の非公開キャラクター情報） — 優先度: 中
 **対象:** PL
 **概要:** PLが「キャラクターだけが知っている秘密の過去」「他のPCに隠している事実」などをキャラクター単位で記録できる非公開メモ機能。既存のクイックメモ（quick-notes）とは異なり、秘密の性質・重要度・KP共有フラグを持つ構造化データとして管理する。
 **実装ヒント:** Supabaseに `character_secrets`テーブルを追加（id, character_id, title: text, content: text, severity: "minor"|"major"|"critical", share_with_kp: boolean DEFAULT false, created_at）。`src/app/characters/[id]/secrets/page.tsx` を "use client" で新規作成（一覧表示＋インライン追加フォーム＋削除）。severity をバッジ表示、share_with_kp のトグルは `supabase.from("character_secrets").update({ share_with_kp: v }).eq("id", id)` で更新。キャラ詳細ページ（`src/app/characters/[id]/page.tsx`）に「秘密メモ」リンクを追加。追加DB1テーブル。
