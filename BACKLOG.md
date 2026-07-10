@@ -1481,3 +1481,27 @@
 **概要:** PLがセッション中に「なぜ◯◯なのか」「あのNPCの目的は何か」「◯◯の地下に何があるのか」などキャラクターが抱える謎・疑問を箇条書きで記録し、解決したものにチェックを付けて管理できる機能。既存の`clues/page.tsx`（キャラクターが持つ手がかり）は「わかったこと」の記録だが、こちらは「まだわからないこと・調べたいこと」の疑問管理。タブレット・スマホでセッション中に素早く追記できるシンプルUIを指向する。
 **実装ヒント:** Supabaseに `character_mysteries` テーブルを追加（id, character_id, question: text, context_notes: text | null, is_resolved: boolean DEFAULT false, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/mysteries/page.tsx` を "use client" で新規作成。未解決リストと解決済みリストを上下に分けて表示（解決済みは打ち消し線付きグレーでアコーディオン折りたたみ）。チェックボタンで `supabase.from("character_mysteries").update({ is_resolved: true, resolved_at: new Date().toISOString() })` を実行。テキスト入力フォームからワンタップで追加。既存の `src/app/characters/[id]/clues/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「謎リスト」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: character mystery list for tracking unresolved questions during sessions`
+
+## [TODO] 戦闘イニシアティブトラッカー（セッション中の行動順管理） — 優先度: 高
+**対象:** KP / 共通
+**概要:** セッション中の戦闘ラウンドでPC・NPC全員の行動順（イニシアティブ値）をリアルタイムで管理できるツール。現在のターンを強調表示し「次のキャラクターへ」ボタンで順番を進める。KPがNPCの値を入力し、PLが自分のキャラクターの値を入力してSupabase Realtimeで全員の画面に即時反映される。戦闘開始・終了・ラウンドリセットにも対応する。
+**実装ヒント:** `src/app/scenarios/[id]/initiative/page.tsx` を "use client" で新規作成。Supabaseに `initiative_entries` テーブルを追加（id, scenario_id, label: text, initiative_value: integer, is_npc: boolean DEFAULT false, is_active: boolean DEFAULT false, order_index: integer, created_at）。`supabase.channel('initiative-${scenarioId}').on('postgres_changes', { event: '*', schema: 'public', table: 'initiative_entries', filter: `scenario_id=eq.${id}` }, ...)` でリアルタイム同期。エントリは `initiative_value` 降順でソートし、`is_active: true` のエントリを強調表示（背景色変化 + 矢印アイコン）。「次へ」ボタンで現在アクティブエントリの次を `is_active: true` に更新。ラウンド数カウンターも表示。既存の `src/app/_components/NpcQuickRoller.tsx` と `DiceRoller.tsx` を参考にダイスロール連携追加も可。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: combat initiative tracker with realtime sync for session combat management`
+
+## [TODO] セッション後PL満足度フィードバック（KP向け改善ダッシュボード） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション終了後にPLが「楽しさ・緊張感・KPのファシリテーション・また遊びたいか」を5段階評価で記録し、KPが全シナリオ・キャンペーン単位での満足度推移をダッシュボードで確認できる機能。既存のセッションログ（`sessions`テーブル）や`session_summary`はOOC記録だが、PLの主観的体験・満足度の定量データを収集する仕組みはない。KPが自分のGMスタイルを改善するための定量フィードバックループを提供する。
+**実装ヒント:** Supabaseに `session_feedback` テーブルを追加（id, session_id, character_id, fun_rating: smallint CHECK (1-5), tension_rating: smallint CHECK (1-5), facilitation_rating: smallint CHECK (1-5), would_replay: boolean, free_comment: text | null, is_anonymous: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLビューは星5段階UIで4項目を評価して送信（送信後は編集不可、KPには匿名オプション）。KPビューは各評価項目の平均値をシナリオ一覧で表示し、`src/app/campaigns/[id]/feedback-stats/page.tsx` でキャンペーン全体の満足度推移をSVGバーチャートで可視化。`src/lib/supabase.ts` に `SessionFeedback` 型を追加。追加DB1テーブル。
+**コミット:** `feat: post-session player satisfaction feedback with KP improvement dashboard`
+
+## [TODO] KP用カスタムランダムテーブル（セッション中ダイス引き） — 優先度: 中
+**対象:** KP
+**概要:** KPが独自のランダムイベント表を事前に作成し、セッション中にダイスを振って結果を即時参照できる機能。既存の`RandomEventList`コンポーネントは固定イベントを閲覧するものだが、こちらはd4/d6/d8/d10/d12/d20に対応した「KPが中身を定義するカスタム表」で、シナリオ固有の「遭遇表」「症状表」「目撃者反応表」等を作成できる。
+**実装ヒント:** Supabaseに `custom_tables` テーブルを追加（id, scenario_id, table_name: text, dice_type: "d4"|"d6"|"d8"|"d10"|"d12"|"d20", created_at）と `custom_table_entries` テーブルを追加（id, table_id, roll_value: smallint, result_text: text, created_at）。`src/app/scenarios/[id]/custom-tables/page.tsx` を "use client" で新規作成。表一覧と各表のインライン編集（table_name・dice_type を設定し、各ロール値に対応するテキストを入力）。「ロール！」ボタンで `Math.ceil(Math.random() * dice_sides)` を実行し、対応する `result_text` をハイライト表示（アニメーション付き）。既存の `src/app/_components/RandomEventList.tsx` と `DiceRoller.tsx` を参考に。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ランダム表」リンクを追加。追加DB2テーブル。
+**コミット:** `feat: custom random tables for KP with in-session dice roll and result display`
+
+## [TODO] キャンペーン横断アーティファクトコレクション（重要アイテム記録） — 優先度: 低
+**対象:** KP / 共通
+**概要:** キャンペーンを通して発見・入手した魔術書・アーティファクト・重要アイテム（クトゥルフ神話に関わる品物）をコレクション形式で記録する機能。既存の`TomeForm`は個別シナリオの魔術書登録、`InventoryForm`はキャラクター所持品管理だが、こちらはキャンペーン全体の「何を手に入れたか・それが世界にどう影響したか」を重要度付きで記録する歴史的資料。ネクロノミコン等の有名なアーティファクトのフレーバーテキストをAIで生成するオプションも検討できる。
+**実装ヒント:** Supabaseに `campaign_artifacts` テーブルを追加（id, campaign_id, scenario_id: text | null, name: text, description: text | null, artifact_type: "tome"|"weapon"|"relic"|"key_item"|"other", rarity: "common"|"rare"|"legendary", current_holder_character_id: uuid | null, is_destroyed: boolean DEFAULT false, discovered_at: timestamptz | null, notes: text | null, created_at）。`src/app/campaigns/[id]/artifacts/page.tsx` を "use client" で新規作成。カードグリッドでアーティファクトを表示し、`rarity` ごとに枠線の色を変える（コモン=グレー、レア=青、レジェンダリー=金）。`current_holder_character_id` で現在の所持者を表示しドロップダウンで移譲可能。`is_destroyed: true` になったものは赤の打ち消し線で表示。`src/lib/supabase.ts` に `CampaignArtifact` 型を追加。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「アーティファクト」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: campaign artifact collection for tracking cross-scenario key items and relics`
