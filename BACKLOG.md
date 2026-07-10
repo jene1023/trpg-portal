@@ -1494,7 +1494,7 @@
 **実装ヒント:** Supabaseに `session_feedback` テーブルを追加（id, session_id, character_id, fun_rating: smallint CHECK (1-5), tension_rating: smallint CHECK (1-5), facilitation_rating: smallint CHECK (1-5), would_replay: boolean, free_comment: text | null, is_anonymous: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLビューは星5段階UIで4項目を評価して送信（送信後は編集不可、KPには匿名オプション）。KPビューは各評価項目の平均値をシナリオ一覧で表示し、`src/app/campaigns/[id]/feedback-stats/page.tsx` でキャンペーン全体の満足度推移をSVGバーチャートで可視化。`src/lib/supabase.ts` に `SessionFeedback` 型を追加。追加DB1テーブル。
 **コミット:** `feat: post-session player satisfaction feedback with KP improvement dashboard`
 
-## [TODO] KP用カスタムランダムテーブル（セッション中ダイス引き） — 優先度: 中
+## [DONE] KP用カスタムランダムテーブル（セッション中ダイス引き） — 優先度: 中
 **対象:** KP
 **概要:** KPが独自のランダムイベント表を事前に作成し、セッション中にダイスを振って結果を即時参照できる機能。既存の`RandomEventList`コンポーネントは固定イベントを閲覧するものだが、こちらはd4/d6/d8/d10/d12/d20に対応した「KPが中身を定義するカスタム表」で、シナリオ固有の「遭遇表」「症状表」「目撃者反応表」等を作成できる。
 **実装ヒント:** Supabaseに `custom_tables` テーブルを追加（id, scenario_id, table_name: text, dice_type: "d4"|"d6"|"d8"|"d10"|"d12"|"d20", created_at）と `custom_table_entries` テーブルを追加（id, table_id, roll_value: smallint, result_text: text, created_at）。`src/app/scenarios/[id]/custom-tables/page.tsx` を "use client" で新規作成。表一覧と各表のインライン編集（table_name・dice_type を設定し、各ロール値に対応するテキストを入力）。「ロール！」ボタンで `Math.ceil(Math.random() * dice_sides)` を実行し、対応する `result_text` をハイライト表示（アニメーション付き）。既存の `src/app/_components/RandomEventList.tsx` と `DiceRoller.tsx` を参考に。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「ランダム表」リンクを追加。追加DB2テーブル。

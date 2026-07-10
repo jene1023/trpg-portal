@@ -1065,3 +1065,21 @@ export type SessionFeedback = {
   is_anonymous: boolean;
   created_at: string;
 };
+
+export type CustomTableDiceType = "d4" | "d6" | "d8" | "d10" | "d12" | "d20";
+
+export type CustomTable = {
+  id: string;
+  scenario_id: string;
+  table_name: string;
+  dice_type: CustomTableDiceType;
+  created_at: string;
+};
+
+export type CustomTableEntry = {
+  id: string;
+  table_id: string;
+  roll_value: number;
+  result_text: string;
+  created_at: string;
+};

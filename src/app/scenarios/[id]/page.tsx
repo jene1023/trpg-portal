@@ -1050,6 +1050,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/custom-tables`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Dices size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">ランダム表</p>
+              <p className="text-xs text-coc-muted">KP独自の遭遇表・症状表をd4〜d20で作成・セッション中にロール</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/group-roll`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
