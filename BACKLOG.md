@@ -1529,3 +1529,27 @@
 **概要:** キャラクター・NPC間の「関係」をノード&エッジのビジュアルグラフで表示する機能。既存の `RelationList.tsx` はテキストリストだが、こちらは関係の構造を俯瞰できる視覚的なマップ。セッション前の人間関係整理やKPのNPC相関図作成に活用できる。
 **実装ヒント:** `src/app/scenarios/[id]/relation-map/page.tsx` を "use client" で新規作成。シナリオに紐づくNPC一覧（`npcs`テーブル）とキャンペーン参加者（`campaign_participants`経由の`characters`）をノードとして取得し、既存の `character_relations` テーブルをエッジとして描画。SVGを直接操作してノード（円形 + 名前ラベル）をドラッグ移動可能にする（`onMouseDown/onMouseMove` でノード座標を `useState` 管理）。エッジは関係種別（`relation_type`）ごとに線のスタイルを変える（敵対=赤破線、友好=緑実線、不明=グレー点線）。ノード位置は `localStorage` でシナリオIDをキーに永続化。`src/lib/supabase.ts` の既存 `CharacterRelation` 型を参照。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「関係マップ」リンクを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: visual character relation map with SVG node-edge graph for scenario NPC relationships`
+
+## [TODO] キャンペーンワールドノート（世界設定wiki） — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーン横断の場所・組織・神話的知識・重要用語をページ単位で構造化して記録するwiki機能。既存の `scenario_areas`（シナリオ別ロケーション）や `gm_notes`（単一テキスト）と異なり、複数シナリオにまたがる世界設定を一元管理しKP・PLが参照できる。
+**実装ヒント:** Supabaseに `campaign_wiki_pages` テーブルを追加（id, campaign_id, title, category: "location"|"organization"|"lore"|"npc"|"other", content: text, order_index: integer, created_at）。`src/app/campaigns/[id]/wiki/page.tsx` を "use client" で新規作成（カテゴリタブ切り替え＋ページ一覧＋マークダウン非依存のシンプルテキスト編集）。各ページは `<details>` で折りたたみ表示し `supabase.from("campaign_wiki_pages").upsert(...)` で保存。カテゴリフィルタで `location`（ロケーション）・`lore`（神話的知識）等に絞り込み可能。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「ワールドノート」リンクを追加。`src/lib/supabase.ts` に `CampaignWikiPage` 型を追加。追加DB1テーブル。
+**コミット:** `feat: campaign world notes wiki for cross-scenario lore and location management`
+
+## [TODO] パーティー共有アイテム庫（キャラクター間受け渡し対応） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** シナリオに紐づく「パーティー共有アイテム庫」でアイテムを一括管理し、キャラクターへの割り当てと返却を記録できる機能。現在の個人インベントリ（`inventory_items`）ではパーティー全体で所持する共有アイテム（鍵・地図・共用武器等）を一元管理できない。
+**実装ヒント:** Supabaseに `party_inventory` テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item"|"key_item", description: text | null, current_holder_character_id: uuid | null, created_at）。`src/app/scenarios/[id]/party-inventory/page.tsx` を "use client" で新規作成（アイテム一覧＋追加フォーム）。各アイテムカードに「所持者を変更」ドロップダウン（`scenario_participants` から参加者リスト取得）を設置し `supabase.from("party_inventory").update({ current_holder_character_id })` で更新。所持者未割当のアイテムは「共有庫」セクションに表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有アイテム庫」リンクを追加。`src/lib/supabase.ts` に `PartyInventoryItem` 型を追加。追加DB1テーブル。
+**コミット:** `feat: party shared inventory with per-character item assignment for scenario`
+
+## [TODO] シナリオ難易度アセスメントツール — 優先度: 中
+**対象:** KP
+**概要:** シナリオ参加キャラクターの平均HP/SAN/代表技能値と、登録クリーチャーのSAN喪失式・ダメージを自動集計して「難易度スコア」と「推奨SAN準備量」を算出するKP向け試算ツール。セッション準備段階で難易度調整の判断材料を提供する。追加DBなし（既存 `scenario_participants`, `characters`, `creatures` テーブルを流用）。
+**実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(hp_max, san_max, character_skills(*))").eq("scenario_id", id)` で参加者データ取得。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得。パーティー平均HP/SANと全クリーチャーのSAN喪失数値の合計を比較し「安全/標準/危険/絶望的」の4段階スコアをバッジで表示。主要技能（回避・幸運等）の平均値を棒グラフ（CSSのみ）で可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）と KP準備チェックリスト（`preflight/page.tsx`）に「難易度試算」リンクを追加。追加DBなし。
+**コミット:** `feat: scenario difficulty assessment tool comparing party stats vs creature threats`
+
+## [TODO] キャラクター感情・心情ジャーナル — 優先度: 低
+**対象:** PL
+**概要:** キャラクターの「その時の気持ち・心情・独白」をセッションごとに短文日記として記録できる機能。既存のセッションログ（`sessions`テーブル）は出来事の事実記録だが、こちらはキャラクター視点の一人称ロールプレイ的な感情メモに特化する。キャラクターの内面の変化をセッションをまたいで振り返れる。
+**実装ヒント:** Supabaseに `character_journals` テーブルを追加（id, character_id, session_label: text | null, mood: "normal"|"anxious"|"frightened"|"hopeful"|"despair"|"euphoric", entry: text, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、created_at降順）。各エントリはmoodに応じた背景カラーのカードで表示（anxious=黄、frightened=橙、despair=灰、hopeful=緑等）。`mood` はemojiアイコン付きselectで選択。既存の `src/app/characters/[id]/quick-notes/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心情日記」リンクを追加。`src/lib/supabase.ts` に `CharacterJournal` 型を追加。追加DB1テーブル。
+**コミット:** `feat: character emotion journal for in-character roleplay diary entries`
