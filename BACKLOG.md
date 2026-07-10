@@ -1524,7 +1524,7 @@
 **実装ヒント:** `src/app/players/[id]/dashboard/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, san_current, san_max, sessions(san_loss), growth_records(count), clues(count)").eq("player_id", id)` を中心にデータ集計。累計SAN損失はキャラクター別に `sessions.san_loss` を合算。キャラクター別の統計をカードグリッドで表示し、最上部にキャンペーン参加数・総セッション数・最もプレイ時間が長いキャラクター名の「ハイライト3枚カード」を置く。SVGの横棒グラフでキャラクター別SAN損失比較を可視化。`src/app/campaigns/[id]/stats/page.tsx` の実装を参考に。既存 `src/app/_components/ProfileCard.tsx` を流用。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: player personal stats dashboard with cross-character session and SAN analytics`
 
-## [TODO] キャラクター関係マップビジュアライザー — 優先度: 中
+## [DONE] キャラクター関係マップビジュアライザー — 優先度: 中
 **対象:** PL / KP
 **概要:** キャラクター・NPC間の「関係」をノード&エッジのビジュアルグラフで表示する機能。既存の `RelationList.tsx` はテキストリストだが、こちらは関係の構造を俯瞰できる視覚的なマップ。セッション前の人間関係整理やKPのNPC相関図作成に活用できる。
 **実装ヒント:** `src/app/scenarios/[id]/relation-map/page.tsx` を "use client" で新規作成。シナリオに紐づくNPC一覧（`npcs`テーブル）とキャンペーン参加者（`campaign_participants`経由の`characters`）をノードとして取得し、既存の `character_relations` テーブルをエッジとして描画。SVGを直接操作してノード（円形 + 名前ラベル）をドラッグ移動可能にする（`onMouseDown/onMouseMove` でノード座標を `useState` 管理）。エッジは関係種別（`relation_type`）ごとに線のスタイルを変える（敵対=赤破線、友好=緑実線、不明=グレー点線）。ノード位置は `localStorage` でシナリオIDをキーに永続化。`src/lib/supabase.ts` の既存 `CharacterRelation` 型を参照。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「関係マップ」リンクを追加。追加DBなし（既存テーブルのみ）。
