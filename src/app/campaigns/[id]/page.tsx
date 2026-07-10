@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -42,6 +42,7 @@ export default function CampaignDetailPage({ params }: Props) {
   const [newStatus, setNewStatus] = useState<CampaignStatus>("planning");
   const [savingStatus, setSavingStatus] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [wikiCount, setWikiCount] = useState<number>(0);
 
   useEffect(() => {
     params.then(({ id }) => setCampaignId(id));
@@ -49,14 +50,19 @@ export default function CampaignDetailPage({ params }: Props) {
 
   const load = useCallback(async (id: string) => {
     if (!isSupabaseConfigured) { setLoading(false); return; }
-    const [{ data: c }, { data: links }] = await Promise.all([
+    const [{ data: c }, { data: links }, { count: wc }] = await Promise.all([
       supabase.from("campaigns").select("*").eq("id", id).single(),
       supabase
         .from("campaign_scenarios")
         .select("id, scenario_id, order_index, scenarios(*)")
         .eq("campaign_id", id)
         .order("order_index", { ascending: true }),
+      supabase
+        .from("campaign_wiki_pages")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", id),
     ]);
+    setWikiCount(wc ?? 0);
     if (c) {
       setCampaign(c as Campaign);
       setNewStatus(c.status as CampaignStatus);
@@ -217,6 +223,18 @@ export default function CampaignDetailPage({ params }: Props) {
         >
           <Clock size={15} />
           キャンペーン年表
+        </Link>
+        <Link
+          href={`/campaigns/${campaignId}/wiki`}
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <BookMarked size={15} />
+          設定Wiki
+          {wikiCount > 0 && (
+            <span className="rounded-full bg-coc-raised px-1.5 py-0.5 text-xs leading-none">
+              {wikiCount}
+            </span>
+          )}
         </Link>
       </div>
 

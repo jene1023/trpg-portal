@@ -1007,3 +1007,15 @@ export type SessionZeroAnswer = {
   answer_text: string;
   created_at: string;
 };
+
+export type WikiPageType = "lore" | "faction" | "glossary" | "timeline" | "other";
+
+export type CampaignWikiPage = {
+  id: string;
+  campaign_id: string;
+  title: string;
+  content: string | null;
+  page_type: WikiPageType;
+  order_index: number;
+  created_at: string;
+};

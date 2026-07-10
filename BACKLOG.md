@@ -1444,7 +1444,7 @@
 **実装ヒント:** Supabaseに `session_zero_questions` テーブルを追加（id, scenario_id, question_text, order_index, created_at）と `session_zero_answers` テーブルを追加（id, question_id, character_id, answer_text, created_at）。`src/app/scenarios/[id]/session-zero/page.tsx` を新規作成（"use client"）。KPは質問を追加、PLは自キャラとしてそれぞれ回答。全回答はKPビュー（質問ごとに参加者の回答を横並び）とPLビュー（自分の回答のみ）で表示分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「Session 0」リンクを追加。`src/lib/supabase.ts` に `SessionZeroQuestion`, `SessionZeroAnswer` 型を追加。
 **コミット:** `feat: session zero page for pre-campaign PC relationship and world building`
 
-## [TODO] キャンペーン設定Wiki（世界観・用語・勢力ページ集） — 優先度: 中
+## [DONE] キャンペーン設定Wiki（世界観・用語・勢力ページ集） — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーンに紐づいた「世界観設定」「用語集」「勢力・組織情報」などをWiki形式のページ集として管理できる機能。現在のキャンペーン管理（`campaigns`テーブル）はシナリオのグループ化のみで、キャンペーン固有の世界設定ノートを記録する場所がない。長期キャンペーンでKPが設定の一貫性を保ち、PLも設定を参照できる。
 **リサーチ根拠:** World Anvil（海外TRPG設定管理ツール）が「世界観Wiki」を核心機能として急速に普及しており、TRPGキャンペーンの設定資料をまとめたいニーズが国内外のレビューで繰り返し確認された。国内では`gm_notes`（テキスト1フィールド）に全設定を詰め込む現実があり、構造化された代替手段への需要が高い。
