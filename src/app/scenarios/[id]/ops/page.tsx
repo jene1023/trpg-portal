@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,6 +9,9 @@ import {
   ListChecks,
   StickyNote,
   Dices,
+  MessageCircle,
+  Radio,
+  Send,
 } from "lucide-react";
 import {
   supabase,
@@ -25,16 +28,23 @@ import PartySanCheck from "@/app/_components/PartySanCheck";
 import SessionAgendaChecklist from "@/app/_components/SessionAgendaChecklist";
 import ScenarioNoteList from "@/app/_components/ScenarioNoteList";
 
-type Tab = "status" | "agenda" | "notes" | "roll";
+type Tab = "status" | "agenda" | "notes" | "roll" | "chat";
 
-const TAB_IDS: Tab[] = ["status", "agenda", "notes", "roll"];
+const TAB_IDS: Tab[] = ["status", "agenda", "notes", "roll", "chat"];
 
 const TAB_CONFIG: { id: Tab; label: string }[] = [
   { id: "status", label: "ステータス" },
   { id: "agenda", label: "アジェンダ" },
   { id: "notes", label: "メモ" },
   { id: "roll", label: "ロール" },
+  { id: "chat", label: "チャット" },
 ];
+
+type ChatMessage = {
+  author: string;
+  text: string;
+  timestamp: string;
+};
 
 type ParticipantWithCharacter = ScenarioParticipant & {
   characters: Character & { character_skills: CharacterSkill[] };
@@ -116,6 +126,14 @@ export default function OpsPage() {
   const [rolling, setRolling] = useState(false);
   const [lastSkill, setLastSkill] = useState("");
 
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatAuthor, setChatAuthor] = useState("");
+  const [chatText, setChatText] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatConnected, setChatConnected] = useState(false);
+  const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const syncHash = () => {
       const h = window.location.hash.slice(1) as Tab;
@@ -166,9 +184,69 @@ export default function OpsPage() {
     })();
   }, [id]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const ch = supabase
+      .channel(`chat-${id}`)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on("broadcast", { event: "message" }, ({ payload }: { payload: any }) => {
+        setChatMessages((prev) => [...prev, payload as ChatMessage].slice(-100));
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .subscribe((status: any) => {
+        setChatConnected(status === "SUBSCRIBED");
+      });
+    chatChannelRef.current = ch;
+    return () => {
+      supabase.removeChannel(ch);
+      chatChannelRef.current = null;
+      setChatConnected(false);
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (activeTab === "chat") {
+      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, activeTab]);
+
   function switchTab(tab: Tab) {
     setActiveTab(tab);
     window.history.replaceState(null, "", `#${tab}`);
+  }
+
+  async function handleChatSend() {
+    if (!chatAuthor.trim() || !chatText.trim() || chatSending || !chatChannelRef.current) return;
+    setChatSending(true);
+    await chatChannelRef.current.send({
+      type: "broadcast",
+      event: "message",
+      payload: {
+        author: chatAuthor.trim(),
+        text: chatText.trim(),
+        timestamp: new Date().toISOString(),
+      },
+    });
+    setChatText("");
+    setChatSending(false);
+  }
+
+  function handleChatKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleChatSend();
+    }
+  }
+
+  function formatChatTime(iso: string) {
+    try {
+      return new Date(iso).toLocaleTimeString("ja-JP", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "";
+    }
   }
 
   const chars = participants
@@ -340,6 +418,93 @@ export default function OpsPage() {
                 </h2>
               </div>
               <ScenarioNoteList scenarioId={id} initialNotes={notes} />
+            </div>
+          )}
+
+          {activeTab === "chat" && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={18} className="text-coc-gold" />
+                  <h2 className="font-cinzel text-xs font-semibold text-coc-gold uppercase tracking-widest">
+                    セッションチャット
+                  </h2>
+                </div>
+                <span
+                  className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
+                    chatConnected
+                      ? "border-green-700 bg-green-900/20 text-green-400"
+                      : "border-coc-border text-coc-muted"
+                  }`}
+                >
+                  <Radio size={10} className={chatConnected ? "animate-pulse" : ""} />
+                  {chatConnected ? "接続中" : "接続待機中"}
+                </span>
+              </div>
+              {!isSupabaseConfigured ? (
+                <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4 text-sm text-coc-muted text-center">
+                  Supabase が設定されていないため利用できません。
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-coc-border bg-coc-surface overflow-y-auto max-h-[45vh] px-4 py-4 flex flex-col gap-3">
+                    {chatMessages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-32 text-center">
+                        <MessageCircle size={28} className="text-coc-muted opacity-30 mb-2" />
+                        <p className="text-sm text-coc-muted">メッセージなし</p>
+                      </div>
+                    ) : (
+                      chatMessages.map((msg, i) => (
+                        <div
+                          key={i}
+                          className="rounded-lg border border-coc-border bg-coc-raised px-4 py-3"
+                        >
+                          <div className="flex items-baseline justify-between gap-2 mb-1">
+                            <span className="text-xs font-semibold text-coc-gold">
+                              {msg.author}
+                            </span>
+                            <span className="text-xs text-coc-muted flex-shrink-0">
+                              {formatChatTime(msg.timestamp)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-coc-text whitespace-pre-wrap leading-relaxed">
+                            {msg.text}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                    <div ref={chatBottomRef} />
+                  </div>
+                  <div className="rounded-xl border border-coc-border bg-coc-surface px-4 py-4 flex flex-col gap-3">
+                    <input
+                      type="text"
+                      value={chatAuthor}
+                      onChange={(e) => setChatAuthor(e.target.value)}
+                      placeholder="名前（例: KP / 探索者名）"
+                      maxLength={30}
+                      className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder-coc-muted focus:border-coc-gold focus:outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <textarea
+                        value={chatText}
+                        onChange={(e) => setChatText(e.target.value)}
+                        onKeyDown={handleChatKeyDown}
+                        placeholder="メッセージ… (Enter で送信 / Shift+Enter で改行)"
+                        rows={2}
+                        className="flex-1 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder-coc-muted focus:border-coc-gold focus:outline-none resize-none"
+                      />
+                      <button
+                        onClick={handleChatSend}
+                        disabled={!chatAuthor.trim() || !chatText.trim() || chatSending || !chatConnected}
+                        className="flex items-center justify-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-3 py-2 text-sm font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed self-end"
+                      >
+                        <Send size={15} />
+                        送信
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

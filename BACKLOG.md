@@ -1451,7 +1451,7 @@
 **実装ヒント:** Supabaseに `campaign_wiki_pages` テーブルを追加（id, campaign_id, title, content: text, page_type: "lore"|"faction"|"glossary"|"timeline"|"other", order_index: integer, created_at）。`src/app/campaigns/[id]/wiki/page.tsx` を新規作成（Server Component）でページ一覧をtype別タブで表示。`src/app/campaigns/[id]/wiki/[pageId]/page.tsx` を新規作成（"use client"）で個別ページ閲覧・編集（`<textarea>` + 保存ボタン）。`src/lib/supabase.ts` に `CampaignWikiPage` 型を追加。`src/app/campaigns/[id]/page.tsx` にWikiリンクと総ページ数バッジを追加。
 **コミット:** `feat: campaign setting wiki for world lore, factions, and glossary`
 
-## [TODO] セッション中リアルタイムチャット（シナリオ参加者間テキスト） — 優先度: 中
+## [DONE] セッション中リアルタイムチャット（シナリオ参加者間テキスト） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** シナリオに紐づいたリアルタイムテキストチャット機能。Discordや外部通話ツールを使わないセッションや、セッション中の「OOC（Out of Character）コメント」をIn-charメッセージと分けて記録するのに使う。Supabase Realtimeのbroadcastで実装しDB保存は最小限。
 **リサーチ根拠:** 国内TRPGポータルの多くはDiscordや外部チャットツールへの依存を前提にしているが、完全にポータル内で完結するセッション運営ニーズは特に少人数・初心者グループで高いことが複数のTRPG入門記事で確認された。ここフォリアのチャット機能の人気がそのニーズを示している。
