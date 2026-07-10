@@ -1464,7 +1464,7 @@
 **実装ヒント:** Supabaseに `character_journal_entries` テーブルを追加（id, character_id, session_label: text | null, entry_date: date | null, title: text, content: text, mood: "hopeful"|"fearful"|"determined"|"despairing"|"curious"|"numb" | null, is_private: boolean DEFAULT true, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。エントリ一覧を `entry_date` 降順で表示し、インライン追加フォームで title・content（`<textarea>`）・mood（select）・session_label を入力。mood は絵文字バッジ（🌟希望 / 😨恐怖 / 💪決意 / 😔絶望 / 🔍好奇 / 😶麻痺）でビジュアル表示。`is_private: false` にすると公開キャラページ（`/c/[slug]`）でも表示可能。既存の `src/app/characters/[id]/bonds/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「日誌」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: character in-character journal for session-by-session first-person narrative entries`
 
-## [TODO] シナリオ参加者へのKPブロードキャストメッセージ — 優先度: 中
+## [DONE] シナリオ参加者へのKPブロードキャストメッセージ — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPがシナリオに参加しているPL全員へ「次のセッションは来週日曜20時です」「ハンドアウト3を更新しました」等のテキスト通知を一斉送信できる機能。既存のキャラクター間In-characterメッセージ（`character_messages`）はPC間のIC通信で、BGMブロードキャスト（Supabase Realtime）は揮発性のリアルタイム通知だが、こちらはOOC・永続保存・既読管理付きの公式通知機能。
 **実装ヒント:** Supabaseに `scenario_broadcasts` テーブルを追加（id, scenario_id, sender_character_id: uuid | null, title: text, body: text, created_at）と `scenario_broadcast_reads` テーブル（id, broadcast_id, character_id, read_at, created_at）を追加。`src/app/scenarios/[id]/broadcast/page.tsx` を "use client" で新規作成（KP向け送信フォーム＋送信済み一覧）。参加PLが `MessageInbox.tsx`（`src/app/_components/MessageInbox.tsx`）または `src/app/characters/[id]/messages/page.tsx` でブロードキャストを受信し既読マークを付けられるよう既存MessageInbox UIを拡張。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「通知送信」リンクを追加。追加DB2テーブル。

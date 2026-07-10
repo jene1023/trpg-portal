@@ -1019,3 +1019,24 @@ export type CampaignWikiPage = {
   order_index: number;
   created_at: string;
 };
+
+export type ScenarioBroadcast = {
+  id: string;
+  scenario_id: string;
+  sender_character_id: string | null;
+  title: string;
+  body: string | null;
+  created_at: string;
+};
+
+export type ScenarioBroadcastRead = {
+  id: string;
+  broadcast_id: string;
+  character_id: string;
+  read_at: string;
+  created_at: string;
+};
+
+export type ScenarioBroadcastWithRead = ScenarioBroadcast & {
+  is_read: boolean;
+};
