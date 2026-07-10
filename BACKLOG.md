@@ -1457,3 +1457,27 @@
 **リサーチ根拠:** 国内TRPGポータルの多くはDiscordや外部チャットツールへの依存を前提にしているが、完全にポータル内で完結するセッション運営ニーズは特に少人数・初心者グループで高いことが複数のTRPG入門記事で確認された。ここフォリアのチャット機能の人気がそのニーズを示している。
 **実装ヒント:** `src/app/scenarios/[id]/chat/page.tsx` を "use client" で新規作成。`supabase.channel('chat-${scenarioId}').on('broadcast', { event: 'message' }, payload => setMessages(prev => [payload, ...prev].slice(0, 100)))` でリアルタイム受信。送信時は `.send({ type: 'broadcast', event: 'message', payload: { author, text, timestamp } })` でブロードキャスト（揮発性のため永続化不要。必要なら `chat_messages` テーブルに保存オプションを追加）。メッセージ表示は最新100件をリストで表示し自動スクロール。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チャット」リンクを追加し、KPオペレーション統合ビュー（`src/app/scenarios/[id]/ops/page.tsx`）のタブにも追加。追加DBなし（broadcast のみ）。
 **コミット:** `feat: realtime in-session chat for scenario participants via Supabase Realtime`
+
+## [TODO] 探索者In-characterジャーナル（セッション別キャラ視点日誌） — 優先度: 中
+**対象:** PL
+**概要:** PLがセッション終了後にキャラクター視点（1人称）で「今日感じたこと・気づいたこと・仲間への想い」を日誌として書き残せる機能。既存のセッションログ（`sessions`テーブル）はGM/PL共有のOOC記録だが、こちらはキャラクター本人が書く物語的・主観的な内面記録。長期キャンペーンでキャラクターの成長弧を振り返る一次資料となる。
+**実装ヒント:** Supabaseに `character_journal_entries` テーブルを追加（id, character_id, session_label: text | null, entry_date: date | null, title: text, content: text, mood: "hopeful"|"fearful"|"determined"|"despairing"|"curious"|"numb" | null, is_private: boolean DEFAULT true, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。エントリ一覧を `entry_date` 降順で表示し、インライン追加フォームで title・content（`<textarea>`）・mood（select）・session_label を入力。mood は絵文字バッジ（🌟希望 / 😨恐怖 / 💪決意 / 😔絶望 / 🔍好奇 / 😶麻痺）でビジュアル表示。`is_private: false` にすると公開キャラページ（`/c/[slug]`）でも表示可能。既存の `src/app/characters/[id]/bonds/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「日誌」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: character in-character journal for session-by-session first-person narrative entries`
+
+## [TODO] シナリオ参加者へのKPブロードキャストメッセージ — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPがシナリオに参加しているPL全員へ「次のセッションは来週日曜20時です」「ハンドアウト3を更新しました」等のテキスト通知を一斉送信できる機能。既存のキャラクター間In-characterメッセージ（`character_messages`）はPC間のIC通信で、BGMブロードキャスト（Supabase Realtime）は揮発性のリアルタイム通知だが、こちらはOOC・永続保存・既読管理付きの公式通知機能。
+**実装ヒント:** Supabaseに `scenario_broadcasts` テーブルを追加（id, scenario_id, sender_character_id: uuid | null, title: text, body: text, created_at）と `scenario_broadcast_reads` テーブル（id, broadcast_id, character_id, read_at, created_at）を追加。`src/app/scenarios/[id]/broadcast/page.tsx` を "use client" で新規作成（KP向け送信フォーム＋送信済み一覧）。参加PLが `MessageInbox.tsx`（`src/app/_components/MessageInbox.tsx`）または `src/app/characters/[id]/messages/page.tsx` でブロードキャストを受信し既読マークを付けられるよう既存MessageInbox UIを拡張。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「通知送信」リンクを追加。追加DB2テーブル。
+**コミット:** `feat: KP broadcast message system for scenario-wide participant notifications`
+
+## [TODO] キャンペーン全体SAN推移グラフ（探索者健全度モニタリング） — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーンに参加している全探索者のSAN現在値をセッションごとに折れ線グラフで可視化するダッシュボード。「誰がいつSANを大きく失ったか」「パーティ全体の精神的消耗ペース」を一目で把握し、KPがシナリオ難易度やSAN回復機会を調整する際の判断材料となる。既存の `campaigns/[id]/stats/page.tsx` は参加者・シナリオ数などの集計だが、SAN値の時系列推移に特化したグラフはない。
+**実装ヒント:** `src/app/campaigns/[id]/san-graph/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("san_loss, played_at, scenario_id, scenarios(campaign_id)").eq("scenarios.campaign_id", id)` と `supabase.from("campaign_participants").select("character_id, characters(name, san_current, san_max)")` を `Promise.all` で並行取得。セッション日付順にSAN損失を累積し「初期SAN − セッションごとの累積SAN損失」で各時点のSAN推定値を算出。CSSのみの折れ線グラフ（SVG pathを手書き）かシンプルな棒グラフでキャラクター別に色分け表示。「SAN 0近づき警告」として現在SANが初期値の30%以下のキャラクターをハイライト。追加DBなし（既存テーブルのみ使用）。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「SAN推移グラフ」リンクを追加。
+**コミット:** `feat: campaign-wide SAN transition graph for party mental health monitoring`
+
+## [TODO] 探索者の未解決疑問リスト（セッション中の謎メモ） — 優先度: 低
+**対象:** PL
+**概要:** PLがセッション中に「なぜ◯◯なのか」「あのNPCの目的は何か」「◯◯の地下に何があるのか」などキャラクターが抱える謎・疑問を箇条書きで記録し、解決したものにチェックを付けて管理できる機能。既存の`clues/page.tsx`（キャラクターが持つ手がかり）は「わかったこと」の記録だが、こちらは「まだわからないこと・調べたいこと」の疑問管理。タブレット・スマホでセッション中に素早く追記できるシンプルUIを指向する。
+**実装ヒント:** Supabaseに `character_mysteries` テーブルを追加（id, character_id, question: text, context_notes: text | null, is_resolved: boolean DEFAULT false, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/mysteries/page.tsx` を "use client" で新規作成。未解決リストと解決済みリストを上下に分けて表示（解決済みは打ち消し線付きグレーでアコーディオン折りたたみ）。チェックボタンで `supabase.from("character_mysteries").update({ is_resolved: true, resolved_at: new Date().toISOString() })` を実行。テキスト入力フォームからワンタップで追加。既存の `src/app/characters/[id]/clues/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「謎リスト」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: character mystery list for tracking unresolved questions during sessions`
