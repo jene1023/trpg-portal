@@ -1505,3 +1505,27 @@
 **概要:** キャンペーンを通して発見・入手した魔術書・アーティファクト・重要アイテム（クトゥルフ神話に関わる品物）をコレクション形式で記録する機能。既存の`TomeForm`は個別シナリオの魔術書登録、`InventoryForm`はキャラクター所持品管理だが、こちらはキャンペーン全体の「何を手に入れたか・それが世界にどう影響したか」を重要度付きで記録する歴史的資料。ネクロノミコン等の有名なアーティファクトのフレーバーテキストをAIで生成するオプションも検討できる。
 **実装ヒント:** Supabaseに `campaign_artifacts` テーブルを追加（id, campaign_id, scenario_id: text | null, name: text, description: text | null, artifact_type: "tome"|"weapon"|"relic"|"key_item"|"other", rarity: "common"|"rare"|"legendary", current_holder_character_id: uuid | null, is_destroyed: boolean DEFAULT false, discovered_at: timestamptz | null, notes: text | null, created_at）。`src/app/campaigns/[id]/artifacts/page.tsx` を "use client" で新規作成。カードグリッドでアーティファクトを表示し、`rarity` ごとに枠線の色を変える（コモン=グレー、レア=青、レジェンダリー=金）。`current_holder_character_id` で現在の所持者を表示しドロップダウンで移譲可能。`is_destroyed: true` になったものは赤の打ち消し線で表示。`src/lib/supabase.ts` に `CampaignArtifact` 型を追加。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「アーティファクト」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: campaign artifact collection for tracking cross-scenario key items and relics`
+
+## [TODO] シナリオ横断全文キーワード検索 — 優先度: 高
+**対象:** 共通
+**概要:** 複数シナリオのノート・NPC説明・ハンドアウト本文・手がかり（クルー）を横断してキーワード検索できる機能。長期キャンペーンで「あの情報どのシナリオに書いたっけ」を即時解決し、情報の再利用性を大幅に高める。
+**実装ヒント:** `src/app/search/page.tsx` を Server Component で新規作成。Supabase の `plainto_tsquery` を使い `scenario_notes`・`npcs`・`handouts`・`character_clues` テーブルに対して `ilike` 全文検索を `Promise.all` で並行実行し結果をテーブル種別ごとにセクション分けして表示。各結果カードにはタイトル・スニペット・シナリオ名・内部リンクを表示。`src/app/_components/` にグローバルヘッダー用 `SearchBar.tsx` を追加して共通ヘッダーからアクセス可能にする。追加DBなし（既存テーブルのみ・FTSインデックスはMigrationのみ）。
+**コミット:** `feat: cross-scenario full-text keyword search across notes, NPCs, handouts, and clues`
+
+## [TODO] セッション中カウントダウンタイマー（シーン制限時間） — 優先度: 高
+**対象:** KP / 共通
+**概要:** KPがシーン名と制限秒数を設定してカウントダウンを開始し、Supabase Realtime で参加者全員の画面に同期されるリアルタイムタイマー。脱出・解読・説得など時間制限演出でセッションの緊張感を高め、時間切れ時はアラートアニメーションを全員に表示する。
+**実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。KPビューは「シーン名」テキスト入力と「秒数」数値入力＋「開始」ボタン。開始時に `supabase.channel('timer-${scenarioId}').send({ type: 'broadcast', event: 'timer_start', payload: { sceneLabel, durationSec, startedAt: Date.now() } })` でブロードキャスト。PLビューと同じページで受信し `useEffect` の `setInterval` でカウントダウン表示（`mm:ss` フォーマット）。残り10秒以下で数字を赤に変え、0秒で「⏰ タイムアップ！」をモーダル表示。既存 `src/app/_components/GameClockEditor.tsx` と `DiceRoller.tsx` を参考に。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし（broadcast のみ）。
+**コミット:** `feat: realtime countdown timer for scene time limits with broadcast to all participants`
+
+## [TODO] PLプレイヤー横断個人統計ダッシュボード — 優先度: 中
+**対象:** PL
+**概要:** 特定プレイヤーが持つ全キャラクターを横断して「累計セッション参加数・累計SAN損失・技能成長総数・取得クルー数・作成キャラ数」をグラフと数値で一覧化するダッシュボード。個人の活動履歴を振り返り、TRPG経験の積み重ねを実感できる。
+**実装ヒント:** `src/app/players/[id]/dashboard/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, san_current, san_max, sessions(san_loss), growth_records(count), clues(count)").eq("player_id", id)` を中心にデータ集計。累計SAN損失はキャラクター別に `sessions.san_loss` を合算。キャラクター別の統計をカードグリッドで表示し、最上部にキャンペーン参加数・総セッション数・最もプレイ時間が長いキャラクター名の「ハイライト3枚カード」を置く。SVGの横棒グラフでキャラクター別SAN損失比較を可視化。`src/app/campaigns/[id]/stats/page.tsx` の実装を参考に。既存 `src/app/_components/ProfileCard.tsx` を流用。追加DBなし（既存テーブルのみ）。
+**コミット:** `feat: player personal stats dashboard with cross-character session and SAN analytics`
+
+## [TODO] キャラクター関係マップビジュアライザー — 優先度: 中
+**対象:** PL / KP
+**概要:** キャラクター・NPC間の「関係」をノード&エッジのビジュアルグラフで表示する機能。既存の `RelationList.tsx` はテキストリストだが、こちらは関係の構造を俯瞰できる視覚的なマップ。セッション前の人間関係整理やKPのNPC相関図作成に活用できる。
+**実装ヒント:** `src/app/scenarios/[id]/relation-map/page.tsx` を "use client" で新規作成。シナリオに紐づくNPC一覧（`npcs`テーブル）とキャンペーン参加者（`campaign_participants`経由の`characters`）をノードとして取得し、既存の `character_relations` テーブルをエッジとして描画。SVGを直接操作してノード（円形 + 名前ラベル）をドラッグ移動可能にする（`onMouseDown/onMouseMove` でノード座標を `useState` 管理）。エッジは関係種別（`relation_type`）ごとに線のスタイルを変える（敵対=赤破線、友好=緑実線、不明=グレー点線）。ノード位置は `localStorage` でシナリオIDをキーに永続化。`src/lib/supabase.ts` の既存 `CharacterRelation` 型を参照。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「関係マップ」リンクを追加。追加DBなし（既存テーブルのみ）。
+**コミット:** `feat: visual character relation map with SVG node-edge graph for scenario NPC relationships`
