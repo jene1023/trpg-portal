@@ -1512,7 +1512,7 @@
 **実装ヒント:** `src/app/search/page.tsx` を Server Component で新規作成。Supabase の `plainto_tsquery` を使い `scenario_notes`・`npcs`・`handouts`・`character_clues` テーブルに対して `ilike` 全文検索を `Promise.all` で並行実行し結果をテーブル種別ごとにセクション分けして表示。各結果カードにはタイトル・スニペット・シナリオ名・内部リンクを表示。`src/app/_components/` にグローバルヘッダー用 `SearchBar.tsx` を追加して共通ヘッダーからアクセス可能にする。追加DBなし（既存テーブルのみ・FTSインデックスはMigrationのみ）。
 **コミット:** `feat: cross-scenario full-text keyword search across notes, NPCs, handouts, and clues`
 
-## [TODO] セッション中カウントダウンタイマー（シーン制限時間） — 優先度: 高
+## [DONE] セッション中カウントダウンタイマー（シーン制限時間） — 優先度: 高
 **対象:** KP / 共通
 **概要:** KPがシーン名と制限秒数を設定してカウントダウンを開始し、Supabase Realtime で参加者全員の画面に同期されるリアルタイムタイマー。脱出・解読・説得など時間制限演出でセッションの緊張感を高め、時間切れ時はアラートアニメーションを全員に表示する。
 **実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。KPビューは「シーン名」テキスト入力と「秒数」数値入力＋「開始」ボタン。開始時に `supabase.channel('timer-${scenarioId}').send({ type: 'broadcast', event: 'timer_start', payload: { sceneLabel, durationSec, startedAt: Date.now() } })` でブロードキャスト。PLビューと同じページで受信し `useEffect` の `setInterval` でカウントダウン表示（`mm:ss` フォーマット）。残り10秒以下で数字を赤に変え、0秒で「⏰ タイムアップ！」をモーダル表示。既存 `src/app/_components/GameClockEditor.tsx` と `DiceRoller.tsx` を参考に。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし（broadcast のみ）。
