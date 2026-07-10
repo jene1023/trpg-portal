@@ -25,7 +25,7 @@ export default function DerivedStatBar({ label, current, max, color, compact = f
   const isLow = pct > 0 && pct <= 20;
 
   return (
-    <div className={compact ? "space-y-0.5" : "space-y-1"}>
+    <div className={`coc-stat-row ${compact ? "space-y-0.5" : "space-y-1"}`}>
       <div className="flex justify-between items-center">
         <span className={`text-coc-muted ${compact ? "text-xs" : "text-xs"}`}>{label}</span>
         <span className={`tabular-nums ${compact ? "text-xs" : "text-xs"} text-coc-text`}>
@@ -35,7 +35,7 @@ export default function DerivedStatBar({ label, current, max, color, compact = f
       <div className="w-full rounded-full overflow-hidden bg-coc-void h-1.5">
         <div className="coc-bar-enter h-full w-full">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${isLow ? "coc-stat-low-pulse" : ""}`}
+            className={`h-full rounded-full transition-all duration-300 coc-bar-shimmer ${isLow ? "coc-stat-low-pulse" : ""}`}
             style={{
               width: `${pct}%`,
               background: `linear-gradient(90deg, rgba(${glowRgb[color]}, 0.55), ${colorMap[color]})`,

@@ -812,6 +812,39 @@ body {
   }
 }
 
+/* ステータスバーホバーシマー: 燭台の炎が一閃し、残量値が輝く */
+@keyframes coc-stat-shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.coc-bar-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.coc-bar-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.16) 35%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.16) 65%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-stat-row:hover .coc-bar-shimmer::after {
+    animation: coc-stat-shimmer 0.65s ease-out forwards;
+  }
+}
+
 /* ヒーローパネル環境光呼吸: ランタンの温かい光が古扉の隙間から静かに滲み出るように */
 /* 内側のアニメーション群（タイトル11s・サブタイトル8s・引用7s）と周期をずらして位相ドリフトを生む */
 @keyframes coc-hero-breathe {
