@@ -15,6 +15,7 @@ import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import GameClockEditor from "@/app/_components/GameClockEditor";
+import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGenerator";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -1109,6 +1110,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <p className="text-sm text-coc-text whitespace-pre-wrap">{scenario.gm_notes}</p>
         </div>
       )}
+
+      <div className="rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4">
+        <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">次回予告 AI生成</p>
+        <NextEpisodePreviewGenerator
+          scenarioId={id}
+          discordWebhookUrl={scenario.discord_webhook_url ?? null}
+        />
+      </div>
 
       <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>

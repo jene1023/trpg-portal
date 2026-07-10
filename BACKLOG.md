@@ -1400,7 +1400,7 @@
 **実装ヒント:** Supabaseに `character_absences`テーブルを追加（id, scenario_id, character_id, session_number: integer | null, reason: text | null, action_taken: text | null, return_condition: text | null, created_at）。`src/app/scenarios/[id]/absences/page.tsx` を "use client" で新規作成。`supabase.from("campaign_participants").select("character_id, characters(name)")` で参加者を取得し、各キャラの欠席エントリを accordion 形式で表示。既存の `AttendanceToggle.tsx`（`src/app/_components/AttendanceToggle.tsx`）と `ParticipantList.tsx` を参考に実装。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「欠席者記録」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: absent character action log for in-fiction absence management`
 
-## [TODO] 次回予告AIテキスト生成（セッション終了後の「次回予告」） — 優先度: 高
+## [DONE] 次回予告AIテキスト生成（セッション終了後の「次回予告」） — 優先度: 高
 **対象:** KP / 共通
 **概要:** セッション終了後にKPが「今回解決しなかったプロットスレッド・未回収のクリフハンガー・NPCの脅威」を入力すると、Claude APIが「次回予告」風の短いドラマティックなテキスト（100〜150字）を自動生成し、Discord共有やセッション開始前の読み上げに使える機能。既存の`SessionSummaryGenerator`（今回のセッション振り返り）とは異なり、「次回への期待と緊張感」を演出する前向きな煽りテキストに特化する。
 **実装ヒント:** `src/app/_components/NextEpisodePreviewGenerator.tsx` を "use client" で新規作成。unresolved_threads（未解決の伏線）・cliffhanger（崖っぷち描写）・npc_threat（NPCの動き）を自由テキストで入力 → `/api/ai/next-episode-preview/route.ts`（POST）に送信 → `claude-haiku-4-5-20251001` で「TRPGリプレイ次回予告風の日本語テキストを生成」プロンプトを実行 → 生成テキストをコピーボタン付きで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「セッション後」セクションに配置。`ScenarioDiscordWebhookEditor.tsx` を参考に Discord Webhook への直接送信オプションも追加可能。追加DBなし。
