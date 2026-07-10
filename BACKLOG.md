@@ -1530,7 +1530,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/relation-map/page.tsx` を "use client" で新規作成。シナリオに紐づくNPC一覧（`npcs`テーブル）とキャンペーン参加者（`campaign_participants`経由の`characters`）をノードとして取得し、既存の `character_relations` テーブルをエッジとして描画。SVGを直接操作してノード（円形 + 名前ラベル）をドラッグ移動可能にする（`onMouseDown/onMouseMove` でノード座標を `useState` 管理）。エッジは関係種別（`relation_type`）ごとに線のスタイルを変える（敵対=赤破線、友好=緑実線、不明=グレー点線）。ノード位置は `localStorage` でシナリオIDをキーに永続化。`src/lib/supabase.ts` の既存 `CharacterRelation` 型を参照。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「関係マップ」リンクを追加。追加DBなし（既存テーブルのみ）。
 **コミット:** `feat: visual character relation map with SVG node-edge graph for scenario NPC relationships`
 
-## [TODO] キャンペーンワールドノート（世界設定wiki） — 優先度: 中
+## [DONE] キャンペーンワールドノート（世界設定wiki） — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーン横断の場所・組織・神話的知識・重要用語をページ単位で構造化して記録するwiki機能。既存の `scenario_areas`（シナリオ別ロケーション）や `gm_notes`（単一テキスト）と異なり、複数シナリオにまたがる世界設定を一元管理しKP・PLが参照できる。
 **実装ヒント:** Supabaseに `campaign_wiki_pages` テーブルを追加（id, campaign_id, title, category: "location"|"organization"|"lore"|"npc"|"other", content: text, order_index: integer, created_at）。`src/app/campaigns/[id]/wiki/page.tsx` を "use client" で新規作成（カテゴリタブ切り替え＋ページ一覧＋マークダウン非依存のシンプルテキスト編集）。各ページは `<details>` で折りたたみ表示し `supabase.from("campaign_wiki_pages").upsert(...)` で保存。カテゴリフィルタで `location`（ロケーション）・`lore`（神話的知識）等に絞り込み可能。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「ワールドノート」リンクを追加。`src/lib/supabase.ts` に `CampaignWikiPage` 型を追加。追加DB1テーブル。
