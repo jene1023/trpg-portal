@@ -961,3 +961,14 @@ export type PrepTaskTemplate = {
   sort_order: number;
   created_at: string;
 };
+
+export type CharacterKeepsake = {
+  id: string;
+  character_id: string;
+  name: string;
+  obtained_from: string | null;
+  session_label: string | null;
+  story_notes: string | null;
+  is_lost: boolean;
+  created_at: string;
+};

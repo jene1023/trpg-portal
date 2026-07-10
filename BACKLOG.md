@@ -1412,7 +1412,7 @@
 **実装ヒント:** Supabaseに `scenario_prep_tasks` テーブルを追加（id, scenario_id, task_name: text, is_done: boolean DEFAULT false, sort_order: integer DEFAULT 0, created_at）。`src/app/scenarios/[id]/prep/page.tsx` を "use client" で新規作成。インライン追加フォームで task_name を入力し `supabase.from("scenario_prep_tasks").insert(...)` で保存。各タスクにチェックボックス（`supabase.from("scenario_prep_tasks").update({ is_done })`）とドラッグ不要のソートボタン（上/下矢印で sort_order 入れ替え）を配置。「テンプレートとして保存」ボタンでシナリオIDなしのレコードを `prep_task_templates` テーブル（id, task_name, sort_order, created_at）に保存し、次のシナリオ準備時に一括コピー可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「準備チェックリスト」リンクを追加。追加DB2テーブル。
 **コミット:** `feat: KP scenario prep task checklist with template reuse`
 
-## [TODO] 探索者の記念品コレクション（物語的意味を持つアイテム記録） — 優先度: 中
+## [DONE] 探索者の記念品コレクション（物語的意味を持つアイテム記録） — 優先度: 中
 **対象:** PL
 **概要:** 死亡したNPCの形見・呪われた遺物・特別な経緯で手に入れたアイテム等、ゲーム的なステータスより物語的意義が大きいアイテムをキャラクターごとに記録・展示できるコレクション機能。既存の`inventory_items`（武器/アイテムの戦闘・使用回数管理）とは異なり、セッション名と入手経緯・感情的重みをメインとする「思い出の品」専用ストレージ。探索者の人生の軌跡を物語として可視化する。
 **実装ヒント:** Supabaseに `character_keepsakes` テーブルを追加（id, character_id, name: text, obtained_from: text | null, session_label: text | null, story_notes: text | null, is_lost: boolean DEFAULT false, created_at）。`src/app/characters/[id]/keepsakes/page.tsx` を "use client" で新規作成。各記念品カードに name・obtained_from（入手元NPC/シナリオ）・session_label・story_notes（入手時の経緯や感情）・is_lost（失った場合のフラグ、打ち消し線でグレーアウト）を表示。`is_lost` トグルで喪失状態を記録し、喪失した品も履歴として残す。インライン追加フォーム。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「記念品」リンクを追加。`src/app/characters/[id]/bonds/page.tsx` の実装を参考に。追加DB1テーブル。
