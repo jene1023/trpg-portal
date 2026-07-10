@@ -1506,7 +1506,7 @@
 **実装ヒント:** Supabaseに `campaign_artifacts` テーブルを追加（id, campaign_id, scenario_id: text | null, name: text, description: text | null, artifact_type: "tome"|"weapon"|"relic"|"key_item"|"other", rarity: "common"|"rare"|"legendary", current_holder_character_id: uuid | null, is_destroyed: boolean DEFAULT false, discovered_at: timestamptz | null, notes: text | null, created_at）。`src/app/campaigns/[id]/artifacts/page.tsx` を "use client" で新規作成。カードグリッドでアーティファクトを表示し、`rarity` ごとに枠線の色を変える（コモン=グレー、レア=青、レジェンダリー=金）。`current_holder_character_id` で現在の所持者を表示しドロップダウンで移譲可能。`is_destroyed: true` になったものは赤の打ち消し線で表示。`src/lib/supabase.ts` に `CampaignArtifact` 型を追加。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「アーティファクト」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: campaign artifact collection for tracking cross-scenario key items and relics`
 
-## [TODO] シナリオ横断全文キーワード検索 — 優先度: 高
+## [DONE] シナリオ横断全文キーワード検索 — 優先度: 高
 **対象:** 共通
 **概要:** 複数シナリオのノート・NPC説明・ハンドアウト本文・手がかり（クルー）を横断してキーワード検索できる機能。長期キャンペーンで「あの情報どのシナリオに書いたっけ」を即時解決し、情報の再利用性を大幅に高める。
 **実装ヒント:** `src/app/search/page.tsx` を Server Component で新規作成。Supabase の `plainto_tsquery` を使い `scenario_notes`・`npcs`・`handouts`・`character_clues` テーブルに対して `ilike` 全文検索を `Promise.all` で並行実行し結果をテーブル種別ごとにセクション分けして表示。各結果カードにはタイトル・スニペット・シナリオ名・内部リンクを表示。`src/app/_components/` にグローバルヘッダー用 `SearchBar.tsx` を追加して共通ヘッダーからアクセス可能にする。追加DBなし（既存テーブルのみ・FTSインデックスはMigrationのみ）。

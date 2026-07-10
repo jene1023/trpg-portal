@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Menu, Search, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
+import SearchBar from "./SearchBar";
 
 const navLinks = [
   { href: "/dashboard", label: "ダッシュボード" },
@@ -30,7 +31,6 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
 
   async function handleLogout() {
@@ -39,16 +39,6 @@ export default function NavBar() {
     await client.auth.signOut();
     router.push("/login");
     router.refresh();
-  }
-
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = searchQuery.trim();
-    if (trimmed) {
-      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-      setSearchQuery("");
-      setOpen(false);
-    }
   }
 
   return (
@@ -84,16 +74,7 @@ export default function NavBar() {
             );
           })}
           <li>
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
-              <input
-                type="text"
-                placeholder="検索..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-32 rounded-lg border border-coc-border bg-coc-surface pl-7 pr-2 py-1.5 text-xs text-coc-text placeholder-coc-muted focus:outline-none focus:border-coc-gold focus:w-44 transition-all"
-              />
-            </form>
+            <SearchBar inputClassName="w-32 focus:w-44" />
           </li>
           <li>
             {user ? (
@@ -137,16 +118,14 @@ export default function NavBar() {
       {/* モバイルドロワー */}
       {open && (
         <div className="coc-mobile-drawer md:hidden border-t border-coc-border bg-coc-void">
-          <form onSubmit={handleSearchSubmit} className="relative px-4 pt-3">
-            <Search size={14} className="absolute left-7 top-1/2 -translate-y-1/2 text-coc-muted pointer-events-none" />
-            <input
-              type="text"
-              placeholder="検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-coc-border bg-coc-surface pl-8 pr-3 py-2 text-sm text-coc-text placeholder-coc-muted focus:outline-none focus:border-coc-gold transition-colors"
+          <div className="px-4 pt-3">
+            <SearchBar
+              className="w-full"
+              inputClassName="w-full pl-8 pr-3 py-2 text-sm"
+              iconSize={14}
+              onSubmit={() => setOpen(false)}
             />
-          </form>
+          </div>
           <ul className="flex flex-col px-4 py-3 gap-3">
             {navLinks.map((link) => {
               const isActive = pathname.startsWith(link.href);

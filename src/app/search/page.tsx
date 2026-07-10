@@ -4,12 +4,14 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, QuickNote, ScenarioNote, Tag } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, Character, Npc, Scenario, SessionLog, QuickNote, ScenarioNote, Tag, Handout, ScenarioClue } from "@/lib/supabase";
 
 type SessionResult = SessionLog & { characters: { name: string } | null };
 type QuickNoteResult = QuickNote & { characters: { name: string } | null };
 type ScenarioNoteResult = ScenarioNote & { scenarios: { title: string } | null };
 type GmNotesScenarioResult = Pick<Scenario, "id" | "title" | "status"> & { gm_notes: string | null };
+type HandoutResult = Handout & { scenarios: { title: string } | null };
+type ClueResult = ScenarioClue & { scenarios: { title: string } | null; characters: { name: string } | null };
 
 function extractExcerpt(text: string, keyword: string, contextChars = 50): string {
   const lower = text.toLowerCase();
@@ -54,6 +56,8 @@ function SearchPageInner() {
   const [quickNotes, setQuickNotes] = useState<QuickNoteResult[]>([]);
   const [scenarioNotes, setScenarioNotes] = useState<ScenarioNoteResult[]>([]);
   const [gmNoteScenarios, setGmNoteScenarios] = useState<GmNotesScenarioResult[]>([]);
+  const [handouts, setHandouts] = useState<HandoutResult[]>([]);
+  const [clues, setClues] = useState<ClueResult[]>([]);
 
   useEffect(() => {
     setInputValue(initialQuery);
@@ -65,6 +69,8 @@ function SearchPageInner() {
       setQuickNotes([]);
       setScenarioNotes([]);
       setGmNoteScenarios([]);
+      setHandouts([]);
+      setClues([]);
       setSearched(false);
       return;
     }
@@ -83,6 +89,8 @@ function SearchPageInner() {
         { data: scenarioNotesData },
         { data: matchingTagsData },
         { data: gmNotesScenariosData },
+        { data: handoutsData },
+        { data: cluesData },
       ] = await Promise.all([
         supabase.from("characters").select("*").ilike("name", `%${q}%`),
         supabase.from("npcs").select("*").or(`name.ilike.%${q}%,notes.ilike.%${q}%`),
@@ -92,6 +100,8 @@ function SearchPageInner() {
         supabase.from("scenario_notes").select("*, scenarios(title)").ilike("content", `%${q}%`),
         supabase.from("tags").select("id, name").ilike("name", `%${q}%`),
         supabase.from("scenarios").select("id, title, gm_notes, status").ilike("gm_notes", `%${q}%`),
+        supabase.from("handouts").select("*, scenarios(title)").or(`title.ilike.%${q}%,content.ilike.%${q}%`),
+        supabase.from("scenario_clues").select("*, scenarios(title), characters(name)").or(`title.ilike.%${q}%,content.ilike.%${q}%`),
       ]);
 
       let mergedChars = (charactersData as Character[]) ?? [];
@@ -167,6 +177,8 @@ function SearchPageInner() {
       setQuickNotes((quickNotesData as QuickNoteResult[]) ?? []);
       setScenarioNotes((scenarioNotesData as ScenarioNoteResult[]) ?? []);
       setGmNoteScenarios(gmNotesOnly);
+      setHandouts((handoutsData as HandoutResult[]) ?? []);
+      setClues((cluesData as ClueResult[]) ?? []);
       setLoading(false);
       setSearched(true);
     }
@@ -182,7 +194,7 @@ function SearchPageInner() {
   }
 
   const totalResults =
-    characters.length + npcs.length + scenarios.length + sessions.length + quickNotes.length + scenarioNotes.length + gmNoteScenarios.length;
+    characters.length + npcs.length + scenarios.length + sessions.length + quickNotes.length + scenarioNotes.length + gmNoteScenarios.length + handouts.length + clues.length;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -290,6 +302,60 @@ function SearchPageInner() {
                     className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
                   >
                     <p className="text-sm font-medium text-coc-text">{s.title}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {handouts.length > 0 && (
+            <section>
+              <h2 className="font-cinzel text-sm font-semibold text-coc-gold mb-3">
+                ハンドアウト ({handouts.length})
+              </h2>
+              <div className="flex flex-col gap-2">
+                {handouts.map((h) => (
+                  <Link
+                    key={h.id}
+                    href={`/scenarios/${h.scenario_id}/handouts`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-sm font-medium text-coc-text">{h.title}</p>
+                    {h.scenarios?.title && (
+                      <p className="text-xs text-coc-muted mt-0.5">{h.scenarios.title}</p>
+                    )}
+                    {h.content && (
+                      <p className="mt-1">
+                        <HighlightedExcerpt text={h.content} keyword={initialQuery} />
+                      </p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {clues.length > 0 && (
+            <section>
+              <h2 className="font-cinzel text-sm font-semibold text-coc-gold mb-3">
+                手がかり ({clues.length})
+              </h2>
+              <div className="flex flex-col gap-2">
+                {clues.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={c.scenario_id ? `/scenarios/${c.scenario_id}/clues` : `/characters/${c.character_id}/clues`}
+                    className="rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-gold-dim transition-colors"
+                  >
+                    <p className="text-sm font-medium text-coc-text">{c.title}</p>
+                    <p className="text-xs text-coc-muted mt-0.5">
+                      {c.scenarios?.title ?? c.characters?.name ?? ""}
+                    </p>
+                    {c.content && (
+                      <p className="mt-1">
+                        <HighlightedExcerpt text={c.content} keyword={initialQuery} />
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>
