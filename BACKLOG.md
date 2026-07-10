@@ -1458,7 +1458,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/chat/page.tsx` を "use client" で新規作成。`supabase.channel('chat-${scenarioId}').on('broadcast', { event: 'message' }, payload => setMessages(prev => [payload, ...prev].slice(0, 100)))` でリアルタイム受信。送信時は `.send({ type: 'broadcast', event: 'message', payload: { author, text, timestamp } })` でブロードキャスト（揮発性のため永続化不要。必要なら `chat_messages` テーブルに保存オプションを追加）。メッセージ表示は最新100件をリストで表示し自動スクロール。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チャット」リンクを追加し、KPオペレーション統合ビュー（`src/app/scenarios/[id]/ops/page.tsx`）のタブにも追加。追加DBなし（broadcast のみ）。
 **コミット:** `feat: realtime in-session chat for scenario participants via Supabase Realtime`
 
-## [TODO] 探索者In-characterジャーナル（セッション別キャラ視点日誌） — 優先度: 中
+## [DONE] 探索者In-characterジャーナル（セッション別キャラ視点日誌） — 優先度: 中
 **対象:** PL
 **概要:** PLがセッション終了後にキャラクター視点（1人称）で「今日感じたこと・気づいたこと・仲間への想い」を日誌として書き残せる機能。既存のセッションログ（`sessions`テーブル）はGM/PL共有のOOC記録だが、こちらはキャラクター本人が書く物語的・主観的な内面記録。長期キャンペーンでキャラクターの成長弧を振り返る一次資料となる。
 **実装ヒント:** Supabaseに `character_journal_entries` テーブルを追加（id, character_id, session_label: text | null, entry_date: date | null, title: text, content: text, mood: "hopeful"|"fearful"|"determined"|"despairing"|"curious"|"numb" | null, is_private: boolean DEFAULT true, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。エントリ一覧を `entry_date` 降順で表示し、インライン追加フォームで title・content（`<textarea>`）・mood（select）・session_label を入力。mood は絵文字バッジ（🌟希望 / 😨恐怖 / 💪決意 / 😔絶望 / 🔍好奇 / 😶麻痺）でビジュアル表示。`is_private: false` にすると公開キャラページ（`/c/[slug]`）でも表示可能。既存の `src/app/characters/[id]/bonds/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「日誌」リンクを追加。追加DB1テーブル。
