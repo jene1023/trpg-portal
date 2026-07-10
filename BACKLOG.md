@@ -1430,7 +1430,7 @@
 **実装ヒント:** `src/app/characters/[id]/focus/page.tsx` を "use client" で新規作成。`<html>` の `overflow` を `hidden` にして全画面表示を確保。`supabase.from("characters").select("*, character_skills(*), character_conditions(*)")` で必要データ取得。ページ上部にHP/MP/SAN の3本バーを大きく表示（緑→黄→赤のグラデーション変化）。中段に `is_active: true` のコンディションバッジを表示。下段に `is_favorite: true` の技能TOP10を2列グリッドで表示し、タップでダイスロール（結果のトースト通知）。画面右下に固定フローティングの「メモ」アイコンでクイックノート入力モーダルを開く。Supabase Realtimeチャンネルで `characters` テーブルの `hp_current`/`mp_current`/`san_current` をリアルタイム購読し、他の参加者がKP側で更新した場合も即時反映（`supabase.channel("focus-mode-character-{id}").on("postgres_changes", ...)` パターン）。既存の `QuickStatsDisplay.tsx` と `DiceRoller.tsx` を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「クイックアクセス」セクションに「フォーカスモード」リンクを追加。追加DBなし。
 **コミット:** `feat: session focus mode with fullscreen minimal UI for active play`
 
-## [TODO] BGMシンクロ通知（KPがBGMキューを切り替えると全参加者へリアルタイム通知） — 優先度: 高
+## [DONE] BGMシンクロ通知（KPがBGMキューを切り替えると全参加者へリアルタイム通知） — 優先度: 高
 **対象:** KP / 共通
 **概要:** 既存のBGMキューリスト（`bgm_cues`）に「再生」ボタンを追加し、KPが押すとSupabase Realtimeブロードキャストで全参加者に「現在の曲：[ラベル名]」とBGMリンクを即時通知する機能。VTT（ここフォリア等）のシーン切り替え時のBGM自動切替を補完し、外部通話ツールなしでも音楽演出の合図を共有できる。
 **リサーチ根拠:** ここフォリアのシーン別BGM自動切り替えが「オンセの没入感を決定的に上げる」機能として複数ブログで高評価を受けており、既存の`bgm_cues`にリアルタイム通知を加えることでポータルとしてのVTT補完価値が大きく向上することが確認された。

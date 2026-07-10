@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, ChevronDown, Trash2, Plus, ExternalLink } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash2, Plus, ExternalLink, Play } from "lucide-react";
 import { supabase, isSupabaseConfigured, BgmCue } from "@/lib/supabase";
 
 type Props = {
@@ -17,6 +17,20 @@ export default function BgmCueList({ scenarioId, initialCues }: Props) {
   const [directionNotes, setDirectionNotes] = useState("");
   const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [broadcasting, setBroadcasting] = useState(false);
+
+  async function broadcastCue(cue: BgmCue) {
+    if (!isSupabaseConfigured || broadcasting) return;
+    setBroadcasting(true);
+    setPlayingId(cue.id);
+    await supabase.channel(`bgm-${scenarioId}`).send({
+      type: "broadcast",
+      event: "bgm_change",
+      payload: { label: cue.label, bgm_url: cue.bgm_url },
+    });
+    setBroadcasting(false);
+  }
 
   async function addCue() {
     if (!label.trim() || !isSupabaseConfigured) return;
@@ -86,6 +100,19 @@ export default function BgmCueList({ scenarioId, initialCues }: Props) {
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => broadcastCue(cue)}
+                disabled={broadcasting}
+                className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  playingId === cue.id
+                    ? "bg-coc-gold/20 text-coc-gold border border-coc-gold-dim"
+                    : "border border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+                }`}
+                aria-label="再生通知"
+              >
+                <Play size={11} />
+                再生
+              </button>
               <button
                 onClick={() => moveCue(i, -1)}
                 disabled={i === 0}
