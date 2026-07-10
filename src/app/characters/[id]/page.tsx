@@ -660,6 +660,13 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
+                href={`/characters/${id}/mysteries`}
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>謎リスト（未解決疑問）</span>
+                <span className="text-coc-gold">→</span>
+              </Link>
+              <Link
                 href={`/characters/${id}/vows`}
                 className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >

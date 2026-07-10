@@ -1476,7 +1476,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/san-graph/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("san_loss, played_at, scenario_id, scenarios(campaign_id)").eq("scenarios.campaign_id", id)` と `supabase.from("campaign_participants").select("character_id, characters(name, san_current, san_max)")` を `Promise.all` で並行取得。セッション日付順にSAN損失を累積し「初期SAN − セッションごとの累積SAN損失」で各時点のSAN推定値を算出。CSSのみの折れ線グラフ（SVG pathを手書き）かシンプルな棒グラフでキャラクター別に色分け表示。「SAN 0近づき警告」として現在SANが初期値の30%以下のキャラクターをハイライト。追加DBなし（既存テーブルのみ使用）。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「SAN推移グラフ」リンクを追加。
 **コミット:** `feat: campaign-wide SAN transition graph for party mental health monitoring`
 
-## [TODO] 探索者の未解決疑問リスト（セッション中の謎メモ） — 優先度: 低
+## [DONE] 探索者の未解決疑問リスト（セッション中の謎メモ） — 優先度: 低
 **対象:** PL
 **概要:** PLがセッション中に「なぜ◯◯なのか」「あのNPCの目的は何か」「◯◯の地下に何があるのか」などキャラクターが抱える謎・疑問を箇条書きで記録し、解決したものにチェックを付けて管理できる機能。既存の`clues/page.tsx`（キャラクターが持つ手がかり）は「わかったこと」の記録だが、こちらは「まだわからないこと・調べたいこと」の疑問管理。タブレット・スマホでセッション中に素早く追記できるシンプルUIを指向する。
 **実装ヒント:** Supabaseに `character_mysteries` テーブルを追加（id, character_id, question: text, context_notes: text | null, is_resolved: boolean DEFAULT false, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/mysteries/page.tsx` を "use client" で新規作成。未解決リストと解決済みリストを上下に分けて表示（解決済みは打ち消し線付きグレーでアコーディオン折りたたみ）。チェックボタンで `supabase.from("character_mysteries").update({ is_resolved: true, resolved_at: new Date().toISOString() })` を実行。テキスト入力フォームからワンタップで追加。既存の `src/app/characters/[id]/clues/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「謎リスト」リンクを追加。追加DB1テーブル。

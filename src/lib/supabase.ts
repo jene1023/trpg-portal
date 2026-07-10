@@ -1040,3 +1040,13 @@ export type ScenarioBroadcastRead = {
 export type ScenarioBroadcastWithRead = ScenarioBroadcast & {
   is_read: boolean;
 };
+
+export type CharacterMystery = {
+  id: string;
+  character_id: string;
+  question: string;
+  context_notes: string | null;
+  is_resolved: boolean;
+  resolved_at: string | null;
+  created_at: string;
+};
