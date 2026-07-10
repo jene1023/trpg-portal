@@ -1406,7 +1406,7 @@
 **実装ヒント:** `src/app/_components/NextEpisodePreviewGenerator.tsx` を "use client" で新規作成。unresolved_threads（未解決の伏線）・cliffhanger（崖っぷち描写）・npc_threat（NPCの動き）を自由テキストで入力 → `/api/ai/next-episode-preview/route.ts`（POST）に送信 → `claude-haiku-4-5-20251001` で「TRPGリプレイ次回予告風の日本語テキストを生成」プロンプトを実行 → 生成テキストをコピーボタン付きで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「セッション後」セクションに配置。`ScenarioDiscordWebhookEditor.tsx` を参考に Discord Webhook への直接送信オプションも追加可能。追加DBなし。
 **コミット:** `feat: AI next-episode preview generator for dramatic session cliffhanger teasers`
 
-## [TODO] KPシナリオ準備タスクリスト（セッション前カスタムチェックリスト） — 優先度: 中
+## [DONE] KPシナリオ準備タスクリスト（セッション前カスタムチェックリスト） — 優先度: 中
 **対象:** KP
 **概要:** KPがシナリオごとにセッション前準備タスク（「ハンドアウト印刷」「BGMキュー確認」「NPC口調練習」「マップ準備」等）をカスタム登録し、当日チェックしながら消化できるリスト機能。既存の`SessionAgendaChecklist.tsx`はセッション中の進行順序管理だが、こちらは「セッション開始前の準備」に特化したKP専用の事前タスク管理ツール。シナリオ間で再利用できるテンプレートも保存可能。
 **実装ヒント:** Supabaseに `scenario_prep_tasks` テーブルを追加（id, scenario_id, task_name: text, is_done: boolean DEFAULT false, sort_order: integer DEFAULT 0, created_at）。`src/app/scenarios/[id]/prep/page.tsx` を "use client" で新規作成。インライン追加フォームで task_name を入力し `supabase.from("scenario_prep_tasks").insert(...)` で保存。各タスクにチェックボックス（`supabase.from("scenario_prep_tasks").update({ is_done })`）とドラッグ不要のソートボタン（上/下矢印で sort_order 入れ替え）を配置。「テンプレートとして保存」ボタンでシナリオIDなしのレコードを `prep_task_templates` テーブル（id, task_name, sort_order, created_at）に保存し、次のシナリオ準備時に一括コピー可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「準備チェックリスト」リンクを追加。追加DB2テーブル。

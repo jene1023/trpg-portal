@@ -945,3 +945,19 @@ export type CharacterAbsence = {
   return_condition: string | null;
   created_at: string;
 };
+
+export type ScenarioPrepTask = {
+  id: string;
+  scenario_id: string;
+  task_name: string;
+  is_done: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
+export type PrepTaskTemplate = {
+  id: string;
+  task_name: string;
+  sort_order: number;
+  created_at: string;
+};
