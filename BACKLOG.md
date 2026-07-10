@@ -1399,3 +1399,33 @@
 **概要:** PLが欠席したセッションで、そのキャラクターがシナリオ内でどう行動していたか（離脱理由・代理行動・復帰条件）をKPが記録できる機能。欠席管理をトグルで行うAttendanceToggleと組み合わせ、欠席者ごとに物語的整合性のあるメモを残す。
 **実装ヒント:** Supabaseに `character_absences`テーブルを追加（id, scenario_id, character_id, session_number: integer | null, reason: text | null, action_taken: text | null, return_condition: text | null, created_at）。`src/app/scenarios/[id]/absences/page.tsx` を "use client" で新規作成。`supabase.from("campaign_participants").select("character_id, characters(name)")` で参加者を取得し、各キャラの欠席エントリを accordion 形式で表示。既存の `AttendanceToggle.tsx`（`src/app/_components/AttendanceToggle.tsx`）と `ParticipantList.tsx` を参考に実装。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「欠席者記録」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: absent character action log for in-fiction absence management`
+
+## [TODO] 次回予告AIテキスト生成（セッション終了後の「次回予告」） — 優先度: 高
+**対象:** KP / 共通
+**概要:** セッション終了後にKPが「今回解決しなかったプロットスレッド・未回収のクリフハンガー・NPCの脅威」を入力すると、Claude APIが「次回予告」風の短いドラマティックなテキスト（100〜150字）を自動生成し、Discord共有やセッション開始前の読み上げに使える機能。既存の`SessionSummaryGenerator`（今回のセッション振り返り）とは異なり、「次回への期待と緊張感」を演出する前向きな煽りテキストに特化する。
+**実装ヒント:** `src/app/_components/NextEpisodePreviewGenerator.tsx` を "use client" で新規作成。unresolved_threads（未解決の伏線）・cliffhanger（崖っぷち描写）・npc_threat（NPCの動き）を自由テキストで入力 → `/api/ai/next-episode-preview/route.ts`（POST）に送信 → `claude-haiku-4-5-20251001` で「TRPGリプレイ次回予告風の日本語テキストを生成」プロンプトを実行 → 生成テキストをコピーボタン付きで表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）の「セッション後」セクションに配置。`ScenarioDiscordWebhookEditor.tsx` を参考に Discord Webhook への直接送信オプションも追加可能。追加DBなし。
+**コミット:** `feat: AI next-episode preview generator for dramatic session cliffhanger teasers`
+
+## [TODO] KPシナリオ準備タスクリスト（セッション前カスタムチェックリスト） — 優先度: 中
+**対象:** KP
+**概要:** KPがシナリオごとにセッション前準備タスク（「ハンドアウト印刷」「BGMキュー確認」「NPC口調練習」「マップ準備」等）をカスタム登録し、当日チェックしながら消化できるリスト機能。既存の`SessionAgendaChecklist.tsx`はセッション中の進行順序管理だが、こちらは「セッション開始前の準備」に特化したKP専用の事前タスク管理ツール。シナリオ間で再利用できるテンプレートも保存可能。
+**実装ヒント:** Supabaseに `scenario_prep_tasks` テーブルを追加（id, scenario_id, task_name: text, is_done: boolean DEFAULT false, sort_order: integer DEFAULT 0, created_at）。`src/app/scenarios/[id]/prep/page.tsx` を "use client" で新規作成。インライン追加フォームで task_name を入力し `supabase.from("scenario_prep_tasks").insert(...)` で保存。各タスクにチェックボックス（`supabase.from("scenario_prep_tasks").update({ is_done })`）とドラッグ不要のソートボタン（上/下矢印で sort_order 入れ替え）を配置。「テンプレートとして保存」ボタンでシナリオIDなしのレコードを `prep_task_templates` テーブル（id, task_name, sort_order, created_at）に保存し、次のシナリオ準備時に一括コピー可能。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「準備チェックリスト」リンクを追加。追加DB2テーブル。
+**コミット:** `feat: KP scenario prep task checklist with template reuse`
+
+## [TODO] 探索者の記念品コレクション（物語的意味を持つアイテム記録） — 優先度: 中
+**対象:** PL
+**概要:** 死亡したNPCの形見・呪われた遺物・特別な経緯で手に入れたアイテム等、ゲーム的なステータスより物語的意義が大きいアイテムをキャラクターごとに記録・展示できるコレクション機能。既存の`inventory_items`（武器/アイテムの戦闘・使用回数管理）とは異なり、セッション名と入手経緯・感情的重みをメインとする「思い出の品」専用ストレージ。探索者の人生の軌跡を物語として可視化する。
+**実装ヒント:** Supabaseに `character_keepsakes` テーブルを追加（id, character_id, name: text, obtained_from: text | null, session_label: text | null, story_notes: text | null, is_lost: boolean DEFAULT false, created_at）。`src/app/characters/[id]/keepsakes/page.tsx` を "use client" で新規作成。各記念品カードに name・obtained_from（入手元NPC/シナリオ）・session_label・story_notes（入手時の経緯や感情）・is_lost（失った場合のフラグ、打ち消し線でグレーアウト）を表示。`is_lost` トグルで喪失状態を記録し、喪失した品も履歴として残す。インライン追加フォーム。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「記念品」リンクを追加。`src/app/characters/[id]/bonds/page.tsx` の実装を参考に。追加DB1テーブル。
+**コミット:** `feat: character keepsake collection for narrative-significant story items`
+
+## [TODO] キャンペーン年表（シナリオ横断イベント記録） — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーンに含まれる全シナリオを横断して「重要な出来事・死亡したキャラクター・解明された真実・世界に起きた変化」をタイムライン形式で記録できるページ。既存の`TruthTimeline.tsx`は単一シナリオの伏線年表だが、こちらは複数シナリオにまたがる「キャンペーン全体の歴史」を俯瞰する長期記録ツール。クトゥルフの邪神復活まで何が起きたのかを振り返れる。
+**実装ヒント:** Supabaseに `campaign_events` テーブルを追加（id, campaign_id, scenario_id: text | null, event_date: text | null, event_title: text, event_description: text | null, event_type: "death"|"revelation"|"world_change"|"npc_action"|"player_action"|"other", created_at）。`src/app/campaigns/[id]/timeline/page.tsx` を "use client" で新規作成。`supabase.from("campaign_events").select("*, scenarios(title)").eq("campaign_id", id).order("event_date", {ascending: true})` でイベント一覧取得。縦型タイムラインUIで event_type ごとに色分けアイコン（死亡=赤の頭蓋骨、啓示=黄の電球、世界変化=青の地球）を付けて表示。インライン追加フォームで scenario_id（select）・event_date・event_title・event_type を入力。既存の `TruthTimeline.tsx`（`src/app/_components/TruthTimeline.tsx`）を参考に。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「キャンペーン年表」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: campaign-wide event timeline spanning multiple scenarios`
+
+## [TODO] セッションフォーカスモード（プレイ中専用ミニマルUI） — 優先度: 低
+**対象:** PL
+**概要:** セッション中、PLが手元のスマートフォンで「今すぐ確認したい情報だけ」を表示する全画面フォーカスモードページ。HP/MP/SAN現在値バー・アクティブなコンディションバッジ・上位10技能と現在値・ダイスロールボタン・クイックメモ入力だけをシンプルなカード1枚に集約。既存の`quick/page.tsx`（モバイルクイックダッシュボード）より更に絞り込み、ナビゲーションとサイドバーを完全に非表示にする没入型UI。
+**実装ヒント:** `src/app/characters/[id]/focus/page.tsx` を "use client" で新規作成。`<html>` の `overflow` を `hidden` にして全画面表示を確保。`supabase.from("characters").select("*, character_skills(*), character_conditions(*)")` で必要データ取得。ページ上部にHP/MP/SAN の3本バーを大きく表示（緑→黄→赤のグラデーション変化）。中段に `is_active: true` のコンディションバッジを表示。下段に `is_favorite: true` の技能TOP10を2列グリッドで表示し、タップでダイスロール（結果のトースト通知）。画面右下に固定フローティングの「メモ」アイコンでクイックノート入力モーダルを開く。Supabase Realtimeチャンネルで `characters` テーブルの `hp_current`/`mp_current`/`san_current` をリアルタイム購読し、他の参加者がKP側で更新した場合も即時反映（`supabase.channel("focus-mode-character-{id}").on("postgres_changes", ...)` パターン）。既存の `QuickStatsDisplay.tsx` と `DiceRoller.tsx` を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「クイックアクセス」セクションに「フォーカスモード」リンクを追加。追加DBなし。
+**コミット:** `feat: session focus mode with fullscreen minimal UI for active play`
