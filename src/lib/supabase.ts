@@ -1083,3 +1083,21 @@ export type CustomTableEntry = {
   result_text: string;
   created_at: string;
 };
+
+export type ArtifactType = "tome" | "weapon" | "relic" | "key_item" | "other";
+export type ArtifactRarity = "common" | "rare" | "legendary";
+
+export type CampaignArtifact = {
+  id: string;
+  campaign_id: string;
+  scenario_id: string | null;
+  name: string;
+  description: string | null;
+  artifact_type: ArtifactType;
+  rarity: ArtifactRarity;
+  current_holder_character_id: string | null;
+  is_destroyed: boolean;
+  discovered_at: string | null;
+  notes: string | null;
+  created_at: string;
+};
