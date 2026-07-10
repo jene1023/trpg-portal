@@ -1437,7 +1437,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/bgm/page.tsx` に「再生」ボタンを追加（"use client"化）。`supabase.channel('bgm-${scenarioId}').send({ type: 'broadcast', event: 'bgm_change', payload: { label, bgm_url } })` でブロードキャスト。`src/app/scenarios/[id]/party/page.tsx` または新規 `src/app/scenarios/[id]/bgm-player/page.tsx` で同チャンネルをsubscribeし「♪ Now Playing: [ラベル]」バナーを最上部に表示（`bgm_url` がYouTubeの場合はiframe埋め込みも選択肢）。追加DBなし（既存`bgm_cues`テーブルを流用、Realtime broadcast は揮発性）。
 **コミット:** `feat: realtime BGM change notification broadcast for KP via Supabase Realtime`
 
-## [TODO] セッション0サポート（PC関係構築と世界観合意フォーム） — 優先度: 中
+## [DONE] セッション0サポート（PC関係構築と世界観合意フォーム） — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** キャンペーン開始前のSession 0（ゼロセッション）専用ページ。KPがPC間の初期関係性質問（「どこで知り合いましたか？」「誰を信頼していますか？」）を設定し、PLが各自で回答を入力してKPが一覧確認できる。既存の安全設定（`scenario_safety_settings`）・参加者フック（`hook_text`）と連携し、セッション開始前の合意形成を構造化する。
 **リサーチ根拠:** 現代TRPGではSession 0がベストプラクティスとして広く普及しており（CoC7版ガイダンス・キャンペーン設定サプリ等）、参加者全員がキャラクター背景と関係性を事前に確認することでセッション満足度が向上することが複数のTRPGブログで確認された。

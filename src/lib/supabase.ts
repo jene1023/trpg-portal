@@ -991,3 +991,19 @@ export type CampaignEvent = {
   event_type: CampaignEventType;
   created_at: string;
 };
+
+export type SessionZeroQuestion = {
+  id: string;
+  scenario_id: string;
+  question_text: string;
+  order_index: number;
+  created_at: string;
+};
+
+export type SessionZeroAnswer = {
+  id: string;
+  question_id: string;
+  character_id: string;
+  answer_text: string;
+  created_at: string;
+};
