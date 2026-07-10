@@ -1470,7 +1470,7 @@
 **実装ヒント:** Supabaseに `scenario_broadcasts` テーブルを追加（id, scenario_id, sender_character_id: uuid | null, title: text, body: text, created_at）と `scenario_broadcast_reads` テーブル（id, broadcast_id, character_id, read_at, created_at）を追加。`src/app/scenarios/[id]/broadcast/page.tsx` を "use client" で新規作成（KP向け送信フォーム＋送信済み一覧）。参加PLが `MessageInbox.tsx`（`src/app/_components/MessageInbox.tsx`）または `src/app/characters/[id]/messages/page.tsx` でブロードキャストを受信し既読マークを付けられるよう既存MessageInbox UIを拡張。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「通知送信」リンクを追加。追加DB2テーブル。
 **コミット:** `feat: KP broadcast message system for scenario-wide participant notifications`
 
-## [TODO] キャンペーン全体SAN推移グラフ（探索者健全度モニタリング） — 優先度: 中
+## [DONE] キャンペーン全体SAN推移グラフ（探索者健全度モニタリング） — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーンに参加している全探索者のSAN現在値をセッションごとに折れ線グラフで可視化するダッシュボード。「誰がいつSANを大きく失ったか」「パーティ全体の精神的消耗ペース」を一目で把握し、KPがシナリオ難易度やSAN回復機会を調整する際の判断材料となる。既存の `campaigns/[id]/stats/page.tsx` は参加者・シナリオ数などの集計だが、SAN値の時系列推移に特化したグラフはない。
 **実装ヒント:** `src/app/campaigns/[id]/san-graph/page.tsx` を新規作成（Server Component）。`supabase.from("sessions").select("san_loss, played_at, scenario_id, scenarios(campaign_id)").eq("scenarios.campaign_id", id)` と `supabase.from("campaign_participants").select("character_id, characters(name, san_current, san_max)")` を `Promise.all` で並行取得。セッション日付順にSAN損失を累積し「初期SAN − セッションごとの累積SAN損失」で各時点のSAN推定値を算出。CSSのみの折れ線グラフ（SVG pathを手書き）かシンプルな棒グラフでキャラクター別に色分け表示。「SAN 0近づき警告」として現在SANが初期値の30%以下のキャラクターをハイライト。追加DBなし（既存テーブルのみ使用）。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「SAN推移グラフ」リンクを追加。
