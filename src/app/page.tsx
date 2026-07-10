@@ -235,7 +235,7 @@ export default async function HomePage() {
       {pinned && pinned.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <Pin size={14} className="text-coc-gold" />
               <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
                 ピン留めキャラクター
@@ -261,7 +261,7 @@ export default async function HomePage() {
       {ongoingScenarios && ongoingScenarios.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <Scroll size={14} className="text-coc-gold" />
               <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
                 進行中シナリオ
@@ -306,7 +306,7 @@ export default async function HomePage() {
       {recentSessions && recentSessions.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <BookMarked size={14} className="text-coc-gold" />
               <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
                 直近のセッションログ
@@ -380,7 +380,7 @@ export default async function HomePage() {
       {recent && recent.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <Clock size={14} className="text-coc-gold" />
               <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
                 最近のキャラクター

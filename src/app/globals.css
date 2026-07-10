@@ -132,6 +132,8 @@ body {
 .coc-section-title {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .coc-section-title::before {
