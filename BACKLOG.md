@@ -1518,7 +1518,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/timer/page.tsx` を "use client" で新規作成。KPビューは「シーン名」テキスト入力と「秒数」数値入力＋「開始」ボタン。開始時に `supabase.channel('timer-${scenarioId}').send({ type: 'broadcast', event: 'timer_start', payload: { sceneLabel, durationSec, startedAt: Date.now() } })` でブロードキャスト。PLビューと同じページで受信し `useEffect` の `setInterval` でカウントダウン表示（`mm:ss` フォーマット）。残り10秒以下で数字を赤に変え、0秒で「⏰ タイムアップ！」をモーダル表示。既存 `src/app/_components/GameClockEditor.tsx` と `DiceRoller.tsx` を参考に。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「タイマー」リンクを追加。追加DBなし（broadcast のみ）。
 **コミット:** `feat: realtime countdown timer for scene time limits with broadcast to all participants`
 
-## [TODO] PLプレイヤー横断個人統計ダッシュボード — 優先度: 中
+## [DONE] PLプレイヤー横断個人統計ダッシュボード — 優先度: 中
 **対象:** PL
 **概要:** 特定プレイヤーが持つ全キャラクターを横断して「累計セッション参加数・累計SAN損失・技能成長総数・取得クルー数・作成キャラ数」をグラフと数値で一覧化するダッシュボード。個人の活動履歴を振り返り、TRPG経験の積み重ねを実感できる。
 **実装ヒント:** `src/app/players/[id]/dashboard/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, san_current, san_max, sessions(san_loss), growth_records(count), clues(count)").eq("player_id", id)` を中心にデータ集計。累計SAN損失はキャラクター別に `sessions.san_loss` を合算。キャラクター別の統計をカードグリッドで表示し、最上部にキャンペーン参加数・総セッション数・最もプレイ時間が長いキャラクター名の「ハイライト3枚カード」を置く。SVGの横棒グラフでキャラクター別SAN損失比較を可視化。`src/app/campaigns/[id]/stats/page.tsx` の実装を参考に。既存 `src/app/_components/ProfileCard.tsx` を流用。追加DBなし（既存テーブルのみ）。

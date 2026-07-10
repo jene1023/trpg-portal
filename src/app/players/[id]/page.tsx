@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, Phone, BookOpen, StickyNote, Gamepad2, User, Calendar } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, BookOpen, StickyNote, Gamepad2, User, Calendar, BarChart2 } from "lucide-react";
 import { supabase, isSupabaseConfigured, Player, ScenarioStatus } from "@/lib/supabase";
 
 type ParticipantRow = {
@@ -62,10 +62,19 @@ export default async function PlayerDetailPage({ params }: Props) {
         </Link>
       </div>
 
-      <h1 className="font-cinzel text-2xl font-bold text-coc-text mb-6 flex items-center gap-2">
-        <User size={22} className="text-coc-gold" />
-        {p.display_name}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-cinzel text-2xl font-bold text-coc-text flex items-center gap-2">
+          <User size={22} className="text-coc-gold" />
+          {p.display_name}
+        </h1>
+        <Link
+          href={`/players/${p.id}/dashboard`}
+          className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-gold-dim transition-colors"
+        >
+          <BarChart2 size={14} />
+          個人統計
+        </Link>
+      </div>
 
       {/* 連絡先情報 */}
       <section className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4 mb-4">
