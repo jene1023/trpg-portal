@@ -60,7 +60,7 @@ export default function NavBar() {
           className="flex items-center gap-2 font-cinzel text-lg font-bold text-coc-text hover:text-coc-gold transition-colors"
         >
           <span className="text-coc-gold text-xl select-none coc-star-twinkle">✦</span>
-          CoC Portal
+          <span className="coc-nav-logo">CoC Portal</span>
         </Link>
 
         {/* デスクトップナビ */}

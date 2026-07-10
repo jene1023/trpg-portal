@@ -140,6 +140,7 @@ body {
   margin-right: 0.45rem;
   color: var(--color-coc-gold-dim);
   font-size: 0.6em;
+  opacity: 0.65;
 }
 
 .coc-section-title::after {
@@ -152,6 +153,29 @@ body {
     var(--color-coc-border) 0%,
     transparent 100%
   );
+  opacity: 0.65;
+}
+
+/* ◆ 印: 封印が静かに脈打つように明滅する */
+@keyframes coc-diamond-pulse {
+  0%, 100% { opacity: 0.50; }
+  50%       { opacity: 1; color: var(--color-coc-gold); }
+}
+
+/* 右フェードライン: 燭台の光が左から右へ流れるように揺らめく */
+@keyframes coc-rule-flow {
+  0%, 100% { opacity: 0.40; }
+  50%       { opacity: 0.75; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-section-title::before {
+    animation: coc-diamond-pulse 5s ease-in-out infinite;
+  }
+  .coc-section-title::after {
+    animation: coc-rule-flow 7s ease-in-out infinite;
+    animation-delay: 1.2s;
+  }
 }
 
 /* 残量わずかなステータスバーの警告グロー（HP/MP/SAN） */
@@ -326,6 +350,23 @@ body {
   height: 1px;
   background: linear-gradient(to right, var(--color-coc-border-glow) 0%, var(--color-coc-border) 35%, transparent 100%);
   opacity: 0.65;
+}
+
+/* NavBar ロゴ文字: 燭台の光が古文書の銘板を照らすように金色に微光する */
+@keyframes coc-nav-logo-breathe {
+  0%, 100% { text-shadow: 0 0 6px rgba(201, 133, 58, 0.10), 0 1px 0 rgba(0, 0, 0, 0.40); }
+  50%       { text-shadow: 0 0 18px rgba(201, 133, 58, 0.42), 0 0 36px rgba(201, 133, 58, 0.10), 0 1px 0 rgba(0, 0, 0, 0.40); }
+}
+
+.coc-nav-logo {
+  text-shadow: 0 0 6px rgba(201, 133, 58, 0.10), 0 1px 0 rgba(0, 0, 0, 0.40);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-nav-logo {
+    animation: coc-nav-logo-breathe 7s ease-in-out infinite;
+    animation-delay: 2.5s;
+  }
 }
 
 /* NavBar アクティブリンク: 燭台の炎のように脈打つ下線 */
