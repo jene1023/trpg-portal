@@ -1482,7 +1482,7 @@
 **実装ヒント:** Supabaseに `character_mysteries` テーブルを追加（id, character_id, question: text, context_notes: text | null, is_resolved: boolean DEFAULT false, resolved_at: timestamptz | null, created_at）。`src/app/characters/[id]/mysteries/page.tsx` を "use client" で新規作成。未解決リストと解決済みリストを上下に分けて表示（解決済みは打ち消し線付きグレーでアコーディオン折りたたみ）。チェックボタンで `supabase.from("character_mysteries").update({ is_resolved: true, resolved_at: new Date().toISOString() })` を実行。テキスト入力フォームからワンタップで追加。既存の `src/app/characters/[id]/clues/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「謎リスト」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: character mystery list for tracking unresolved questions during sessions`
 
-## [TODO] 戦闘イニシアティブトラッカー（セッション中の行動順管理） — 優先度: 高
+## [DONE] 戦闘イニシアティブトラッカー（セッション中の行動順管理） — 優先度: 高
 **対象:** KP / 共通
 **概要:** セッション中の戦闘ラウンドでPC・NPC全員の行動順（イニシアティブ値）をリアルタイムで管理できるツール。現在のターンを強調表示し「次のキャラクターへ」ボタンで順番を進める。KPがNPCの値を入力し、PLが自分のキャラクターの値を入力してSupabase Realtimeで全員の画面に即時反映される。戦闘開始・終了・ラウンドリセットにも対応する。
 **実装ヒント:** `src/app/scenarios/[id]/initiative/page.tsx` を "use client" で新規作成。Supabaseに `initiative_entries` テーブルを追加（id, scenario_id, label: text, initiative_value: integer, is_npc: boolean DEFAULT false, is_active: boolean DEFAULT false, order_index: integer, created_at）。`supabase.channel('initiative-${scenarioId}').on('postgres_changes', { event: '*', schema: 'public', table: 'initiative_entries', filter: `scenario_id=eq.${id}` }, ...)` でリアルタイム同期。エントリは `initiative_value` 降順でソートし、`is_active: true` のエントリを強調表示（背景色変化 + 矢印アイコン）。「次へ」ボタンで現在アクティブエントリの次を `is_active: true` に更新。ラウンド数カウンターも表示。既存の `src/app/_components/NpcQuickRoller.tsx` と `DiceRoller.tsx` を参考にダイスロール連携追加も可。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加。追加DB1テーブル。
