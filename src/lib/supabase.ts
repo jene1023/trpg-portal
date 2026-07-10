@@ -1050,3 +1050,18 @@ export type CharacterMystery = {
   resolved_at: string | null;
   created_at: string;
 };
+
+export type SessionFeedback = {
+  id: string;
+  scenario_id: string;
+  session_id: string | null;
+  character_id: string | null;
+  character_name: string | null;
+  fun_rating: number;
+  tension_rating: number;
+  facilitation_rating: number;
+  would_replay: boolean;
+  free_comment: string | null;
+  is_anonymous: boolean;
+  created_at: string;
+};

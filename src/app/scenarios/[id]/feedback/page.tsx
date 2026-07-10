@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquarePlus, Star } from "lucide-react";
-import { supabase, isSupabaseConfigured, PlayerFeedback } from "@/lib/supabase";
+import { ArrowLeft, Send, TrendingUp } from "lucide-react";
+import { supabase, isSupabaseConfigured, SessionFeedback } from "@/lib/supabase";
 
 function StarInput({
   label,
@@ -49,23 +49,30 @@ function StarDisplay({ value }: { value: number }) {
   );
 }
 
-export default function FeedbackPage() {
+export default function SessionFeedbackPage() {
   const params = useParams<{ id: string }>();
   const scenarioId = params.id;
 
   const [scenarioTitle, setScenarioTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [feedbackList, setFeedbackList] = useState<PlayerFeedback[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [feedbackList, setFeedbackList] = useState<SessionFeedback[]>([]);
 
-  const [playerName, setPlayerName] = useState("");
-  const [sessionLabel, setSessionLabel] = useState("");
-  const [funScore, setFunScore] = useState(0);
-  const [highlight, setHighlight] = useState("");
-  const [improvement, setImprovement] = useState("");
+  const [characterName, setCharacterName] = useState("");
+  const [funRating, setFunRating] = useState(0);
+  const [tensionRating, setTensionRating] = useState(0);
+  const [facilitationRating, setFacilitationRating] = useState(0);
+  const [wouldReplay, setWouldReplay] = useState<boolean | null>(null);
+  const [freeComment, setFreeComment] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   useEffect(() => {
+    const key = `session_feedback_submitted_${scenarioId}`;
+    if (typeof window !== "undefined" && localStorage.getItem(key)) {
+      setSubmitted(true);
+    }
+
     if (!isSupabaseConfigured) {
       setLoading(false);
       return;
@@ -75,55 +82,64 @@ export default function FeedbackPage() {
       const [{ data: scenario }, { data: rows }] = await Promise.all([
         supabase.from("scenarios").select("title").eq("id", scenarioId).single(),
         supabase
-          .from("player_feedback")
+          .from("session_feedback")
           .select("*")
           .eq("scenario_id", scenarioId)
           .order("created_at", { ascending: false }),
       ]);
       setScenarioTitle(scenario?.title ?? "");
-      setFeedbackList((rows ?? []) as PlayerFeedback[]);
+      setFeedbackList((rows ?? []) as SessionFeedback[]);
       setLoading(false);
     })();
   }, [scenarioId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isSupabaseConfigured || !playerName.trim() || funScore === 0) return;
+    if (
+      !isSupabaseConfigured ||
+      funRating === 0 ||
+      tensionRating === 0 ||
+      facilitationRating === 0 ||
+      wouldReplay === null
+    )
+      return;
     setSaving(true);
 
     const payload = {
       scenario_id: scenarioId,
-      session_label: sessionLabel.trim() || null,
-      player_name: playerName.trim(),
-      fun_score: funScore,
-      highlight: highlight.trim() || null,
-      improvement: improvement.trim() || null,
+      session_id: null,
+      character_id: null,
+      character_name: isAnonymous ? null : (characterName.trim() || null),
+      fun_rating: funRating,
+      tension_rating: tensionRating,
+      facilitation_rating: facilitationRating,
+      would_replay: wouldReplay,
+      free_comment: freeComment.trim() || null,
+      is_anonymous: isAnonymous,
     };
 
     const { data } = await supabase
-      .from("player_feedback")
+      .from("session_feedback")
       .insert(payload)
       .select("*")
       .single();
 
     if (data) {
-      setFeedbackList((prev) => [data as PlayerFeedback, ...prev]);
-      setPlayerName("");
-      setSessionLabel("");
-      setFunScore(0);
-      setHighlight("");
-      setImprovement("");
+      setFeedbackList((prev) => [data as SessionFeedback, ...prev]);
+      localStorage.setItem(`session_feedback_submitted_${scenarioId}`, "1");
+      setSubmitted(true);
     }
 
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   }
 
-  const avgFun =
-    feedbackList.length > 0
-      ? feedbackList.reduce((s, f) => s + f.fun_score, 0) / feedbackList.length
-      : null;
+  const count = feedbackList.length;
+  const avgFun = count > 0 ? feedbackList.reduce((s, f) => s + f.fun_rating, 0) / count : null;
+  const avgTension = count > 0 ? feedbackList.reduce((s, f) => s + f.tension_rating, 0) / count : null;
+  const avgFacilitation =
+    count > 0 ? feedbackList.reduce((s, f) => s + f.facilitation_rating, 0) / count : null;
+  const wouldReplayCount = feedbackList.filter((f) => f.would_replay).length;
+  const publicFeedbacks = feedbackList.filter((f) => !f.is_anonymous);
 
   if (loading) {
     return (
@@ -148,11 +164,11 @@ export default function FeedbackPage() {
       <div className="mb-6">
         <p className="text-xs text-coc-muted mb-1">{scenarioTitle}</p>
         <h1 className="font-cinzel text-xl font-bold text-coc-text flex items-center gap-2">
-          <MessageSquarePlus size={20} className="text-coc-gold" />
-          PLフィードバック
+          <TrendingUp size={20} className="text-coc-gold" />
+          セッション満足度フィードバック
         </h1>
         <p className="text-xs text-coc-muted mt-1">
-          セッション後の感想をKPへ匿名で送れます。認証不要です。
+          セッション後の満足度をKPへ送信できます。送信後は編集できません。
         </p>
       </div>
 
@@ -162,122 +178,211 @@ export default function FeedbackPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {avgFun !== null && (
-            <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-5">
-              <p className="text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">
-                平均評価（{feedbackList.length}件）
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="text-center">
-                  <p className="text-xs text-coc-muted mb-1">楽しさ</p>
-                  <StarDisplay value={avgFun} />
-                  <p className="text-xs text-coc-gold mt-1">{avgFun.toFixed(1)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {saved && (
-            <div className="rounded-xl border border-green-800 bg-green-950/20 px-4 py-3 text-center">
-              <p className="text-sm text-green-400">フィードバックを送信しました。ありがとうございます！</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {count > 0 && (
             <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-5">
               <p className="text-xs font-medium text-coc-muted uppercase tracking-widest mb-4">
-                フィードバックを送る
+                平均評価（{count}件）
               </p>
-              <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-coc-muted mb-1 block">お名前 *</label>
-                  <input
-                    type="text"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    placeholder="PL名（匿名の場合は「匿名」等）"
-                    required
-                    className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none"
-                  />
+                  <p className="text-xs text-coc-muted mb-1">楽しさ</p>
+                  {avgFun !== null && (
+                    <>
+                      <StarDisplay value={avgFun} />
+                      <p className="text-xs text-coc-gold mt-0.5">{avgFun.toFixed(1)}</p>
+                    </>
+                  )}
                 </div>
                 <div>
-                  <label className="text-xs text-coc-muted mb-1 block">セッション回（任意）</label>
-                  <input
-                    type="text"
-                    value={sessionLabel}
-                    onChange={(e) => setSessionLabel(e.target.value)}
-                    placeholder="例: 第3回、最終回 など"
-                    className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none"
-                  />
-                </div>
-                <StarInput label="楽しさ *" value={funScore} onChange={setFunScore} />
-                <div>
-                  <label className="text-xs text-coc-muted mb-1 block">印象的な場面・良かった点（任意）</label>
-                  <textarea
-                    value={highlight}
-                    onChange={(e) => setHighlight(e.target.value)}
-                    rows={3}
-                    placeholder="特に楽しかった場面や演出を書いてください..."
-                    className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
-                  />
+                  <p className="text-xs text-coc-muted mb-1">緊張感</p>
+                  {avgTension !== null && (
+                    <>
+                      <StarDisplay value={avgTension} />
+                      <p className="text-xs text-coc-gold mt-0.5">{avgTension.toFixed(1)}</p>
+                    </>
+                  )}
                 </div>
                 <div>
-                  <label className="text-xs text-coc-muted mb-1 block">改善提案（任意）</label>
-                  <textarea
-                    value={improvement}
-                    onChange={(e) => setImprovement(e.target.value)}
-                    rows={3}
-                    placeholder="次回への改善提案があれば..."
-                    className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
-                  />
+                  <p className="text-xs text-coc-muted mb-1">KPファシリテーション</p>
+                  {avgFacilitation !== null && (
+                    <>
+                      <StarDisplay value={avgFacilitation} />
+                      <p className="text-xs text-coc-gold mt-0.5">{avgFacilitation.toFixed(1)}</p>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-coc-muted mb-1">また遊びたい</p>
+                  <p className="text-sm font-bold text-coc-text">
+                    {wouldReplayCount}/{count}
+                  </p>
+                  <p className="text-xs text-coc-muted">
+                    {count > 0 ? Math.round((wouldReplayCount / count) * 100) : 0}%
+                  </p>
                 </div>
               </div>
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={saving || !playerName.trim() || funScore === 0}
-              className="flex items-center justify-center gap-2 rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-3 text-sm font-medium text-coc-gold transition-colors hover:border-coc-gold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Star size={16} />
-              {saving ? "送信中..." : "フィードバックを送る"}
-            </button>
-          </form>
+          {submitted ? (
+            <div className="rounded-xl border border-green-800 bg-green-950/20 px-5 py-8 text-center">
+              <p className="text-green-400 font-medium mb-2">フィードバックを送信済みです</p>
+              <p className="text-xs text-coc-muted">ご回答ありがとうございました。</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-5">
+                <p className="text-xs font-medium text-coc-muted uppercase tracking-widest mb-4">
+                  フィードバックを送る
+                </p>
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="is-anonymous"
+                      checked={isAnonymous}
+                      onChange={(e) => setIsAnonymous(e.target.checked)}
+                      className="accent-coc-gold"
+                    />
+                    <label htmlFor="is-anonymous" className="text-xs text-coc-muted cursor-pointer">
+                      KPには匿名で送信する
+                    </label>
+                  </div>
 
-          {feedbackList.length > 0 && (
+                  {!isAnonymous && (
+                    <div>
+                      <label className="text-xs text-coc-muted mb-1 block">
+                        キャラクター名（任意）
+                      </label>
+                      <input
+                        type="text"
+                        value={characterName}
+                        onChange={(e) => setCharacterName(e.target.value)}
+                        placeholder="キャラクター名や PL 名"
+                        className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none"
+                      />
+                    </div>
+                  )}
+
+                  <StarInput label="楽しさ *" value={funRating} onChange={setFunRating} />
+                  <StarInput label="緊張感 *" value={tensionRating} onChange={setTensionRating} />
+                  <StarInput
+                    label="KPのファシリテーション *"
+                    value={facilitationRating}
+                    onChange={setFacilitationRating}
+                  />
+
+                  <div>
+                    <p className="text-xs text-coc-muted mb-2">また遊びたいですか？ *</p>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setWouldReplay(true)}
+                        className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                          wouldReplay === true
+                            ? "border-coc-gold bg-coc-gold/10 text-coc-gold"
+                            : "border-coc-border bg-coc-raised text-coc-muted hover:text-coc-text"
+                        }`}
+                      >
+                        はい
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWouldReplay(false)}
+                        className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                          wouldReplay === false
+                            ? "border-red-800 bg-red-950/20 text-red-400"
+                            : "border-coc-border bg-coc-raised text-coc-muted hover:text-coc-text"
+                        }`}
+                      >
+                        いいえ
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-coc-muted mb-1 block">
+                      自由コメント（任意）
+                    </label>
+                    <textarea
+                      value={freeComment}
+                      onChange={(e) => setFreeComment(e.target.value)}
+                      rows={3}
+                      placeholder="セッションの感想、印象的な場面、改善提案など..."
+                      className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={
+                  saving ||
+                  funRating === 0 ||
+                  tensionRating === 0 ||
+                  facilitationRating === 0 ||
+                  wouldReplay === null
+                }
+                className="flex items-center justify-center gap-2 rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-3 text-sm font-medium text-coc-gold transition-colors hover:border-coc-gold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send size={16} />
+                {saving ? "送信中..." : "フィードバックを送る"}
+              </button>
+            </form>
+          )}
+
+          {publicFeedbacks.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="text-xs font-medium text-coc-muted uppercase tracking-widest">
-                送信されたフィードバック（{feedbackList.length}件）
+                フィードバック一覧（{publicFeedbacks.length}件表示）
               </p>
-              {feedbackList.map((f) => (
+              {publicFeedbacks.map((f) => (
                 <div
                   key={f.id}
                   className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4"
                 >
-                  <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <p className="text-sm font-medium text-coc-text">
+                      {f.character_name ?? "プレイヤー"}
+                    </p>
+                    <p className="text-xs text-coc-muted flex-shrink-0">
+                      {new Date(f.created_at).toLocaleDateString("ja-JP")}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <p className="text-sm font-medium text-coc-text">{f.player_name}</p>
-                      {f.session_label && (
-                        <p className="text-xs text-coc-muted">{f.session_label}</p>
-                      )}
+                      <span className="text-coc-muted">楽しさ</span>
+                      <div className="mt-0.5">
+                        <StarDisplay value={f.fun_rating} />
+                      </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <StarDisplay value={f.fun_score} />
-                      <p className="text-xs text-coc-muted mt-0.5">
-                        {new Date(f.created_at).toLocaleDateString("ja-JP")}
+                    <div>
+                      <span className="text-coc-muted">緊張感</span>
+                      <div className="mt-0.5">
+                        <StarDisplay value={f.tension_rating} />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-coc-muted">ファシリ</span>
+                      <div className="mt-0.5">
+                        <StarDisplay value={f.facilitation_rating} />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-coc-muted">また遊びたい</span>
+                      <p
+                        className={`mt-0.5 font-medium ${
+                          f.would_replay ? "text-coc-gold" : "text-coc-muted"
+                        }`}
+                      >
+                        {f.would_replay ? "はい" : "いいえ"}
                       </p>
                     </div>
                   </div>
-                  {f.highlight && (
-                    <div className="mt-2 border-t border-coc-border pt-2">
-                      <p className="text-xs text-coc-muted mb-0.5">印象的な場面</p>
-                      <p className="text-xs text-coc-text whitespace-pre-wrap">{f.highlight}</p>
-                    </div>
-                  )}
-                  {f.improvement && (
-                    <div className="mt-2 border-t border-coc-border pt-2">
-                      <p className="text-xs text-coc-muted mb-0.5">改善提案</p>
-                      <p className="text-xs text-coc-text whitespace-pre-wrap">{f.improvement}</p>
+                  {f.free_comment && (
+                    <div className="mt-3 border-t border-coc-border pt-3">
+                      <p className="text-xs text-coc-text whitespace-pre-wrap">{f.free_comment}</p>
                     </div>
                   )}
                 </div>

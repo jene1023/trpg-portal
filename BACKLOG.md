@@ -1488,7 +1488,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/initiative/page.tsx` を "use client" で新規作成。Supabaseに `initiative_entries` テーブルを追加（id, scenario_id, label: text, initiative_value: integer, is_npc: boolean DEFAULT false, is_active: boolean DEFAULT false, order_index: integer, created_at）。`supabase.channel('initiative-${scenarioId}').on('postgres_changes', { event: '*', schema: 'public', table: 'initiative_entries', filter: `scenario_id=eq.${id}` }, ...)` でリアルタイム同期。エントリは `initiative_value` 降順でソートし、`is_active: true` のエントリを強調表示（背景色変化 + 矢印アイコン）。「次へ」ボタンで現在アクティブエントリの次を `is_active: true` に更新。ラウンド数カウンターも表示。既存の `src/app/_components/NpcQuickRoller.tsx` と `DiceRoller.tsx` を参考にダイスロール連携追加も可。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「戦闘トラッカー」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: combat initiative tracker with realtime sync for session combat management`
 
-## [TODO] セッション後PL満足度フィードバック（KP向け改善ダッシュボード） — 優先度: 中
+## [DONE] セッション後PL満足度フィードバック（KP向け改善ダッシュボード） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション終了後にPLが「楽しさ・緊張感・KPのファシリテーション・また遊びたいか」を5段階評価で記録し、KPが全シナリオ・キャンペーン単位での満足度推移をダッシュボードで確認できる機能。既存のセッションログ（`sessions`テーブル）や`session_summary`はOOC記録だが、PLの主観的体験・満足度の定量データを収集する仕組みはない。KPが自分のGMスタイルを改善するための定量フィードバックループを提供する。
 **実装ヒント:** Supabaseに `session_feedback` テーブルを追加（id, session_id, character_id, fun_rating: smallint CHECK (1-5), tension_rating: smallint CHECK (1-5), facilitation_rating: smallint CHECK (1-5), would_replay: boolean, free_comment: text | null, is_anonymous: boolean DEFAULT false, created_at）。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLビューは星5段階UIで4項目を評価して送信（送信後は編集不可、KPには匿名オプション）。KPビューは各評価項目の平均値をシナリオ一覧で表示し、`src/app/campaigns/[id]/feedback-stats/page.tsx` でキャンペーン全体の満足度推移をSVGバーチャートで可視化。`src/lib/supabase.ts` に `SessionFeedback` 型を追加。追加DB1テーブル。
