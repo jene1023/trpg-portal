@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2 } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -202,14 +202,21 @@ export default function CampaignDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* 統計リンク */}
-      <div className="mb-6">
+      {/* リンク */}
+      <div className="mb-6 flex gap-3 flex-wrap">
         <Link
           href={`/campaigns/${campaignId}/stats`}
-          className="flex items-center gap-2 w-fit rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
         >
           <BarChart2 size={15} />
           統計を見る
+        </Link>
+        <Link
+          href={`/campaigns/${campaignId}/timeline`}
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <Clock size={15} />
+          キャンペーン年表
         </Link>
       </div>
 

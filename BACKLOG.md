@@ -1418,7 +1418,7 @@
 **実装ヒント:** Supabaseに `character_keepsakes` テーブルを追加（id, character_id, name: text, obtained_from: text | null, session_label: text | null, story_notes: text | null, is_lost: boolean DEFAULT false, created_at）。`src/app/characters/[id]/keepsakes/page.tsx` を "use client" で新規作成。各記念品カードに name・obtained_from（入手元NPC/シナリオ）・session_label・story_notes（入手時の経緯や感情）・is_lost（失った場合のフラグ、打ち消し線でグレーアウト）を表示。`is_lost` トグルで喪失状態を記録し、喪失した品も履歴として残す。インライン追加フォーム。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「記念品」リンクを追加。`src/app/characters/[id]/bonds/page.tsx` の実装を参考に。追加DB1テーブル。
 **コミット:** `feat: character keepsake collection for narrative-significant story items`
 
-## [TODO] キャンペーン年表（シナリオ横断イベント記録） — 優先度: 中
+## [DONE] キャンペーン年表（シナリオ横断イベント記録） — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーンに含まれる全シナリオを横断して「重要な出来事・死亡したキャラクター・解明された真実・世界に起きた変化」をタイムライン形式で記録できるページ。既存の`TruthTimeline.tsx`は単一シナリオの伏線年表だが、こちらは複数シナリオにまたがる「キャンペーン全体の歴史」を俯瞰する長期記録ツール。クトゥルフの邪神復活まで何が起きたのかを振り返れる。
 **実装ヒント:** Supabaseに `campaign_events` テーブルを追加（id, campaign_id, scenario_id: text | null, event_date: text | null, event_title: text, event_description: text | null, event_type: "death"|"revelation"|"world_change"|"npc_action"|"player_action"|"other", created_at）。`src/app/campaigns/[id]/timeline/page.tsx` を "use client" で新規作成。`supabase.from("campaign_events").select("*, scenarios(title)").eq("campaign_id", id).order("event_date", {ascending: true})` でイベント一覧取得。縦型タイムラインUIで event_type ごとに色分けアイコン（死亡=赤の頭蓋骨、啓示=黄の電球、世界変化=青の地球）を付けて表示。インライン追加フォームで scenario_id（select）・event_date・event_title・event_type を入力。既存の `TruthTimeline.tsx`（`src/app/_components/TruthTimeline.tsx`）を参考に。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「キャンペーン年表」リンクを追加。追加DB1テーブル。

@@ -972,3 +972,22 @@ export type CharacterKeepsake = {
   is_lost: boolean;
   created_at: string;
 };
+
+export type CampaignEventType =
+  | "death"
+  | "revelation"
+  | "world_change"
+  | "npc_action"
+  | "player_action"
+  | "other";
+
+export type CampaignEvent = {
+  id: string;
+  campaign_id: string;
+  scenario_id: string | null;
+  event_date: string | null;
+  event_title: string;
+  event_description: string | null;
+  event_type: CampaignEventType;
+  created_at: string;
+};
