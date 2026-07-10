@@ -1429,3 +1429,31 @@
 **概要:** セッション中、PLが手元のスマートフォンで「今すぐ確認したい情報だけ」を表示する全画面フォーカスモードページ。HP/MP/SAN現在値バー・アクティブなコンディションバッジ・上位10技能と現在値・ダイスロールボタン・クイックメモ入力だけをシンプルなカード1枚に集約。既存の`quick/page.tsx`（モバイルクイックダッシュボード）より更に絞り込み、ナビゲーションとサイドバーを完全に非表示にする没入型UI。
 **実装ヒント:** `src/app/characters/[id]/focus/page.tsx` を "use client" で新規作成。`<html>` の `overflow` を `hidden` にして全画面表示を確保。`supabase.from("characters").select("*, character_skills(*), character_conditions(*)")` で必要データ取得。ページ上部にHP/MP/SAN の3本バーを大きく表示（緑→黄→赤のグラデーション変化）。中段に `is_active: true` のコンディションバッジを表示。下段に `is_favorite: true` の技能TOP10を2列グリッドで表示し、タップでダイスロール（結果のトースト通知）。画面右下に固定フローティングの「メモ」アイコンでクイックノート入力モーダルを開く。Supabase Realtimeチャンネルで `characters` テーブルの `hp_current`/`mp_current`/`san_current` をリアルタイム購読し、他の参加者がKP側で更新した場合も即時反映（`supabase.channel("focus-mode-character-{id}").on("postgres_changes", ...)` パターン）。既存の `QuickStatsDisplay.tsx` と `DiceRoller.tsx` を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の「クイックアクセス」セクションに「フォーカスモード」リンクを追加。追加DBなし。
 **コミット:** `feat: session focus mode with fullscreen minimal UI for active play`
+
+## [TODO] BGMシンクロ通知（KPがBGMキューを切り替えると全参加者へリアルタイム通知） — 優先度: 高
+**対象:** KP / 共通
+**概要:** 既存のBGMキューリスト（`bgm_cues`）に「再生」ボタンを追加し、KPが押すとSupabase Realtimeブロードキャストで全参加者に「現在の曲：[ラベル名]」とBGMリンクを即時通知する機能。VTT（ここフォリア等）のシーン切り替え時のBGM自動切替を補完し、外部通話ツールなしでも音楽演出の合図を共有できる。
+**リサーチ根拠:** ここフォリアのシーン別BGM自動切り替えが「オンセの没入感を決定的に上げる」機能として複数ブログで高評価を受けており、既存の`bgm_cues`にリアルタイム通知を加えることでポータルとしてのVTT補完価値が大きく向上することが確認された。
+**実装ヒント:** `src/app/scenarios/[id]/bgm/page.tsx` に「再生」ボタンを追加（"use client"化）。`supabase.channel('bgm-${scenarioId}').send({ type: 'broadcast', event: 'bgm_change', payload: { label, bgm_url } })` でブロードキャスト。`src/app/scenarios/[id]/party/page.tsx` または新規 `src/app/scenarios/[id]/bgm-player/page.tsx` で同チャンネルをsubscribeし「♪ Now Playing: [ラベル]」バナーを最上部に表示（`bgm_url` がYouTubeの場合はiframe埋め込みも選択肢）。追加DBなし（既存`bgm_cues`テーブルを流用、Realtime broadcast は揮発性）。
+**コミット:** `feat: realtime BGM change notification broadcast for KP via Supabase Realtime`
+
+## [TODO] セッション0サポート（PC関係構築と世界観合意フォーム） — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** キャンペーン開始前のSession 0（ゼロセッション）専用ページ。KPがPC間の初期関係性質問（「どこで知り合いましたか？」「誰を信頼していますか？」）を設定し、PLが各自で回答を入力してKPが一覧確認できる。既存の安全設定（`scenario_safety_settings`）・参加者フック（`hook_text`）と連携し、セッション開始前の合意形成を構造化する。
+**リサーチ根拠:** 現代TRPGではSession 0がベストプラクティスとして広く普及しており（CoC7版ガイダンス・キャンペーン設定サプリ等）、参加者全員がキャラクター背景と関係性を事前に確認することでセッション満足度が向上することが複数のTRPGブログで確認された。
+**実装ヒント:** Supabaseに `session_zero_questions` テーブルを追加（id, scenario_id, question_text, order_index, created_at）と `session_zero_answers` テーブルを追加（id, question_id, character_id, answer_text, created_at）。`src/app/scenarios/[id]/session-zero/page.tsx` を新規作成（"use client"）。KPは質問を追加、PLは自キャラとしてそれぞれ回答。全回答はKPビュー（質問ごとに参加者の回答を横並び）とPLビュー（自分の回答のみ）で表示分岐。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「Session 0」リンクを追加。`src/lib/supabase.ts` に `SessionZeroQuestion`, `SessionZeroAnswer` 型を追加。
+**コミット:** `feat: session zero page for pre-campaign PC relationship and world building`
+
+## [TODO] キャンペーン設定Wiki（世界観・用語・勢力ページ集） — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーンに紐づいた「世界観設定」「用語集」「勢力・組織情報」などをWiki形式のページ集として管理できる機能。現在のキャンペーン管理（`campaigns`テーブル）はシナリオのグループ化のみで、キャンペーン固有の世界設定ノートを記録する場所がない。長期キャンペーンでKPが設定の一貫性を保ち、PLも設定を参照できる。
+**リサーチ根拠:** World Anvil（海外TRPG設定管理ツール）が「世界観Wiki」を核心機能として急速に普及しており、TRPGキャンペーンの設定資料をまとめたいニーズが国内外のレビューで繰り返し確認された。国内では`gm_notes`（テキスト1フィールド）に全設定を詰め込む現実があり、構造化された代替手段への需要が高い。
+**実装ヒント:** Supabaseに `campaign_wiki_pages` テーブルを追加（id, campaign_id, title, content: text, page_type: "lore"|"faction"|"glossary"|"timeline"|"other", order_index: integer, created_at）。`src/app/campaigns/[id]/wiki/page.tsx` を新規作成（Server Component）でページ一覧をtype別タブで表示。`src/app/campaigns/[id]/wiki/[pageId]/page.tsx` を新規作成（"use client"）で個別ページ閲覧・編集（`<textarea>` + 保存ボタン）。`src/lib/supabase.ts` に `CampaignWikiPage` 型を追加。`src/app/campaigns/[id]/page.tsx` にWikiリンクと総ページ数バッジを追加。
+**コミット:** `feat: campaign setting wiki for world lore, factions, and glossary`
+
+## [TODO] セッション中リアルタイムチャット（シナリオ参加者間テキスト） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** シナリオに紐づいたリアルタイムテキストチャット機能。Discordや外部通話ツールを使わないセッションや、セッション中の「OOC（Out of Character）コメント」をIn-charメッセージと分けて記録するのに使う。Supabase Realtimeのbroadcastで実装しDB保存は最小限。
+**リサーチ根拠:** 国内TRPGポータルの多くはDiscordや外部チャットツールへの依存を前提にしているが、完全にポータル内で完結するセッション運営ニーズは特に少人数・初心者グループで高いことが複数のTRPG入門記事で確認された。ここフォリアのチャット機能の人気がそのニーズを示している。
+**実装ヒント:** `src/app/scenarios/[id]/chat/page.tsx` を "use client" で新規作成。`supabase.channel('chat-${scenarioId}').on('broadcast', { event: 'message' }, payload => setMessages(prev => [payload, ...prev].slice(0, 100)))` でリアルタイム受信。送信時は `.send({ type: 'broadcast', event: 'message', payload: { author, text, timestamp } })` でブロードキャスト（揮発性のため永続化不要。必要なら `chat_messages` テーブルに保存オプションを追加）。メッセージ表示は最新100件をリストで表示し自動スクロール。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「チャット」リンクを追加し、KPオペレーション統合ビュー（`src/app/scenarios/[id]/ops/page.tsx`）のタブにも追加。追加DBなし（broadcast のみ）。
+**コミット:** `feat: realtime in-session chat for scenario participants via Supabase Realtime`
