@@ -390,6 +390,13 @@ export default async function CharacterDetailPage({ params }: Props) {
             <h2 className={sectionTitle}>ツール</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 coc-tool-grid">
               <Link
+                href={`/characters/${id}/focus`}
+                className="flex items-center justify-between rounded-lg border border-yellow-400/40 bg-yellow-400/5 px-3.5 py-2.5 text-sm text-yellow-400 hover:bg-yellow-400/10 hover:border-yellow-400/60 transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>フォーカスモード（プレイ中）</span>
+                <span>→</span>
+              </Link>
+              <Link
                 href={`/characters/${id}/quick`}
                 className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
               >
