@@ -178,6 +178,7 @@ export type Scenario = {
   remind_email: string | null;
   game_current_date: string | null;
   game_current_time: string | null;
+  recruit_token: string | null;
   created_at: string;
 };
 

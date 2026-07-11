@@ -1249,6 +1249,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
           </div>
         </div>
 
+        <Link
+          href={`/scenarios/${id}/invite`}
+          className="flex items-center justify-between gap-3 rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold-dim transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Share2 size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">参加招待コード</p>
+              <p className="text-xs text-coc-muted">PLがURLまたはQRコードから直接キャラクターを選んで参加申請できる招待リンクを発行</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
         <div className="rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4">
           <div className="flex items-center gap-3 mb-3">
             <Radio size={20} className="text-coc-gold" />

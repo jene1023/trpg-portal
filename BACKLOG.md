@@ -1634,7 +1634,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/npc-generator/page.tsx` を "use client" で新規作成。名前は和名テーブル（漢字＋読み仮名 各50件程度）をファイルに埋め込み `Math.random()` で選択。職業リストは既存キャラクター職業フィールドの選択肢（`src/app/_components/CharacterForm.tsx` の職業リスト）を流用。能力値は `3D6×5`（STR/DEX等）をJS内でロール。外見メモ（髪色・目の色・体格）はそれぞれの形容詞テーブルからランダム組み合わせ。「このNPCを保存」ボタンで `supabase.from("npcs").insert(...)` に登録（既存 `npcs` テーブル流用）。「再生成」ボタンで即座に別のNPCを生成。追加DBなし（既存npcsテーブル流用）。
 **コミット:** `feat: random NPC quick generator for instant extras during improvised encounters`
 
-## [TODO] シナリオ参加招待コード発行 — 優先度: 中
+## [DONE] シナリオ参加招待コード発行 — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** KPがシナリオ専用の招待URLを発行し、PLがそのページにアクセスして自分のキャラクターを選ぶだけでシナリオ参加申請を送れる仕組み。現状はKPがScenarioParticipantsを手動登録する必要があり、募集からセッション準備までが繁雑。
 **実装ヒント:** `scenarios` テーブルに `recruit_token: text | null` カラムを追加し、`src/app/scenarios/[id]/invite/page.tsx` でトークン生成・QRコード表示（既存 `QrCodeShare.tsx` を流用）。`src/app/join/[token]/page.tsx` でPLが自分のキャラクターを選択し `supabase.from("scenario_participants").insert({scenario_id, character_id, attendance_status: "unconfirmed"})` で参加申請。既存 `RecruitShareButton.tsx` と連携。追加DBカラム1本（既存テーブル）。
