@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Upload, X, GitCompare, Trophy } from "lucide-react";
+import { Plus, Search, Upload, X, GitCompare, Trophy, PackageOpen } from "lucide-react";
 import { supabase, isSupabaseConfigured, Character, CharacterSkill, CharacterStatus, Tag } from "@/lib/supabase";
 import CharacterCard from "@/app/_components/CharacterCard";
 import CharacterCardSkeleton from "@/app/_components/CharacterCardSkeleton";
@@ -123,6 +123,13 @@ export default function CharactersPage() {
           >
             <Trophy size={16} />
             記念碑
+          </Link>
+          <Link
+            href="/characters/export-bulk"
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            <PackageOpen size={16} />
+            一括エクスポート
           </Link>
           <Link
             href="/characters/import"

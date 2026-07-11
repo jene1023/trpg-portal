@@ -1582,7 +1582,7 @@
 **実装ヒント:** `src/app/sessions/[id]/end-sync/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, san_current, luck_current)").eq("scenario_id", scenarioId)` で参加者リストと現在値を取得。各参加者行に HP・SAN・幸運の number input を表示（初期値は現在のDB値）。「一括反映」ボタンで変更分のみ `supabase.from("characters").update({hp_current, san_current, luck_current}).eq("id", charId)` をループ実行（Promise.all）。変更がなかった行はスキップ。`src/app/sessions/[id]/page.tsx` に「セッション終了・値を確定」リンクを追加。追加DBなし。
 **コミット:** `feat: session-end batch sync form to reconcile VTT stats back to portal characters`
 
-## [TODO] キャラクター一括エクスポート（ZIP+CSV） — 優先度: 中
+## [DONE] キャラクター一括エクスポート（ZIP+CSV） — 優先度: 中
 **対象:** PL / KP
 **概要:** キャラクター一覧から複数キャラを選択し、各キャラのJSONファイルをまとめてZIPでダウンロードできる機能。加えてキャンペーン参加者の能力値サマリーをCSVとして書き出すKP向けオプションも提供する。現状は1キャラずつの個別JSON出力のみで、引退キャラの一括バックアップや卓メンバー一覧出力に不便がある。
 **リサーチ根拠:** いあキャラPROはキャラクター一覧のCSVダウンロードをPRO機能として提供；Charaeno・キャラクターシートRPGは複数キャラ一括出力未対応のため差別化ポイントになる。コミュニティでも「キャラを全部バックアップしたい」という声がある。
