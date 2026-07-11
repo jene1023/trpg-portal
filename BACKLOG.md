@@ -1676,7 +1676,7 @@
 **実装ヒント:** `src/app/api/calendar/scenario/[scenarioId]/route.ts` を新規作成し、HTTPヘッダー `Content-Type: text/calendar; charset=utf-8` で `.ics` を返す。`scenarios` テーブルの `scheduled_at`・`title`・`description` をRFC 5545形式のVEVENT文字列に変換（外部ライブラリ不要、テンプレートリテラルで実装可能）。`src/app/scenarios/[id]/page.tsx` に「カレンダーに追加 (.ics)」ボタンを追加し、モバイルは `<a href="webcal://...">` でネイティブカレンダーアプリへ直接登録。キャンペーン全シナリオをまとめた VCALENDAR は `src/app/api/calendar/campaign/[campaignId]/route.ts` で提供し、キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）にも購読ボタンを追加。追加DBなし。
 **コミット:** `feat: iCal and webcal export for session schedules to sync with external calendars`
 
-## [TODO] シナリオシーン構成ボード（カンバン形式シーンフロー管理） — 優先度: 中
+## [DONE] シナリオシーン構成ボード（カンバン形式シーンフロー管理） — 優先度: 中
 **対象:** KP
 **概要:** シナリオを「オープニング→調査→クライマックス→エンディング」等のフェーズに分け、各フェーズにシーン（場所・出来事・分岐条件）をカードとして配置できるカンバンボード形式のシナリオ設計ツール。KPがシナリオ全体の流れを視覚的に把握し、抜け漏れや分岐の管理を効率化できる。
 **実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, title: text, description: text | null, phase: "opening"|"investigation"|"climax"|"ending"|"optional", sort_order: int, is_completed: bool DEFAULT false, linked_area_id: uuid | null, created_at）。`src/app/scenarios/[id]/scene-board/page.tsx` を "use client" で新規作成。phase ごとにカラムを横並びで表示し、各カラムにシーンカードを縦スクロールで一覧表示。ドラッグ＆ドロップ（HTML5 Drag and Drop API）でカードの並び替えと列間移動を実装し `supabase.from("scenario_scenes").update({ sort_order, phase })` で即時保存。セッション中は `is_completed` チェックでシーン進捗を追跡し達成済みカードをグレーアウト。`src/app/scenarios/[id]/page.tsx` に「シーンボード」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。追加DB1テーブル。

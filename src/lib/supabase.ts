@@ -1215,3 +1215,17 @@ export type SafetySetting = {
   user_id: string;
   created_at: string;
 };
+
+export type ScenePhase = "opening" | "investigation" | "climax" | "ending" | "optional";
+
+export type KanbanScene = {
+  id: string;
+  scenario_id: string;
+  title: string;
+  description: string | null;
+  phase: ScenePhase;
+  sort_order: number;
+  is_completed: boolean;
+  linked_area_id: string | null;
+  created_at: string;
+};
