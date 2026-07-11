@@ -1622,7 +1622,7 @@
 **実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, hp_current: int, san_current: int, luck: int, snapshot_at: timestamptz, created_at）。セッション終了時のVTT→ポータル一括反映（`sessions/[id]/end-sync/page.tsx`）の保存時に自動スナップショットを記録。`src/app/characters/[id]/stat-history/page.tsx` を新規作成（Server Component）。折れ線グラフはCSSグリッド＋SVGポリライン（外部ライブラリなし）で描画し、各点にセッションラベルのツールチップを表示。`src/app/characters/[id]/page.tsx` のサイドバーに「能力値推移」リンクを追加。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character stat history graph showing HP/SAN/luck trends across sessions`
 
-## [TODO] セッション後PLフィードバックフォーム（KP向け感想収集） — 優先度: 中
+## [DONE] セッション後PLフィードバックフォーム（KP向け感想収集） — 優先度: 中
 **対象:** KP / PL
 **概要:** セッション終了後にKPがPL向けの短いフィードバックフォームを発行し、PL各自が5段階評価＋自由コメントを送信できる機能。KPは集計結果（平均スコア・コメント一覧）を次回準備の参考にできる。現状フィードバックはDiscord等の外部チャンネルに依存しており、セッション記録と紐づいていない。
 **実装ヒント:** Supabaseに `session_feedbacks` テーブルを追加（id, session_id, from_user_id, rating: int check(1-5), comment: text | null, is_anonymous: bool default false, created_at）。`src/app/sessions/[id]/feedback/page.tsx` を "use client" で新規作成（PL向け入力フォーム）。`src/app/sessions/[id]/feedback/results/page.tsx` をKP限定（`user_id` 照合）で新規作成し、平均評価をスター表示・コメント一覧を表示。セッション詳細ページ（`src/app/sessions/[id]/page.tsx`）にKPは「フィードバック結果」リンク、PLには「フィードバックを送る」リンクを追加。フォームURLをセッションパックや Discord Webhook 経由でPLへ共有するボタンも添える。追加DB1テーブル。

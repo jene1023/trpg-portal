@@ -1181,3 +1181,13 @@ export type CharacterStatSnapshot = {
   snapshot_at: string;
   created_at: string;
 };
+
+export type SessionFeedbackEntry = {
+  id: string;
+  session_id: string;
+  from_user_id: string | null;
+  rating: number;
+  comment: string | null;
+  is_anonymous: boolean;
+  created_at: string;
+};
