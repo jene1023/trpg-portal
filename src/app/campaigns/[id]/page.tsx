@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -43,10 +43,15 @@ export default function CampaignDetailPage({ params }: Props) {
   const [savingStatus, setSavingStatus] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [wikiCount, setWikiCount] = useState<number>(0);
+  const [origin, setOrigin] = useState("");
 
   useEffect(() => {
     params.then(({ id }) => setCampaignId(id));
   }, [params]);
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   const load = useCallback(async (id: string) => {
     if (!isSupabaseConfigured) { setLoading(false); return; }
@@ -257,6 +262,23 @@ export default function CampaignDetailPage({ params }: Props) {
           <Gem size={15} />
           アーティファクト
         </Link>
+        <a
+          href={`/api/calendar/campaign/${campaignId}`}
+          download="campaign-sessions.ics"
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <Download size={15} />
+          カレンダー(.ics)
+        </a>
+        {origin && (
+          <a
+            href={`${origin.replace(/^https?/, "webcal")}/api/calendar/campaign/${campaignId}`}
+            className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+          >
+            <CalendarDays size={15} />
+            カレンダー購読
+          </a>
+        )}
       </div>
 
       {/* シナリオ一覧 */}

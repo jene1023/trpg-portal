@@ -1670,7 +1670,7 @@
 **実装ヒント:** Supabaseに `safety_settings` テーブルを追加（id, scenario_id, category: "gore"|"body_horror"|"romance"|"psychological"|"other", level: "line"|"veil"|"ok", user_id, created_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成。KPが事前にカテゴリ一覧を設定しPLへ招待URLで回答を促す。回答は匿名で集計し、全員が「line（禁止）」とした項目を赤ハイライト表示。セッション中は `supabase.channel('xcard-${scenarioId}').send({ type: 'broadcast', event: 'xcard', payload: {} })` でX-Card発動をブロードキャストし、全参加者画面に「⚠️ Xカード — 一時停止してください」モーダルを表示（既存の `GameClockEditor.tsx` のブロードキャストパターンを参考に）。`src/app/scenarios/[id]/page.tsx` に「安全ツール」リンクを追加。`src/lib/supabase.ts` に `SafetySetting` 型を追加。追加DB1テーブル。
 **コミット:** `feat: session safety tools with X-card realtime broadcast and Lines & Veils consent form`
 
-## [TODO] 外部カレンダー連携（iCal / Google Calendar エクスポート） — 優先度: 中
+## [DONE] 外部カレンダー連携（iCal / Google Calendar エクスポート） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** スケジュール済みのセッション予定を `.ics` 形式（iCalendar）でダウンロードでき、Google Calendar・Apple Calendar・Outlook 等のカレンダーアプリへ直接インポートできる機能。セッション管理を既存カレンダーと統合し、他の予定との日程衝突を防ぐ。キャンペーン全セッションを `webcal://` URLで常時購読するオプションも提供する。
 **実装ヒント:** `src/app/api/calendar/scenario/[scenarioId]/route.ts` を新規作成し、HTTPヘッダー `Content-Type: text/calendar; charset=utf-8` で `.ics` を返す。`scenarios` テーブルの `scheduled_at`・`title`・`description` をRFC 5545形式のVEVENT文字列に変換（外部ライブラリ不要、テンプレートリテラルで実装可能）。`src/app/scenarios/[id]/page.tsx` に「カレンダーに追加 (.ics)」ボタンを追加し、モバイルは `<a href="webcal://...">` でネイティブカレンダーアプリへ直接登録。キャンペーン全シナリオをまとめた VCALENDAR は `src/app/api/calendar/campaign/[campaignId]/route.ts` で提供し、キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）にも購読ボタンを追加。追加DBなし。

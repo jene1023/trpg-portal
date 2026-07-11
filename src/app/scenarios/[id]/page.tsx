@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target, BookMarked } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
@@ -54,6 +55,10 @@ export default async function ScenarioDetailPage({ params }: Props) {
   const { id } = await params;
 
   if (!isSupabaseConfigured) notFound();
+
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const webcalScenarioUrl = `webcal://${host}/api/calendar/scenario/${id}`;
 
   const { data: scenario } = await supabase
     .from("scenarios")
@@ -169,12 +174,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
               })}
             </div>
             <a
-              href={`/api/calendar/ical?id=${id}`}
+              href={`/api/calendar/scenario/${id}`}
               download="trpg-session.ics"
               className="flex items-center gap-1 rounded-full border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
             >
               <Download size={11} />
-              カレンダーに登録
+              .ics
+            </a>
+            <a
+              href={webcalScenarioUrl}
+              className="flex items-center gap-1 rounded-full border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+            >
+              <CalendarClock size={11} />
+              カレンダーに追加
             </a>
           </div>
         )}
