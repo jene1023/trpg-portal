@@ -894,6 +894,63 @@ body {
   }
 }
 
+/* ヒーロー燭台の炎から漂う金色の火の粉: 左側の粒子がゆっくり右斜め上へ舞い上がる */
+@keyframes coc-ember-l {
+  0%   { opacity: 0; transform: translateY(0px)   translateX(0px)  scale(1.0); }
+  18%  { opacity: 0.68; }
+  82%  { opacity: 0.28; }
+  100% { opacity: 0; transform: translateY(-52px) translateX(6px)  scale(0.5); }
+}
+
+/* 右側の粒子: 左斜め上へ流れ、より小さく儚く消える */
+@keyframes coc-ember-r {
+  0%   { opacity: 0; transform: translateY(0px)   translateX(0px)  scale(1.0); }
+  18%  { opacity: 0.50; }
+  82%  { opacity: 0.18; }
+  100% { opacity: 0; transform: translateY(-38px) translateX(-5px) scale(0.4); }
+}
+
+/* 火の粉コンテナ: ヒーローパネルを覆う透明な絶対配置レイヤー */
+.coc-hero-embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.coc-hero-embers::before,
+.coc-hero-embers::after {
+  content: '•';
+  position: absolute;
+  font-size: 6px;
+  line-height: 1;
+  color: var(--color-coc-gold);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.coc-hero-embers::before {
+  bottom: 28%;
+  left: 22%;
+}
+
+.coc-hero-embers::after {
+  bottom: 22%;
+  right: 26%;
+  font-size: 5px;
+  color: var(--color-coc-gold-dim);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-hero-embers::before {
+    animation: coc-ember-l 7s ease-out 1.8s infinite;
+  }
+  .coc-hero-embers::after {
+    animation: coc-ember-r 9s ease-out 5.0s infinite;
+  }
+}
+
 /* ヒーローパネル環境光呼吸: ランタンの温かい光が古扉の隙間から静かに滲み出るように */
 /* 内側のアニメーション群（タイトル11s・サブタイトル8s・引用7s）と周期をずらして位相ドリフトを生む */
 @keyframes coc-hero-breathe {

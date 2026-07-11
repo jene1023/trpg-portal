@@ -158,6 +158,8 @@ export default async function HomePage() {
             aria-hidden="true"
           >&rdquo;</span>
         </p>
+        {/* 燭台の炎から漂う火の粉: position:absolute なのでレイアウトに影響なし */}
+        <div className="coc-hero-embers" aria-hidden="true" />
       </div>
 
       {/* ヒーローとタイルの区切り */}
