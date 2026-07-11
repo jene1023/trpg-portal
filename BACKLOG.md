@@ -1610,7 +1610,7 @@
 **実装ヒント:** `dice_macros` テーブルを追加（id, owner_id, campaign_id nullable, name: text, expression: text, description: text, is_public: bool, created_at）。`src/app/dice/macros/page.tsx` を "use client" で新規作成し CRUD UI を実装。ダイス式は既存の `src/lib/dice.ts`（または同等）のパーサーで評価し、`{STR}` `{DEX}` 等のキャラクターパラメータ参照を `character` オブジェクトから動的置換。`src/components/DiceRoller.tsx` のサイドパネルに「マイマクロ」タブを追加してマクロ一覧を表示・即時実行できるように拡張。追加DB1テーブル。
 **コミット:** `feat: custom dice macro save and campaign-wide sharing for quick roll access`
 
-## [TODO] シナリオ目標トラッカー（メイン/サブ達成フラグ管理） — 優先度: 高
+## [DONE] シナリオ目標トラッカー（メイン/サブ達成フラグ管理） — 優先度: 高
 **対象:** KP
 **概要:** KPがシナリオ準備時にメイン目標・サブ目標をリスト化しておき、セッション中に達成済みをチェックしながら進捗を可視化できる機能。現状のシナリオノートは自由テキストのみで、目標の達成状況を追跡するUIがない。
 **実装ヒント:** Supabaseに `scenario_objectives` テーブルを追加（id, scenario_id, title: text, type: "main"|"sub", is_achieved: bool, achieved_at: timestamptz | null, sort_order: int, created_at）。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。各目標カードにチェックボックスを配置し、チェック時に `supabase.from("scenario_objectives").update({ is_achieved: true, achieved_at: new Date().toISOString() })` を実行。達成率（達成数/総数）をプログレスバー（CSS width%）で画面上部に表示。`src/app/scenarios/[id]/page.tsx` のKP向けダッシュボードに「目標トラッカー」リンクと達成率バッジを追加。`src/lib/supabase.ts` に `ScenarioObjective` 型を追加。追加DB1テーブル。

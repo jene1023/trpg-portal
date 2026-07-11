@@ -1157,3 +1157,16 @@ export type DiceMacro = {
   is_public: boolean;
   created_at: string;
 };
+
+export type ScenarioObjectiveType = "main" | "sub";
+
+export type ScenarioObjective = {
+  id: string;
+  scenario_id: string;
+  title: string;
+  type: ScenarioObjectiveType;
+  is_achieved: boolean;
+  achieved_at: string | null;
+  sort_order: number;
+  created_at: string;
+};

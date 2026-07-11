@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -74,6 +74,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { count: feedbackCount },
     { data: safetySettings },
     { count: scheduleProposalCount },
+    { data: objectiveRows },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status, hook_text").eq("scenario_id", id),
@@ -86,7 +87,11 @@ export default async function ScenarioDetailPage({ params }: Props) {
     supabase.from("player_feedback").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_safety_settings").select("x_card_enabled").eq("scenario_id", id).single(),
     supabase.from("schedule_proposals").select("*", { count: "exact", head: true }).eq("scenario_id", id),
+    supabase.from("scenario_objectives").select("is_achieved").eq("scenario_id", id),
   ]);
+
+  const objectiveTotal = objectiveRows?.length ?? 0;
+  const objectiveAchieved = objectiveRows?.filter((o) => o.is_achieved).length ?? 0;
 
   const safetyConfigured = safetySettings !== null;
   const xCardEnabled = safetySettings?.x_card_enabled ?? false;
@@ -659,6 +664,27 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-gold">準備チェックリスト</p>
               <p className="text-xs text-coc-muted">セッション前の準備タスクをカスタム登録・テンプレート再利用</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/objectives`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Target size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">
+                目標トラッカー
+                {objectiveTotal > 0 && (
+                  <span className="ml-2 text-xs font-normal text-coc-muted">
+                    {objectiveAchieved}/{objectiveTotal}達成
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-coc-muted">メイン・サブ目標をリスト化し達成率をプログレスバーで可視化</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
