@@ -1170,3 +1170,14 @@ export type ScenarioObjective = {
   sort_order: number;
   created_at: string;
 };
+
+export type CharacterStatSnapshot = {
+  id: string;
+  character_id: string;
+  session_label: string | null;
+  hp_current: number;
+  san_current: number;
+  luck: number;
+  snapshot_at: string;
+  created_at: string;
+};

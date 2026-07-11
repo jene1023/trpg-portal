@@ -1616,7 +1616,7 @@
 **実装ヒント:** Supabaseに `scenario_objectives` テーブルを追加（id, scenario_id, title: text, type: "main"|"sub", is_achieved: bool, achieved_at: timestamptz | null, sort_order: int, created_at）。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。各目標カードにチェックボックスを配置し、チェック時に `supabase.from("scenario_objectives").update({ is_achieved: true, achieved_at: new Date().toISOString() })` を実行。達成率（達成数/総数）をプログレスバー（CSS width%）で画面上部に表示。`src/app/scenarios/[id]/page.tsx` のKP向けダッシュボードに「目標トラッカー」リンクと達成率バッジを追加。`src/lib/supabase.ts` に `ScenarioObjective` 型を追加。追加DB1テーブル。
 **コミット:** `feat: scenario objective tracker with main/sub goal checklist and progress bar`
 
-## [TODO] PLキャラクター能力値推移グラフ（セッション間の変化可視化） — 優先度: 中
+## [DONE] PLキャラクター能力値推移グラフ（セッション間の変化可視化） — 優先度: 中
 **対象:** PL
 **概要:** キャンペーンを通じたキャラクターのHP・SAN・幸運の変化を折れ線グラフで可視化する機能。セッションごとの「あの時SANが激減した」「HPがじわじわ回復した」軌跡を一望でき、キャラクターの旅路を振り返れる。
 **実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, hp_current: int, san_current: int, luck: int, snapshot_at: timestamptz, created_at）。セッション終了時のVTT→ポータル一括反映（`sessions/[id]/end-sync/page.tsx`）の保存時に自動スナップショットを記録。`src/app/characters/[id]/stat-history/page.tsx` を新規作成（Server Component）。折れ線グラフはCSSグリッド＋SVGポリライン（外部ライブラリなし）で描画し、各点にセッションラベルのツールチップを表示。`src/app/characters/[id]/page.tsx` のサイドバーに「能力値推移」リンクを追加。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。

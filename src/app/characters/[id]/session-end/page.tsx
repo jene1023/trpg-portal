@@ -127,8 +127,25 @@ export default function SessionEndPage({ params }: Props) {
       hp_loss: sessionForm.hp_loss,
       played_at: sessionForm.played_at || null,
     });
+    if (!error) {
+      const { data: charData } = await supabase
+        .from("characters")
+        .select("hp_current, san_current, luck")
+        .eq("id", characterId)
+        .single();
+      if (charData) {
+        await supabase.from("character_stat_snapshots").insert({
+          character_id: characterId,
+          session_label: sessionForm.title.trim(),
+          hp_current: charData.hp_current,
+          san_current: charData.san_current,
+          luck: charData.luck,
+          snapshot_at: new Date().toISOString(),
+        });
+      }
+      setSessionSaved(true);
+    }
     setSessionSaving(false);
-    if (!error) setSessionSaved(true);
   }
 
   async function rollGrowth(skill: CharacterSkill) {
