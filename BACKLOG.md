@@ -1589,7 +1589,7 @@
 **実装ヒント:** `src/app/characters/export-bulk/page.tsx` を "use client" で新規作成。`supabase.from("characters").select("*").eq("user_id", userId)` でキャラ一覧取得 → チェックボックスで複数選択。選択後「ZIPでダウンロード」ボタンで `fflate`（軽量WASMレスzip）または `jszip` を使って各キャラのJSONをまとめて `characters-backup.zip` として `URL.createObjectURL` でダウンロード。CSVはKP権限所持者のみ表示し `papaparse` の `Papa.unparse()` で能力値列（STR/DEX/INT/…/HP/SAN）を書き出す。`src/app/characters/page.tsx` に「一括エクスポート」ボタンを追加。追加DBなし。
 **コミット:** `feat: bulk character export as ZIP (JSON per char) and CSV stat summary for KP`
 
-## [TODO] Webプッシュ通知（セッション前日・当日アラート） — 優先度: 中
+## [DONE] Webプッシュ通知（セッション前日・当日アラート） — 優先度: 中
 **対象:** PL / KP
 **概要:** ブラウザのWeb Push API（Service Worker + Push API）を使い、スケジュール済みセッションの前日・当日にデスクトップ／Androidへプッシュ通知を送る機能。現行のメールリマインダー（Supabase Edge Function + Resend）を補完し、メールを見逃すユーザーにも届くようにする。
 **リサーチ根拠:** DiscordやFoundry VTTのカレンダープラグインはセッション直前通知が人気機能；Web Push対応によりPWAとしての完成度が上がり、特にAndroidユーザーの利便性が向上する。メールより開封率が高くリマインダーの実効性が高まる。

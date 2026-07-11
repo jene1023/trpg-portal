@@ -1137,3 +1137,12 @@ export type CharacterTransferRequest = {
   expires_at: string;
   created_at: string;
 };
+
+export type PushSubscription = {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
+};
