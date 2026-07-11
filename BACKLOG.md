@@ -1548,7 +1548,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(hp_max, san_max, character_skills(*))").eq("scenario_id", id)` で参加者データ取得。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得。パーティー平均HP/SANと全クリーチャーのSAN喪失数値の合計を比較し「安全/標準/危険/絶望的」の4段階スコアをバッジで表示。主要技能（回避・幸運等）の平均値を棒グラフ（CSSのみ）で可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）と KP準備チェックリスト（`preflight/page.tsx`）に「難易度試算」リンクを追加。追加DBなし。
 **コミット:** `feat: scenario difficulty assessment tool comparing party stats vs creature threats`
 
-## [TODO] キャラクター感情・心情ジャーナル — 優先度: 低
+## [DONE] キャラクター感情・心情ジャーナル — 優先度: 低
 **対象:** PL
 **概要:** キャラクターの「その時の気持ち・心情・独白」をセッションごとに短文日記として記録できる機能。既存のセッションログ（`sessions`テーブル）は出来事の事実記録だが、こちらはキャラクター視点の一人称ロールプレイ的な感情メモに特化する。キャラクターの内面の変化をセッションをまたいで振り返れる。
 **実装ヒント:** Supabaseに `character_journals` テーブルを追加（id, character_id, session_label: text | null, mood: "normal"|"anxious"|"frightened"|"hopeful"|"despair"|"euphoric", entry: text, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、created_at降順）。各エントリはmoodに応じた背景カラーのカードで表示（anxious=黄、frightened=橙、despair=灰、hopeful=緑等）。`mood` はemojiアイコン付きselectで選択。既存の `src/app/characters/[id]/quick-notes/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心情日記」リンクを追加。`src/lib/supabase.ts` に `CharacterJournal` 型を追加。追加DB1テーブル。

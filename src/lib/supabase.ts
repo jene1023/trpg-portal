@@ -1113,3 +1113,14 @@ export type CampaignArtifact = {
   notes: string | null;
   created_at: string;
 };
+
+export type JournalMood = "normal" | "anxious" | "frightened" | "hopeful" | "despair" | "euphoric";
+
+export type CharacterJournal = {
+  id: string;
+  character_id: string;
+  session_label: string | null;
+  mood: JournalMood;
+  entry: string;
+  created_at: string;
+};
