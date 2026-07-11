@@ -204,7 +204,7 @@ export default async function HomePage() {
               今週の予定
             </h2>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 coc-stagger-grid">
             {upcomingSessions.map((scenario) => {
               const date = scenario.next_session_at
                 ? new Date(scenario.next_session_at).toLocaleDateString("ja-JP", {
@@ -271,7 +271,7 @@ export default async function HomePage() {
               すべて表示
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 coc-stagger-grid">
             {ongoingScenarios.map((scenario) => {
               const nextDate = scenario.next_session_at
                 ? new Date(scenario.next_session_at).toLocaleDateString("ja-JP", {
@@ -284,7 +284,7 @@ export default async function HomePage() {
                 <Link
                   key={scenario.id}
                   href={`/scenarios/${scenario.id}`}
-                  className="group relative rounded-lg border border-coc-border coc-card-bg p-4 space-y-2 coc-tile-shimmer transition-all duration-300 ease-out hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.20),inset_0_1px_0_rgba(201,133,58,0.08)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]"
+                  className="group coc-corner-frame relative rounded-lg border border-coc-border coc-card-bg p-4 space-y-2 coc-tile-shimmer transition-all duration-300 ease-out hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.20),inset_0_1px_0_rgba(201,133,58,0.08)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]"
                 >
                   <p className="font-cinzel text-sm font-semibold text-coc-text group-hover:text-coc-gold transition-colors">
                     {scenario.title}
@@ -313,7 +313,7 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 coc-stagger-grid">
             {recentSessions.map((session) => {
               const date = session.created_at
                 ? new Date(session.created_at).toLocaleDateString("ja-JP", {
@@ -353,7 +353,7 @@ export default async function HomePage() {
               アクティブな狂気状態
             </h2>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 coc-stagger-grid">
             {activeMadness.map((record) => (
               <Link
                 key={record.id}
