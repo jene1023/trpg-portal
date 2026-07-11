@@ -1575,7 +1575,7 @@
 **実装ヒント:** Supabaseに `character_transfer_requests` テーブルを追加（id, character_id, from_user_id, to_email: text, token: text, status: "pending"|"accepted"|"rejected", expires_at, created_at）。`src/app/characters/[id]/transfer/page.tsx` を "use client" で新規作成（メールアドレス入力フォーム）。送信時に `crypto.randomUUID()` でトークン生成 → テーブルにinsert → Supabase Edge Function（`supabase/functions/send-transfer-email/`）経由で受信者へ確認メール送信。受信者が承認リンク（`/characters/transfer/accept?token=...`）を踏むと `characters.user_id` を更新し元所有者のアクセスを削除。`src/app/characters/[id]/page.tsx` の所有者メニューに「別ユーザーに譲渡」を追加。追加DB1テーブル＋Edge Function1本。
 **コミット:** `feat: character transfer flow to hand off explorer ownership to another user`
 
-## [TODO] セッション終了時VTT→ポータル一括反映 — 優先度: 中
+## [DONE] セッション終了時VTT→ポータル一括反映 — 優先度: 中
 **対象:** PL / KP
 **概要:** セッション終了時にVTT（ここフォリア・ユドナリウム）上で変動したHP・SAN・幸運値を参加キャラクター分まとめて手入力し、ポータルのキャラクターシートへ一括反映するセッション締め処理画面。リアルタイム同期（Supabase Realtime）はセッション中の連携だが、VTTを使わない卓や同期ミスが生じた場合の「終了時確定」フローとして機能する。
 **リサーチ根拠:** VTT側とポータル側の値がズレる問題はコミュニティで頻出の不満；特にモバイルでここフォリアを操作しながらリアルタイム連携が取れなかったセッション後のデータ整合が煩雑との声がある。
