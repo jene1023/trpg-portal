@@ -69,6 +69,20 @@ body {
   50%       { box-shadow: 0 0 14px rgba(170, 80, 240, 0.85); }
 }
 
+/* 狂気バッジ グリッチ: 精神の崩壊が文字を引き裂くように瞬間的に歪む */
+@keyframes coc-insane-glitch {
+  0%, 83%, 97%, 100% {
+    transform: translate(0, 0) skewX(0deg);
+    opacity: 1;
+  }
+  84% { transform: translate(-3px, 0) skewX(-5deg); opacity: 0.80; }
+  86% { transform: translate(3px, 0)  skewX(4deg);  opacity: 0.90; }
+  88% { transform: translate(-2px, 0) skewX(-3deg); opacity: 0.75; }
+  90% { transform: translate(2px, 0)  skewX(2deg);  opacity: 0.95; }
+  92% { transform: translate(-1px, 0) skewX(-1deg); opacity: 1.00; }
+  94% { transform: translate(0, 0)    skewX(0deg);  opacity: 1.00; }
+}
+
 /* 引退バッジ: 往年の栄光が緩やかに燻る温かいセピアグロー */
 @keyframes coc-retired-pulse {
   0%, 100% { box-shadow: 0 0 4px rgba(100, 85, 60, 0.20); }
@@ -83,7 +97,9 @@ body {
     animation: coc-dead-pulse 3.2s ease-in-out infinite;
   }
   .coc-badge-insane {
-    animation: coc-insane-pulse 2.4s ease-in-out infinite;
+    animation:
+      coc-insane-pulse  2.4s ease-in-out              infinite,
+      coc-insane-glitch 7.0s cubic-bezier(0.4, 0, 0.6, 1) 1.5s infinite;
   }
   .coc-badge-retired {
     animation: coc-retired-pulse 5.5s ease-in-out infinite;
