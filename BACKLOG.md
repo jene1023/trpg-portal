@@ -1553,3 +1553,31 @@
 **概要:** キャラクターの「その時の気持ち・心情・独白」をセッションごとに短文日記として記録できる機能。既存のセッションログ（`sessions`テーブル）は出来事の事実記録だが、こちらはキャラクター視点の一人称ロールプレイ的な感情メモに特化する。キャラクターの内面の変化をセッションをまたいで振り返れる。
 **実装ヒント:** Supabaseに `character_journals` テーブルを追加（id, character_id, session_label: text | null, mood: "normal"|"anxious"|"frightened"|"hopeful"|"despair"|"euphoric", entry: text, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、created_at降順）。各エントリはmoodに応じた背景カラーのカードで表示（anxious=黄、frightened=橙、despair=灰、hopeful=緑等）。`mood` はemojiアイコン付きselectで選択。既存の `src/app/characters/[id]/quick-notes/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心情日記」リンクを追加。`src/lib/supabase.ts` に `CharacterJournal` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character emotion journal for in-character roleplay diary entries`
+
+## [TODO] 統合キャラクター作成ウィザード — 優先度: 中
+**対象:** PL
+**概要:** 能力値ロール・職業選択・技能ポイント配分・背景設定・アイコン設定を一画面のステップ形式でガイドするキャラクター作成ウィザード。現在は各機能が個別ページに分散しており初回ユーザーが迷いやすい。PrismScroll CthulhuやQuest Portalのような「完了まで誘導する一本道フロー」を実現する。
+**リサーチ根拠:** PrismScroll Cthulhuのステップ別作成画面・Quest Portalのモバイル向け作成UXが好評；国内ではいあキャラでも作成ステップの視覚化が要望として挙がっている。
+**実装ヒント:** `src/app/characters/new/wizard/page.tsx` を "use client" で新規作成。ステップ状態を `useState<number>` で管理（0:基本情報→1:能力値ロール→2:職業選択→3:技能配分→4:背景・メモ→5:完了確認）。各ステップは既存コンポーネント（`AbilityRoller`、`OccupationSelector`、`SkillCalculator`等）を再利用。ステップ間でのデータ引き継ぎは `useReducer` で一括管理し、最終ステップで `supabase.from("characters").insert(...)` + `supabase.from("character_skills").insert(...)` を一括実行。プログレスバー（CSS width %）でステップ位置を可視化。`src/app/characters/new/page.tsx` に「ウィザードで作成」ボタンを追加。追加DBなし。
+**コミット:** `feat: unified character creation wizard with guided step-by-step flow`
+
+## [TODO] ここフォリアClipboard API直接出力 — 優先度: 低
+**対象:** PL / KP
+**概要:** 既存のここフォリア用コマごとJSONエクスポート機能に「クリップボードへコピー」ボタンを追加し、ここフォリアの「コマのインポート」画面にそのままペーストできるようにする。現在はテキストエリアに表示されたJSONを手動選択→コピーする必要があり、モバイルでは特に煩雑。
+**リサーチ根拠:** いあキャラがユーザー要望でここフォリア出力のクリップボードコピー機能を追加した実績あり；Clipboard APIはモダンブラウザ標準対応済みで実装コストが低い。
+**実装ヒント:** 既存の `src/app/characters/[id]/export/cocofolia/page.tsx`（またはその近傍のコンポーネント）に `<button onClick={() => navigator.clipboard.writeText(json)}>クリップボードにコピー</button>` を追加。コピー成功時は `useState` で「コピー済み ✓」に一時的にラベル切り替え（setTimeout 2秒）。HTTPS環境限定のため `navigator.clipboard` が undefined の場合は従来のテキストエリア選択にフォールバック（`document.execCommand("copy")` は非推奨なので非対応時はメッセージ表示のみ）。追加DBなし・追加ファイルなし（既存ファイルへの数行追加のみ）。
+**コミット:** `feat: clipboard copy button for Cocofolia piece JSON export`
+
+## [TODO] 探索者ユーザー間譲渡 — 優先度: 中
+**対象:** PL
+**概要:** キャラクターの所有権を別ユーザーアカウントにメールベースで譲渡できる機能。PLが卓から離脱する際に引き継ぎ先PLへキャラクターを渡したり、KPがNPCを引き継いでもらう場面で活用できる。いあキャラPROのキャラクター譲渡機能に相当。
+**リサーチ根拠:** いあキャラPROが提供するキャラクター譲渡機能がPL間の引き継ぎシーンで重宝されている；Charaeno含む他ツールはアカウント間移動手段がなくユーザーの不満点の一つ。
+**実装ヒント:** Supabaseに `character_transfer_requests` テーブルを追加（id, character_id, from_user_id, to_email: text, token: text, status: "pending"|"accepted"|"rejected", expires_at, created_at）。`src/app/characters/[id]/transfer/page.tsx` を "use client" で新規作成（メールアドレス入力フォーム）。送信時に `crypto.randomUUID()` でトークン生成 → テーブルにinsert → Supabase Edge Function（`supabase/functions/send-transfer-email/`）経由で受信者へ確認メール送信。受信者が承認リンク（`/characters/transfer/accept?token=...`）を踏むと `characters.user_id` を更新し元所有者のアクセスを削除。`src/app/characters/[id]/page.tsx` の所有者メニューに「別ユーザーに譲渡」を追加。追加DB1テーブル＋Edge Function1本。
+**コミット:** `feat: character transfer flow to hand off explorer ownership to another user`
+
+## [TODO] セッション終了時VTT→ポータル一括反映 — 優先度: 中
+**対象:** PL / KP
+**概要:** セッション終了時にVTT（ここフォリア・ユドナリウム）上で変動したHP・SAN・幸運値を参加キャラクター分まとめて手入力し、ポータルのキャラクターシートへ一括反映するセッション締め処理画面。リアルタイム同期（Supabase Realtime）はセッション中の連携だが、VTTを使わない卓や同期ミスが生じた場合の「終了時確定」フローとして機能する。
+**リサーチ根拠:** VTT側とポータル側の値がズレる問題はコミュニティで頻出の不満；特にモバイルでここフォリアを操作しながらリアルタイム連携が取れなかったセッション後のデータ整合が煩雑との声がある。
+**実装ヒント:** `src/app/sessions/[id]/end-sync/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, san_current, luck_current)").eq("scenario_id", scenarioId)` で参加者リストと現在値を取得。各参加者行に HP・SAN・幸運の number input を表示（初期値は現在のDB値）。「一括反映」ボタンで変更分のみ `supabase.from("characters").update({hp_current, san_current, luck_current}).eq("id", charId)` をループ実行（Promise.all）。変更がなかった行はスキップ。`src/app/sessions/[id]/page.tsx` に「セッション終了・値を確定」リンクを追加。追加DBなし。
+**コミット:** `feat: session-end batch sync form to reconcile VTT stats back to portal characters`
