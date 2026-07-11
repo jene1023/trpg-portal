@@ -1203,3 +1203,15 @@ export type NpcAppearance = {
   disposition_change: NpcDispositionType | null;
   created_at: string;
 };
+
+export type SafetyCategory = "gore" | "body_horror" | "romance" | "psychological" | "other";
+export type SafetyLevel = "line" | "veil" | "ok";
+
+export type SafetySetting = {
+  id: string;
+  scenario_id: string;
+  category: SafetyCategory;
+  level: SafetyLevel;
+  user_id: string;
+  created_at: string;
+};

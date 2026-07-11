@@ -1664,7 +1664,7 @@
 **実装ヒント:** Supabaseに `npc_appearances` テーブルを追加（id, npc_id: uuid, scenario_id: uuid, role_in_scenario: text | null, disposition_change: text | null, created_at）。`src/app/npcs/[id]/appearances/page.tsx` を "use client" で新規作成（シナリオ名リンク付き一覧 + 追加フォーム）。各エントリに既存 `NpcDisposition` の値（friendly/neutral/hostile）を参照し、登場シナリオ間での立場変化を色バッジで表示。`src/app/npcs/[id]/page.tsx` に「登場履歴」リンクを追加。`src/lib/supabase.ts` に `NpcAppearance` 型を追加。追加DB1テーブル。
 **コミット:** `feat: NPC cross-scenario appearance history for recurring character tracking`
 
-## [TODO] セッション安全ツール（X-Card・ラインズ＆ベールズ設定） — 優先度: 高
+## [DONE] セッション安全ツール（X-Card・ラインズ＆ベールズ設定） — 優先度: 高
 **対象:** KP / PL / 共通
 **概要:** TRPGセッション前にKPとPL全員が不快なコンテンツ領域（ゴア表現・恐怖演出の強度・心理的暗示等）を匿名投票形式で確認し合う安全ツール。セッション中にX-Card（緊急中断申告）をリアルタイムで全画面通知する機能も含む。プレイヤー間の心理的安全を確保し、セッション品質を向上させる。
 **実装ヒント:** Supabaseに `safety_settings` テーブルを追加（id, scenario_id, category: "gore"|"body_horror"|"romance"|"psychological"|"other", level: "line"|"veil"|"ok", user_id, created_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成。KPが事前にカテゴリ一覧を設定しPLへ招待URLで回答を促す。回答は匿名で集計し、全員が「line（禁止）」とした項目を赤ハイライト表示。セッション中は `supabase.channel('xcard-${scenarioId}').send({ type: 'broadcast', event: 'xcard', payload: {} })` でX-Card発動をブロードキャストし、全参加者画面に「⚠️ Xカード — 一時停止してください」モーダルを表示（既存の `GameClockEditor.tsx` のブロードキャストパターンを参考に）。`src/app/scenarios/[id]/page.tsx` に「安全ツール」リンクを追加。`src/lib/supabase.ts` に `SafetySetting` 型を追加。追加DB1テーブル。
