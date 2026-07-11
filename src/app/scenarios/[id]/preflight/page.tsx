@@ -14,6 +14,7 @@ import {
   Shield,
   ExternalLink,
   Package,
+  Gauge,
 } from "lucide-react";
 import {
   supabase,
@@ -508,6 +509,16 @@ export default async function ScenarioPreflightPage({ params }: Props) {
           <div className="flex items-center gap-2">
             <FileText size={16} className="text-coc-gold" />
             <span>共有メモを開く</span>
+          </div>
+          <span className="text-coc-gold">→</span>
+        </Link>
+        <Link
+          href={`/scenarios/${id}/difficulty`}
+          className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Gauge size={16} className="text-coc-gold" />
+            <span>難易度試算を開く</span>
           </div>
           <span className="text-coc-gold">→</span>
         </Link>

@@ -1542,7 +1542,7 @@
 **実装ヒント:** Supabaseに `party_inventory` テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item"|"key_item", description: text | null, current_holder_character_id: uuid | null, created_at）。`src/app/scenarios/[id]/party-inventory/page.tsx` を "use client" で新規作成（アイテム一覧＋追加フォーム）。各アイテムカードに「所持者を変更」ドロップダウン（`scenario_participants` から参加者リスト取得）を設置し `supabase.from("party_inventory").update({ current_holder_character_id })` で更新。所持者未割当のアイテムは「共有庫」セクションに表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有アイテム庫」リンクを追加。`src/lib/supabase.ts` に `PartyInventoryItem` 型を追加。追加DB1テーブル。
 **コミット:** `feat: party shared inventory with per-character item assignment for scenario`
 
-## [TODO] シナリオ難易度アセスメントツール — 優先度: 中
+## [DONE] シナリオ難易度アセスメントツール — 優先度: 中
 **対象:** KP
 **概要:** シナリオ参加キャラクターの平均HP/SAN/代表技能値と、登録クリーチャーのSAN喪失式・ダメージを自動集計して「難易度スコア」と「推奨SAN準備量」を算出するKP向け試算ツール。セッション準備段階で難易度調整の判断材料を提供する。追加DBなし（既存 `scenario_participants`, `characters`, `creatures` テーブルを流用）。
 **実装ヒント:** `src/app/scenarios/[id]/difficulty/page.tsx` を新規作成（Server Component）。`supabase.from("scenario_participants").select("*, characters(hp_max, san_max, character_skills(*))").eq("scenario_id", id)` で参加者データ取得。`supabase.from("creatures").select("*").eq("scenario_id", id)` でクリーチャー取得。パーティー平均HP/SANと全クリーチャーのSAN喪失数値の合計を比較し「安全/標準/危険/絶望的」の4段階スコアをバッジで表示。主要技能（回避・幸運等）の平均値を棒グラフ（CSSのみ）で可視化。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）と KP準備チェックリスト（`preflight/page.tsx`）に「難易度試算」リンクを追加。追加DBなし。

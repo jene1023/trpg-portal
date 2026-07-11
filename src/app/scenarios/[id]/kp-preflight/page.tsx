@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Shield,
   ClipboardList,
+  Gauge,
 } from "lucide-react";
 import { supabase, isSupabaseConfigured, AttendanceStatus } from "@/lib/supabase";
 import HandoutDistributeToggle from "@/app/_components/HandoutDistributeToggle";
@@ -427,6 +428,16 @@ export default async function KpPreflightPage({ params }: Props) {
           <div className="flex items-center gap-2">
             <ListChecks size={16} className="text-coc-gold" />
             <span>GMスクリーンを開く</span>
+          </div>
+          <span className="text-coc-gold">→</span>
+        </Link>
+        <Link
+          href={`/scenarios/${id}/difficulty`}
+          className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 text-sm text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Gauge size={16} className="text-coc-gold" />
+            <span>難易度試算を開く</span>
           </div>
           <span className="text-coc-gold">→</span>
         </Link>
