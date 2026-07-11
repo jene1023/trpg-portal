@@ -1581,3 +1581,31 @@
 **リサーチ根拠:** VTT側とポータル側の値がズレる問題はコミュニティで頻出の不満；特にモバイルでここフォリアを操作しながらリアルタイム連携が取れなかったセッション後のデータ整合が煩雑との声がある。
 **実装ヒント:** `src/app/sessions/[id]/end-sync/page.tsx` を "use client" で新規作成。`supabase.from("scenario_participants").select("*, characters(id, name, hp_current, san_current, luck_current)").eq("scenario_id", scenarioId)` で参加者リストと現在値を取得。各参加者行に HP・SAN・幸運の number input を表示（初期値は現在のDB値）。「一括反映」ボタンで変更分のみ `supabase.from("characters").update({hp_current, san_current, luck_current}).eq("id", charId)` をループ実行（Promise.all）。変更がなかった行はスキップ。`src/app/sessions/[id]/page.tsx` に「セッション終了・値を確定」リンクを追加。追加DBなし。
 **コミット:** `feat: session-end batch sync form to reconcile VTT stats back to portal characters`
+
+## [TODO] キャラクター一括エクスポート（ZIP+CSV） — 優先度: 中
+**対象:** PL / KP
+**概要:** キャラクター一覧から複数キャラを選択し、各キャラのJSONファイルをまとめてZIPでダウンロードできる機能。加えてキャンペーン参加者の能力値サマリーをCSVとして書き出すKP向けオプションも提供する。現状は1キャラずつの個別JSON出力のみで、引退キャラの一括バックアップや卓メンバー一覧出力に不便がある。
+**リサーチ根拠:** いあキャラPROはキャラクター一覧のCSVダウンロードをPRO機能として提供；Charaeno・キャラクターシートRPGは複数キャラ一括出力未対応のため差別化ポイントになる。コミュニティでも「キャラを全部バックアップしたい」という声がある。
+**実装ヒント:** `src/app/characters/export-bulk/page.tsx` を "use client" で新規作成。`supabase.from("characters").select("*").eq("user_id", userId)` でキャラ一覧取得 → チェックボックスで複数選択。選択後「ZIPでダウンロード」ボタンで `fflate`（軽量WASMレスzip）または `jszip` を使って各キャラのJSONをまとめて `characters-backup.zip` として `URL.createObjectURL` でダウンロード。CSVはKP権限所持者のみ表示し `papaparse` の `Papa.unparse()` で能力値列（STR/DEX/INT/…/HP/SAN）を書き出す。`src/app/characters/page.tsx` に「一括エクスポート」ボタンを追加。追加DBなし。
+**コミット:** `feat: bulk character export as ZIP (JSON per char) and CSV stat summary for KP`
+
+## [TODO] Webプッシュ通知（セッション前日・当日アラート） — 優先度: 中
+**対象:** PL / KP
+**概要:** ブラウザのWeb Push API（Service Worker + Push API）を使い、スケジュール済みセッションの前日・当日にデスクトップ／Androidへプッシュ通知を送る機能。現行のメールリマインダー（Supabase Edge Function + Resend）を補完し、メールを見逃すユーザーにも届くようにする。
+**リサーチ根拠:** DiscordやFoundry VTTのカレンダープラグインはセッション直前通知が人気機能；Web Push対応によりPWAとしての完成度が上がり、特にAndroidユーザーの利便性が向上する。メールより開封率が高くリマインダーの実効性が高まる。
+**実装ヒント:** `public/service-worker.js` にプッシュイベントハンドラを追加（`self.addEventListener("push", ...)`）。`src/app/settings/notifications/page.tsx` を新規作成し `Notification.requestPermission()` + `registration.pushManager.subscribe({userVisibleOnly:true, applicationServerKey: VAPID公開鍵})` でサブスクリプション取得 → `supabase.from("push_subscriptions").upsert({user_id, endpoint, keys})` に保存。Supabase Edge Function `supabase/functions/send-push-reminder/` を cron（前日19:00・当日2時間前）で実行し `web-push` ライブラリでペイロード送信。追加DB1テーブル（push_subscriptions）＋Edge Function1本。
+**コミット:** `feat: Web Push notifications for session day-before and day-of reminders`
+
+## [TODO] AIロールプレイシミュレーター（卓前キャラ対話練習） — 優先度: 低
+**対象:** PL
+**概要:** セッション参加前にPLが自分のキャラクターとしてAI（Claude）と対話練習できるロールプレイシミュレーター。キャラクターの背景・性格・信念をシステムプロンプトに注入し、他のNPCや状況設定をKPが事前に準備しておくことで、PL本番前のキャラクター把握・練習に活用できる。
+**リサーチ根拠:** AI Dungeon・NovelAIがキャラクター対話機能で高評価；TRPGコミュニティではキャラクターの「声」を見つけるための練習需要が一定あり、既存のAIバックストーリー生成の自然な拡張となる。
+**実装ヒント:** `src/app/characters/[id]/roleplay/page.tsx` を "use client" で新規作成。キャラクターのname/age/occupation/backstory/bonds/personality（既存フィールド）をシステムプロンプトに組み込み、Anthropic SDK（`src/lib/anthropic.ts` 既存）の `messages.create` にストリーミング（`stream: true`）で送信。チャット履歴は `useState<{role,content}[]>` で管理しセッション中のみ保持（DB保存なし）。KPが事前に「シナリオ設定プリセット」（JSON）を `scenarios` テーブルのメタフィールドに保存し、PLが読み込めるオプションも提供。追加DBなし（キャラデータ再利用）。
+**コミット:** `feat: AI roleplay simulator for character voice practice before sessions`
+
+## [TODO] カスタムダイスマクロ保存・セッション間共有 — 優先度: 低
+**対象:** PL / KP
+**概要:** 「1D6+DEX補正ボーナス」「ファイト！コンボ（2連撃）」のような複合ダイスマクロを名前付きで保存し、セッション中にワンクリックで呼び出せる機能。KPはマクロをキャンペーン全体に公開でき、参加PLが共用できる。既存のDiceRollerコンポーネントの上位機能として実装する。
+**リサーチ根拠:** FoundryVTT・Roll20はカスタムマクロが最も使われる機能の一つ；ここフォリアはマクロ保存に非対応のためポータル側での補完ニーズがある。チャットパレット機能（既実装）と組み合わせて差別化できる。
+**実装ヒント:** `dice_macros` テーブルを追加（id, owner_id, campaign_id nullable, name: text, expression: text, description: text, is_public: bool, created_at）。`src/app/dice/macros/page.tsx` を "use client" で新規作成し CRUD UI を実装。ダイス式は既存の `src/lib/dice.ts`（または同等）のパーサーで評価し、`{STR}` `{DEX}` 等のキャラクターパラメータ参照を `character` オブジェクトから動的置換。`src/components/DiceRoller.tsx` のサイドパネルに「マイマクロ」タブを追加してマクロ一覧を表示・即時実行できるように拡張。追加DB1テーブル。
+**コミット:** `feat: custom dice macro save and campaign-wide sharing for quick roll access`
