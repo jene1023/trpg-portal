@@ -1628,7 +1628,7 @@
 **実装ヒント:** Supabaseに `session_feedbacks` テーブルを追加（id, session_id, from_user_id, rating: int check(1-5), comment: text | null, is_anonymous: bool default false, created_at）。`src/app/sessions/[id]/feedback/page.tsx` を "use client" で新規作成（PL向け入力フォーム）。`src/app/sessions/[id]/feedback/results/page.tsx` をKP限定（`user_id` 照合）で新規作成し、平均評価をスター表示・コメント一覧を表示。セッション詳細ページ（`src/app/sessions/[id]/page.tsx`）にKPは「フィードバック結果」リンク、PLには「フィードバックを送る」リンクを追加。フォームURLをセッションパックや Discord Webhook 経由でPLへ共有するボタンも添える。追加DB1テーブル。
 **コミット:** `feat: post-session PL feedback form with 5-star rating and KP aggregate view`
 
-## [TODO] ランダムNPC即席生成ツール（エキストラ自動作成） — 優先度: 中
+## [DONE] ランダムNPC即席生成ツール（エキストラ自動作成） — 優先度: 中
 **対象:** KP
 **概要:** ボタン一つでモブNPC（名前・年齢・性別・職業・外見・代表技能3つ）をランダム生成できるツール。シナリオ本編外の即興遭遇や会話相手が必要な場面でKPが素早く使える。生成結果はシナリオに紐づけて保存可能。
 **実装ヒント:** `src/app/scenarios/[id]/npc-generator/page.tsx` を "use client" で新規作成。名前は和名テーブル（漢字＋読み仮名 各50件程度）をファイルに埋め込み `Math.random()` で選択。職業リストは既存キャラクター職業フィールドの選択肢（`src/app/_components/CharacterForm.tsx` の職業リスト）を流用。能力値は `3D6×5`（STR/DEX等）をJS内でロール。外見メモ（髪色・目の色・体格）はそれぞれの形容詞テーブルからランダム組み合わせ。「このNPCを保存」ボタンで `supabase.from("npcs").insert(...)` に登録（既存 `npcs` テーブル流用）。「再生成」ボタンで即座に別のNPCを生成。追加DBなし（既存npcsテーブル流用）。
