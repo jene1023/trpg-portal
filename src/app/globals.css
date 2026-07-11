@@ -967,6 +967,42 @@ body {
   }
 }
 
+/* テキストリンク アクセントライン: ホバー時にゴールドのグラデーション下線が中央から外側へ燭台の炎のように広がる */
+.coc-link-accent {
+  position: relative;
+}
+
+.coc-link-accent::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-coc-gold-dim) 20%,
+    var(--color-coc-gold)     50%,
+    var(--color-coc-gold-dim) 80%,
+    transparent 100%
+  );
+  transform: scaleX(0);
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.coc-link-accent:hover::after,
+.coc-link-accent:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-link-accent::after {
+    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
 /* ヒーローパネル環境光呼吸: ランタンの温かい光が古扉の隙間から静かに滲み出るように */
 /* 内側のアニメーション群（タイトル11s・サブタイトル8s・引用7s）と周期をずらして位相ドリフトを生む */
 @keyframes coc-hero-breathe {

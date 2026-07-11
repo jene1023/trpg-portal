@@ -144,7 +144,7 @@ export default async function DashboardPage() {
                 ピン留めキャラクター
               </h2>
             </div>
-            <Link href="/characters" className="text-xs text-coc-gold hover:underline">
+            <Link href="/characters" className="text-xs text-coc-gold coc-link-accent">
               すべて表示
             </Link>
           </div>
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
                 進行中シナリオ
               </h2>
             </div>
-            <Link href="/scenarios" className="text-xs text-coc-gold hover:underline">
+            <Link href="/scenarios" className="text-xs text-coc-gold coc-link-accent">
               すべて表示
             </Link>
           </div>
