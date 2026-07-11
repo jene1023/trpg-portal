@@ -1663,3 +1663,27 @@
 **概要:** 同一NPCが複数シナリオに「再登場」した記録を追加し、NPC個別ページでそのNPCがどのシナリオに登場しどのPCと関わったかの歴史を俯瞰できる機能。長期キャンペーンで「謎の老人がまた現れた」という連続性演出をデータで管理できる。
 **実装ヒント:** Supabaseに `npc_appearances` テーブルを追加（id, npc_id: uuid, scenario_id: uuid, role_in_scenario: text | null, disposition_change: text | null, created_at）。`src/app/npcs/[id]/appearances/page.tsx` を "use client" で新規作成（シナリオ名リンク付き一覧 + 追加フォーム）。各エントリに既存 `NpcDisposition` の値（friendly/neutral/hostile）を参照し、登場シナリオ間での立場変化を色バッジで表示。`src/app/npcs/[id]/page.tsx` に「登場履歴」リンクを追加。`src/lib/supabase.ts` に `NpcAppearance` 型を追加。追加DB1テーブル。
 **コミット:** `feat: NPC cross-scenario appearance history for recurring character tracking`
+
+## [TODO] セッション安全ツール（X-Card・ラインズ＆ベールズ設定） — 優先度: 高
+**対象:** KP / PL / 共通
+**概要:** TRPGセッション前にKPとPL全員が不快なコンテンツ領域（ゴア表現・恐怖演出の強度・心理的暗示等）を匿名投票形式で確認し合う安全ツール。セッション中にX-Card（緊急中断申告）をリアルタイムで全画面通知する機能も含む。プレイヤー間の心理的安全を確保し、セッション品質を向上させる。
+**実装ヒント:** Supabaseに `safety_settings` テーブルを追加（id, scenario_id, category: "gore"|"body_horror"|"romance"|"psychological"|"other", level: "line"|"veil"|"ok", user_id, created_at）。`src/app/scenarios/[id]/safety/page.tsx` を "use client" で新規作成。KPが事前にカテゴリ一覧を設定しPLへ招待URLで回答を促す。回答は匿名で集計し、全員が「line（禁止）」とした項目を赤ハイライト表示。セッション中は `supabase.channel('xcard-${scenarioId}').send({ type: 'broadcast', event: 'xcard', payload: {} })` でX-Card発動をブロードキャストし、全参加者画面に「⚠️ Xカード — 一時停止してください」モーダルを表示（既存の `GameClockEditor.tsx` のブロードキャストパターンを参考に）。`src/app/scenarios/[id]/page.tsx` に「安全ツール」リンクを追加。`src/lib/supabase.ts` に `SafetySetting` 型を追加。追加DB1テーブル。
+**コミット:** `feat: session safety tools with X-card realtime broadcast and Lines & Veils consent form`
+
+## [TODO] 外部カレンダー連携（iCal / Google Calendar エクスポート） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** スケジュール済みのセッション予定を `.ics` 形式（iCalendar）でダウンロードでき、Google Calendar・Apple Calendar・Outlook 等のカレンダーアプリへ直接インポートできる機能。セッション管理を既存カレンダーと統合し、他の予定との日程衝突を防ぐ。キャンペーン全セッションを `webcal://` URLで常時購読するオプションも提供する。
+**実装ヒント:** `src/app/api/calendar/scenario/[scenarioId]/route.ts` を新規作成し、HTTPヘッダー `Content-Type: text/calendar; charset=utf-8` で `.ics` を返す。`scenarios` テーブルの `scheduled_at`・`title`・`description` をRFC 5545形式のVEVENT文字列に変換（外部ライブラリ不要、テンプレートリテラルで実装可能）。`src/app/scenarios/[id]/page.tsx` に「カレンダーに追加 (.ics)」ボタンを追加し、モバイルは `<a href="webcal://...">` でネイティブカレンダーアプリへ直接登録。キャンペーン全シナリオをまとめた VCALENDAR は `src/app/api/calendar/campaign/[campaignId]/route.ts` で提供し、キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）にも購読ボタンを追加。追加DBなし。
+**コミット:** `feat: iCal and webcal export for session schedules to sync with external calendars`
+
+## [TODO] シナリオシーン構成ボード（カンバン形式シーンフロー管理） — 優先度: 中
+**対象:** KP
+**概要:** シナリオを「オープニング→調査→クライマックス→エンディング」等のフェーズに分け、各フェーズにシーン（場所・出来事・分岐条件）をカードとして配置できるカンバンボード形式のシナリオ設計ツール。KPがシナリオ全体の流れを視覚的に把握し、抜け漏れや分岐の管理を効率化できる。
+**実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, title: text, description: text | null, phase: "opening"|"investigation"|"climax"|"ending"|"optional", sort_order: int, is_completed: bool DEFAULT false, linked_area_id: uuid | null, created_at）。`src/app/scenarios/[id]/scene-board/page.tsx` を "use client" で新規作成。phase ごとにカラムを横並びで表示し、各カラムにシーンカードを縦スクロールで一覧表示。ドラッグ＆ドロップ（HTML5 Drag and Drop API）でカードの並び替えと列間移動を実装し `supabase.from("scenario_scenes").update({ sort_order, phase })` で即時保存。セッション中は `is_completed` チェックでシーン進捗を追跡し達成済みカードをグレーアウト。`src/app/scenarios/[id]/page.tsx` に「シーンボード」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。追加DB1テーブル。
+**コミット:** `feat: kanban-style scenario scene board for KP to plan and track scene flow`
+
+## [TODO] キャラクター語録・印象的な発言コレクション — 優先度: 低
+**対象:** PL / 共通
+**概要:** セッション中のキャラクターの印象的な台詞・名言・名場面を「語録」として記録し、キャラクター別に閲覧できる機能。同一卓の参加者が「いいね」できるソーシャル要素を加え、キャラクターへの愛着と卓の思い出を長期的に積み上げる。既存の心情日記（`character_journals`）は一人称の感情メモだが、こちらはセッション中に発せられた具体的な台詞や他PLが目撃した名場面の記録に特化する。
+**実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, session_label: text | null, quote_text: text, context_note: text | null, submitted_by_user_id: uuid, likes: int DEFAULT 0, created_at）。`src/app/characters/[id]/quotes/page.tsx` を "use client" で新規作成（投稿フォーム＋likes降順/created_at降順の切り替え一覧）。各語録カードにクリップボードコピーボタン（`navigator.clipboard.writeText`）とハートボタン（`supabase.rpc("increment_quote_likes", { quote_id })` でlikes加算）を設置。同一シナリオの参加者であれば他PLも投稿・いいね可能（RLSで `scenario_participants` と照合）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「語録」リンクを追加。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DB1テーブル。
+**コミット:** `feat: character quote collection for memorable in-session lines with social likes`
