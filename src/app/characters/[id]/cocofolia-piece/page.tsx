@@ -14,6 +14,7 @@ export default function CocofollaPiecePage() {
   const [char, setChar] = useState<Character | null>(null);
   const [skills, setSkills] = useState<CharacterSkill[]>([]);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -101,9 +102,19 @@ export default function CocofollaPiecePage() {
   const handleCopy = async () => {
     const piece = generatePieceJson();
     if (!piece) return;
-    await navigator.clipboard.writeText(JSON.stringify(piece, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!navigator.clipboard) {
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 3000);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(piece, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 3000);
+    }
   };
 
   if (!isSupabaseConfigured) {
@@ -202,6 +213,11 @@ export default function CocofollaPiecePage() {
             <>
               <Check size={14} className="text-green-400" />
               <span className="text-green-400">コピー済み</span>
+            </>
+          ) : copyError ? (
+            <>
+              <Copy size={14} className="text-red-400" />
+              <span className="text-red-400">コピー不可（HTTPS環境が必要です）</span>
             </>
           ) : (
             <>

@@ -1561,7 +1561,7 @@
 **実装ヒント:** `src/app/characters/new/wizard/page.tsx` を "use client" で新規作成。ステップ状態を `useState<number>` で管理（0:基本情報→1:能力値ロール→2:職業選択→3:技能配分→4:背景・メモ→5:完了確認）。各ステップは既存コンポーネント（`AbilityRoller`、`OccupationSelector`、`SkillCalculator`等）を再利用。ステップ間でのデータ引き継ぎは `useReducer` で一括管理し、最終ステップで `supabase.from("characters").insert(...)` + `supabase.from("character_skills").insert(...)` を一括実行。プログレスバー（CSS width %）でステップ位置を可視化。`src/app/characters/new/page.tsx` に「ウィザードで作成」ボタンを追加。追加DBなし。
 **コミット:** `feat: unified character creation wizard with guided step-by-step flow`
 
-## [TODO] ここフォリアClipboard API直接出力 — 優先度: 低
+## [DONE] ここフォリアClipboard API直接出力 — 優先度: 低
 **対象:** PL / KP
 **概要:** 既存のここフォリア用コマごとJSONエクスポート機能に「クリップボードへコピー」ボタンを追加し、ここフォリアの「コマのインポート」画面にそのままペーストできるようにする。現在はテキストエリアに表示されたJSONを手動選択→コピーする必要があり、モバイルでは特に煩雑。
 **リサーチ根拠:** いあキャラがユーザー要望でここフォリア出力のクリップボードコピー機能を追加した実績あり；Clipboard APIはモダンブラウザ標準対応済みで実装コストが低い。
