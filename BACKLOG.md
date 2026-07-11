@@ -1646,7 +1646,7 @@
 **実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/report/page.tsx` を Server Componentで新規作成。`session_logs`, `dice_rolls`, `growth_history`, `scenario_clues` を `Promise.all` で並行取得し、テンプレートHTMLを組み立てて `<a download>` で配布。AI整形オプションとして `src/app/api/ai/session-summary/route.ts`（既存）を呼び出し人読み向けサマリーを追記できるようにする。既存 `RecapCopyButton.tsx` と `SessionSummaryGenerator.tsx` を参考に。追加DBなし。
 **コミット:** `feat: session play-report HTML export with auto-aggregated stats and optional AI summary`
 
-## [TODO] キャラクター誕生日リマインダー通知 — 優先度: 低
+## [DONE] キャラクター誕生日リマインダー通知 — 優先度: 低
 **対象:** PL / 共通
 **概要:** キャラクターの `birthday` フィールド（既存）を活用し、誕生日当日にWebプッシュ通知（既存 `push_subscriptions` テーブル）で「本日は◯◯の誕生日です！」とPLへ通知する機能。愛着あるキャラクターの記念日を見逃さない。
 **実装ヒント:** Supabase Edge Function `supabase/functions/birthday-reminder/index.ts` を新規作成し、毎朝07:00 JSTのcronで実行。`supabase.from("characters").select("id, name, birthday, user_id").not("birthday", "is", null)` で誕生日フィールドを全取得し、`MM-DD` が当日のキャラをフィルタ。`push_subscriptions` から該当 `user_id` のエンドポイントを取得して `web-push` でプッシュ送信（既存 `send-push-reminder` 関数の実装パターンを流用）。追加DBなし・追加Edge Function1本。
