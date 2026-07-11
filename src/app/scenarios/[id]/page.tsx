@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target, BookMarked } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -16,6 +16,7 @@ import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import GameClockEditor from "@/app/_components/GameClockEditor";
 import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGenerator";
+import ScenarioTemplateToggle from "@/app/_components/ScenarioTemplateToggle";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -1317,6 +1318,25 @@ export default async function ScenarioDetailPage({ params }: Props) {
       <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">タグ</p>
         <TagSelector entityType="scenario" entityId={id} />
+      </div>
+
+      {/* テンプレートライブラリ */}
+      <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest">テンプレートライブラリ</p>
+          <Link
+            href="/templates"
+            className="flex items-center gap-1 text-xs text-coc-muted hover:text-coc-gold transition-colors"
+          >
+            <BookMarked size={12} />
+            ライブラリを見る
+          </Link>
+        </div>
+        <ScenarioTemplateToggle
+          scenarioId={id}
+          initialIsTemplate={scenario.is_template ?? false}
+          initialPublishedAt={scenario.template_published_at ?? null}
+        />
       </div>
 
       {/* KP秘匿メモ */}

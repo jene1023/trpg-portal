@@ -1652,7 +1652,7 @@
 **実装ヒント:** Supabase Edge Function `supabase/functions/birthday-reminder/index.ts` を新規作成し、毎朝07:00 JSTのcronで実行。`supabase.from("characters").select("id, name, birthday, user_id").not("birthday", "is", null)` で誕生日フィールドを全取得し、`MM-DD` が当日のキャラをフィルタ。`push_subscriptions` から該当 `user_id` のエンドポイントを取得して `web-push` でプッシュ送信（既存 `send-push-reminder` 関数の実装パターンを流用）。追加DBなし・追加Edge Function1本。
 **コミット:** `feat: character birthday push notification via edge function cron`
 
-## [TODO] シナリオテンプレートライブラリ（公開・複製） — 優先度: 低
+## [DONE] シナリオテンプレートライブラリ（公開・複製） — 優先度: 低
 **対象:** KP
 **概要:** KPが完成したシナリオを「テンプレートとして公開」でき、他のKPが一覧から選んでワンクリックで自分のシナリオとして複製できるコミュニティライブラリ機能。ハンドアウト・シナリオエリア・クリーチャーも丸ごとコピーされ、シナリオ準備の初速を上げる。
 **実装ヒント:** `scenarios` テーブルに `is_template: boolean DEFAULT false` と `template_published_at: timestamptz | null` を追加。`src/app/templates/page.tsx` を Server Componentで新規作成（テンプレート一覧、`difficulty`・`content_tags` でフィルタ）。「複製」ボタンで `scenarios` + `handouts` + `creatures` + `scenario_areas` を `Promise.all` でコピーし `title` に "〜のコピー" を付与。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」トグルを追加。追加DBカラム2本（既存テーブル）。

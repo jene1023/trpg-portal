@@ -179,6 +179,8 @@ export type Scenario = {
   game_current_date: string | null;
   game_current_time: string | null;
   recruit_token: string | null;
+  is_template: boolean;
+  template_published_at: string | null;
   created_at: string;
 };
 
