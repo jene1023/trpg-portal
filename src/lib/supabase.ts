@@ -1146,3 +1146,14 @@ export type PushSubscription = {
   auth: string;
   created_at: string;
 };
+
+export type DiceMacro = {
+  id: string;
+  owner_id: string;
+  campaign_id: string | null;
+  name: string;
+  expression: string;
+  description: string | null;
+  is_public: boolean;
+  created_at: string;
+};

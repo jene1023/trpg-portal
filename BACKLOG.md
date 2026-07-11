@@ -1603,7 +1603,7 @@
 **実装ヒント:** `src/app/characters/[id]/roleplay/page.tsx` を "use client" で新規作成。キャラクターのname/age/occupation/backstory/bonds/personality（既存フィールド）をシステムプロンプトに組み込み、Anthropic SDK（`src/lib/anthropic.ts` 既存）の `messages.create` にストリーミング（`stream: true`）で送信。チャット履歴は `useState<{role,content}[]>` で管理しセッション中のみ保持（DB保存なし）。KPが事前に「シナリオ設定プリセット」（JSON）を `scenarios` テーブルのメタフィールドに保存し、PLが読み込めるオプションも提供。追加DBなし（キャラデータ再利用）。
 **コミット:** `feat: AI roleplay simulator for character voice practice before sessions`
 
-## [TODO] カスタムダイスマクロ保存・セッション間共有 — 優先度: 低
+## [DONE] カスタムダイスマクロ保存・セッション間共有 — 優先度: 低
 **対象:** PL / KP
 **概要:** 「1D6+DEX補正ボーナス」「ファイト！コンボ（2連撃）」のような複合ダイスマクロを名前付きで保存し、セッション中にワンクリックで呼び出せる機能。KPはマクロをキャンペーン全体に公開でき、参加PLが共用できる。既存のDiceRollerコンポーネントの上位機能として実装する。
 **リサーチ根拠:** FoundryVTT・Roll20はカスタムマクロが最も使われる機能の一つ；ここフォリアはマクロ保存に非対応のためポータル側での補完ニーズがある。チャットパレット機能（既実装）と組み合わせて差別化できる。
