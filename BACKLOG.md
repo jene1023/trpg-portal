@@ -1609,3 +1609,27 @@
 **リサーチ根拠:** FoundryVTT・Roll20はカスタムマクロが最も使われる機能の一つ；ここフォリアはマクロ保存に非対応のためポータル側での補完ニーズがある。チャットパレット機能（既実装）と組み合わせて差別化できる。
 **実装ヒント:** `dice_macros` テーブルを追加（id, owner_id, campaign_id nullable, name: text, expression: text, description: text, is_public: bool, created_at）。`src/app/dice/macros/page.tsx` を "use client" で新規作成し CRUD UI を実装。ダイス式は既存の `src/lib/dice.ts`（または同等）のパーサーで評価し、`{STR}` `{DEX}` 等のキャラクターパラメータ参照を `character` オブジェクトから動的置換。`src/components/DiceRoller.tsx` のサイドパネルに「マイマクロ」タブを追加してマクロ一覧を表示・即時実行できるように拡張。追加DB1テーブル。
 **コミット:** `feat: custom dice macro save and campaign-wide sharing for quick roll access`
+
+## [TODO] シナリオ目標トラッカー（メイン/サブ達成フラグ管理） — 優先度: 高
+**対象:** KP
+**概要:** KPがシナリオ準備時にメイン目標・サブ目標をリスト化しておき、セッション中に達成済みをチェックしながら進捗を可視化できる機能。現状のシナリオノートは自由テキストのみで、目標の達成状況を追跡するUIがない。
+**実装ヒント:** Supabaseに `scenario_objectives` テーブルを追加（id, scenario_id, title: text, type: "main"|"sub", is_achieved: bool, achieved_at: timestamptz | null, sort_order: int, created_at）。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成（一覧＋追加フォーム）。各目標カードにチェックボックスを配置し、チェック時に `supabase.from("scenario_objectives").update({ is_achieved: true, achieved_at: new Date().toISOString() })` を実行。達成率（達成数/総数）をプログレスバー（CSS width%）で画面上部に表示。`src/app/scenarios/[id]/page.tsx` のKP向けダッシュボードに「目標トラッカー」リンクと達成率バッジを追加。`src/lib/supabase.ts` に `ScenarioObjective` 型を追加。追加DB1テーブル。
+**コミット:** `feat: scenario objective tracker with main/sub goal checklist and progress bar`
+
+## [TODO] PLキャラクター能力値推移グラフ（セッション間の変化可視化） — 優先度: 中
+**対象:** PL
+**概要:** キャンペーンを通じたキャラクターのHP・SAN・幸運の変化を折れ線グラフで可視化する機能。セッションごとの「あの時SANが激減した」「HPがじわじわ回復した」軌跡を一望でき、キャラクターの旅路を振り返れる。
+**実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, hp_current: int, san_current: int, luck: int, snapshot_at: timestamptz, created_at）。セッション終了時のVTT→ポータル一括反映（`sessions/[id]/end-sync/page.tsx`）の保存時に自動スナップショットを記録。`src/app/characters/[id]/stat-history/page.tsx` を新規作成（Server Component）。折れ線グラフはCSSグリッド＋SVGポリライン（外部ライブラリなし）で描画し、各点にセッションラベルのツールチップを表示。`src/app/characters/[id]/page.tsx` のサイドバーに「能力値推移」リンクを追加。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。
+**コミット:** `feat: character stat history graph showing HP/SAN/luck trends across sessions`
+
+## [TODO] セッション後PLフィードバックフォーム（KP向け感想収集） — 優先度: 中
+**対象:** KP / PL
+**概要:** セッション終了後にKPがPL向けの短いフィードバックフォームを発行し、PL各自が5段階評価＋自由コメントを送信できる機能。KPは集計結果（平均スコア・コメント一覧）を次回準備の参考にできる。現状フィードバックはDiscord等の外部チャンネルに依存しており、セッション記録と紐づいていない。
+**実装ヒント:** Supabaseに `session_feedbacks` テーブルを追加（id, session_id, from_user_id, rating: int check(1-5), comment: text | null, is_anonymous: bool default false, created_at）。`src/app/sessions/[id]/feedback/page.tsx` を "use client" で新規作成（PL向け入力フォーム）。`src/app/sessions/[id]/feedback/results/page.tsx` をKP限定（`user_id` 照合）で新規作成し、平均評価をスター表示・コメント一覧を表示。セッション詳細ページ（`src/app/sessions/[id]/page.tsx`）にKPは「フィードバック結果」リンク、PLには「フィードバックを送る」リンクを追加。フォームURLをセッションパックや Discord Webhook 経由でPLへ共有するボタンも添える。追加DB1テーブル。
+**コミット:** `feat: post-session PL feedback form with 5-star rating and KP aggregate view`
+
+## [TODO] ランダムNPC即席生成ツール（エキストラ自動作成） — 優先度: 中
+**対象:** KP
+**概要:** ボタン一つでモブNPC（名前・年齢・性別・職業・外見・代表技能3つ）をランダム生成できるツール。シナリオ本編外の即興遭遇や会話相手が必要な場面でKPが素早く使える。生成結果はシナリオに紐づけて保存可能。
+**実装ヒント:** `src/app/scenarios/[id]/npc-generator/page.tsx` を "use client" で新規作成。名前は和名テーブル（漢字＋読み仮名 各50件程度）をファイルに埋め込み `Math.random()` で選択。職業リストは既存キャラクター職業フィールドの選択肢（`src/app/_components/CharacterForm.tsx` の職業リスト）を流用。能力値は `3D6×5`（STR/DEX等）をJS内でロール。外見メモ（髪色・目の色・体格）はそれぞれの形容詞テーブルからランダム組み合わせ。「このNPCを保存」ボタンで `supabase.from("npcs").insert(...)` に登録（既存 `npcs` テーブル流用）。「再生成」ボタンで即座に別のNPCを生成。追加DBなし（既存npcsテーブル流用）。
+**コミット:** `feat: random NPC quick generator for instant extras during improvised encounters`
