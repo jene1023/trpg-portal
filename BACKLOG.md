@@ -1682,7 +1682,7 @@
 **実装ヒント:** Supabaseに `scenario_scenes` テーブルを追加（id, scenario_id, title: text, description: text | null, phase: "opening"|"investigation"|"climax"|"ending"|"optional", sort_order: int, is_completed: bool DEFAULT false, linked_area_id: uuid | null, created_at）。`src/app/scenarios/[id]/scene-board/page.tsx` を "use client" で新規作成。phase ごとにカラムを横並びで表示し、各カラムにシーンカードを縦スクロールで一覧表示。ドラッグ＆ドロップ（HTML5 Drag and Drop API）でカードの並び替えと列間移動を実装し `supabase.from("scenario_scenes").update({ sort_order, phase })` で即時保存。セッション中は `is_completed` チェックでシーン進捗を追跡し達成済みカードをグレーアウト。`src/app/scenarios/[id]/page.tsx` に「シーンボード」リンクを追加。`src/lib/supabase.ts` に `ScenarioScene` 型を追加。追加DB1テーブル。
 **コミット:** `feat: kanban-style scenario scene board for KP to plan and track scene flow`
 
-## [TODO] キャラクター語録・印象的な発言コレクション — 優先度: 低
+## [DONE] キャラクター語録・印象的な発言コレクション — 優先度: 低
 **対象:** PL / 共通
 **概要:** セッション中のキャラクターの印象的な台詞・名言・名場面を「語録」として記録し、キャラクター別に閲覧できる機能。同一卓の参加者が「いいね」できるソーシャル要素を加え、キャラクターへの愛着と卓の思い出を長期的に積み上げる。既存の心情日記（`character_journals`）は一人称の感情メモだが、こちらはセッション中に発せられた具体的な台詞や他PLが目撃した名場面の記録に特化する。
 **実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, session_label: text | null, quote_text: text, context_note: text | null, submitted_by_user_id: uuid, likes: int DEFAULT 0, created_at）。`src/app/characters/[id]/quotes/page.tsx` を "use client" で新規作成（投稿フォーム＋likes降順/created_at降順の切り替え一覧）。各語録カードにクリップボードコピーボタン（`navigator.clipboard.writeText`）とハートボタン（`supabase.rpc("increment_quote_likes", { quote_id })` でlikes加算）を設置。同一シナリオの参加者であれば他PLも投稿・いいね可能（RLSで `scenario_participants` と照合）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「語録」リンクを追加。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DB1テーブル。

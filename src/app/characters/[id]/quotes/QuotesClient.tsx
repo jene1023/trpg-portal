@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { supabase, isSupabaseConfigured, CharacterQuote } from "@/lib/supabase";
 
+type SortOrder = "likes" | "created_at";
+
 type Props = {
   characterId: string;
   initialQuotes: CharacterQuote[];
@@ -16,6 +18,12 @@ export default function QuotesClient({ characterId, initialQuotes }: Props) {
   const [sessionLabel, setSessionLabel] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("created_at");
+
+  const sorted = [...quotes].sort((a, b) => {
+    if (sortOrder === "likes") return (b.likes ?? 0) - (a.likes ?? 0);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   async function addQuote() {
     if (!quoteText.trim()) return;
@@ -49,6 +57,14 @@ export default function QuotesClient({ characterId, initialQuotes }: Props) {
     if (!isSupabaseConfigured) return;
     await supabase.from("character_quotes").delete().eq("id", quoteId);
     setQuotes((prev) => prev.filter((q) => q.id !== quoteId));
+  }
+
+  async function likeQuote(quoteId: string) {
+    if (!isSupabaseConfigured) return;
+    await supabase.rpc("increment_quote_likes", { quote_id: quoteId });
+    setQuotes((prev) =>
+      prev.map((q) => (q.id === quoteId ? { ...q, likes: (q.likes ?? 0) + 1 } : q))
+    );
   }
 
   return (
@@ -101,11 +117,35 @@ export default function QuotesClient({ characterId, initialQuotes }: Props) {
         <p className="text-center text-sm text-coc-muted py-8">名言がまだ登録されていません</p>
       ) : (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-coc-muted uppercase tracking-widest">
-            語録一覧（{quotes.length}件）
-          </h2>
-          {quotes.map((quote) => (
-            <QuoteCard key={quote.id} quote={quote} onDelete={deleteQuote} />
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-coc-muted uppercase tracking-widest">
+              語録一覧（{quotes.length}件）
+            </h2>
+            <div className="flex items-center gap-1 text-xs">
+              <button
+                onClick={() => setSortOrder("created_at")}
+                className={`px-2.5 py-1 rounded border transition-colors ${
+                  sortOrder === "created_at"
+                    ? "border-coc-gold/50 bg-coc-gold/10 text-coc-gold"
+                    : "border-coc-border text-coc-muted hover:text-coc-text"
+                }`}
+              >
+                新着順
+              </button>
+              <button
+                onClick={() => setSortOrder("likes")}
+                className={`px-2.5 py-1 rounded border transition-colors ${
+                  sortOrder === "likes"
+                    ? "border-coc-gold/50 bg-coc-gold/10 text-coc-gold"
+                    : "border-coc-border text-coc-muted hover:text-coc-text"
+                }`}
+              >
+                いいね順
+              </button>
+            </div>
+          </div>
+          {sorted.map((quote) => (
+            <QuoteCard key={quote.id} quote={quote} onDelete={deleteQuote} onLike={likeQuote} />
           ))}
         </div>
       )}
@@ -116,10 +156,20 @@ export default function QuotesClient({ characterId, initialQuotes }: Props) {
 function QuoteCard({
   quote,
   onDelete,
+  onLike,
 }: {
   quote: CharacterQuote;
   onDelete: (id: string) => Promise<void>;
+  onLike: (id: string) => Promise<void>;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copyToClipboard() {
+    await navigator.clipboard.writeText(quote.quote_text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
   return (
     <div className="rounded-lg border border-coc-border coc-card-bg p-4 space-y-2">
       <p className="font-crimson italic text-coc-gold text-base leading-relaxed border-l-2 border-coc-gold-dim pl-3 whitespace-pre-wrap">
@@ -132,14 +182,28 @@ function QuoteCard({
         {quote.session_label && (
           <span>🎲 {quote.session_label}</span>
         )}
-        {quote.context && (
-          <span>— {quote.context}</span>
+        {(quote.context || quote.context_note) && (
+          <span>— {quote.context ?? quote.context_note}</span>
         )}
         <span className="ml-auto">
           {new Date(quote.created_at).toLocaleDateString("ja-JP")}
         </span>
       </div>
-      <div className="flex justify-end pt-1">
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onLike(quote.id)}
+            className="flex items-center gap-1 rounded border border-pink-900/40 px-2.5 py-1 text-xs text-pink-400/70 hover:text-pink-300 hover:border-pink-800/60 transition-colors"
+          >
+            ♥ {(quote.likes ?? 0) > 0 ? quote.likes : "いいね"}
+          </button>
+          <button
+            onClick={copyToClipboard}
+            className="rounded border border-coc-border px-2.5 py-1 text-xs text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors"
+          >
+            {copied ? "コピー済み ✓" : "コピー"}
+          </button>
+        </div>
         <button
           onClick={() => onDelete(quote.id)}
           className="rounded border border-red-900/40 px-2.5 py-1 text-xs text-red-500/60 hover:text-red-400 hover:border-red-800/60 transition-colors"

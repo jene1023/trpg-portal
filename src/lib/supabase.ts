@@ -849,7 +849,10 @@ export type CharacterQuote = {
   scenario_name: string | null;
   quote_text: string;
   context: string | null;
+  context_note: string | null;
   session_label: string | null;
+  submitted_by_user_id: string | null;
+  likes: number;
   created_at: string;
 };
 
