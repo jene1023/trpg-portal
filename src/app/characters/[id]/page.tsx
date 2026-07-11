@@ -796,6 +796,13 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <span className="text-coc-gold">→</span>
               </Link>
               <Link
+                href={`/characters/${id}/roleplay`}
+                className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-3.5 py-2.5 text-sm text-coc-muted hover:text-coc-text hover:border-coc-border-glow transition-colors motion-safe:active:scale-[0.98]"
+              >
+                <span>ロールプレイ練習（AI対話）</span>
+                <span className="text-coc-gold">→</span>
+              </Link>
+              <Link
                 href={`/characters/${id}/transfer`}
                 className="flex items-center justify-between rounded-lg border border-orange-800/50 bg-orange-950/20 px-3.5 py-2.5 text-sm text-orange-300 hover:text-orange-200 hover:border-orange-700 transition-colors motion-safe:active:scale-[0.98]"
               >

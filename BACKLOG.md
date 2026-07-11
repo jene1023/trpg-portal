@@ -1596,7 +1596,7 @@
 **実装ヒント:** `public/service-worker.js` にプッシュイベントハンドラを追加（`self.addEventListener("push", ...)`）。`src/app/settings/notifications/page.tsx` を新規作成し `Notification.requestPermission()` + `registration.pushManager.subscribe({userVisibleOnly:true, applicationServerKey: VAPID公開鍵})` でサブスクリプション取得 → `supabase.from("push_subscriptions").upsert({user_id, endpoint, keys})` に保存。Supabase Edge Function `supabase/functions/send-push-reminder/` を cron（前日19:00・当日2時間前）で実行し `web-push` ライブラリでペイロード送信。追加DB1テーブル（push_subscriptions）＋Edge Function1本。
 **コミット:** `feat: Web Push notifications for session day-before and day-of reminders`
 
-## [TODO] AIロールプレイシミュレーター（卓前キャラ対話練習） — 優先度: 低
+## [DONE] AIロールプレイシミュレーター（卓前キャラ対話練習） — 優先度: 低
 **対象:** PL
 **概要:** セッション参加前にPLが自分のキャラクターとしてAI（Claude）と対話練習できるロールプレイシミュレーター。キャラクターの背景・性格・信念をシステムプロンプトに注入し、他のNPCや状況設定をKPが事前に準備しておくことで、PL本番前のキャラクター把握・練習に活用できる。
 **リサーチ根拠:** AI Dungeon・NovelAIがキャラクター対話機能で高評価；TRPGコミュニティではキャラクターの「声」を見つけるための練習需要が一定あり、既存のAIバックストーリー生成の自然な拡張となる。
