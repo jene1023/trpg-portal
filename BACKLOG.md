@@ -1568,7 +1568,7 @@
 **実装ヒント:** 既存の `src/app/characters/[id]/export/cocofolia/page.tsx`（またはその近傍のコンポーネント）に `<button onClick={() => navigator.clipboard.writeText(json)}>クリップボードにコピー</button>` を追加。コピー成功時は `useState` で「コピー済み ✓」に一時的にラベル切り替え（setTimeout 2秒）。HTTPS環境限定のため `navigator.clipboard` が undefined の場合は従来のテキストエリア選択にフォールバック（`document.execCommand("copy")` は非推奨なので非対応時はメッセージ表示のみ）。追加DBなし・追加ファイルなし（既存ファイルへの数行追加のみ）。
 **コミット:** `feat: clipboard copy button for Cocofolia piece JSON export`
 
-## [TODO] 探索者ユーザー間譲渡 — 優先度: 中
+## [DONE] 探索者ユーザー間譲渡 — 優先度: 中
 **対象:** PL
 **概要:** キャラクターの所有権を別ユーザーアカウントにメールベースで譲渡できる機能。PLが卓から離脱する際に引き継ぎ先PLへキャラクターを渡したり、KPがNPCを引き継いでもらう場面で活用できる。いあキャラPROのキャラクター譲渡機能に相当。
 **リサーチ根拠:** いあキャラPROが提供するキャラクター譲渡機能がPL間の引き継ぎシーンで重宝されている；Charaeno含む他ツールはアカウント間移動手段がなくユーザーの不満点の一つ。

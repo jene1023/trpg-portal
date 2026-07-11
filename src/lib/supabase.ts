@@ -1124,3 +1124,16 @@ export type CharacterJournal = {
   entry: string;
   created_at: string;
 };
+
+export type TransferStatus = "pending" | "accepted" | "rejected";
+
+export type CharacterTransferRequest = {
+  id: string;
+  character_id: string;
+  from_user_id: string;
+  to_email: string;
+  token: string;
+  status: TransferStatus;
+  expires_at: string;
+  created_at: string;
+};
