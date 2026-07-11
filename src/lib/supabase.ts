@@ -905,6 +905,18 @@ export type ScenarioSharedItem = {
   created_at: string;
 };
 
+export type PartyInventoryItemType = "weapon" | "item" | "key_item";
+
+export type PartyInventoryItem = {
+  id: string;
+  scenario_id: string;
+  name: string;
+  item_type: PartyInventoryItemType;
+  description: string | null;
+  current_holder_character_id: string | null;
+  created_at: string;
+};
+
 export type DiceType = "d6" | "d8" | "d10" | "d12" | "d20" | "d100";
 
 export type RandomTable = {

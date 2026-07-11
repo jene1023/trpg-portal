@@ -1536,7 +1536,7 @@
 **実装ヒント:** Supabaseに `campaign_wiki_pages` テーブルを追加（id, campaign_id, title, category: "location"|"organization"|"lore"|"npc"|"other", content: text, order_index: integer, created_at）。`src/app/campaigns/[id]/wiki/page.tsx` を "use client" で新規作成（カテゴリタブ切り替え＋ページ一覧＋マークダウン非依存のシンプルテキスト編集）。各ページは `<details>` で折りたたみ表示し `supabase.from("campaign_wiki_pages").upsert(...)` で保存。カテゴリフィルタで `location`（ロケーション）・`lore`（神話的知識）等に絞り込み可能。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「ワールドノート」リンクを追加。`src/lib/supabase.ts` に `CampaignWikiPage` 型を追加。追加DB1テーブル。
 **コミット:** `feat: campaign world notes wiki for cross-scenario lore and location management`
 
-## [TODO] パーティー共有アイテム庫（キャラクター間受け渡し対応） — 優先度: 中
+## [DONE] パーティー共有アイテム庫（キャラクター間受け渡し対応） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** シナリオに紐づく「パーティー共有アイテム庫」でアイテムを一括管理し、キャラクターへの割り当てと返却を記録できる機能。現在の個人インベントリ（`inventory_items`）ではパーティー全体で所持する共有アイテム（鍵・地図・共用武器等）を一元管理できない。
 **実装ヒント:** Supabaseに `party_inventory` テーブルを追加（id, scenario_id, name, item_type: "weapon"|"item"|"key_item", description: text | null, current_holder_character_id: uuid | null, created_at）。`src/app/scenarios/[id]/party-inventory/page.tsx` を "use client" で新規作成（アイテム一覧＋追加フォーム）。各アイテムカードに「所持者を変更」ドロップダウン（`scenario_participants` から参加者リスト取得）を設置し `supabase.from("party_inventory").update({ current_holder_character_id })` で更新。所持者未割当のアイテムは「共有庫」セクションに表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）に「共有アイテム庫」リンクを追加。`src/lib/supabase.ts` に `PartyInventoryItem` 型を追加。追加DB1テーブル。

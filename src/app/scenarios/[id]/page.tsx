@@ -1036,6 +1036,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/party-inventory`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Package size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">共有アイテム庫</p>
+              <p className="text-xs text-coc-muted">鍵・地図・共用武器などパーティー共有アイテムを所持者割り当てで管理</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/difficulty`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
