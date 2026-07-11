@@ -1554,7 +1554,7 @@
 **実装ヒント:** Supabaseに `character_journals` テーブルを追加（id, character_id, session_label: text | null, mood: "normal"|"anxious"|"frightened"|"hopeful"|"despair"|"euphoric", entry: text, created_at）。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成（一覧＋追加フォーム、created_at降順）。各エントリはmoodに応じた背景カラーのカードで表示（anxious=黄、frightened=橙、despair=灰、hopeful=緑等）。`mood` はemojiアイコン付きselectで選択。既存の `src/app/characters/[id]/quick-notes/page.tsx` の実装を参考に。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「心情日記」リンクを追加。`src/lib/supabase.ts` に `CharacterJournal` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character emotion journal for in-character roleplay diary entries`
 
-## [TODO] 統合キャラクター作成ウィザード — 優先度: 中
+## [DONE] 統合キャラクター作成ウィザード — 優先度: 中
 **対象:** PL
 **概要:** 能力値ロール・職業選択・技能ポイント配分・背景設定・アイコン設定を一画面のステップ形式でガイドするキャラクター作成ウィザード。現在は各機能が個別ページに分散しており初回ユーザーが迷いやすい。PrismScroll CthulhuやQuest Portalのような「完了まで誘導する一本道フロー」を実現する。
 **リサーチ根拠:** PrismScroll Cthulhuのステップ別作成画面・Quest Portalのモバイル向け作成UXが好評；国内ではいあキャラでも作成ステップの視覚化が要望として挙がっている。
