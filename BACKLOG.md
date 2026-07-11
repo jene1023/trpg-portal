@@ -1640,7 +1640,7 @@
 **実装ヒント:** `scenarios` テーブルに `recruit_token: text | null` カラムを追加し、`src/app/scenarios/[id]/invite/page.tsx` でトークン生成・QRコード表示（既存 `QrCodeShare.tsx` を流用）。`src/app/join/[token]/page.tsx` でPLが自分のキャラクターを選択し `supabase.from("scenario_participants").insert({scenario_id, character_id, attendance_status: "unconfirmed"})` で参加申請。既存 `RecruitShareButton.tsx` と連携。追加DBカラム1本（既存テーブル）。
 **コミット:** `feat: scenario invite code flow for players to self-register via QR or URL`
 
-## [TODO] セッション後自動プレイレポートHTML生成 — 優先度: 中
+## [DONE] セッション後自動プレイレポートHTML生成 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション終了後、セッションログ・SAN喪失量・取得クルー・技能成長チェックを自動集計し「セッションN：〇〇の夜」形式のプレイレポートHTMLをダウンロードできる機能。DiscordやSNSへのセッションレポート投稿をワンクリックで完結させる。
 **実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/report/page.tsx` を Server Componentで新規作成。`session_logs`, `dice_rolls`, `growth_history`, `scenario_clues` を `Promise.all` で並行取得し、テンプレートHTMLを組み立てて `<a download>` で配布。AI整形オプションとして `src/app/api/ai/session-summary/route.ts`（既存）を呼び出し人読み向けサマリーを追記できるようにする。既存 `RecapCopyButton.tsx` と `SessionSummaryGenerator.tsx` を参考に。追加DBなし。
