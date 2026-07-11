@@ -1194,3 +1194,12 @@ export type SessionFeedbackEntry = {
   is_anonymous: boolean;
   created_at: string;
 };
+
+export type NpcAppearance = {
+  id: string;
+  npc_id: string;
+  scenario_id: string;
+  role_in_scenario: string | null;
+  disposition_change: NpcDispositionType | null;
+  created_at: string;
+};

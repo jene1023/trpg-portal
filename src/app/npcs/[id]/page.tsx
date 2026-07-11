@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, History } from "lucide-react";
 import { supabase, isSupabaseConfigured, Npc, NpcDiceRoll, SuccessLevel, NpcDispositionType } from "@/lib/supabase";
 import NpcQuickRoller from "@/app/_components/NpcQuickRoller";
 import NpcDuplicateButton from "@/app/_components/NpcDuplicateButton";
@@ -384,6 +384,20 @@ export default async function NpcDetailPage({ params }: Props) {
 
         {/* KP秘匿メモ */}
         <KpMemoSection entityType="npc" entityId={npc.id} />
+
+        {/* 登場履歴 */}
+        <Link
+          href={`/npcs/${npc.id}/appearances`}
+          className="flex items-center justify-between rounded-lg border border-coc-border bg-coc-surface px-4 py-3 hover:border-coc-border-glow transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <History size={16} className="text-coc-gold shrink-0" />
+            <span className="text-sm font-medium text-coc-text">登場履歴</span>
+          </div>
+          <span className="text-xs text-coc-muted group-hover:text-coc-text transition-colors">
+            シナリオ横断で記録 →
+          </span>
+        </Link>
       </div>
     </div>
   );

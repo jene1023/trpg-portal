@@ -1658,7 +1658,7 @@
 **実装ヒント:** `scenarios` テーブルに `is_template: boolean DEFAULT false` と `template_published_at: timestamptz | null` を追加。`src/app/templates/page.tsx` を Server Componentで新規作成（テンプレート一覧、`difficulty`・`content_tags` でフィルタ）。「複製」ボタンで `scenarios` + `handouts` + `creatures` + `scenario_areas` を `Promise.all` でコピーし `title` に "〜のコピー" を付与。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」トグルを追加。追加DBカラム2本（既存テーブル）。
 **コミット:** `feat: scenario template library with one-click clone for KP community sharing`
 
-## [TODO] NPCシナリオ横断登場履歴 — 優先度: 低
+## [DONE] NPCシナリオ横断登場履歴 — 優先度: 低
 **対象:** KP
 **概要:** 同一NPCが複数シナリオに「再登場」した記録を追加し、NPC個別ページでそのNPCがどのシナリオに登場しどのPCと関わったかの歴史を俯瞰できる機能。長期キャンペーンで「謎の老人がまた現れた」という連続性演出をデータで管理できる。
 **実装ヒント:** Supabaseに `npc_appearances` テーブルを追加（id, npc_id: uuid, scenario_id: uuid, role_in_scenario: text | null, disposition_change: text | null, created_at）。`src/app/npcs/[id]/appearances/page.tsx` を "use client" で新規作成（シナリオ名リンク付き一覧 + 追加フォーム）。各エントリに既存 `NpcDisposition` の値（friendly/neutral/hostile）を参照し、登場シナリオ間での立場変化を色バッジで表示。`src/app/npcs/[id]/page.tsx` に「登場履歴」リンクを追加。`src/lib/supabase.ts` に `NpcAppearance` 型を追加。追加DB1テーブル。
