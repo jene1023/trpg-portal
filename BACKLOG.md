@@ -1687,3 +1687,27 @@
 **概要:** セッション中のキャラクターの印象的な台詞・名言・名場面を「語録」として記録し、キャラクター別に閲覧できる機能。同一卓の参加者が「いいね」できるソーシャル要素を加え、キャラクターへの愛着と卓の思い出を長期的に積み上げる。既存の心情日記（`character_journals`）は一人称の感情メモだが、こちらはセッション中に発せられた具体的な台詞や他PLが目撃した名場面の記録に特化する。
 **実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, session_label: text | null, quote_text: text, context_note: text | null, submitted_by_user_id: uuid, likes: int DEFAULT 0, created_at）。`src/app/characters/[id]/quotes/page.tsx` を "use client" で新規作成（投稿フォーム＋likes降順/created_at降順の切り替え一覧）。各語録カードにクリップボードコピーボタン（`navigator.clipboard.writeText`）とハートボタン（`supabase.rpc("increment_quote_likes", { quote_id })` でlikes加算）を設置。同一シナリオの参加者であれば他PLも投稿・いいね可能（RLSで `scenario_participants` と照合）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「語録」リンクを追加。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character quote collection for memorable in-session lines with social likes`
+
+## [TODO] キャラクター成長グラフ（スキル値変遷の可視化） — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターのスキル値・正気度・HPなどのステータスをセッションごとにスナップショット保存し、折れ線グラフで成長の軌跡を可視化する機能。PLが「あのセッションで正気度がガタ落ちした」「技能を重点的に伸ばしてきた」という過去を振り返り、キャラクターへの愛着をさらに深められる。
+**実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, recorded_at: timestamptz, stats: jsonb — {san, hp, mp, skills: {name: string, value: number}[]}）。`src/app/characters/[id]/growth/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG で実装（外部チャートライブラリ不要）：データポイントを `<polyline>` で繋ぎ、各点に `<circle>` とホバー時 `<title>` を付与。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の編集フォームに「現在値をスナップショット保存」ボタンを追加し、`supabase.from("character_stat_snapshots").insert(...)` で保存。最新スナップショットとの差分（±）をキャラクター一覧カードにバッジ表示するオプションも検討。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。
+**コミット:** `feat: character skill growth graph with per-session stat snapshots`
+
+## [TODO] シナリオ感想・レビュー＆評価機能 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション終了後に参加者が星1〜5の評価とテキストコメントをシナリオに投稿できるレビュー機能。KPが将来的に同シナリオを再利用する際の参考となり、キャンペーン内でどのシナリオが好評だったかを一目で把握できる。PLにとっては「あの夜の感動」を言語化して残す思い出記録にもなる。
+**実装ヒント:** Supabaseに `scenario_reviews` テーブルを追加（id, scenario_id, reviewer_user_id: uuid, rating: int CHECK(1 <= rating AND rating <= 5), comment: text | null, is_spoiler: bool DEFAULT false, created_at）。`src/app/scenarios/[id]/reviews/page.tsx` を "use client" で新規作成（星評価入力コンポーネント＋既存レビュー一覧）。星評価UIは `★☆` Unicode文字とCSSで実装。スポイラーフラグが付いたコメントはデフォルト折りたたみ表示（`<details>` タグ活用）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のヘッダーに平均評価バッジ（`AVG(rating)` を `supabase.rpc` で取得）を表示し「レビューを見る」リンクを追加。RLSで `scenario_participants` テーブルと照合し参加者のみ投稿可能、閲覧は同キャンペーンメンバー全員。`src/lib/supabase.ts` に `ScenarioReview` 型を追加。追加DB1テーブル。
+**コミット:** `feat: scenario review and star rating system for post-session feedback`
+
+## [TODO] NPC関係図ビジュアライザー — 優先度: 中
+**対象:** KP
+**概要:** シナリオに登場するNPC同士の関係（協力・対立・家族・雇用・秘密など）をノードとエッジで可視化するインタラクティブな関係図。KPがシナリオ設計時にNPC相関を整理しやすくなり、セッション中も素早く全体像を参照できる。既存のNPCリスト（`src/app/npcs/`）と連動し、NPCカードへのリンクも内包する。
+**実装ヒント:** Supabaseに `npc_relationships` テーブルを追加（id, scenario_id, from_npc_id: uuid, to_npc_id: uuid, relation_type: "ally"|"enemy"|"family"|"employer"|"secret"|"unknown", label: text | null, created_at）。`src/app/scenarios/[id]/npc-map/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG＋`useState` で管理：NPCを `<circle>+<text>` ノードとして表示し、関係を `<line>` や `<path>` エッジで接続。ノードはドラッグ可能（`onMouseDown`/`onMouseMove` で座標更新、位置は `localStorage` にキャッシュ）。エッジラベルをエッジ中点に `<text>` で表示し、`relation_type` ごとにエッジ色を変える（協力=緑、対立=赤、家族=青など）。ノードクリックで既存の NPC 詳細ページ（`/npcs/[id]`）にナビゲート。シナリオ詳細ページに「NPC関係図」リンクを追加。`src/lib/supabase.ts` に `NpcRelationship` 型を追加。追加DB1テーブル。
+**コミット:** `feat: interactive SVG NPC relationship map for scenario planning`
+
+## [TODO] セッション事後アンケート（MVP投票・名場面共有） — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** セッション終了後に参加者全員が匿名で回答できる事後アンケート機能。「今回のMVP（最も活躍したキャラクター）」投票、「印象に残ったシーン（自由記述）」、「次回セッションへの期待度（星評価）」などの項目を設け、KPがセッション品質を振り返るデータとして活用できる。PLにとってもお互いのプレイへの感謝を示せるポジティブなコミュニティ機能となる。
+**実装ヒント:** Supabaseに `session_surveys` テーブル（id, scenario_id, submitted_by_user_id: uuid, mvp_character_id: uuid | null, memorable_scene: text | null, next_session_rating: int | null, created_at）と `session_survey_configs` テーブル（id, scenario_id, is_open: bool DEFAULT false, opened_at: timestamptz | null）を追加。KPがシナリオ詳細ページからアンケートを「公開」にすると参加者に通知（Supabase Realtime broadcast）。`src/app/scenarios/[id]/survey/page.tsx` を "use client" で新規作成（回答フォーム）、`src/app/scenarios/[id]/survey/results/page.tsx` で集計結果をKPのみ閲覧可能（MVPキャラクターの득票数棒グラフはSVGで実装、シーンコメントは一覧表示）。既存の `src/app/scenarios/[id]/page.tsx` の KP 向けアクションメニューに「事後アンケートを開始」ボタンを追加。`src/lib/supabase.ts` に `SessionSurvey`・`SessionSurveyConfig` 型を追加。追加DB2テーブル。
+**コミット:** `feat: post-session survey with MVP voting and memorable scene sharing`
