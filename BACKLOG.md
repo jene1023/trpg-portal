@@ -1633,3 +1633,33 @@
 **概要:** ボタン一つでモブNPC（名前・年齢・性別・職業・外見・代表技能3つ）をランダム生成できるツール。シナリオ本編外の即興遭遇や会話相手が必要な場面でKPが素早く使える。生成結果はシナリオに紐づけて保存可能。
 **実装ヒント:** `src/app/scenarios/[id]/npc-generator/page.tsx` を "use client" で新規作成。名前は和名テーブル（漢字＋読み仮名 各50件程度）をファイルに埋め込み `Math.random()` で選択。職業リストは既存キャラクター職業フィールドの選択肢（`src/app/_components/CharacterForm.tsx` の職業リスト）を流用。能力値は `3D6×5`（STR/DEX等）をJS内でロール。外見メモ（髪色・目の色・体格）はそれぞれの形容詞テーブルからランダム組み合わせ。「このNPCを保存」ボタンで `supabase.from("npcs").insert(...)` に登録（既存 `npcs` テーブル流用）。「再生成」ボタンで即座に別のNPCを生成。追加DBなし（既存npcsテーブル流用）。
 **コミット:** `feat: random NPC quick generator for instant extras during improvised encounters`
+
+## [TODO] シナリオ参加招待コード発行 — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** KPがシナリオ専用の招待URLを発行し、PLがそのページにアクセスして自分のキャラクターを選ぶだけでシナリオ参加申請を送れる仕組み。現状はKPがScenarioParticipantsを手動登録する必要があり、募集からセッション準備までが繁雑。
+**実装ヒント:** `scenarios` テーブルに `recruit_token: text | null` カラムを追加し、`src/app/scenarios/[id]/invite/page.tsx` でトークン生成・QRコード表示（既存 `QrCodeShare.tsx` を流用）。`src/app/join/[token]/page.tsx` でPLが自分のキャラクターを選択し `supabase.from("scenario_participants").insert({scenario_id, character_id, attendance_status: "unconfirmed"})` で参加申請。既存 `RecruitShareButton.tsx` と連携。追加DBカラム1本（既存テーブル）。
+**コミット:** `feat: scenario invite code flow for players to self-register via QR or URL`
+
+## [TODO] セッション後自動プレイレポートHTML生成 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション終了後、セッションログ・SAN喪失量・取得クルー・技能成長チェックを自動集計し「セッションN：〇〇の夜」形式のプレイレポートHTMLをダウンロードできる機能。DiscordやSNSへのセッションレポート投稿をワンクリックで完結させる。
+**実装ヒント:** `src/app/characters/[id]/sessions/[sessionId]/report/page.tsx` を Server Componentで新規作成。`session_logs`, `dice_rolls`, `growth_history`, `scenario_clues` を `Promise.all` で並行取得し、テンプレートHTMLを組み立てて `<a download>` で配布。AI整形オプションとして `src/app/api/ai/session-summary/route.ts`（既存）を呼び出し人読み向けサマリーを追記できるようにする。既存 `RecapCopyButton.tsx` と `SessionSummaryGenerator.tsx` を参考に。追加DBなし。
+**コミット:** `feat: session play-report HTML export with auto-aggregated stats and optional AI summary`
+
+## [TODO] キャラクター誕生日リマインダー通知 — 優先度: 低
+**対象:** PL / 共通
+**概要:** キャラクターの `birthday` フィールド（既存）を活用し、誕生日当日にWebプッシュ通知（既存 `push_subscriptions` テーブル）で「本日は◯◯の誕生日です！」とPLへ通知する機能。愛着あるキャラクターの記念日を見逃さない。
+**実装ヒント:** Supabase Edge Function `supabase/functions/birthday-reminder/index.ts` を新規作成し、毎朝07:00 JSTのcronで実行。`supabase.from("characters").select("id, name, birthday, user_id").not("birthday", "is", null)` で誕生日フィールドを全取得し、`MM-DD` が当日のキャラをフィルタ。`push_subscriptions` から該当 `user_id` のエンドポイントを取得して `web-push` でプッシュ送信（既存 `send-push-reminder` 関数の実装パターンを流用）。追加DBなし・追加Edge Function1本。
+**コミット:** `feat: character birthday push notification via edge function cron`
+
+## [TODO] シナリオテンプレートライブラリ（公開・複製） — 優先度: 低
+**対象:** KP
+**概要:** KPが完成したシナリオを「テンプレートとして公開」でき、他のKPが一覧から選んでワンクリックで自分のシナリオとして複製できるコミュニティライブラリ機能。ハンドアウト・シナリオエリア・クリーチャーも丸ごとコピーされ、シナリオ準備の初速を上げる。
+**実装ヒント:** `scenarios` テーブルに `is_template: boolean DEFAULT false` と `template_published_at: timestamptz | null` を追加。`src/app/templates/page.tsx` を Server Componentで新規作成（テンプレート一覧、`difficulty`・`content_tags` でフィルタ）。「複製」ボタンで `scenarios` + `handouts` + `creatures` + `scenario_areas` を `Promise.all` でコピーし `title` に "〜のコピー" を付与。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」トグルを追加。追加DBカラム2本（既存テーブル）。
+**コミット:** `feat: scenario template library with one-click clone for KP community sharing`
+
+## [TODO] NPCシナリオ横断登場履歴 — 優先度: 低
+**対象:** KP
+**概要:** 同一NPCが複数シナリオに「再登場」した記録を追加し、NPC個別ページでそのNPCがどのシナリオに登場しどのPCと関わったかの歴史を俯瞰できる機能。長期キャンペーンで「謎の老人がまた現れた」という連続性演出をデータで管理できる。
+**実装ヒント:** Supabaseに `npc_appearances` テーブルを追加（id, npc_id: uuid, scenario_id: uuid, role_in_scenario: text | null, disposition_change: text | null, created_at）。`src/app/npcs/[id]/appearances/page.tsx` を "use client" で新規作成（シナリオ名リンク付き一覧 + 追加フォーム）。各エントリに既存 `NpcDisposition` の値（friendly/neutral/hostile）を参照し、登場シナリオ間での立場変化を色バッジで表示。`src/app/npcs/[id]/page.tsx` に「登場履歴」リンクを追加。`src/lib/supabase.ts` に `NpcAppearance` 型を追加。追加DB1テーブル。
+**コミット:** `feat: NPC cross-scenario appearance history for recurring character tracking`
