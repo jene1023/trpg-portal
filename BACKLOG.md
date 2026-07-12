@@ -1711,3 +1711,38 @@
 **概要:** セッション終了後に参加者全員が匿名で回答できる事後アンケート機能。「今回のMVP（最も活躍したキャラクター）」投票、「印象に残ったシーン（自由記述）」、「次回セッションへの期待度（星評価）」などの項目を設け、KPがセッション品質を振り返るデータとして活用できる。PLにとってもお互いのプレイへの感謝を示せるポジティブなコミュニティ機能となる。
 **実装ヒント:** Supabaseに `session_surveys` テーブル（id, scenario_id, submitted_by_user_id: uuid, mvp_character_id: uuid | null, memorable_scene: text | null, next_session_rating: int | null, created_at）と `session_survey_configs` テーブル（id, scenario_id, is_open: bool DEFAULT false, opened_at: timestamptz | null）を追加。KPがシナリオ詳細ページからアンケートを「公開」にすると参加者に通知（Supabase Realtime broadcast）。`src/app/scenarios/[id]/survey/page.tsx` を "use client" で新規作成（回答フォーム）、`src/app/scenarios/[id]/survey/results/page.tsx` で集計結果をKPのみ閲覧可能（MVPキャラクターの득票数棒グラフはSVGで実装、シーンコメントは一覧表示）。既存の `src/app/scenarios/[id]/page.tsx` の KP 向けアクションメニューに「事後アンケートを開始」ボタンを追加。`src/lib/supabase.ts` に `SessionSurvey`・`SessionSurveyConfig` 型を追加。追加DB2テーブル。
 **コミット:** `feat: post-session survey with MVP voting and memorable scene sharing`
+
+## [TODO] セッションゼロ チェックリスト（安全確認・コンテンツ合意ツール） — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** セッション前にKP・PLがコンテンツ内容（暴力描写・恐怖要素・ロマンス要素など）への対応方針を確認し合えるチェックリスト機能。各PLが「OK/NG/要相談」をチェックし、KPが一覧で把握できる。
+**リサーチ根拠:** るるたく・セッションゼロ解説記事で「安全な卓運営」のニーズが可視化されており、モダンTRPGコミュニティで広く導入が進んでいる。
+**実装ヒント:** `session_zero_checklists(id, scenario_id, kp_user_id, items jsonb, created_at)` + `session_zero_responses(id, checklist_id, player_user_id, responses jsonb)` テーブルを追加。`src/app/scenarios/[id]/session-zero/page.tsx` (use client)。チェック項目はKPがカスタム追加可能なJSONB配列で管理。
+**コミット:** `feat: session-zero safety checklist for KP/PL content agreement`
+
+## [TODO] 卓報告フォーマット自動生成（SNS共有カード） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション終了後に参加者名・シナリオ名・日時・KP名などを自動集約し、Twitter/X投稿や文章コピーに適した「卓報告テキスト」を一発生成する機能。テンプレートはカスタマイズ可能。
+**リサーチ根拠:** 「卓報告フォーマットジェネレーター」などが需要を裏付けており、セッション後の振り返り投稿はコミュニティで定番の文化となっている。
+**実装ヒント:** 既存の `sessions`・`characters`・`scenarios` テーブルを結合して生成するため新規テーブル不要。`src/app/sessions/[id]/report/page.tsx` (use client)。テキストエリアでプレビュー→クリップボードコピー。Twitter share URLは `https://twitter.com/intent/tweet?text=...` を使用。
+**コミット:** `feat: auto-generate SNS-shareable taku-houkoku session report`
+
+## [TODO] KP専用キャラクター秘匿メモ — 優先度: 中
+**対象:** KP
+**概要:** KPがPLのキャラクターに対してPL非公開の秘匿メモ（「実は黒幕」「狂気フラグ管理」等）を記入できる機能。PLはメモの存在自体を見られない。
+**リサーチ根拠:** PrismScroll Cthulhuのジャーナル機能・るるたくの秘匿ハンドアウト管理からのインスピレーション。KPがセッション中にキャラクターの隠し情報を素早く参照したいニーズが高い。
+**実装ヒント:** `character_kp_notes(id, character_id, scenario_id, kp_user_id, content text, created_at)` テーブルを追加。RLSポリシーで `kp_user_id = auth.uid()` のみREAD権限を付与。`src/app/scenarios/[id]/characters/[charId]/kp-note/page.tsx` (use client)。
+**コミット:** `feat: KP-only private notes per character with RLS-enforced visibility`
+
+## [TODO] シナリオ難易度・プレイ時間・タグ検索フィルター — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** シナリオに難易度（1〜5）・推定プレイ時間・最小/最大PL人数・フリータグを登録し、シナリオ一覧でフィルター・ソートできる機能。
+**リサーチ根拠:** scenarch.com（シナリオ投稿・検索サイト）のタグ検索機能や難易度フィルターが活発に使われており、自前ポータルでも「自分向けシナリオを素早く見つける」需要がある。
+**実装ヒント:** 既存の `scenarios` テーブルに `difficulty smallint`・`estimated_minutes int`・`min_players smallint`・`max_players smallint`・`tags text[]` カラムをALTER TABLEで追加。`src/app/scenarios/page.tsx` にフィルターサイドバーコンポーネントを追加。タグ検索はSupabaseの `@>` オペレータ（配列包含）を使用。
+**コミット:** `feat: scenario difficulty, playtime, player count and tag filter`
+
+## [TODO] シナリオ HTMLエクスポート（KP用レジュメ出力） — 優先度: 低
+**対象:** KP
+**概要:** シナリオのシーン・NPC・ハンドアウト情報をまとめた単一HTMLファイルをエクスポートし、オフライン参照やプリントアウトに利用できる機能。
+**リサーチ根拠:** TRPGシナリオエディタ（BOOTH、HTML出力機能付き）が多数購入されており、セッション中にWEB接続不要でシナリオを参照したいKPのニーズが高い。
+**実装ヒント:** 新規テーブル不要。`src/app/api/scenarios/[id]/export-html/route.ts` をAPI Routeとして実装。`scenarios`・`npcs`・`handouts` を結合しサーバー側でHTMLテンプレート文字列を組み立て、`Content-Type: text/html` + `Content-Disposition: attachment` で返す。
+**コミット:** `feat: export scenario as single-file HTML for offline KP reference`
