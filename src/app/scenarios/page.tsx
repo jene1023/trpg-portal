@@ -61,8 +61,11 @@ export default function ScenariosPage() {
   const [statusFilter, setStatusFilter] = useState<ScenarioStatus | "all">("all");
   const [difficultyFilter, setDifficultyFilter] = useState<ScenarioDifficulty | "all">("all");
   const [playtimeFilter, setPlaytimeFilter] = useState<ScenarioPlaytimeType | "all">("all");
+  const [playerCountFilter, setPlayerCountFilter] = useState<string>("all");
+  const [maxMinutesFilter, setMaxMinutesFilter] = useState<string>("all");
   const [tagsByScenario, setTagsByScenario] = useState<Record<string, Tag[]>>({});
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedFreeTags, setSelectedFreeTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -117,8 +120,18 @@ export default function ScenariosPage() {
     new Set(Object.values(tagsByScenario).flat().map((t) => t.name))
   ).sort();
 
+  const allFreeTagNames = Array.from(
+    new Set(scenarios.flatMap((s) => s.tags ?? []))
+  ).sort();
+
   function toggleTag(name: string) {
     setSelectedTags((prev) =>
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+    );
+  }
+
+  function toggleFreeTag(name: string) {
+    setSelectedFreeTags((prev) =>
       prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
     );
   }
@@ -128,9 +141,26 @@ export default function ScenariosPage() {
     .filter((s) => difficultyFilter === "all" || s.difficulty === difficultyFilter)
     .filter((s) => playtimeFilter === "all" || s.playtime_type === playtimeFilter)
     .filter((s) => {
+      if (playerCountFilter === "all") return true;
+      const n = parseInt(playerCountFilter);
+      const min = s.min_players ?? 1;
+      const max = s.max_players ?? 99;
+      return n >= min && n <= max;
+    })
+    .filter((s) => {
+      if (maxMinutesFilter === "all") return true;
+      if (s.estimated_minutes == null) return true;
+      return s.estimated_minutes <= parseInt(maxMinutesFilter);
+    })
+    .filter((s) => {
       if (selectedTags.length === 0) return true;
       const scenTagNames = (tagsByScenario[s.id] ?? []).map((t) => t.name);
       return selectedTags.some((tag) => scenTagNames.includes(tag));
+    })
+    .filter((s) => {
+      if (selectedFreeTags.length === 0) return true;
+      const scenFreeTags = s.tags ?? [];
+      return selectedFreeTags.every((tag) => scenFreeTags.includes(tag));
     });
 
   return (
@@ -187,12 +217,64 @@ export default function ScenariosPage() {
           <option value="medium">中編</option>
           <option value="long">長編</option>
         </select>
+        <select
+          value={playerCountFilter}
+          onChange={(e) => setPlayerCountFilter(e.target.value)}
+          className="rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+        >
+          <option value="all">すべての人数</option>
+          <option value="1">1人</option>
+          <option value="2">2人</option>
+          <option value="3">3人</option>
+          <option value="4">4人</option>
+          <option value="5">5人</option>
+          <option value="6">6人〜</option>
+        </select>
+        <select
+          value={maxMinutesFilter}
+          onChange={(e) => setMaxMinutesFilter(e.target.value)}
+          className="rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text focus:outline-none focus:border-coc-gold transition-colors"
+        >
+          <option value="all">すべての所要時間</option>
+          <option value="60">〜1時間</option>
+          <option value="120">〜2時間</option>
+          <option value="180">〜3時間</option>
+          <option value="360">〜6時間</option>
+        </select>
       </div>
 
-      {/* タグフィルタ */}
+      {/* フリータグフィルタ */}
+      {allFreeTagNames.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <span className="text-xs text-coc-muted mr-1">タグ:</span>
+          {allFreeTagNames.map((name) => (
+            <button
+              key={name}
+              onClick={() => toggleFreeTag(name)}
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                selectedFreeTags.includes(name)
+                  ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                  : "border-coc-border bg-coc-surface text-coc-muted hover:text-coc-text hover:border-coc-border-glow"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+          {selectedFreeTags.length > 0 && (
+            <button
+              onClick={() => setSelectedFreeTags([])}
+              className="text-xs text-coc-muted hover:text-coc-text ml-1"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* カテゴリタグフィルタ */}
       {allTagNames.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 mb-6">
-          <span className="text-xs text-coc-muted mr-1">タグ:</span>
+          <span className="text-xs text-coc-muted mr-1">カテゴリ:</span>
           {allTagNames.map((name) => (
             <button
               key={name}
@@ -273,6 +355,13 @@ export default function ScenariosPage() {
                       {PLAYTIME_LABELS[scenario.playtime_type as ScenarioPlaytimeType]}
                     </span>
                   )}
+                  {scenario.estimated_minutes != null && (
+                    <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
+                      {scenario.estimated_minutes >= 60
+                        ? `約${Math.round(scenario.estimated_minutes / 60)}時間`
+                        : `約${scenario.estimated_minutes}分`}
+                    </span>
+                  )}
                   {(scenario.min_players != null || scenario.max_players != null) && (
                     <span className="rounded-full border border-coc-border px-2.5 py-0.5 text-xs text-coc-muted">
                       {scenario.min_players != null && scenario.max_players != null
@@ -332,6 +421,25 @@ export default function ScenariosPage() {
                     >
                       {tag}
                     </span>
+                  ))}
+                </div>
+              )}
+
+              {/* フリータグ表示 */}
+              {(scenario.tags ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {(scenario.tags ?? []).map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleFreeTag(tag)}
+                      className={`rounded-full border px-2 py-0.5 text-xs transition-colors ${
+                        selectedFreeTags.includes(tag)
+                          ? "border-coc-gold bg-coc-gold/20 text-coc-gold"
+                          : "border-coc-border bg-coc-surface text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+                      }`}
+                    >
+                      #{tag}
+                    </button>
                   ))}
                 </div>
               )}

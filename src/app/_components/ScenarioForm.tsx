@@ -24,6 +24,8 @@ export default function ScenarioForm() {
     playtime_type: "" as ScenarioPlaytimeType | "",
     min_players: "",
     max_players: "",
+    estimated_minutes: "",
+    tags: "",
     content_tags: "",
     remind_enabled: false,
     remind_email: "",
@@ -49,8 +51,12 @@ export default function ScenarioForm() {
     }
     setSaving(true);
     setError(null);
-    const rawTags = form.content_tags.trim();
-    const contentTagsArray = rawTags
+    const rawContentTags = form.content_tags.trim();
+    const contentTagsArray = rawContentTags
+      ? rawContentTags.split(/[,、]/).map((t) => t.trim()).filter(Boolean)
+      : null;
+    const rawTags = form.tags.trim();
+    const tagsArray = rawTags
       ? rawTags.split(/[,、]/).map((t) => t.trim()).filter(Boolean)
       : null;
 
@@ -70,6 +76,8 @@ export default function ScenarioForm() {
       playtime_type: form.playtime_type || null,
       min_players: form.min_players ? parseInt(form.min_players) : null,
       max_players: form.max_players ? parseInt(form.max_players) : null,
+      estimated_minutes: form.estimated_minutes ? parseInt(form.estimated_minutes) : null,
+      tags: tagsArray,
       content_tags: contentTagsArray,
       remind_enabled: form.remind_enabled,
       remind_email: form.remind_email.trim() || null,
@@ -284,7 +292,7 @@ export default function ScenarioForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div>
             <label htmlFor="min_players" className={labelClass}>
               推奨人数（最小）
@@ -317,6 +325,39 @@ export default function ScenarioForm() {
               className={fieldClass}
             />
           </div>
+          <div>
+            <label htmlFor="estimated_minutes" className={labelClass}>
+              推定時間（分）
+            </label>
+            <input
+              id="estimated_minutes"
+              name="estimated_minutes"
+              type="number"
+              min="30"
+              step="30"
+              value={form.estimated_minutes}
+              onChange={handleChange}
+              placeholder="例: 180"
+              className={fieldClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="tags" className={labelClass}>
+            フリータグ（カンマ区切り）
+          </label>
+          <input
+            id="tags"
+            name="tags"
+            value={form.tags}
+            onChange={handleChange}
+            placeholder="例: ミステリー, 現代, ソロ"
+            className={fieldClass}
+          />
+          <p className="text-xs text-coc-faint mt-1">
+            一覧画面でのタグ検索に使用されます
+          </p>
         </div>
 
         <div>

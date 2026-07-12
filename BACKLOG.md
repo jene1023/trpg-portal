@@ -1733,7 +1733,7 @@
 **実装ヒント:** `character_kp_notes(id, character_id, scenario_id, kp_user_id, content text, created_at)` テーブルを追加。RLSポリシーで `kp_user_id = auth.uid()` のみREAD権限を付与。`src/app/scenarios/[id]/characters/[charId]/kp-note/page.tsx` (use client)。
 **コミット:** `feat: KP-only private notes per character with RLS-enforced visibility`
 
-## [TODO] シナリオ難易度・プレイ時間・タグ検索フィルター — 優先度: 中
+## [DONE] シナリオ難易度・プレイ時間・タグ検索フィルター — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** シナリオに難易度（1〜5）・推定プレイ時間・最小/最大PL人数・フリータグを登録し、シナリオ一覧でフィルター・ソートできる機能。
 **リサーチ根拠:** scenarch.com（シナリオ投稿・検索サイト）のタグ検索機能や難易度フィルターが活発に使われており、自前ポータルでも「自分向けシナリオを素早く見つける」需要がある。

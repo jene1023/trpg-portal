@@ -378,3 +378,8 @@ create table if not exists character_bonds (
 );
 alter table character_bonds enable row level security;
 create policy "allow all for anon" on character_bonds for all using (true) with check (true);
+
+
+-- シナリオ難易度・プレイ時間・タグ検索フィルター (追加マイグレーション)
+alter table scenarios add column if not exists estimated_minutes integer;
+alter table scenarios add column if not exists tags text[];
