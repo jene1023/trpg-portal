@@ -1688,7 +1688,7 @@
 **実装ヒント:** Supabaseに `character_quotes` テーブルを追加（id, character_id, session_label: text | null, quote_text: text, context_note: text | null, submitted_by_user_id: uuid, likes: int DEFAULT 0, created_at）。`src/app/characters/[id]/quotes/page.tsx` を "use client" で新規作成（投稿フォーム＋likes降順/created_at降順の切り替え一覧）。各語録カードにクリップボードコピーボタン（`navigator.clipboard.writeText`）とハートボタン（`supabase.rpc("increment_quote_likes", { quote_id })` でlikes加算）を設置。同一シナリオの参加者であれば他PLも投稿・いいね可能（RLSで `scenario_participants` と照合）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「語録」リンクを追加。`src/lib/supabase.ts` に `CharacterQuote` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character quote collection for memorable in-session lines with social likes`
 
-## [TODO] キャラクター成長グラフ（スキル値変遷の可視化） — 優先度: 中
+## [DONE] キャラクター成長グラフ（スキル値変遷の可視化） — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターのスキル値・正気度・HPなどのステータスをセッションごとにスナップショット保存し、折れ線グラフで成長の軌跡を可視化する機能。PLが「あのセッションで正気度がガタ落ちした」「技能を重点的に伸ばしてきた」という過去を振り返り、キャラクターへの愛着をさらに深められる。
 **実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, recorded_at: timestamptz, stats: jsonb — {san, hp, mp, skills: {name: string, value: number}[]}）。`src/app/characters/[id]/growth/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG で実装（外部チャートライブラリ不要）：データポイントを `<polyline>` で繋ぎ、各点に `<circle>` とホバー時 `<title>` を付与。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の編集フォームに「現在値をスナップショット保存」ボタンを追加し、`supabase.from("character_stat_snapshots").insert(...)` で保存。最新スナップショットとの差分（±）をキャラクター一覧カードにバッジ表示するオプションも検討。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。

@@ -25,6 +25,7 @@ import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import SuccessionButton from "@/app/_components/SuccessionButton";
 import PublicShareButton from "@/app/_components/PublicShareButton";
+import StatSnapshotSaveButton from "@/app/_components/StatSnapshotSaveButton";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -275,6 +276,11 @@ export default async function CharacterDetailPage({ params }: Props) {
               sanMax={char.san_max}
               con={char.con}
             />
+            <SectionDivider className="my-2" />
+            <div>
+              <p className="text-xs text-coc-muted font-semibold mb-2">スナップショット保存</p>
+              <StatSnapshotSaveButton characterId={char.id} />
+            </div>
             <SectionDivider className="my-2" />
             <div>
               <p className="text-xs text-coc-muted font-semibold mb-2">状態異常</p>
