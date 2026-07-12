@@ -1777,7 +1777,7 @@
 **実装ヒント:** 新規テーブル不要。`src/app/characters/page.tsx` でfetchしたキャラクターに対し `san_current / san_max < 0.3` または `hp_current / hp_max < 0.3` の条件を評価し、`src/app/_components/StatusBadge.tsx` に `"crisis"` バリアントを追加（赤色の「危機」ラベル）。`src/app/page.tsx`（ホームダッシュボード）に「危機状態のキャラクター」セクションを追加して該当キャラへのリンクを表示。追加DBなし。
 **コミット:** `feat: SAN/HP crisis alert badge on character list and dashboard`
 
-## [TODO] PLウィッシュリスト（次セッションへの期待メモ） — 優先度: 中
+## [DONE] PLウィッシュリスト（次セッションへの期待メモ） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** PLがシナリオ参加中に「次はここへ行きたい」「あのNPCと再会したい」等の期待を短いメモとして投稿し、KPがセッション前に一覧確認できる機能。KP-PL間の期待値調整を促進する。
 **実装ヒント:** Supabaseに `player_wishes(id, scenario_id, character_id, user_id, wish_text text, is_fulfilled bool DEFAULT false, fulfilled_at timestamptz, created_at)` テーブルを追加。`src/app/scenarios/[id]/wishes/page.tsx` を新規作成（PLは自分のウィッシュをCRUD、KPは全PLの一覧を読み専用で閲覧＋「叶った」ボタン）。`src/lib/supabase.ts` に `PlayerWish` 型を追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「PLの期待リスト」リンクを追加。

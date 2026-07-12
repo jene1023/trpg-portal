@@ -1335,3 +1335,15 @@ export type SessionPollVote = {
   chosen_option_index: number;
   voted_at: string;
 };
+
+export type PlayerWish = {
+  id: string;
+  scenario_id: string;
+  character_id: string | null;
+  user_id: string | null;
+  wish_text: string;
+  author_name: string | null;
+  is_fulfilled: boolean;
+  fulfilled_at: string | null;
+  created_at: string;
+};
