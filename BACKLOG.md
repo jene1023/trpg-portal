@@ -1771,7 +1771,7 @@
 **実装ヒント:** 新規テーブルは `player_profiles(id, user_id, display_name, bio text, play_style text[], is_public bool DEFAULT false, created_at)` のみ追加。`src/app/players/[userId]/page.tsx` を新規作成（Server Component）。`characters`・`sessions`・`dice_rolls` テーブルを集計：キャラ数、総セッション数、総ダイス判定数、最多使用職業、累計SAN喪失。キャラクター一覧はサムネイルカード形式で縦グリッド表示。`src/app/_components/PlayerForm.tsx` を流用しプロフィール編集フォームを構成。NavBarのユーザーメニューに「マイプロフィール」リンクを追加。`src/lib/supabase.ts` に `PlayerProfile` 型を追加。
 **コミット:** `feat: player profile page with play history and character portfolio`
 
-## [TODO] キャラクターSAN/HP危機アラート — 優先度: 高
+## [DONE] キャラクターSAN/HP危機アラート — 優先度: 高
 **対象:** PL / 共通
 **概要:** SAN・HPが最大値の30%以下になったキャラクターをホームダッシュボードとキャラクター一覧で赤バッジ付き警告表示する機能。セッション中に危機状態を見落とすリスクを自動検出する。
 **実装ヒント:** 新規テーブル不要。`src/app/characters/page.tsx` でfetchしたキャラクターに対し `san_current / san_max < 0.3` または `hp_current / hp_max < 0.3` の条件を評価し、`src/app/_components/StatusBadge.tsx` に `"crisis"` バリアントを追加（赤色の「危機」ラベル）。`src/app/page.tsx`（ホームダッシュボード）に「危機状態のキャラクター」セクションを追加して該当キャラへのリンクを表示。追加DBなし。

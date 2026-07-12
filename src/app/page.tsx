@@ -13,10 +13,12 @@ import {
   Clock,
   Brain,
   BookMarked,
+  AlertTriangle,
 } from "lucide-react";
-import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario, SessionLog, MadnessRecord } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, CharacterWithSkills, Scenario, SessionLog, MadnessRecord, Character } from "@/lib/supabase";
 import CharacterCard from "./_components/CharacterCard";
 import SectionDivider from "./_components/SectionDivider";
+import { CrisisBadge } from "./_components/StatusBadge";
 
 type SessionWithCharacter = SessionLog & { characters: { name: string } | null };
 type MadnessWithCharacter = MadnessRecord & { characters: { name: string; id: string } | null };
@@ -72,6 +74,7 @@ export default async function HomePage() {
   let ongoingScenarios: Scenario[] | null = null;
   let recentSessions: SessionWithCharacter[] | null = null;
   let activeMadness: MadnessWithCharacter[] | null = null;
+  let allAliveChars: Character[] | null = null;
 
   const now = new Date();
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -79,7 +82,7 @@ export default async function HomePage() {
   const weekFromNowIso = weekFromNow.toISOString();
 
   if (isSupabaseConfigured) {
-    const [recentRes, pinnedRes, ongoingRes, sessionsRes, madnessRes] = await Promise.all([
+    const [recentRes, pinnedRes, ongoingRes, sessionsRes, madnessRes, allAliveRes] = await Promise.all([
       supabase
         .from("characters")
         .select("*, character_skills(*)")
@@ -107,13 +110,24 @@ export default async function HomePage() {
         .select("*, characters(name, id)")
         .eq("is_active", true)
         .limit(5),
+      supabase
+        .from("characters")
+        .select("id, name, hp_current, hp_max, san_current, san_max, status")
+        .eq("status", "alive"),
     ]);
     recent = recentRes.data as CharacterWithSkills[];
     pinned = pinnedRes.data as CharacterWithSkills[];
     ongoingScenarios = ongoingRes.data as Scenario[];
     recentSessions = sessionsRes.data as SessionWithCharacter[];
     activeMadness = madnessRes.data as MadnessWithCharacter[];
+    allAliveChars = allAliveRes.data as Character[];
   }
+
+  const crisisChars = (allAliveChars ?? []).filter((c) => {
+    const hpCrisis = c.hp_max > 0 && c.hp_current / c.hp_max < 0.3;
+    const sanCrisis = c.san_max > 0 && c.san_current / c.san_max < 0.3;
+    return hpCrisis || sanCrisis;
+  });
 
   const configured = isSupabaseConfigured;
 
@@ -196,6 +210,47 @@ export default async function HomePage() {
           </Link>
         ))}
       </div>
+
+      {/* 危機状態のキャラクター */}
+      {crisisChars.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={14} className="text-red-400" />
+            <h2 className="coc-section-title font-cinzel text-sm font-semibold text-red-400 uppercase tracking-widest">
+              危機状態のキャラクター
+            </h2>
+          </div>
+          <div className="space-y-2 coc-stagger-grid">
+            {crisisChars.map((c) => {
+              const hpCrisis = c.hp_max > 0 && c.hp_current / c.hp_max < 0.3;
+              const sanCrisis = c.san_max > 0 && c.san_current / c.san_max < 0.3;
+              return (
+                <a
+                  key={c.id}
+                  href={`/characters/${c.id}`}
+                  className="flex items-center justify-between rounded-lg border border-red-800/50 bg-red-950/30 px-4 py-3 transition-all duration-200 ease-out hover:border-red-600/60 hover:bg-red-950/50 motion-safe:hover:-translate-y-px"
+                >
+                  <div className="min-w-0 flex items-center gap-3">
+                    <CrisisBadge />
+                    <div>
+                      <p className="text-sm font-medium text-coc-text truncate">{c.name}</p>
+                      <p className="text-xs text-coc-muted mt-0.5 flex gap-2">
+                        {hpCrisis && (
+                          <span className="text-red-400">HP {c.hp_current}/{c.hp_max}</span>
+                        )}
+                        {sanCrisis && (
+                          <span className="text-red-400">SAN {c.san_current}/{c.san_max}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight size={14} className="text-coc-faint flex-shrink-0" />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 今週の予定 */}
       {upcomingSessions.length > 0 && (

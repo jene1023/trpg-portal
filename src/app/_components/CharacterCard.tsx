@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { Character, CharacterSkill, supabase, isSupabaseConfigured } from "@/lib/supabase";
-import StatusBadge from "./StatusBadge";
+import StatusBadge, { CrisisBadge } from "./StatusBadge";
 import PortraitImage from "./PortraitImage";
 import DerivedStatBar from "./DerivedStatBar";
 
@@ -13,6 +13,7 @@ type Props = {
   onTogglePin?: (id: string, pinned: boolean) => void;
   isCompared?: boolean;
   onToggleCompare?: (id: string) => void;
+  isCrisis?: boolean;
 };
 
 function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
@@ -21,7 +22,7 @@ function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
     .slice(0, 3);
 }
 
-export default function CharacterCard({ character, skills = [], onTogglePin, isCompared, onToggleCompare }: Props) {
+export default function CharacterCard({ character, skills = [], onTogglePin, isCompared, onToggleCompare, isCrisis = false }: Props) {
   const top = topSkills(skills);
   const status = character.status ?? "alive";
 
@@ -93,8 +94,9 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
             )}
           </div>
           {/* ステータスバッジ */}
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
             <StatusBadge status={character.status} />
+            {isCrisis && <CrisisBadge />}
           </div>
           {/* 追悼バッジ（死亡・引退で最終章記録済みの場合） */}
           {(character.status === "dead" || character.status === "retired") &&
