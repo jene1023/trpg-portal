@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -215,6 +215,13 @@ export default function CampaignDetailPage({ params }: Props) {
 
       {/* リンク */}
       <div className="mb-6 flex gap-3 flex-wrap">
+        <Link
+          href={`/campaigns/${campaignId}/board`}
+          className="flex items-center gap-2 rounded-lg border border-coc-gold bg-coc-surface px-4 py-2 text-sm text-coc-gold hover:bg-coc-gold/10 transition-colors"
+        >
+          <Monitor size={15} />
+          共有ボード
+        </Link>
         <Link
           href={`/campaigns/${campaignId}/stats`}
           className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"

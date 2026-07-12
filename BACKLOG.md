@@ -1795,7 +1795,7 @@
 **実装ヒント:** `scenarios` テーブルに `teaser_text text`, `recommended_players_min smallint`, `recommended_players_max smallint`, `estimated_hours float4`, `teaser_is_public bool DEFAULT false` カラムを追加（ALTER TABLE）。`src/app/s/[slug]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「ティザー編集・公開」セクションを追加し、公開URLをコピーするボタン（既存 `QrCodeShare.tsx` パターン参考）を配置。`src/lib/supabase.ts` に `teaser_*` フィールドを `Scenario` 型へ追加。
 **コミット:** `feat: scenario teaser public page for spoiler-free recruitment`
 
-## [TODO] パーティリアルタイム共有ステータスボード — 優先度: 高
+## [DONE] パーティリアルタイム共有ステータスボード — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッション中にKP・全PLがリンクを開くだけでパーティ全員のHP/MP/SAN現在値をリアルタイムで一覧できるボード。KP画面・GMスクリーン代わりに使える。
 **実装ヒント:** Supabaseの `characters` テーブルへのリアルタイムサブスクリプション（`supabase.channel().on("postgres_changes",...).subscribe()`）で実装。`src/app/campaigns/[id]/board/page.tsx` を "use client" で新規作成し、パーティ参加キャラのHP/MP/SANを大きくカード表示。既存の `QuickStatEditor.tsx` と `PartySanCheck.tsx` を参考に実装。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「共有ボード」リンクを追加。
