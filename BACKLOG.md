@@ -1746,3 +1746,27 @@
 **リサーチ根拠:** TRPGシナリオエディタ（BOOTH、HTML出力機能付き）が多数購入されており、セッション中にWEB接続不要でシナリオを参照したいKPのニーズが高い。
 **実装ヒント:** 新規テーブル不要。`src/app/api/scenarios/[id]/export-html/route.ts` をAPI Routeとして実装。`scenarios`・`npcs`・`handouts` を結合しサーバー側でHTMLテンプレート文字列を組み立て、`Content-Type: text/html` + `Content-Disposition: attachment` で返す。
 **コミット:** `feat: export scenario as single-file HTML for offline KP reference`
+
+## [TODO] クリーチャー図鑑ページ（シナリオ連携） — 優先度: 中
+**対象:** KP
+**概要:** KPがシナリオ別にクリーチャーの能力値・攻撃方法・恐怖度・秘匿情報を登録・参照できる図鑑ページ。既存の `CreatureForm.tsx` コンポーネントを活用し、シナリオ詳細からワンクリックでアクセスできる。
+**実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id, name, description, str, con, dex, pow, hp, armor, attacks jsonb, fear_rating smallint, secret_notes text | null, created_at）。`src/app/scenarios/[id]/creatures/page.tsx` を新規作成（一覧＋インライン追加は既存 `CreatureForm.tsx` を流用）。各クリーチャーカードは `hp` バー・`fear_rating` 星表示・`secret_notes` 折りたたみ（KPのみ展開可）で構成。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「クリーチャー」リンクを追加。`src/lib/supabase.ts` に `Creature` 型を追加。
+**コミット:** `feat: creature bestiary page per scenario for KP reference`
+
+## [TODO] セッション中行動投票（リアルタイム） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** KPが「次の行動を選んでください」などの議題と選択肢を立て、参加PLがリアルタイムで投票できる機能。Supabase Realtime を使い、全員の投票状況を即座に全画面共有する。
+**実装ヒント:** Supabaseに `session_polls` テーブル（id, scenario_id, question text, options jsonb — string[], created_by_user_id, is_open bool DEFAULT true, created_at）と `session_poll_votes` テーブル（id, poll_id, voter_user_id, chosen_option_index smallint, voted_at）を追加。`src/app/scenarios/[id]/poll/page.tsx` を "use client" で新規作成。KPはフォームで議題作成、PLはボタン1つで選択肢を押す。`supabase.channel('poll-${scenarioId}')` でリアルタイムブロードキャスト（既存 `GameClockEditor.tsx` のパターン参考）し、得票数バーをリアルタイム更新。`src/app/scenarios/[id]/page.tsx` に「投票」リンクを追加。`src/lib/supabase.ts` に `SessionPoll`・`SessionPollVote` 型を追加。
+**コミット:** `feat: realtime in-session action voting for player group decisions`
+
+## [TODO] パーティ能力値比較ビュー — 優先度: 低
+**対象:** KP / 共通
+**概要:** シナリオ参加キャラクターを横並びで表示し、STR/DEX/INT等の能力値と代表技能値をグリッドで比較できるビュー。KPがパーティバランスを把握し、シナリオ難易度調整の参考にできる。PLも「誰がどの役割に強いか」を一画面で確認できる。
+**実装ヒント:** 新規テーブル不要（既存 `scenario_participants`・`characters`・`character_skills` を結合）。`src/app/scenarios/[id]/party-stats/page.tsx` を Server Component で新規作成。`supabase.from("scenario_participants").select("character_id, characters(name, str, con, pow, dex, app, siz, int_stat, edu, hp, mp, san_current, character_skills(*))").eq("scenario_id", id)` でデータ取得。能力値はキャラ名を列ヘッダー・能力値名を行ラベルとしたtable要素で表示。最高値セルを `bg-green-100` でハイライト。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「パーティ比較」リンクを追加。
+**コミット:** `feat: party ability score comparison view for scenario balance check`
+
+## [TODO] PLプロフィール・プレイ実績ページ — 優先度: 低
+**対象:** PL / 共通
+**概要:** PLが過去の参加セッション数・担当キャラクター一覧・よく使う職業・累計SAN喪失量などの実績をまとめたプロフィールページ。卓募集時の自己紹介や他PLへの共有に使う。公開/非公開を切り替え可能。
+**実装ヒント:** 新規テーブルは `player_profiles(id, user_id, display_name, bio text, play_style text[], is_public bool DEFAULT false, created_at)` のみ追加。`src/app/players/[userId]/page.tsx` を新規作成（Server Component）。`characters`・`sessions`・`dice_rolls` テーブルを集計：キャラ数、総セッション数、総ダイス判定数、最多使用職業、累計SAN喪失。キャラクター一覧はサムネイルカード形式で縦グリッド表示。`src/app/_components/PlayerForm.tsx` を流用しプロフィール編集フォームを構成。NavBarのユーザーメニューに「マイプロフィール」リンクを追加。`src/lib/supabase.ts` に `PlayerProfile` 型を追加。
+**コミット:** `feat: player profile page with play history and character portfolio`
