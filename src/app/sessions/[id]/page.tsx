@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquarePlus, BarChart2, Share2 } from "lucide-react";
+import { ArrowLeft, MessageSquarePlus, BarChart2, Share2, Newspaper } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import FeedbackCopyButton from "@/app/_components/FeedbackCopyButton";
 
@@ -60,6 +60,20 @@ export default async function SessionDetailPage({ params }: Props) {
       )}
 
       <div className="flex flex-col gap-3 mb-6">
+        <Link
+          href={`/sessions/${id}/report`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold-dim transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <Newspaper size={18} className="text-coc-gold" />
+            <div>
+              <p className="text-sm font-medium text-coc-text">卓報告カード生成</p>
+              <p className="text-xs text-coc-muted">SNS投稿用テキストを自動生成</p>
+            </div>
+          </div>
+          <span className="text-coc-muted group-hover:text-coc-text transition-colors">→</span>
+        </Link>
+
         <Link
           href={`/sessions/${id}/feedback`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold-dim transition-colors group"

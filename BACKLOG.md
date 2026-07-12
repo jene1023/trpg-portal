@@ -1719,7 +1719,7 @@
 **実装ヒント:** `session_zero_checklists(id, scenario_id, kp_user_id, items jsonb, created_at)` + `session_zero_responses(id, checklist_id, player_user_id, responses jsonb)` テーブルを追加。`src/app/scenarios/[id]/session-zero/page.tsx` (use client)。チェック項目はKPがカスタム追加可能なJSONB配列で管理。
 **コミット:** `feat: session-zero safety checklist for KP/PL content agreement`
 
-## [TODO] 卓報告フォーマット自動生成（SNS共有カード） — 優先度: 中
+## [DONE] 卓報告フォーマット自動生成（SNS共有カード） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション終了後に参加者名・シナリオ名・日時・KP名などを自動集約し、Twitter/X投稿や文章コピーに適した「卓報告テキスト」を一発生成する機能。テンプレートはカスタマイズ可能。
 **リサーチ根拠:** 「卓報告フォーマットジェネレーター」などが需要を裏付けており、セッション後の振り返り投稿はコミュニティで定番の文化となっている。
