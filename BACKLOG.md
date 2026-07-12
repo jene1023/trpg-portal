@@ -1770,3 +1770,27 @@
 **概要:** PLが過去の参加セッション数・担当キャラクター一覧・よく使う職業・累計SAN喪失量などの実績をまとめたプロフィールページ。卓募集時の自己紹介や他PLへの共有に使う。公開/非公開を切り替え可能。
 **実装ヒント:** 新規テーブルは `player_profiles(id, user_id, display_name, bio text, play_style text[], is_public bool DEFAULT false, created_at)` のみ追加。`src/app/players/[userId]/page.tsx` を新規作成（Server Component）。`characters`・`sessions`・`dice_rolls` テーブルを集計：キャラ数、総セッション数、総ダイス判定数、最多使用職業、累計SAN喪失。キャラクター一覧はサムネイルカード形式で縦グリッド表示。`src/app/_components/PlayerForm.tsx` を流用しプロフィール編集フォームを構成。NavBarのユーザーメニューに「マイプロフィール」リンクを追加。`src/lib/supabase.ts` に `PlayerProfile` 型を追加。
 **コミット:** `feat: player profile page with play history and character portfolio`
+
+## [TODO] キャラクターSAN/HP危機アラート — 優先度: 高
+**対象:** PL / 共通
+**概要:** SAN・HPが最大値の30%以下になったキャラクターをホームダッシュボードとキャラクター一覧で赤バッジ付き警告表示する機能。セッション中に危機状態を見落とすリスクを自動検出する。
+**実装ヒント:** 新規テーブル不要。`src/app/characters/page.tsx` でfetchしたキャラクターに対し `san_current / san_max < 0.3` または `hp_current / hp_max < 0.3` の条件を評価し、`src/app/_components/StatusBadge.tsx` に `"crisis"` バリアントを追加（赤色の「危機」ラベル）。`src/app/page.tsx`（ホームダッシュボード）に「危機状態のキャラクター」セクションを追加して該当キャラへのリンクを表示。追加DBなし。
+**コミット:** `feat: SAN/HP crisis alert badge on character list and dashboard`
+
+## [TODO] PLウィッシュリスト（次セッションへの期待メモ） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** PLがシナリオ参加中に「次はここへ行きたい」「あのNPCと再会したい」等の期待を短いメモとして投稿し、KPがセッション前に一覧確認できる機能。KP-PL間の期待値調整を促進する。
+**実装ヒント:** Supabaseに `player_wishes(id, scenario_id, character_id, user_id, wish_text text, is_fulfilled bool DEFAULT false, fulfilled_at timestamptz, created_at)` テーブルを追加。`src/app/scenarios/[id]/wishes/page.tsx` を新規作成（PLは自分のウィッシュをCRUD、KPは全PLの一覧を読み専用で閲覧＋「叶った」ボタン）。`src/lib/supabase.ts` に `PlayerWish` 型を追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「PLの期待リスト」リンクを追加。
+**コミット:** `feat: player wishlist for next-session expectations per scenario`
+
+## [TODO] ユーザー通知設定ページ（マイ設定） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッションリマインダー・メッセージ受信・ハンドアウト更新・BGMブロードキャスト等の通知種別をユーザーが個別にON/OFFできる設定ページ。通知機能は実装済みだが受け取り設定を管理するUIが存在しない。
+**実装ヒント:** Supabaseに `user_notification_prefs(id, user_id, session_reminder bool DEFAULT true, message_received bool DEFAULT true, handout_distributed bool DEFAULT true, bgm_broadcast bool DEFAULT false, updated_at)` テーブルを追加（upsert方式で1ユーザー1行）。`src/app/settings/notifications/page.tsx` を "use client" で新規作成（トグルスイッチUI）。`src/app/_components/NavBar.tsx` のユーザーメニューに「通知設定」リンクを追加。`src/lib/supabase.ts` に `UserNotificationPrefs` 型を追加。
+**コミット:** `feat: user notification preferences settings page`
+
+## [TODO] シナリオティザーページ（ネタバレなし公開） — 優先度: 低
+**対象:** KP / 共通
+**概要:** KPがシナリオの雰囲気・参加条件・推奨人数・プレイ時間のみを記載した「ネタバレなし概要ページ」を公開URLで共有できる機能。卓募集SNS投稿に貼るだけで詳細なネタバレなしに参加者を集められる。
+**実装ヒント:** `scenarios` テーブルに `teaser_text text`, `recommended_players_min smallint`, `recommended_players_max smallint`, `estimated_hours float4`, `teaser_is_public bool DEFAULT false` カラムを追加（ALTER TABLE）。`src/app/s/[slug]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「ティザー編集・公開」セクションを追加し、公開URLをコピーするボタン（既存 `QrCodeShare.tsx` パターン参考）を配置。`src/lib/supabase.ts` に `teaser_*` フィールドを `Scenario` 型へ追加。
+**コミット:** `feat: scenario teaser public page for spoiler-free recruitment`
