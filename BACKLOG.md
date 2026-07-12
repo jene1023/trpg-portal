@@ -1807,7 +1807,7 @@
 **実装ヒント:** `sessions` テーブルの `san_loss`, `hp_loss`, `played_at` を時系列集計。`src/app/characters/[id]/stat-history/page.tsx` を "use client" で新規作成。グラフはネイティブSVGまたは `<canvas>` で実装（外部ライブラリ不要）。X軸: セッション番号、Y軸: HP/SAN/MP残量。`src/app/_components/QuickStatsDisplay.tsx` の表示パターンを参考に色分け。キャラクター詳細ページに「成長グラフ」リンクを追加。
 **コミット:** `feat: character stat progression graph over sessions`
 
-## [TODO] セッション横断ログ検索 — 優先度: 中
+## [DONE] セッション横断ログ検索 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** 全セッションログ・シナリオノート・KPメモをまとめてキーワード検索し、過去の出来事や決定事項を素早く引き出せる機能。セッション数が増えるほど価値が高まる。
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。Supabase `ilike` を使い `sessions(title, summary)`, `scenario_notes(content)` を横断検索（`Promise.all` で並列実行）。検索結果はソース種別ごとにセクション分けして表示し、リンクでジャンプできるよう設計。`src/app/_components/NavBar.tsx` に検索アイコンリンクを追加。
