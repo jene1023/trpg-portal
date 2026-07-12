@@ -407,6 +407,8 @@ export type Creature = {
   attacks: string | null;
   can_use_spells: boolean;
   notes: string | null;
+  fear_rating: number | null;
+  secret_notes: string | null;
   created_at: string;
 };
 

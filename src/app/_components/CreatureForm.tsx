@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Star } from "lucide-react";
 import { supabase, isSupabaseConfigured, Scenario } from "@/lib/supabase";
 
 type StatKey = "str" | "con" | "pow" | "dex" | "siz" | "hp" | "mp";
@@ -17,7 +17,13 @@ const STAT_LABELS: { key: StatKey; label: string }[] = [
   { key: "mp", label: "MP" },
 ];
 
-export default function CreatureForm() {
+type Props = {
+  scenarioId?: string;
+  redirectTo?: string;
+  onSuccess?: () => void;
+};
+
+export default function CreatureForm({ scenarioId, redirectTo, onSuccess }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +31,7 @@ export default function CreatureForm() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
 
   const [form, setForm] = useState({
-    scenario_id: "",
+    scenario_id: scenarioId ?? "",
     name: "",
     mythos_background: "",
     san_loss_success: "",
@@ -34,6 +40,8 @@ export default function CreatureForm() {
     attacks: "",
     notes: "",
     can_use_spells: false,
+    fear_rating: 0,
+    secret_notes: "",
   });
 
   const [stats, setStats] = useState<Record<StatKey, string>>({
@@ -47,6 +55,7 @@ export default function CreatureForm() {
   });
 
   useEffect(() => {
+    if (scenarioId) return;
     if (!isSupabaseConfigured) return;
     supabase
       .from("scenarios")
@@ -55,7 +64,7 @@ export default function CreatureForm() {
       .then(({ data: scenarioData }) => {
         if (scenarioData) setScenarios(scenarioData as Scenario[]);
       });
-  }, []);
+  }, [scenarioId]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -64,6 +73,10 @@ export default function CreatureForm() {
 
   function handleCheckbox(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, can_use_spells: e.target.checked }));
+  }
+
+  function handleFearRating(value: number) {
+    setForm((prev) => ({ ...prev, fear_rating: value }));
   }
 
   function handleStatChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -100,6 +113,8 @@ export default function CreatureForm() {
       attacks: form.attacks.trim() || null,
       notes: form.notes.trim() || null,
       can_use_spells: form.can_use_spells,
+      fear_rating: form.fear_rating || null,
+      secret_notes: form.secret_notes.trim() || null,
       ...statPayload,
     });
 
@@ -108,7 +123,11 @@ export default function CreatureForm() {
       setSaving(false);
       return;
     }
-    router.push("/creatures");
+    if (onSuccess) {
+      onSuccess();
+      return;
+    }
+    router.push(redirectTo ?? "/creatures");
     router.refresh();
   }
 
@@ -126,25 +145,27 @@ export default function CreatureForm() {
         </p>
       )}
 
-      <div>
-        <label htmlFor="scenario_id" className={labelClass}>
-          シナリオ（任意）
-        </label>
-        <select
-          id="scenario_id"
-          name="scenario_id"
-          value={form.scenario_id}
-          onChange={handleChange}
-          className={fieldClass}
-        >
-          <option value="">シナリオ未設定</option>
-          {scenarios.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.title}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!scenarioId && (
+        <div>
+          <label htmlFor="scenario_id" className={labelClass}>
+            シナリオ（任意）
+          </label>
+          <select
+            id="scenario_id"
+            name="scenario_id"
+            value={form.scenario_id}
+            onChange={handleChange}
+            className={fieldClass}
+          >
+            <option value="">シナリオ未設定</option>
+            {scenarios.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label htmlFor="name" className={labelClass}>
@@ -248,6 +269,28 @@ export default function CreatureForm() {
       </div>
 
       <div>
+        <label className={labelClass}>恐怖度（Fear Rating）</label>
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => handleFearRating(form.fear_rating === n ? 0 : n)}
+              className="p-0.5 transition-colors"
+            >
+              <Star
+                size={20}
+                className={n <= form.fear_rating ? "text-coc-gold fill-coc-gold" : "text-coc-muted"}
+              />
+            </button>
+          ))}
+          {form.fear_rating > 0 && (
+            <span className="ml-2 text-xs text-coc-muted">{form.fear_rating}/5</span>
+          )}
+        </div>
+      </div>
+
+      <div>
         <label htmlFor="notes" className={labelClass}>
           KP メモ
         </label>
@@ -258,6 +301,21 @@ export default function CreatureForm() {
           onChange={handleChange}
           placeholder="運用上の注意・特殊能力・弱点など"
           rows={4}
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="secret_notes" className={labelClass}>
+          秘匿情報（KP専用）
+        </label>
+        <textarea
+          id="secret_notes"
+          name="secret_notes"
+          value={form.secret_notes}
+          onChange={handleChange}
+          placeholder="PLには見せない秘密設定・攻略法・弱点など"
+          rows={3}
           className={fieldClass}
         />
       </div>
@@ -299,7 +357,7 @@ export default function CreatureForm() {
       <div className="flex gap-3 justify-end">
         <button
           type="button"
-          onClick={() => router.push("/creatures")}
+          onClick={() => onSuccess ? onSuccess() : router.push(redirectTo ?? "/creatures")}
           className="rounded-lg border border-coc-border px-4 py-2 text-sm text-coc-muted hover:text-coc-text hover:border-coc-muted transition-colors"
         >
           キャンセル

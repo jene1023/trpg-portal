@@ -1747,7 +1747,7 @@
 **実装ヒント:** 新規テーブル不要。`src/app/api/scenarios/[id]/export-html/route.ts` をAPI Routeとして実装。`scenarios`・`npcs`・`handouts` を結合しサーバー側でHTMLテンプレート文字列を組み立て、`Content-Type: text/html` + `Content-Disposition: attachment` で返す。
 **コミット:** `feat: export scenario as single-file HTML for offline KP reference`
 
-## [TODO] クリーチャー図鑑ページ（シナリオ連携） — 優先度: 中
+## [DONE] クリーチャー図鑑ページ（シナリオ連携） — 優先度: 中
 **対象:** KP
 **概要:** KPがシナリオ別にクリーチャーの能力値・攻撃方法・恐怖度・秘匿情報を登録・参照できる図鑑ページ。既存の `CreatureForm.tsx` コンポーネントを活用し、シナリオ詳細からワンクリックでアクセスできる。
 **実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id, name, description, str, con, dex, pow, hp, armor, attacks jsonb, fear_rating smallint, secret_notes text | null, created_at）。`src/app/scenarios/[id]/creatures/page.tsx` を新規作成（一覧＋インライン追加は既存 `CreatureForm.tsx` を流用）。各クリーチャーカードは `hp` バー・`fear_rating` 星表示・`secret_notes` 折りたたみ（KPのみ展開可）で構成。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「クリーチャー」リンクを追加。`src/lib/supabase.ts` に `Creature` 型を追加。
