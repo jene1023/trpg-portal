@@ -1794,3 +1794,27 @@
 **概要:** KPがシナリオの雰囲気・参加条件・推奨人数・プレイ時間のみを記載した「ネタバレなし概要ページ」を公開URLで共有できる機能。卓募集SNS投稿に貼るだけで詳細なネタバレなしに参加者を集められる。
 **実装ヒント:** `scenarios` テーブルに `teaser_text text`, `recommended_players_min smallint`, `recommended_players_max smallint`, `estimated_hours float4`, `teaser_is_public bool DEFAULT false` カラムを追加（ALTER TABLE）。`src/app/s/[slug]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「ティザー編集・公開」セクションを追加し、公開URLをコピーするボタン（既存 `QrCodeShare.tsx` パターン参考）を配置。`src/lib/supabase.ts` に `teaser_*` フィールドを `Scenario` 型へ追加。
 **コミット:** `feat: scenario teaser public page for spoiler-free recruitment`
+
+## [TODO] パーティリアルタイム共有ステータスボード — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッション中にKP・全PLがリンクを開くだけでパーティ全員のHP/MP/SAN現在値をリアルタイムで一覧できるボード。KP画面・GMスクリーン代わりに使える。
+**実装ヒント:** Supabaseの `characters` テーブルへのリアルタイムサブスクリプション（`supabase.channel().on("postgres_changes",...).subscribe()`）で実装。`src/app/campaigns/[id]/board/page.tsx` を "use client" で新規作成し、パーティ参加キャラのHP/MP/SANを大きくカード表示。既存の `QuickStatEditor.tsx` と `PartySanCheck.tsx` を参考に実装。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「共有ボード」リンクを追加。
+**コミット:** `feat: real-time party status board for in-session use`
+
+## [TODO] キャラクター能力値推移グラフ — 優先度: 中
+**対象:** PL / 共通
+**概要:** セッションごとのHP・SAN・MPの記録を折れ線グラフで可視化し、キャラクターの成長・消耗の変遷を振り返れる機能。セッションログのHP/SAN喪失データを活用する。
+**実装ヒント:** `sessions` テーブルの `san_loss`, `hp_loss`, `played_at` を時系列集計。`src/app/characters/[id]/stat-history/page.tsx` を "use client" で新規作成。グラフはネイティブSVGまたは `<canvas>` で実装（外部ライブラリ不要）。X軸: セッション番号、Y軸: HP/SAN/MP残量。`src/app/_components/QuickStatsDisplay.tsx` の表示パターンを参考に色分け。キャラクター詳細ページに「成長グラフ」リンクを追加。
+**コミット:** `feat: character stat progression graph over sessions`
+
+## [TODO] セッション横断ログ検索 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** 全セッションログ・シナリオノート・KPメモをまとめてキーワード検索し、過去の出来事や決定事項を素早く引き出せる機能。セッション数が増えるほど価値が高まる。
+**実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。Supabase `ilike` を使い `sessions(title, summary)`, `scenario_notes(content)` を横断検索（`Promise.all` で並列実行）。検索結果はソース種別ごとにセクション分けして表示し、リンクでジャンプできるよう設計。`src/app/_components/NavBar.tsx` に検索アイコンリンクを追加。
+**コミット:** `feat: cross-session log and note full-text search`
+
+## [TODO] PLフィードバック収集フォーム（ポストプレイ） — 優先度: 低
+**対象:** KP / 共通
+**概要:** セッション終了後にKPがフィードバックフォームURLをPLに共有し、楽しかった点・改善点・印象的なシーンの評価（5段階）を匿名で収集できる機能。次回シナリオ改善に役立てる。
+**実装ヒント:** Supabaseに `session_feedbacks(id, scenario_id, fun_rating smallint, memorable_scene text, improvement text, created_at)` テーブルを追加。`src/app/s/[slug]/feedback/page.tsx` を認証不要の公開ページとして新規作成（Server Component + Client フォーム）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「フィードバック集計」ビューを追加し、平均評点と回答一覧を表示。既存の `QrCodeShare.tsx` を使いフォームURLをQRコードで共有できるようにする。
+**コミット:** `feat: post-play player feedback form and summary for KP`
