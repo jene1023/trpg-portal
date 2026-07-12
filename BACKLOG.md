@@ -1700,7 +1700,7 @@
 **実装ヒント:** Supabaseに `scenario_reviews` テーブルを追加（id, scenario_id, reviewer_user_id: uuid, rating: int CHECK(1 <= rating AND rating <= 5), comment: text | null, is_spoiler: bool DEFAULT false, created_at）。`src/app/scenarios/[id]/reviews/page.tsx` を "use client" で新規作成（星評価入力コンポーネント＋既存レビュー一覧）。星評価UIは `★☆` Unicode文字とCSSで実装。スポイラーフラグが付いたコメントはデフォルト折りたたみ表示（`<details>` タグ活用）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のヘッダーに平均評価バッジ（`AVG(rating)` を `supabase.rpc` で取得）を表示し「レビューを見る」リンクを追加。RLSで `scenario_participants` テーブルと照合し参加者のみ投稿可能、閲覧は同キャンペーンメンバー全員。`src/lib/supabase.ts` に `ScenarioReview` 型を追加。追加DB1テーブル。
 **コミット:** `feat: scenario review and star rating system for post-session feedback`
 
-## [TODO] NPC関係図ビジュアライザー — 優先度: 中
+## [DONE] NPC関係図ビジュアライザー — 優先度: 中
 **対象:** KP
 **概要:** シナリオに登場するNPC同士の関係（協力・対立・家族・雇用・秘密など）をノードとエッジで可視化するインタラクティブな関係図。KPがシナリオ設計時にNPC相関を整理しやすくなり、セッション中も素早く全体像を参照できる。既存のNPCリスト（`src/app/npcs/`）と連動し、NPCカードへのリンクも内包する。
 **実装ヒント:** Supabaseに `npc_relationships` テーブルを追加（id, scenario_id, from_npc_id: uuid, to_npc_id: uuid, relation_type: "ally"|"enemy"|"family"|"employer"|"secret"|"unknown", label: text | null, created_at）。`src/app/scenarios/[id]/npc-map/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG＋`useState` で管理：NPCを `<circle>+<text>` ノードとして表示し、関係を `<line>` や `<path>` エッジで接続。ノードはドラッグ可能（`onMouseDown`/`onMouseMove` で座標更新、位置は `localStorage` にキャッシュ）。エッジラベルをエッジ中点に `<text>` で表示し、`relation_type` ごとにエッジ色を変える（協力=緑、対立=赤、家族=青など）。ノードクリックで既存の NPC 詳細ページ（`/npcs/[id]`）にナビゲート。シナリオ詳細ページに「NPC関係図」リンクを追加。`src/lib/supabase.ts` に `NpcRelationship` 型を追加。追加DB1テーブル。

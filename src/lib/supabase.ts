@@ -1242,3 +1242,15 @@ export type ScenarioParticipantReview = {
   is_spoiler: boolean;
   created_at: string;
 };
+
+export type NpcRelationType = "ally" | "enemy" | "family" | "employer" | "secret" | "unknown";
+
+export type NpcRelationship = {
+  id: string;
+  scenario_id: string;
+  from_npc_id: string;
+  to_npc_id: string;
+  relation_type: NpcRelationType;
+  label: string | null;
+  created_at: string;
+};
