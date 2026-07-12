@@ -1075,3 +1075,16 @@ body {
     animation: coc-hero-breathe 9s ease-in-out infinite;
   }
 }
+
+/* キャラクターカード名称: ホバー時に燭台の光が名前を照らし、羊皮紙が輝く */
+.group:hover .coc-card-name {
+  text-shadow:
+    0 0 10px rgba(255, 220, 150, 0.55),
+    0 0 26px rgba(201, 133, 58, 0.25);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-card-name {
+    transition: text-shadow 0.45s ease-out;
+  }
+}
