@@ -82,7 +82,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
           <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
           {/* グラデーションオーバーレイ: 名前・職業 */}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-3 pb-3 pt-8">
-            <p className="font-cinzel text-base font-bold text-white leading-tight truncate coc-card-name">
+            <p className="font-cinzel text-base font-bold text-coc-text group-hover:text-coc-gold group-focus-within:text-coc-gold leading-tight truncate coc-card-name">
               {character.name}
             </p>
             {character.occupation && (
