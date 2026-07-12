@@ -29,7 +29,7 @@ export default function StatusBadge({ status, className = "" }: Props) {
 export function CrisisBadge({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium leading-tight bg-red-900/80 text-red-200 shadow-[0_0_6px_rgba(220,38,38,0.7)] border border-red-600/60 animate-pulse ${className}`}
+      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium leading-tight bg-red-900/80 text-red-200 border border-red-600/60 coc-badge-crisis ${className}`}
     >
       危機
     </span>
