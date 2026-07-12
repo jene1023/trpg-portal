@@ -1801,7 +1801,7 @@
 **実装ヒント:** Supabaseの `characters` テーブルへのリアルタイムサブスクリプション（`supabase.channel().on("postgres_changes",...).subscribe()`）で実装。`src/app/campaigns/[id]/board/page.tsx` を "use client" で新規作成し、パーティ参加キャラのHP/MP/SANを大きくカード表示。既存の `QuickStatEditor.tsx` と `PartySanCheck.tsx` を参考に実装。キャンペーン詳細ページ（`src/app/campaigns/[id]/page.tsx`）に「共有ボード」リンクを追加。
 **コミット:** `feat: real-time party status board for in-session use`
 
-## [TODO] キャラクター能力値推移グラフ — 優先度: 中
+## [DONE] キャラクター能力値推移グラフ — 優先度: 中
 **対象:** PL / 共通
 **概要:** セッションごとのHP・SAN・MPの記録を折れ線グラフで可視化し、キャラクターの成長・消耗の変遷を振り返れる機能。セッションログのHP/SAN喪失データを活用する。
 **実装ヒント:** `sessions` テーブルの `san_loss`, `hp_loss`, `played_at` を時系列集計。`src/app/characters/[id]/stat-history/page.tsx` を "use client" で新規作成。グラフはネイティブSVGまたは `<canvas>` で実装（外部ライブラリ不要）。X軸: セッション番号、Y軸: HP/SAN/MP残量。`src/app/_components/QuickStatsDisplay.tsx` の表示パターンを参考に色分け。キャラクター詳細ページに「成長グラフ」リンクを追加。
