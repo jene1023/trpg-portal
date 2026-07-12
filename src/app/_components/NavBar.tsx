@@ -86,10 +86,14 @@ export default function NavBar() {
           <li>
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-xs text-coc-muted">
+                <Link
+                  href={`/profile/${user.id}`}
+                  className="flex items-center gap-1 text-xs text-coc-muted hover:text-coc-gold transition-colors"
+                  title="マイプロフィール"
+                >
                   <User size={12} />
                   {user.email?.split("@")[0]}
-                </span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   title="ログアウト"
@@ -152,18 +156,25 @@ export default function NavBar() {
             })}
             <li className="border-t border-coc-border pt-3 mt-1">
               {user ? (
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-sm text-coc-muted">
-                    <User size={14} />
-                    {user.email}
-                  </span>
-                  <button
-                    onClick={() => { setOpen(false); handleLogout(); }}
-                    className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300 transition-colors"
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href={`/profile/${user.id}`}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-gold transition-colors"
                   >
-                    <LogOut size={14} />
-                    ログアウト
-                  </button>
+                    <User size={14} />
+                    マイプロフィール
+                  </Link>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-coc-faint">{user.email}</span>
+                    <button
+                      onClick={() => { setOpen(false); handleLogout(); }}
+                      className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      <LogOut size={14} />
+                      ログアウト
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <Link

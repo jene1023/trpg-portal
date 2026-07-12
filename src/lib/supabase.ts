@@ -1157,6 +1157,16 @@ export type PushSubscription = {
   created_at: string;
 };
 
+export type PlayerProfile = {
+  id: string;
+  user_id: string;
+  display_name: string;
+  bio: string | null;
+  play_style: string[] | null;
+  is_public: boolean;
+  created_at: string;
+};
+
 export type DiceMacro = {
   id: string;
   owner_id: string;

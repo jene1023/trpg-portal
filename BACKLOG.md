@@ -1765,7 +1765,7 @@
 **実装ヒント:** 新規テーブル不要（既存 `scenario_participants`・`characters`・`character_skills` を結合）。`src/app/scenarios/[id]/party-stats/page.tsx` を Server Component で新規作成。`supabase.from("scenario_participants").select("character_id, characters(name, str, con, pow, dex, app, siz, int_stat, edu, hp, mp, san_current, character_skills(*))").eq("scenario_id", id)` でデータ取得。能力値はキャラ名を列ヘッダー・能力値名を行ラベルとしたtable要素で表示。最高値セルを `bg-green-100` でハイライト。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「パーティ比較」リンクを追加。
 **コミット:** `feat: party ability score comparison view for scenario balance check`
 
-## [TODO] PLプロフィール・プレイ実績ページ — 優先度: 低
+## [DONE] PLプロフィール・プレイ実績ページ — 優先度: 低
 **対象:** PL / 共通
 **概要:** PLが過去の参加セッション数・担当キャラクター一覧・よく使う職業・累計SAN喪失量などの実績をまとめたプロフィールページ。卓募集時の自己紹介や他PLへの共有に使う。公開/非公開を切り替え可能。
 **実装ヒント:** 新規テーブルは `player_profiles(id, user_id, display_name, bio text, play_style text[], is_public bool DEFAULT false, created_at)` のみ追加。`src/app/players/[userId]/page.tsx` を新規作成（Server Component）。`characters`・`sessions`・`dice_rolls` テーブルを集計：キャラ数、総セッション数、総ダイス判定数、最多使用職業、累計SAN喪失。キャラクター一覧はサムネイルカード形式で縦グリッド表示。`src/app/_components/PlayerForm.tsx` を流用しプロフィール編集フォームを構成。NavBarのユーザーメニューに「マイプロフィール」リンクを追加。`src/lib/supabase.ts` に `PlayerProfile` 型を追加。
