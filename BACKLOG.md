@@ -1712,7 +1712,7 @@
 **実装ヒント:** Supabaseに `session_surveys` テーブル（id, scenario_id, submitted_by_user_id: uuid, mvp_character_id: uuid | null, memorable_scene: text | null, next_session_rating: int | null, created_at）と `session_survey_configs` テーブル（id, scenario_id, is_open: bool DEFAULT false, opened_at: timestamptz | null）を追加。KPがシナリオ詳細ページからアンケートを「公開」にすると参加者に通知（Supabase Realtime broadcast）。`src/app/scenarios/[id]/survey/page.tsx` を "use client" で新規作成（回答フォーム）、`src/app/scenarios/[id]/survey/results/page.tsx` で集計結果をKPのみ閲覧可能（MVPキャラクターの득票数棒グラフはSVGで実装、シーンコメントは一覧表示）。既存の `src/app/scenarios/[id]/page.tsx` の KP 向けアクションメニューに「事後アンケートを開始」ボタンを追加。`src/lib/supabase.ts` に `SessionSurvey`・`SessionSurveyConfig` 型を追加。追加DB2テーブル。
 **コミット:** `feat: post-session survey with MVP voting and memorable scene sharing`
 
-## [TODO] セッションゼロ チェックリスト（安全確認・コンテンツ合意ツール） — 優先度: 中
+## [DONE] セッションゼロ チェックリスト（安全確認・コンテンツ合意ツール） — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** セッション前にKP・PLがコンテンツ内容（暴力描写・恐怖要素・ロマンス要素など）への対応方針を確認し合えるチェックリスト機能。各PLが「OK/NG/要相談」をチェックし、KPが一覧で把握できる。
 **リサーチ根拠:** るるたく・セッションゼロ解説記事で「安全な卓運営」のニーズが可視化されており、モダンTRPGコミュニティで広く導入が進んでいる。

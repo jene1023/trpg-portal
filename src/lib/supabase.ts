@@ -1271,3 +1271,26 @@ export type SessionSurveyConfig = {
   is_open: boolean;
   opened_at: string | null;
 };
+
+export type ChecklistItem = {
+  id: string;
+  label: string;
+};
+
+export type ChecklistResponseStatus = "ok" | "ng" | "consult";
+
+export type SessionZeroChecklist = {
+  id: string;
+  scenario_id: string;
+  kp_user_id: string | null;
+  items: ChecklistItem[];
+  created_at: string;
+};
+
+export type SessionZeroChecklistResponse = {
+  id: string;
+  checklist_id: string;
+  player_user_id: string;
+  responses: Record<string, ChecklistResponseStatus>;
+  created_at: string;
+};
