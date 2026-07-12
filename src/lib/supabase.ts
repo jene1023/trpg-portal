@@ -183,6 +183,11 @@ export type Scenario = {
   recruit_token: string | null;
   is_template: boolean;
   template_published_at: string | null;
+  teaser_text: string | null;
+  recommended_players_min: number | null;
+  recommended_players_max: number | null;
+  estimated_hours: number | null;
+  teaser_is_public: boolean;
   created_at: string;
 };
 

@@ -1789,7 +1789,7 @@
 **実装ヒント:** Supabaseに `user_notification_prefs(id, user_id, session_reminder bool DEFAULT true, message_received bool DEFAULT true, handout_distributed bool DEFAULT true, bgm_broadcast bool DEFAULT false, updated_at)` テーブルを追加（upsert方式で1ユーザー1行）。`src/app/settings/notifications/page.tsx` を "use client" で新規作成（トグルスイッチUI）。`src/app/_components/NavBar.tsx` のユーザーメニューに「通知設定」リンクを追加。`src/lib/supabase.ts` に `UserNotificationPrefs` 型を追加。
 **コミット:** `feat: user notification preferences settings page`
 
-## [TODO] シナリオティザーページ（ネタバレなし公開） — 優先度: 低
+## [DONE] シナリオティザーページ（ネタバレなし公開） — 優先度: 低
 **対象:** KP / 共通
 **概要:** KPがシナリオの雰囲気・参加条件・推奨人数・プレイ時間のみを記載した「ネタバレなし概要ページ」を公開URLで共有できる機能。卓募集SNS投稿に貼るだけで詳細なネタバレなしに参加者を集められる。
 **実装ヒント:** `scenarios` テーブルに `teaser_text text`, `recommended_players_min smallint`, `recommended_players_max smallint`, `estimated_hours float4`, `teaser_is_public bool DEFAULT false` カラムを追加（ALTER TABLE）。`src/app/s/[slug]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「ティザー編集・公開」セクションを追加し、公開URLをコピーするボタン（既存 `QrCodeShare.tsx` パターン参考）を配置。`src/lib/supabase.ts` に `teaser_*` フィールドを `Scenario` 型へ追加。

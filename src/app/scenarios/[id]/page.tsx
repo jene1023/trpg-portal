@@ -18,6 +18,7 @@ import TagSelector from "@/app/_components/TagSelector";
 import GameClockEditor from "@/app/_components/GameClockEditor";
 import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGenerator";
 import ScenarioTemplateToggle from "@/app/_components/ScenarioTemplateToggle";
+import TeaserEditor from "@/app/_components/TeaserEditor";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -1445,6 +1446,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
           scenarioId={id}
           initialIsTemplate={scenario.is_template ?? false}
           initialPublishedAt={scenario.template_published_at ?? null}
+        />
+      </div>
+
+      {/* ティザーページ */}
+      <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
+        <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">ティザー公開ページ</p>
+        <p className="text-xs text-coc-muted mb-3">ネタバレなしの紹介文・推奨人数・目安時間を公開URLで共有できます。SNS卓募集に貼るだけで参加者を集められます。</p>
+        <TeaserEditor
+          scenarioId={id}
+          initialTeaserText={scenario.teaser_text ?? null}
+          initialPlayersMin={scenario.recommended_players_min ?? null}
+          initialPlayersMax={scenario.recommended_players_max ?? null}
+          initialEstimatedHours={scenario.estimated_hours ?? null}
+          initialIsPublic={scenario.teaser_is_public ?? false}
         />
       </div>
 
