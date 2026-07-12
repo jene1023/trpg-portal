@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
@@ -31,7 +31,14 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user } = useAuth();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleLogout() {
     if (!isSupabaseConfigured) return;
@@ -42,7 +49,7 @@ export default function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-coc-void/95 backdrop-blur-sm">
+    <header className={`sticky top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-500 ease-out ${scrolled ? "bg-coc-void/98 backdrop-blur-md shadow-[0_4px_28px_rgba(0,0,0,0.55),0_1px_0_rgba(61,47,26,0.22)]" : "bg-coc-void/95 backdrop-blur-sm"}`}>
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* ロゴ */}
         <Link
