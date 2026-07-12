@@ -81,6 +81,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     { data: safetySettings },
     { count: scheduleProposalCount },
     { data: objectiveRows },
+    { data: participantReviewRows },
   ] = await Promise.all([
     supabase.from("handouts").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_participants").select("id, attendance_status, hook_text").eq("scenario_id", id),
@@ -94,6 +95,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
     supabase.from("scenario_safety_settings").select("x_card_enabled").eq("scenario_id", id).single(),
     supabase.from("schedule_proposals").select("*", { count: "exact", head: true }).eq("scenario_id", id),
     supabase.from("scenario_objectives").select("is_achieved").eq("scenario_id", id),
+    supabase.from("scenario_participant_reviews").select("rating").eq("scenario_id", id),
   ]);
 
   const objectiveTotal = objectiveRows?.length ?? 0;
@@ -114,6 +116,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
   const avgHorror = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.horror_rating, 0) / ratingCount) : null;
   const avgMystery = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.mystery_rating, 0) / ratingCount) : null;
   const avgCharacter = ratingCount > 0 ? (ratingRows!.reduce((s, r) => s + r.character_rating, 0) / ratingCount) : null;
+
+  const participantReviewCount = participantReviewRows?.length ?? 0;
+  const avgParticipantRating =
+    participantReviewCount > 0
+      ? participantReviewRows!.reduce((s, r) => s + (r.rating as number), 0) / participantReviewCount
+      : null;
 
   const participantCount = participantRows?.length ?? 0;
   const attendingCount = participantRows?.filter((p) => (p.attendance_status as AttendanceStatus) === "attending").length ?? 0;
@@ -156,6 +164,16 @@ export default async function ScenarioDetailPage({ params }: Props) {
           >
             {STATUS_LABELS[scenario.status as ScenarioStatus]}
           </span>
+          {avgParticipantRating !== null && (
+            <Link
+              href={`/scenarios/${id}/reviews`}
+              className="flex items-center gap-1 rounded-full border border-coc-gold-dim bg-coc-gold/10 px-2.5 py-0.5 text-xs font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
+            >
+              <Star size={11} fill="currentColor" />
+              {avgParticipantRating.toFixed(1)}
+              <span className="text-coc-muted font-normal">（{participantReviewCount}件）</span>
+            </Link>
+          )}
         </div>
         {scenario.played_at && (
           <p className="text-xs text-coc-muted">プレイ日: {scenario.played_at}</p>
@@ -1043,6 +1061,24 @@ export default async function ScenarioDetailPage({ params }: Props) {
                 {ratingCount > 0
                   ? `${ratingCount}件の評価 ★${((avgFun! + avgHorror! + avgMystery! + avgCharacter!) / 4).toFixed(1)}`
                   : "楽しさ・恐怖演出・謎解き・キャラ活躍度を4軸評価"}
+              </p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/reviews`}
+          className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Star size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-text">シナリオレビュー</p>
+              <p className="text-xs text-coc-muted">
+                {participantReviewCount > 0
+                  ? `${participantReviewCount}件 ★${avgParticipantRating!.toFixed(1)} — 参加者の星評価＆感想`
+                  : "セッション後に参加者が星1〜5で評価・感想投稿"}
               </p>
             </div>
           </div>

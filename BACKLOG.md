@@ -1694,7 +1694,7 @@
 **実装ヒント:** Supabaseに `character_stat_snapshots` テーブルを追加（id, character_id, session_label: text | null, recorded_at: timestamptz, stats: jsonb — {san, hp, mp, skills: {name: string, value: number}[]}）。`src/app/characters/[id]/growth/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG で実装（外部チャートライブラリ不要）：データポイントを `<polyline>` で繋ぎ、各点に `<circle>` とホバー時 `<title>` を付与。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）の編集フォームに「現在値をスナップショット保存」ボタンを追加し、`supabase.from("character_stat_snapshots").insert(...)` で保存。最新スナップショットとの差分（±）をキャラクター一覧カードにバッジ表示するオプションも検討。`src/lib/supabase.ts` に `CharacterStatSnapshot` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character skill growth graph with per-session stat snapshots`
 
-## [TODO] シナリオ感想・レビュー＆評価機能 — 優先度: 中
+## [DONE] シナリオ感想・レビュー＆評価機能 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション終了後に参加者が星1〜5の評価とテキストコメントをシナリオに投稿できるレビュー機能。KPが将来的に同シナリオを再利用する際の参考となり、キャンペーン内でどのシナリオが好評だったかを一目で把握できる。PLにとっては「あの夜の感動」を言語化して残す思い出記録にもなる。
 **実装ヒント:** Supabaseに `scenario_reviews` テーブルを追加（id, scenario_id, reviewer_user_id: uuid, rating: int CHECK(1 <= rating AND rating <= 5), comment: text | null, is_spoiler: bool DEFAULT false, created_at）。`src/app/scenarios/[id]/reviews/page.tsx` を "use client" で新規作成（星評価入力コンポーネント＋既存レビュー一覧）。星評価UIは `★☆` Unicode文字とCSSで実装。スポイラーフラグが付いたコメントはデフォルト折りたたみ表示（`<details>` タグ活用）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のヘッダーに平均評価バッジ（`AVG(rating)` を `supabase.rpc` で取得）を表示し「レビューを見る」リンクを追加。RLSで `scenario_participants` テーブルと照合し参加者のみ投稿可能、閲覧は同キャンペーンメンバー全員。`src/lib/supabase.ts` に `ScenarioReview` 型を追加。追加DB1テーブル。

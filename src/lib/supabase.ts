@@ -1232,3 +1232,13 @@ export type KanbanScene = {
   linked_area_id: string | null;
   created_at: string;
 };
+
+export type ScenarioParticipantReview = {
+  id: string;
+  scenario_id: string;
+  reviewer_name: string;
+  rating: number;
+  comment: string | null;
+  is_spoiler: boolean;
+  created_at: string;
+};
