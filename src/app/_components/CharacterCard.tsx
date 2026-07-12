@@ -23,6 +23,36 @@ function topSkills(skills: CharacterSkill[]): CharacterSkill[] {
 
 export default function CharacterCard({ character, skills = [], onTogglePin, isCompared, onToggleCompare }: Props) {
   const top = topSkills(skills);
+  const status = character.status ?? "alive";
+
+  const cardStyle =
+    status === "dead"
+      ? {
+          bg: "coc-card-dead",
+          border: "border-[rgba(107,21,21,0.38)]",
+          hoverBorder: "group-hover:border-[rgba(154,48,16,0.60)]",
+          hoverShadow: "group-hover:shadow-[0_4px_20px_rgba(107,21,21,0.38),inset_0_1px_0_rgba(107,21,21,0.08)]",
+        }
+      : status === "insane"
+      ? {
+          bg: "coc-card-insane",
+          border: "border-[rgba(61,18,96,0.42)]",
+          hoverBorder: "group-hover:border-[rgba(130,50,200,0.55)]",
+          hoverShadow: "group-hover:shadow-[0_4px_20px_rgba(61,18,96,0.42),inset_0_1px_0_rgba(130,50,200,0.08)]",
+        }
+      : status === "retired"
+      ? {
+          bg: "coc-card-retired",
+          border: "border-coc-border/60",
+          hoverBorder: "group-hover:border-coc-border",
+          hoverShadow: "group-hover:shadow-[0_4px_16px_rgba(58,53,48,0.32),inset_0_1px_0_rgba(100,85,60,0.07)]",
+        }
+      : {
+          bg: "coc-card-bg",
+          border: "border-coc-border",
+          hoverBorder: "group-hover:border-coc-border-glow",
+          hoverShadow: "group-hover:shadow-[0_4px_20px_rgba(201,133,58,0.30),inset_0_1px_0_rgba(201,133,58,0.14)]",
+        };
 
   async function handlePin(e: { preventDefault: () => void; stopPropagation: () => void }) {
     e.preventDefault();
@@ -35,7 +65,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
 
   return (
     <Link href={`/characters/${character.id}`} className="group block relative coc-corner-frame">
-      <div className="relative rounded-lg border border-coc-border coc-card-bg coc-tile-shimmer overflow-hidden transition-all duration-300 ease-out group-hover:border-coc-border-glow group-hover:shadow-[0_4px_20px_rgba(201,133,58,0.30),inset_0_1px_0_rgba(201,133,58,0.14)] motion-safe:group-hover:-translate-y-1 motion-safe:group-active:scale-[0.98] motion-safe:group-active:translate-y-0">
+      <div className={`relative rounded-lg border ${cardStyle.border} ${cardStyle.bg} coc-tile-shimmer overflow-hidden transition-all duration-300 ease-out ${cardStyle.hoverBorder} ${cardStyle.hoverShadow} motion-safe:group-hover:-translate-y-1 motion-safe:group-active:scale-[0.98] motion-safe:group-active:translate-y-0`}>
         {/* ポートレート */}
         <div className="relative aspect-[3/4] overflow-hidden">
           <PortraitImage
