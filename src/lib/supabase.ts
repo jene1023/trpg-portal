@@ -1307,3 +1307,21 @@ export type CharacterKpNote = {
   content: string;
   created_at: string;
 };
+
+export type SessionPoll = {
+  id: string;
+  scenario_id: string;
+  question: string;
+  options: string[];
+  created_by_user_id: string | null;
+  is_open: boolean;
+  created_at: string;
+};
+
+export type SessionPollVote = {
+  id: string;
+  poll_id: string;
+  voter_user_id: string | null;
+  chosen_option_index: number;
+  voted_at: string;
+};

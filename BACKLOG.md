@@ -1753,7 +1753,7 @@
 **実装ヒント:** Supabaseに `creatures` テーブルを追加（id, scenario_id, name, description, str, con, dex, pow, hp, armor, attacks jsonb, fear_rating smallint, secret_notes text | null, created_at）。`src/app/scenarios/[id]/creatures/page.tsx` を新規作成（一覧＋インライン追加は既存 `CreatureForm.tsx` を流用）。各クリーチャーカードは `hp` バー・`fear_rating` 星表示・`secret_notes` 折りたたみ（KPのみ展開可）で構成。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「クリーチャー」リンクを追加。`src/lib/supabase.ts` に `Creature` 型を追加。
 **コミット:** `feat: creature bestiary page per scenario for KP reference`
 
-## [TODO] セッション中行動投票（リアルタイム） — 優先度: 中
+## [DONE] セッション中行動投票（リアルタイム） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** KPが「次の行動を選んでください」などの議題と選択肢を立て、参加PLがリアルタイムで投票できる機能。Supabase Realtime を使い、全員の投票状況を即座に全画面共有する。
 **実装ヒント:** Supabaseに `session_polls` テーブル（id, scenario_id, question text, options jsonb — string[], created_by_user_id, is_open bool DEFAULT true, created_at）と `session_poll_votes` テーブル（id, poll_id, voter_user_id, chosen_option_index smallint, voted_at）を追加。`src/app/scenarios/[id]/poll/page.tsx` を "use client" で新規作成。KPはフォームで議題作成、PLはボタン1つで選択肢を押す。`supabase.channel('poll-${scenarioId}')` でリアルタイムブロードキャスト（既存 `GameClockEditor.tsx` のパターン参考）し、得票数バーをリアルタイム更新。`src/app/scenarios/[id]/page.tsx` に「投票」リンクを追加。`src/lib/supabase.ts` に `SessionPoll`・`SessionPollVote` 型を追加。
