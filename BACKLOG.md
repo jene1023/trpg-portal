@@ -1818,3 +1818,33 @@
 **概要:** セッション終了後にKPがフィードバックフォームURLをPLに共有し、楽しかった点・改善点・印象的なシーンの評価（5段階）を匿名で収集できる機能。次回シナリオ改善に役立てる。
 **実装ヒント:** Supabaseに `session_feedbacks(id, scenario_id, fun_rating smallint, memorable_scene text, improvement text, created_at)` テーブルを追加。`src/app/s/[slug]/feedback/page.tsx` を認証不要の公開ページとして新規作成（Server Component + Client フォーム）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「フィードバック集計」ビューを追加し、平均評点と回答一覧を表示。既存の `QrCodeShare.tsx` を使いフォームURLをQRコードで共有できるようにする。
 **コミット:** `feat: post-play player feedback form and summary for KP`
+
+## [TODO] AIシーン雰囲気テキスト生成（KP即興ナレーション支援） — 優先度: 中
+**対象:** KP
+**概要:** KPがシーンのキーワード（場所・天候・感情トーン）を入力すると、Claude APIが数パターンの雰囲気ナレーション文章を即座に生成する。即興セッション中の描写に詰まった際の補助ツール。
+**実装ヒント:** `src/app/api/ai/scene-narration/route.ts` を新規作成。既存の `src/app/api/ai/session-summary/route.ts` と同じ Claude API 呼び出しパターンを踏襲。入力: `{location: string, weather: string, mood: string, playerCount: number}`。`src/app/kp/narration/page.tsx` にフォームUIを新規作成し、生成結果はクリップボードコピーボタン付きで表示。`src/app/_components/AIScenarioDraftGenerator.tsx` のUIレイアウトを参考にする。
+**コミット:** `feat: AI scene atmosphere narration generator for KP`
+
+## [TODO] 固定パーティーグループ保存（再利用可能な卓構成テンプレート） — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPが頻繁に同じメンバー構成で卓を開催する場合に備え、PLとキャラクターの組み合わせを「パーティーテンプレート」として保存・再利用できる機能。新規セッション作成時の手間を削減。
+**実装ヒント:** Supabaseに `party_templates(id, kp_id, name, description, members jsonb, created_at)` テーブルを追加。`members` は `[{user_id, character_id, role}]` の配列。`src/app/kp/party-templates/page.tsx` と `src/app/kp/party-templates/[id]/page.tsx` を新規作成。セッション新規作成フォーム（`src/app/sessions/new/page.tsx`）にテンプレートから参加者を一括インポートするボタンを追加。RLS: `kp_id = auth.uid()` で保護。
+**コミット:** `feat: reusable party group templates for session setup`
+
+## [TODO] キャラクター外見ランダムジェネレーター — 優先度: 低
+**対象:** PL
+**概要:** キャラクター作成時に性別・年代・雰囲気キーワードを選ぶだけで、髪色・目の色・体格・特徴的な外見描写をランダム生成するジェネレーター。RP没入感向上とキャラ立て補助。
+**実装ヒント:** `src/app/characters/[id]/appearance-generator/page.tsx` を新規作成。既存の名前ジェネレーター（`src/app/_components/AIBackstoryGenerator.tsx`）のUIパターンを踏襲。外見テーブルはハードコードされたオプション配列から無作為選択するローカル処理（API不要）で実装しシンプルに保つ。生成結果はキャラクターの `appearance` フィールドにワンクリックで書き込めるよう `characters` テーブルの既存カラムと紐付ける。
+**コミット:** `feat: random character appearance generator`
+
+## [TODO] 探索者公開プロフィール表示項目カスタマイズ — 優先度: 低
+**対象:** PL
+**概要:** `/c/[slug]` の公開プロフィールページで表示するフィールドをPL自身が選択できる機能。秘密の背景設定や未公開ステータスを隠したまま他ユーザーに共有できる。
+**実装ヒント:** `characters` テーブルに `public_fields jsonb default '["name","occupation","age","portrait_url","backstory_public"]'::jsonb` カラムを追加（マイグレーション必要）。`src/app/characters/[id]/settings/page.tsx` にチェックボックスUIを追加し公開フィールドを編集可能に。`src/app/c/[slug]/page.tsx` でレンダリング時に `public_fields` を参照して非公開フィールドを除外。RLS: 書き込みは本人のみ、読み取りは公開。
+**コミット:** `feat: customizable public profile fields for character page`
+
+## [TODO] セッション前VTT接続確認チェックリスト — 優先度: 低
+**対象:** KP
+**概要:** セッション開始30分前にKPが使うプレフライトチェックリスト。VTTツールURL・Discord/VC接続・ハンドアウト配布状況・シナリオ資料のPDF準備などを確認し、チェック完了をPLに通知できる機能。
+**実装ヒント:** `src/app/sessions/[id]/preflight/page.tsx` を "use client" で新規作成。チェック項目はセッションに紐付いた `session_preflight_items(id, session_id, label, is_checked, order)` テーブルで管理（デフォルト項目はシード）。全項目チェック完了時にSupabase Realtimeで参加PLのダッシュボードに「セッション準備完了」バナーを表示。`src/app/sessions/[id]/page.tsx` にプレフライトへのリンクボタンを追加。
+**コミット:** `feat: pre-session VTT preflight checklist for KP`
