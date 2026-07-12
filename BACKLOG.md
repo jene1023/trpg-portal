@@ -1740,7 +1740,7 @@
 **実装ヒント:** 既存の `scenarios` テーブルに `difficulty smallint`・`estimated_minutes int`・`min_players smallint`・`max_players smallint`・`tags text[]` カラムをALTER TABLEで追加。`src/app/scenarios/page.tsx` にフィルターサイドバーコンポーネントを追加。タグ検索はSupabaseの `@>` オペレータ（配列包含）を使用。
 **コミット:** `feat: scenario difficulty, playtime, player count and tag filter`
 
-## [TODO] シナリオ HTMLエクスポート（KP用レジュメ出力） — 優先度: 低
+## [DONE] シナリオ HTMLエクスポート（KP用レジュメ出力） — 優先度: 低
 **対象:** KP
 **概要:** シナリオのシーン・NPC・ハンドアウト情報をまとめた単一HTMLファイルをエクスポートし、オフライン参照やプリントアウトに利用できる機能。
 **リサーチ根拠:** TRPGシナリオエディタ（BOOTH、HTML出力機能付き）が多数購入されており、セッション中にWEB接続不要でシナリオを参照したいKPのニーズが高い。
