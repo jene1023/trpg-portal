@@ -1294,3 +1294,12 @@ export type SessionZeroChecklistResponse = {
   responses: Record<string, ChecklistResponseStatus>;
   created_at: string;
 };
+
+export type CharacterKpNote = {
+  id: string;
+  character_id: string;
+  scenario_id: string;
+  kp_user_id: string;
+  content: string;
+  created_at: string;
+};

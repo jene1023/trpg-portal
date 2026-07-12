@@ -1726,7 +1726,7 @@
 **実装ヒント:** 既存の `sessions`・`characters`・`scenarios` テーブルを結合して生成するため新規テーブル不要。`src/app/sessions/[id]/report/page.tsx` (use client)。テキストエリアでプレビュー→クリップボードコピー。Twitter share URLは `https://twitter.com/intent/tweet?text=...` を使用。
 **コミット:** `feat: auto-generate SNS-shareable taku-houkoku session report`
 
-## [TODO] KP専用キャラクター秘匿メモ — 優先度: 中
+## [DONE] KP専用キャラクター秘匿メモ — 優先度: 中
 **対象:** KP
 **概要:** KPがPLのキャラクターに対してPL非公開の秘匿メモ（「実は黒幕」「狂気フラグ管理」等）を記入できる機能。PLはメモの存在自体を見られない。
 **リサーチ根拠:** PrismScroll Cthulhuのジャーナル機能・るるたくの秘匿ハンドアウト管理からのインスピレーション。KPがセッション中にキャラクターの隠し情報を素早く参照したいニーズが高い。
