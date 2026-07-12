@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, UserNotificationPrefs } from "@/lib/supabase";
 import { useAuth } from "@/app/_components/AuthProvider";
 import { Bell, BellOff, CheckCircle, XCircle } from "lucide-react";
 
@@ -16,11 +16,51 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 
 type SubscriptionStatus = "idle" | "loading" | "subscribed" | "unsubscribed" | "unsupported" | "denied";
 
+type PrefKey = "session_reminder" | "message_received" | "handout_distributed" | "bgm_broadcast";
+
+const PREF_LABELS: { key: PrefKey; label: string; description: string }[] = [
+  { key: "session_reminder", label: "セッションリマインダー", description: "次回セッション予定日時の前日・直前に通知" },
+  { key: "message_received", label: "メッセージ受信", description: "他のキャラクターからメッセージが届いた時に通知" },
+  { key: "handout_distributed", label: "ハンドアウト配布", description: "KPがハンドアウトを配布した時に通知" },
+  { key: "bgm_broadcast", label: "BGMブロードキャスト", description: "KPがBGMキューを送信した時に通知" },
+];
+
+const DEFAULT_PREFS: Pick<UserNotificationPrefs, PrefKey> = {
+  session_reminder: true,
+  message_received: true,
+  handout_distributed: true,
+  bgm_broadcast: false,
+};
+
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      disabled={disabled}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-40 ${
+        checked ? "bg-coc-gold" : "bg-coc-border"
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+          checked ? "translate-x-6" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
+}
+
 export default function NotificationsSettingsPage() {
   const { user } = useAuth();
   const [status, setStatus] = useState<SubscriptionStatus>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [prefs, setPrefs] = useState<Pick<UserNotificationPrefs, PrefKey>>(DEFAULT_PREFS);
+  const [prefsSaving, setPrefsSaving] = useState(false);
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [prefMessage, setPrefMessage] = useState<string | null>(null);
 
   const checkCurrentSubscription = useCallback(async () => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -37,9 +77,50 @@ export default function NotificationsSettingsPage() {
     setStatus(existing ? "subscribed" : "unsubscribed");
   }, []);
 
+  const loadPrefs = useCallback(async () => {
+    if (!isSupabaseConfigured || !user) return;
+    const { data } = await supabase
+      .from("user_notification_prefs")
+      .select("session_reminder,message_received,handout_distributed,bgm_broadcast")
+      .eq("user_id", user.id)
+      .single();
+    if (data) {
+      setPrefs({
+        session_reminder: data.session_reminder,
+        message_received: data.message_received,
+        handout_distributed: data.handout_distributed,
+        bgm_broadcast: data.bgm_broadcast,
+      });
+    }
+    setPrefsLoaded(true);
+  }, [user]);
+
   useEffect(() => {
     checkCurrentSubscription();
   }, [checkCurrentSubscription]);
+
+  useEffect(() => {
+    loadPrefs();
+  }, [loadPrefs]);
+
+  async function handlePrefChange(key: PrefKey, value: boolean) {
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    if (!isSupabaseConfigured || !user) return;
+    setPrefsSaving(true);
+    setPrefMessage(null);
+    const { error } = await supabase.from("user_notification_prefs").upsert(
+      { user_id: user.id, ...next },
+      { onConflict: "user_id" }
+    );
+    setPrefsSaving(false);
+    if (error) {
+      setPrefMessage("保存に失敗しました");
+    } else {
+      setPrefMessage("設定を保存しました");
+      setTimeout(() => setPrefMessage(null), 2000);
+    }
+  }
 
   async function subscribe() {
     if (!isSupabaseConfigured || !user) {
@@ -125,6 +206,42 @@ export default function NotificationsSettingsPage() {
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
       <h1 className="font-cinzel text-2xl text-coc-gold">通知設定</h1>
 
+      {/* 通知種別ごとのON/OFF */}
+      <section className="rounded-xl border border-coc-border bg-coc-surface p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-coc-text">受け取る通知の種類</h2>
+          {prefsSaving && <span className="text-xs text-coc-muted">保存中…</span>}
+          {prefMessage && !prefsSaving && (
+            <span className="text-xs text-green-400">{prefMessage}</span>
+          )}
+        </div>
+
+        {!prefsLoaded ? (
+          <p className="text-sm text-coc-muted">読み込み中…</p>
+        ) : (
+          <ul className="space-y-4">
+            {PREF_LABELS.map(({ key, label, description }) => (
+              <li key={key} className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-coc-text">{label}</p>
+                  <p className="text-xs text-coc-muted mt-0.5">{description}</p>
+                </div>
+                <Toggle
+                  checked={prefs[key]}
+                  onChange={(v) => handlePrefChange(key, v)}
+                  disabled={prefsSaving}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {!user && (
+          <p className="text-xs text-coc-muted">設定を保存するにはログインが必要です。</p>
+        )}
+      </section>
+
+      {/* Webプッシュ通知 */}
       <section className="rounded-xl border border-coc-border bg-coc-surface p-6 space-y-4">
         <div className="flex items-center gap-3">
           <Bell className="text-coc-gold" size={20} />

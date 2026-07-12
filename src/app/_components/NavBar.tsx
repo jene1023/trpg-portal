@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, Bell } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
 import SearchBar from "./SearchBar";
@@ -94,6 +94,13 @@ export default function NavBar() {
                   <User size={12} />
                   {user.email?.split("@")[0]}
                 </Link>
+                <Link
+                  href="/settings/notifications"
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-coc-muted hover:text-coc-gold transition-colors"
+                  title="通知設定"
+                >
+                  <Bell size={13} />
+                </Link>
                 <button
                   onClick={handleLogout}
                   title="ログアウト"
@@ -164,6 +171,14 @@ export default function NavBar() {
                   >
                     <User size={14} />
                     マイプロフィール
+                  </Link>
+                  <Link
+                    href="/settings/notifications"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-gold transition-colors"
+                  >
+                    <Bell size={14} />
+                    通知設定
                   </Link>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-coc-faint">{user.email}</span>

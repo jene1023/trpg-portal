@@ -1783,7 +1783,7 @@
 **実装ヒント:** Supabaseに `player_wishes(id, scenario_id, character_id, user_id, wish_text text, is_fulfilled bool DEFAULT false, fulfilled_at timestamptz, created_at)` テーブルを追加。`src/app/scenarios/[id]/wishes/page.tsx` を新規作成（PLは自分のウィッシュをCRUD、KPは全PLの一覧を読み専用で閲覧＋「叶った」ボタン）。`src/lib/supabase.ts` に `PlayerWish` 型を追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「PLの期待リスト」リンクを追加。
 **コミット:** `feat: player wishlist for next-session expectations per scenario`
 
-## [TODO] ユーザー通知設定ページ（マイ設定） — 優先度: 中
+## [DONE] ユーザー通知設定ページ（マイ設定） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッションリマインダー・メッセージ受信・ハンドアウト更新・BGMブロードキャスト等の通知種別をユーザーが個別にON/OFFできる設定ページ。通知機能は実装済みだが受け取り設定を管理するUIが存在しない。
 **実装ヒント:** Supabaseに `user_notification_prefs(id, user_id, session_reminder bool DEFAULT true, message_received bool DEFAULT true, handout_distributed bool DEFAULT true, bgm_broadcast bool DEFAULT false, updated_at)` テーブルを追加（upsert方式で1ユーザー1行）。`src/app/settings/notifications/page.tsx` を "use client" で新規作成（トグルスイッチUI）。`src/app/_components/NavBar.tsx` のユーザーメニューに「通知設定」リンクを追加。`src/lib/supabase.ts` に `UserNotificationPrefs` 型を追加。
