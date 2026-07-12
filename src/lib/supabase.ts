@@ -1254,3 +1254,20 @@ export type NpcRelationship = {
   label: string | null;
   created_at: string;
 };
+
+export type SessionSurvey = {
+  id: string;
+  scenario_id: string;
+  submitted_by_user_id: string;
+  mvp_character_id: string | null;
+  memorable_scene: string | null;
+  next_session_rating: number | null;
+  created_at: string;
+};
+
+export type SessionSurveyConfig = {
+  id: string;
+  scenario_id: string;
+  is_open: boolean;
+  opened_at: string | null;
+};

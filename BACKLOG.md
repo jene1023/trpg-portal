@@ -1706,7 +1706,7 @@
 **実装ヒント:** Supabaseに `npc_relationships` テーブルを追加（id, scenario_id, from_npc_id: uuid, to_npc_id: uuid, relation_type: "ally"|"enemy"|"family"|"employer"|"secret"|"unknown", label: text | null, created_at）。`src/app/scenarios/[id]/npc-map/page.tsx` を "use client" で新規作成。グラフ描画はネイティブ SVG＋`useState` で管理：NPCを `<circle>+<text>` ノードとして表示し、関係を `<line>` や `<path>` エッジで接続。ノードはドラッグ可能（`onMouseDown`/`onMouseMove` で座標更新、位置は `localStorage` にキャッシュ）。エッジラベルをエッジ中点に `<text>` で表示し、`relation_type` ごとにエッジ色を変える（協力=緑、対立=赤、家族=青など）。ノードクリックで既存の NPC 詳細ページ（`/npcs/[id]`）にナビゲート。シナリオ詳細ページに「NPC関係図」リンクを追加。`src/lib/supabase.ts` に `NpcRelationship` 型を追加。追加DB1テーブル。
 **コミット:** `feat: interactive SVG NPC relationship map for scenario planning`
 
-## [TODO] セッション事後アンケート（MVP投票・名場面共有） — 優先度: 低
+## [DONE] セッション事後アンケート（MVP投票・名場面共有） — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** セッション終了後に参加者全員が匿名で回答できる事後アンケート機能。「今回のMVP（最も活躍したキャラクター）」投票、「印象に残ったシーン（自由記述）」、「次回セッションへの期待度（星評価）」などの項目を設け、KPがセッション品質を振り返るデータとして活用できる。PLにとってもお互いのプレイへの感謝を示せるポジティブなコミュニティ機能となる。
 **実装ヒント:** Supabaseに `session_surveys` テーブル（id, scenario_id, submitted_by_user_id: uuid, mvp_character_id: uuid | null, memorable_scene: text | null, next_session_rating: int | null, created_at）と `session_survey_configs` テーブル（id, scenario_id, is_open: bool DEFAULT false, opened_at: timestamptz | null）を追加。KPがシナリオ詳細ページからアンケートを「公開」にすると参加者に通知（Supabase Realtime broadcast）。`src/app/scenarios/[id]/survey/page.tsx` を "use client" で新規作成（回答フォーム）、`src/app/scenarios/[id]/survey/results/page.tsx` で集計結果をKPのみ閲覧可能（MVPキャラクターの득票数棒グラフはSVGで実装、シーンコメントは一覧表示）。既存の `src/app/scenarios/[id]/page.tsx` の KP 向けアクションメニューに「事後アンケートを開始」ボタンを追加。`src/lib/supabase.ts` に `SessionSurvey`・`SessionSurveyConfig` 型を追加。追加DB2テーブル。
