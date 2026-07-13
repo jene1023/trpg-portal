@@ -1915,7 +1915,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `PlayerCheckin` 型（scenario_id, character_id, energy_level: 1〜5, comment, checked_in_at）を活用。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLはキャラクターを選択してスライダー（1〜5）＋テキスト入力でチェックイン（認証ユーザーのみ）。KP向けに全参加者のチェックイン状況をエネルギーレベルの絵文字バー（🟢🟡🔴）で一覧表示。Supabase Realtime（`supabase.channel().on("postgres_changes",...).subscribe()`）でチェックインがリアルタイム反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」ボタンを追加。
 **コミット:** `feat: pre-session player check-in for energy and readiness`
 
-## [TODO] キャラクター所有権転送承認ページ — 優先度: 中
+## [DONE] キャラクター所有権転送承認ページ — 優先度: 中
 **対象:** PL / 共通
 **概要:** プレイヤーが別アカウントへキャラクターを譲渡するとき、受け取り側がメールに届いたトークンURLを開いて承認・拒否できる公開ページ。`CharacterTransferRequest` のDBデータは存在するが受け取りUIが未実装のためフローが完結しない。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `CharacterTransferRequest` 型（token, character_id, from_user_id, to_email, status: "pending"|"accepted"|"rejected", expires_at）を活用。`src/app/characters/transfer/[token]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。`supabase.from("character_transfer_requests").select("*, characters(id, name, portrait_url, occupation)").eq("token", token).single()` でリクエスト取得。有効期限・ステータスを確認後、キャラクタープレビューカードと「受け取る」「断る」ボタンを表示。受諾時は `characters.update({player_id: auth.uid()})` と `status: "accepted"` を同一トランザクションで更新。送信者には既存の `MessageInbox.tsx` を通じて結果通知。
