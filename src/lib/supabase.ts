@@ -1400,3 +1400,12 @@ export type SessionTimetableItem = {
   notes: string | null;
   created_at: string;
 };
+
+export type CampaignHouseRule = {
+  id: string;
+  campaign_id: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+  created_at: string;
+};

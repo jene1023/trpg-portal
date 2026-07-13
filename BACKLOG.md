@@ -1885,7 +1885,7 @@
 **実装ヒント:** Supabaseに `session_timetable_items(id uuid pk, session_id uuid references sessions, label text, estimated_minutes int, order_index int, notes text)` テーブルを追加、RLS: sessions テーブルを結合して kp_id または参加者を確認。`src/app/sessions/[id]/timetable/page.tsx` を新規作成（"use client"）。アイテムは drag-to-reorder なし・矢印ボタンで並び替え。各アイテムに `estimated_minutes` を積算して「合計予定時間」をヘッダーに表示。`src/app/sessions/[id]/page.tsx` に「タイムスケジュール」リンクを追加。
 **コミット:** `feat: session day timetable planner for KP pacing`
 
-## [TODO] キャンペーン別ハウスルール管理 — 優先度: 中
+## [DONE] キャンペーン別ハウスルール管理 — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーンごとに採用するハウスルール（幸運の使い方・プッシュロール有無・独自クリティカル処理など）をKPがリスト管理し、参加PLが参照できるページ。「そのルールどうでしたっけ？」という確認コストをゼロにし、セッション開始前の説明も省略できる。
 **実装ヒント:** Supabaseに `campaign_house_rules(id uuid pk, campaign_id uuid references campaigns, title text, description text, order_index int, created_at timestamptz)` テーブルを追加、RLS: campaigns テーブルを経由して kp_id = auth.uid() のみ書き込み可・閲覧は参加者全員。`src/app/campaigns/[id]/house-rules/page.tsx` を新規作成。ルール一覧はナンバリング付きカード（タイトル太字＋説明文）、KPのみ追加・編集・削除ボタン表示。`src/app/campaigns/[id]/page.tsx` のハブページに「ハウスルール」リンクを追加。
