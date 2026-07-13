@@ -1958,7 +1958,7 @@
 **実装ヒント:** `src/app/rules/page.tsx` を Server Component（静的、追加DBなし）で新規作成。`src/app/rules/` 配下にカテゴリ別サブページ（`/rules/abilities`・`/rules/skills`・`/rules/combat`・`/rules/sanity`・`/rules/push`）を作成し、サイドバーナビで切り替え。データはJSON定数ファイル（`src/lib/rules-data.ts`）で管理し、ビルド時に静的生成（`export const dynamic = "force-static"`）。技能一覧は `character_skills.skill_name` と紐付けキャラクターの現在値をURLクエリで受け取り横並び表示する「セッション中参照モード」も設ける。グローバルナビゲーションに「ルール」リンクを追加。
 **コミット:** `feat: built-in CoC 7th edition quick rule reference pages`
 
-## [TODO] パーティスキルカバレッジ分析（KP用） — 優先度: 中
+## [DONE] パーティスキルカバレッジ分析（KP用） — 優先度: 中
 **対象:** KP
 **概要:** セッション参加キャラクターの技能値を束ねて「どの技能が誰もカバーしていないか」をKPが事前確認できるツール。「図書館を誰も50以上持っていない」など準備段階でシナリオ難易度を調整するヒントになる。
 **実装ヒント:** `src/app/scenarios/[id]/party-skills/page.tsx` を "use client" で新規作成。参加キャラクター（`scenario_participants` 経由）の `character_skills` を一括取得し、技能名ごとにパーティ内最高値・担当キャラを集計。技能カテゴリ（探索・戦闘・社交・知識・その他）別にグループ化し、最高値が50未満の技能を⚠️バッジで強調。各技能行にキャラクター名と値をインライン表示（`{charName}: {value}`）。ページ内検索（`<input>` フィルタ）で技能名を絞り込み可能。追加DBなし（既存 `character_skills` と `scenario_participants` を結合）。`src/app/scenarios/[id]/page.tsx` のKPセクションに「スキル分析」リンクを追加。
