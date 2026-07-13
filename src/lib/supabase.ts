@@ -1409,3 +1409,30 @@ export type CampaignHouseRule = {
   order_index: number;
   created_at: string;
 };
+
+export type SchedulePollCandidateDate = {
+  date: string;
+  label: string;
+};
+
+export type SchedulePollVoteEntry = {
+  date: string;
+  availability: "ok" | "maybe" | "ng";
+};
+
+export type SchedulePoll = {
+  id: string;
+  scenario_id: string;
+  created_by_kp_id: string | null;
+  candidate_dates: SchedulePollCandidateDate[];
+  is_closed: boolean;
+  created_at: string;
+};
+
+export type SchedulePollVote = {
+  id: string;
+  poll_id: string;
+  voter_user_id: string;
+  votes: SchedulePollVoteEntry[];
+  created_at: string;
+};

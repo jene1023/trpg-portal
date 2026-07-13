@@ -1928,7 +1928,7 @@
 **実装ヒント:** `src/app/api/characters/[id]/export-pdf/route.ts` を新規作成。サーバーサイドで Puppeteer によるHTML→PDFヘッドレス変換を使い、キャラクター能力値・技能一覧・背景テキスト・ポートレートを配置したPDFを生成し `Content-Type: application/pdf` + `Content-Disposition: attachment` で返す。HTMLテンプレートは `src/app/api/characters/[id]/export-html/route.ts`（既存の export-html パターンを参考）と同じ構造で実装し、印刷向け CSS（`@media print`）を適用。Puppeteer が重すぎる場合は `Content-Type: text/html` で返しブラウザ印刷ダイアログに委ねるフォールバックも設ける。`src/app/characters/[id]/page.tsx` に「PDFでダウンロード」ボタンを追加。追加DBなし。
 **コミット:** `feat: character sheet PDF export for offline and print use`
 
-## [TODO] セッション日程調整投票（Doodle風） — 優先度: 高
+## [DONE] セッション日程調整投票（Doodle風） — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** KPが複数の候補日時を提示し、PLが「○/△/×」で回答できるスケジュール調整機能。全員の回答が揃うと最適日時をKPに通知し、そのままシナリオの `scheduled_at` に確定できる。Discord での日程調整スレッドを不要にし、ポータル内で卓準備を完結させる。
 **実装ヒント:** Supabaseに `schedule_polls(id uuid pk, scenario_id uuid references scenarios, created_by_kp_id uuid, candidate_dates jsonb, is_closed bool DEFAULT false, created_at timestamptz)` と `schedule_poll_votes(id uuid pk, poll_id uuid references schedule_polls, voter_user_id uuid, votes jsonb, created_at timestamptz)` テーブルを追加（`candidate_dates` は `{date: string, label: string}[]`、`votes` は `{date: string, availability: "ok"|"maybe"|"ng"}[]`）。`src/app/scenarios/[id]/schedule-poll/page.tsx` を "use client" で新規作成。KPは日時候補（最大10件）を追加し、PLは各日時への○△×をトグルボタンで回答。集計ビューは日時ごとの○数・△数・×数を横棒グラフ（CSSグリッド幅%）で表示。「この日に決定」ボタンで `scenarios.scheduled_at` を更新しポールを閉鎖。RLS: 書き込みはシナリオ参加者のみ・閲覧は同キャンペーンメンバー全員。シナリオ詳細ページに「日程調整」リンクを追加。追加DB2テーブル。
