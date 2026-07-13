@@ -1952,7 +1952,7 @@
 **実装ヒント:** Supabaseに `session_feedbacks(id uuid pk, scenario_id uuid references scenarios, voter_user_id uuid, is_anonymous bool DEFAULT false, fun_rating int CHECK(1-5), scare_rating int CHECK(1-5), pace_rating int CHECK(1-5), highlight text, improvement text, safety_concern text, created_at timestamptz)` テーブルを追加、RLS: voter_user_id = auth.uid() で書き込み・KPのみ全件閲覧。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLが星5段階スライダー×3項目（楽しさ・怖さ・ペース）＋自由記述3欄（ハイライト・改善点・セーフティ）を入力。KP閲覧ビューは各評価の平均を表示し、自由記述は匿名化してカード一覧表示。`src/app/scenarios/[id]/page.tsx` に「フィードバックを送る」ボタンを追加（PLのみ表示）、KP向けには「フィードバック集計を見る」ボタンを表示。
 **コミット:** `feat: post-session player feedback form with KP aggregate view`
 
-## [TODO] CoC内蔵ルールクイックリファレンス — 優先度: 高
+## [DONE] CoC内蔵ルールクイックリファレンス — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッション中にポータルを離れずに確認できるCoC7版ルールリファレンスページ。能力値修正表・技能デフォルト値・戦闘アクション一覧・正気度喪失表・プッシュロール条件をすぐ引ける。紙のルールブックやWiki検索を不要にしてセッションの流れを止めない。
 **実装ヒント:** `src/app/rules/page.tsx` を Server Component（静的、追加DBなし）で新規作成。`src/app/rules/` 配下にカテゴリ別サブページ（`/rules/abilities`・`/rules/skills`・`/rules/combat`・`/rules/sanity`・`/rules/push`）を作成し、サイドバーナビで切り替え。データはJSON定数ファイル（`src/lib/rules-data.ts`）で管理し、ビルド時に静的生成（`export const dynamic = "force-static"`）。技能一覧は `character_skills.skill_name` と紐付けキャラクターの現在値をURLクエリで受け取り横並び表示する「セッション中参照モード」も設ける。グローバルナビゲーションに「ルール」リンクを追加。
