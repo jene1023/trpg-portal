@@ -1177,6 +1177,29 @@ body {
   }
 }
 
+/* ポートレートスキャンライン: 古ブラウン管に映し出された記録写真のような横縞テクスチャ */
+/* ホバー時に探索者が"現代に蘇る"ように縞が溶けて消える — coc-portrait-film の脱セピアと連動 */
+.coc-portrait-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.07) 0px,
+    rgba(0, 0, 0, 0.07) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.group:hover .coc-portrait-scanlines,
+.group:focus-within .coc-portrait-scanlines {
+  opacity: 0.22;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-portrait-scanlines {
+    transition: opacity 0.65s ease-out;
+  }
+}
+
 /* フッター引用文: 深淵の彼方から届く幽冥の声 — opacity が静かに呼吸し、紫青の微光が揺らめく */
 /* サンが削られるほどに深淵は近づく: 読み手を静かに引き込む */
 @keyframes coc-footer-quote-glow {
