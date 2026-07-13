@@ -1922,7 +1922,7 @@
 **コミット:** `feat: character ownership transfer accept/reject page`
 **コミット:** `feat: public player character portfolio page at /player/[slug]`
 
-## [TODO] キャラクターシートPDF出力 — 優先度: 高
+## [DONE] キャラクターシートPDF出力 — 優先度: 高
 **対象:** PL / 共通
 **概要:** 現在のキャラクターデータ（能力値・技能・背景・持ち物）をCoCオフィシャルシート風のレイアウトでPDF出力できる機能。オフラインセッション・卓録・資料保存・印刷に対応し、「データはポータルにあるけど紙の方が見やすい」という需要を満たす。
 **実装ヒント:** `src/app/api/characters/[id]/export-pdf/route.ts` を新規作成。サーバーサイドで Puppeteer によるHTML→PDFヘッドレス変換を使い、キャラクター能力値・技能一覧・背景テキスト・ポートレートを配置したPDFを生成し `Content-Type: application/pdf` + `Content-Disposition: attachment` で返す。HTMLテンプレートは `src/app/api/characters/[id]/export-html/route.ts`（既存の export-html パターンを参考）と同じ構造で実装し、印刷向け CSS（`@media print`）を適用。Puppeteer が重すぎる場合は `Content-Type: text/html` で返しブラウザ印刷ダイアログに委ねるフォールバックも設ける。`src/app/characters/[id]/page.tsx` に「PDFでダウンロード」ボタンを追加。追加DBなし。
