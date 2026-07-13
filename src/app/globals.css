@@ -1125,3 +1125,26 @@ body {
     transition: text-shadow 0.45s ease-out, color 0.30s ease-out;
   }
 }
+
+/* フッター引用文: 深淵の彼方から届く幽冥の声 — opacity が静かに呼吸し、紫青の微光が揺らめく */
+/* サンが削られるほどに深淵は近づく: 読み手を静かに引き込む */
+@keyframes coc-footer-quote-glow {
+  0%, 100% {
+    text-shadow: 0 0 6px rgba(160, 138, 191, 0.03);
+    opacity: 0.35;
+  }
+  50% {
+    text-shadow: 0 0 18px rgba(160, 138, 191, 0.18), 0 0 36px rgba(100, 80, 160, 0.07);
+    opacity: 0.58;
+  }
+}
+
+.coc-footer-quote {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-footer-quote {
+    animation: coc-footer-quote-glow 10s ease-in-out 4s infinite;
+  }
+}

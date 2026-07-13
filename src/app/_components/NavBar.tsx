@@ -71,7 +71,7 @@ export default function NavBar() {
                   className={`relative text-sm font-medium transition-colors pb-1 ${
                     isActive
                       ? "text-coc-gold"
-                      : "text-coc-muted hover:text-coc-text"
+                      : "text-coc-muted hover:text-coc-text coc-link-accent"
                   }`}
                 >
                   {link.label}

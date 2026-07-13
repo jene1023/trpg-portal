@@ -9,7 +9,7 @@ export default function Footer() {
         <p className="font-cinzel text-[11px] text-coc-faint tracking-[0.22em] uppercase opacity-50">
           CoC Portal
         </p>
-        <p className="font-crimson text-xs text-coc-faint italic opacity-35 tracking-[0.05em]">
+        <p className="font-crimson text-xs text-coc-faint italic tracking-[0.05em] coc-footer-quote">
           深淵の向こうから、物語は始まる
         </p>
       </div>
