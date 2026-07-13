@@ -1867,7 +1867,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/events/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("campaign_events").select("*, scenarios(title)").eq("campaign_id", id).order("event_date", {ascending: true})` でイベント一覧取得。イベントカードは event_type ごとに色分けしたバッジ（death=赤/revelation=紫/world_change=青/npc_action=橙/player_action=緑/other=灰）でタイムライン表示（左ボーダーライン＋縦並びカード）。新規追加フォームで event_title・event_type・event_date・event_description・scenario_id（optional select）を入力。`src/lib/supabase.ts` の `CampaignEvent` 型はすでに定義済み。キャンペーン詳細ページに「年代記」リンクを追加。
 **コミット:** `feat: campaign event chronicle with timeline view`
 
-## [TODO] キャンペーン遺物管理 — 優先度: 低
+## [DONE] キャンペーン遺物管理 — 優先度: 低
 **対象:** KP / 共通
 **概要:** `CampaignArtifact` 型（artifact_type: tome/weapon/relic/key_item/other、rarity: common/rare/legendary）を活用し、キャンペーン全体で登場した遺物・重要アイテムを追跡できる管理ページ。現在の所持キャラクター・入手シナリオ・破壊済みフラグを管理し、「失われた遺物」の行方も把握できる。
 **実装ヒント:** `src/app/campaigns/[id]/artifacts/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_artifacts").select("*, characters(id, name), scenarios(id, title)").eq("campaign_id", id)` で取得。カード一覧表示：rarity ごとにグラデーションバッジ（legendary=金/rare=紫/common=灰）、is_destroyed=true のものはグレーアウト＋取り消し線。所持者変更はカード内の select で `current_holder_character_id` を即時 update。新規追加フォームで name・artifact_type・rarity・description・scenario_id（入手シナリオ）を入力。`src/lib/supabase.ts` の `CampaignArtifact` 型はすでに定義済み。キャンペーン詳細ページに「遺物」リンクを追加。
