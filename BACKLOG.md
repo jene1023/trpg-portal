@@ -1831,7 +1831,7 @@
 **実装ヒント:** Supabaseに `party_templates(id, kp_id, name, description, members jsonb, created_at)` テーブルを追加。`members` は `[{user_id, character_id, role}]` の配列。`src/app/kp/party-templates/page.tsx` と `src/app/kp/party-templates/[id]/page.tsx` を新規作成。セッション新規作成フォーム（`src/app/sessions/new/page.tsx`）にテンプレートから参加者を一括インポートするボタンを追加。RLS: `kp_id = auth.uid()` で保護。
 **コミット:** `feat: reusable party group templates for session setup`
 
-## [TODO] キャラクター外見ランダムジェネレーター — 優先度: 低
+## [DONE] キャラクター外見ランダムジェネレーター — 優先度: 低
 **対象:** PL
 **概要:** キャラクター作成時に性別・年代・雰囲気キーワードを選ぶだけで、髪色・目の色・体格・特徴的な外見描写をランダム生成するジェネレーター。RP没入感向上とキャラ立て補助。
 **実装ヒント:** `src/app/characters/[id]/appearance-generator/page.tsx` を新規作成。既存の名前ジェネレーター（`src/app/_components/AIBackstoryGenerator.tsx`）のUIパターンを踏襲。外見テーブルはハードコードされたオプション配列から無作為選択するローカル処理（API不要）で実装しシンプルに保つ。生成結果はキャラクターの `appearance` フィールドにワンクリックで書き込めるよう `characters` テーブルの既存カラムと紐付ける。
