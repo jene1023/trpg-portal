@@ -1843,7 +1843,7 @@
 **実装ヒント:** `characters` テーブルに `public_fields jsonb default '["name","occupation","age","portrait_url","backstory_public"]'::jsonb` カラムを追加（マイグレーション必要）。`src/app/characters/[id]/settings/page.tsx` にチェックボックスUIを追加し公開フィールドを編集可能に。`src/app/c/[slug]/page.tsx` でレンダリング時に `public_fields` を参照して非公開フィールドを除外。RLS: 書き込みは本人のみ、読み取りは公開。
 **コミット:** `feat: customizable public profile fields for character page`
 
-## [TODO] セッション前VTT接続確認チェックリスト — 優先度: 低
+## [DONE] セッション前VTT接続確認チェックリスト — 優先度: 低
 **対象:** KP
 **概要:** セッション開始30分前にKPが使うプレフライトチェックリスト。VTTツールURL・Discord/VC接続・ハンドアウト配布状況・シナリオ資料のPDF準備などを確認し、チェック完了をPLに通知できる機能。
 **実装ヒント:** `src/app/sessions/[id]/preflight/page.tsx` を "use client" で新規作成。チェック項目はセッションに紐付いた `session_preflight_items(id, session_id, label, is_checked, order)` テーブルで管理（デフォルト項目はシード）。全項目チェック完了時にSupabase Realtimeで参加PLのダッシュボードに「セッション準備完了」バナーを表示。`src/app/sessions/[id]/page.tsx` にプレフライトへのリンクボタンを追加。
