@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Send, TrendingUp } from "lucide-react";
-import { supabase, isSupabaseConfigured, SessionFeedback } from "@/lib/supabase";
+import { ArrowLeft, Send, MessageSquarePlus, BarChart2 } from "lucide-react";
+import { supabase, isSupabaseConfigured, SessionFeedbackPost } from "@/lib/supabase";
 
 function StarInput({
   label,
@@ -57,18 +57,18 @@ export default function SessionFeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [feedbackList, setFeedbackList] = useState<SessionFeedback[]>([]);
+  const [feedbackList, setFeedbackList] = useState<SessionFeedbackPost[]>([]);
 
-  const [characterName, setCharacterName] = useState("");
   const [funRating, setFunRating] = useState(0);
-  const [tensionRating, setTensionRating] = useState(0);
-  const [facilitationRating, setFacilitationRating] = useState(0);
-  const [wouldReplay, setWouldReplay] = useState<boolean | null>(null);
-  const [freeComment, setFreeComment] = useState("");
+  const [scareRating, setScareRating] = useState(0);
+  const [paceRating, setPaceRating] = useState(0);
+  const [highlight, setHighlight] = useState("");
+  const [improvement, setImprovement] = useState("");
+  const [safetyConcern, setSafetyConcern] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
 
   useEffect(() => {
-    const key = `session_feedback_submitted_${scenarioId}`;
+    const key = `session_feedbacks_submitted_${scenarioId}`;
     if (typeof window !== "undefined" && localStorage.getItem(key)) {
       setSubmitted(true);
     }
@@ -82,51 +82,43 @@ export default function SessionFeedbackPage() {
       const [{ data: scenario }, { data: rows }] = await Promise.all([
         supabase.from("scenarios").select("title").eq("id", scenarioId).single(),
         supabase
-          .from("session_feedback")
+          .from("session_feedbacks")
           .select("*")
           .eq("scenario_id", scenarioId)
           .order("created_at", { ascending: false }),
       ]);
       setScenarioTitle(scenario?.title ?? "");
-      setFeedbackList((rows ?? []) as SessionFeedback[]);
+      setFeedbackList((rows ?? []) as SessionFeedbackPost[]);
       setLoading(false);
     })();
   }, [scenarioId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (
-      !isSupabaseConfigured ||
-      funRating === 0 ||
-      tensionRating === 0 ||
-      facilitationRating === 0 ||
-      wouldReplay === null
-    )
-      return;
+    if (!isSupabaseConfigured || funRating === 0 || scareRating === 0 || paceRating === 0) return;
     setSaving(true);
 
     const payload = {
       scenario_id: scenarioId,
-      session_id: null,
-      character_id: null,
-      character_name: isAnonymous ? null : (characterName.trim() || null),
-      fun_rating: funRating,
-      tension_rating: tensionRating,
-      facilitation_rating: facilitationRating,
-      would_replay: wouldReplay,
-      free_comment: freeComment.trim() || null,
+      voter_user_id: null,
       is_anonymous: isAnonymous,
+      fun_rating: funRating,
+      scare_rating: scareRating,
+      pace_rating: paceRating,
+      highlight: highlight.trim() || null,
+      improvement: improvement.trim() || null,
+      safety_concern: safetyConcern.trim() || null,
     };
 
     const { data } = await supabase
-      .from("session_feedback")
+      .from("session_feedbacks")
       .insert(payload)
       .select("*")
       .single();
 
     if (data) {
-      setFeedbackList((prev) => [data as SessionFeedback, ...prev]);
-      localStorage.setItem(`session_feedback_submitted_${scenarioId}`, "1");
+      setFeedbackList((prev) => [data as SessionFeedbackPost, ...prev]);
+      localStorage.setItem(`session_feedbacks_submitted_${scenarioId}`, "1");
       setSubmitted(true);
     }
 
@@ -135,11 +127,12 @@ export default function SessionFeedbackPage() {
 
   const count = feedbackList.length;
   const avgFun = count > 0 ? feedbackList.reduce((s, f) => s + f.fun_rating, 0) / count : null;
-  const avgTension = count > 0 ? feedbackList.reduce((s, f) => s + f.tension_rating, 0) / count : null;
-  const avgFacilitation =
-    count > 0 ? feedbackList.reduce((s, f) => s + f.facilitation_rating, 0) / count : null;
-  const wouldReplayCount = feedbackList.filter((f) => f.would_replay).length;
-  const publicFeedbacks = feedbackList.filter((f) => !f.is_anonymous);
+  const avgScare = count > 0 ? feedbackList.reduce((s, f) => s + f.scare_rating, 0) / count : null;
+  const avgPace = count > 0 ? feedbackList.reduce((s, f) => s + f.pace_rating, 0) / count : null;
+
+  const visibleFeedbacks = feedbackList.filter(
+    (f) => f.highlight || f.improvement || f.safety_concern
+  );
 
   if (loading) {
     return (
@@ -151,7 +144,7 @@ export default function SessionFeedbackPage() {
 
   return (
     <div className="coc-page-enter mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href={`/scenarios/${scenarioId}`}
           className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-text transition-colors"
@@ -159,16 +152,23 @@ export default function SessionFeedbackPage() {
           <ArrowLeft size={16} />
           シナリオ詳細
         </Link>
+        <Link
+          href={`/scenarios/${scenarioId}/feedback/results`}
+          className="flex items-center gap-1.5 text-xs text-coc-gold hover:underline"
+        >
+          <BarChart2 size={14} />
+          KP集計ビュー
+        </Link>
       </div>
 
       <div className="mb-6">
         <p className="text-xs text-coc-muted mb-1">{scenarioTitle}</p>
         <h1 className="font-cinzel text-xl font-bold text-coc-text flex items-center gap-2">
-          <TrendingUp size={20} className="text-coc-gold" />
-          セッション満足度フィードバック
+          <MessageSquarePlus size={20} className="text-coc-gold" />
+          セッション後フィードバック
         </h1>
         <p className="text-xs text-coc-muted mt-1">
-          セッション後の満足度をKPへ送信できます。送信後は編集できません。
+          楽しかった点・怖かった点・ペースへの感想をKPへ送信できます。匿名で送ることも可能です。
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export default function SessionFeedbackPage() {
               <p className="text-xs font-medium text-coc-muted uppercase tracking-widest mb-4">
                 平均評価（{count}件）
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-xs text-coc-muted mb-1">楽しさ</p>
                   {avgFun !== null && (
@@ -194,31 +194,22 @@ export default function SessionFeedbackPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-coc-muted mb-1">緊張感</p>
-                  {avgTension !== null && (
+                  <p className="text-xs text-coc-muted mb-1">怖さ</p>
+                  {avgScare !== null && (
                     <>
-                      <StarDisplay value={avgTension} />
-                      <p className="text-xs text-coc-gold mt-0.5">{avgTension.toFixed(1)}</p>
+                      <StarDisplay value={avgScare} />
+                      <p className="text-xs text-coc-gold mt-0.5">{avgScare.toFixed(1)}</p>
                     </>
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-coc-muted mb-1">KPファシリテーション</p>
-                  {avgFacilitation !== null && (
+                  <p className="text-xs text-coc-muted mb-1">ペース</p>
+                  {avgPace !== null && (
                     <>
-                      <StarDisplay value={avgFacilitation} />
-                      <p className="text-xs text-coc-gold mt-0.5">{avgFacilitation.toFixed(1)}</p>
+                      <StarDisplay value={avgPace} />
+                      <p className="text-xs text-coc-gold mt-0.5">{avgPace.toFixed(1)}</p>
                     </>
                   )}
-                </div>
-                <div>
-                  <p className="text-xs text-coc-muted mb-1">また遊びたい</p>
-                  <p className="text-sm font-bold text-coc-text">
-                    {wouldReplayCount}/{count}
-                  </p>
-                  <p className="text-xs text-coc-muted">
-                    {count > 0 ? Math.round((wouldReplayCount / count) * 100) : 0}%
-                  </p>
                 </div>
               </div>
             </div>
@@ -245,70 +236,49 @@ export default function SessionFeedbackPage() {
                       className="accent-coc-gold"
                     />
                     <label htmlFor="is-anonymous" className="text-xs text-coc-muted cursor-pointer">
-                      KPには匿名で送信する
+                      匿名で送信する
                     </label>
                   </div>
 
-                  {!isAnonymous && (
-                    <div>
-                      <label className="text-xs text-coc-muted mb-1 block">
-                        キャラクター名（任意）
-                      </label>
-                      <input
-                        type="text"
-                        value={characterName}
-                        onChange={(e) => setCharacterName(e.target.value)}
-                        placeholder="キャラクター名や PL 名"
-                        className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none"
-                      />
-                    </div>
-                  )}
-
                   <StarInput label="楽しさ *" value={funRating} onChange={setFunRating} />
-                  <StarInput label="緊張感 *" value={tensionRating} onChange={setTensionRating} />
-                  <StarInput
-                    label="KPのファシリテーション *"
-                    value={facilitationRating}
-                    onChange={setFacilitationRating}
-                  />
+                  <StarInput label="怖さ *" value={scareRating} onChange={setScareRating} />
+                  <StarInput label="ペース *" value={paceRating} onChange={setPaceRating} />
 
                   <div>
-                    <p className="text-xs text-coc-muted mb-2">また遊びたいですか？ *</p>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setWouldReplay(true)}
-                        className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                          wouldReplay === true
-                            ? "border-coc-gold bg-coc-gold/10 text-coc-gold"
-                            : "border-coc-border bg-coc-raised text-coc-muted hover:text-coc-text"
-                        }`}
-                      >
-                        はい
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setWouldReplay(false)}
-                        className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                          wouldReplay === false
-                            ? "border-red-800 bg-red-950/20 text-red-400"
-                            : "border-coc-border bg-coc-raised text-coc-muted hover:text-coc-text"
-                        }`}
-                      >
-                        いいえ
-                      </button>
-                    </div>
+                    <label className="text-xs text-coc-muted mb-1 block">
+                      ハイライト（印象的だった場面・よかった点）
+                    </label>
+                    <textarea
+                      value={highlight}
+                      onChange={(e) => setHighlight(e.target.value)}
+                      rows={2}
+                      placeholder="楽しかった場面・うまくいったと思ったシーンなど..."
+                      className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
+                    />
                   </div>
 
                   <div>
                     <label className="text-xs text-coc-muted mb-1 block">
-                      自由コメント（任意）
+                      改善点（次回に活かしてほしいこと）
                     </label>
                     <textarea
-                      value={freeComment}
-                      onChange={(e) => setFreeComment(e.target.value)}
-                      rows={3}
-                      placeholder="セッションの感想、印象的な場面、改善提案など..."
+                      value={improvement}
+                      onChange={(e) => setImprovement(e.target.value)}
+                      rows={2}
+                      placeholder="もう少し〇〇だったら嬉しかった、など..."
+                      className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-coc-muted mb-1 block">
+                      セーフティ懸念（不快だった表現・配慮してほしかった点）
+                    </label>
+                    <textarea
+                      value={safetyConcern}
+                      onChange={(e) => setSafetyConcern(e.target.value)}
+                      rows={2}
+                      placeholder="（任意）気になった描写・セーフティに関するご意見..."
                       className="w-full rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:border-coc-gold focus:outline-none resize-none"
                     />
                   </div>
@@ -317,13 +287,7 @@ export default function SessionFeedbackPage() {
 
               <button
                 type="submit"
-                disabled={
-                  saving ||
-                  funRating === 0 ||
-                  tensionRating === 0 ||
-                  facilitationRating === 0 ||
-                  wouldReplay === null
-                }
+                disabled={saving || funRating === 0 || scareRating === 0 || paceRating === 0}
                 className="flex items-center justify-center gap-2 rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-3 text-sm font-medium text-coc-gold transition-colors hover:border-coc-gold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send size={16} />
@@ -332,25 +296,25 @@ export default function SessionFeedbackPage() {
             </form>
           )}
 
-          {publicFeedbacks.length > 0 && (
+          {visibleFeedbacks.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="text-xs font-medium text-coc-muted uppercase tracking-widest">
-                フィードバック一覧（{publicFeedbacks.length}件表示）
+                寄せられた声（{visibleFeedbacks.length}件）
               </p>
-              {publicFeedbacks.map((f) => (
+              {visibleFeedbacks.map((f) => (
                 <div
                   key={f.id}
                   className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4"
                 >
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <p className="text-sm font-medium text-coc-text">
-                      {f.character_name ?? "プレイヤー"}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <p className="text-xs text-coc-muted">
+                      {f.is_anonymous ? "匿名" : "投稿済み"}
                     </p>
                     <p className="text-xs text-coc-muted flex-shrink-0">
                       {new Date(f.created_at).toLocaleDateString("ja-JP")}
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-3 gap-2 text-xs mb-3">
                     <div>
                       <span className="text-coc-muted">楽しさ</span>
                       <div className="mt-0.5">
@@ -358,31 +322,34 @@ export default function SessionFeedbackPage() {
                       </div>
                     </div>
                     <div>
-                      <span className="text-coc-muted">緊張感</span>
+                      <span className="text-coc-muted">怖さ</span>
                       <div className="mt-0.5">
-                        <StarDisplay value={f.tension_rating} />
+                        <StarDisplay value={f.scare_rating} />
                       </div>
                     </div>
                     <div>
-                      <span className="text-coc-muted">ファシリ</span>
+                      <span className="text-coc-muted">ペース</span>
                       <div className="mt-0.5">
-                        <StarDisplay value={f.facilitation_rating} />
+                        <StarDisplay value={f.pace_rating} />
                       </div>
-                    </div>
-                    <div>
-                      <span className="text-coc-muted">また遊びたい</span>
-                      <p
-                        className={`mt-0.5 font-medium ${
-                          f.would_replay ? "text-coc-gold" : "text-coc-muted"
-                        }`}
-                      >
-                        {f.would_replay ? "はい" : "いいえ"}
-                      </p>
                     </div>
                   </div>
-                  {f.free_comment && (
-                    <div className="mt-3 border-t border-coc-border pt-3">
-                      <p className="text-xs text-coc-text whitespace-pre-wrap">{f.free_comment}</p>
+                  {f.highlight && (
+                    <div className="border-t border-coc-border pt-3 mb-2">
+                      <p className="text-xs font-medium text-coc-muted mb-0.5">ハイライト</p>
+                      <p className="text-sm text-coc-text whitespace-pre-wrap">{f.highlight}</p>
+                    </div>
+                  )}
+                  {f.improvement && (
+                    <div className="border-t border-coc-border pt-3 mb-2">
+                      <p className="text-xs font-medium text-coc-muted mb-0.5">改善点</p>
+                      <p className="text-sm text-coc-text whitespace-pre-wrap">{f.improvement}</p>
+                    </div>
+                  )}
+                  {f.safety_concern && (
+                    <div className="border-t border-coc-border pt-3">
+                      <p className="text-xs font-medium text-yellow-500 mb-0.5">セーフティ懸念</p>
+                      <p className="text-sm text-coc-text whitespace-pre-wrap">{f.safety_concern}</p>
                     </div>
                   )}
                 </div>

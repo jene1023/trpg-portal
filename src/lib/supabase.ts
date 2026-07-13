@@ -1436,3 +1436,17 @@ export type SchedulePollVote = {
   votes: SchedulePollVoteEntry[];
   created_at: string;
 };
+
+export type SessionFeedbackPost = {
+  id: string;
+  scenario_id: string;
+  voter_user_id: string | null;
+  is_anonymous: boolean;
+  fun_rating: number;
+  scare_rating: number;
+  pace_rating: number;
+  highlight: string | null;
+  improvement: string | null;
+  safety_concern: string | null;
+  created_at: string;
+};

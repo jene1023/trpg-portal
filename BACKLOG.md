@@ -1946,7 +1946,7 @@
 **実装ヒント:** `src/app/api/scenarios/[id]/export-zip/route.ts` を新規作成。Node.js の `archiver` パッケージを使い（`npm install archiver @types/archiver`）、`handouts`・`scenario_notes`・`creatures`・`kp_memos` の各テーブルからデータを取得し Markdown/JSON ファイルとして ZIP にまとめる（例: `handouts/01-タイトル.md`、`creatures/クリーチャー名.json`）。`Content-Type: application/zip` + `Content-Disposition: attachment; filename="scenario-TITLE.zip"` で返す。Supabase Storage に保存された画像（ポートレート・ハンドアウト添付）は Storage `download` APIで取得しバイナリをZIPに追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のKP向けアクションメニューに「資料をZIPで保存」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario materials bulk ZIP download for offline backup`
 
-## [TODO] セッション後PLフィードバック機能 — 優先度: 高
+## [DONE] セッション後PLフィードバック機能 — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッション終了後にPLが「楽しかった点・怖かった点・改善希望・セーフティ懸念」を匿名または記名で送信できるアンケート機能。KPはシナリオ別に集計結果を確認でき、次回以降の改善に活かせる。
 **実装ヒント:** Supabaseに `session_feedbacks(id uuid pk, scenario_id uuid references scenarios, voter_user_id uuid, is_anonymous bool DEFAULT false, fun_rating int CHECK(1-5), scare_rating int CHECK(1-5), pace_rating int CHECK(1-5), highlight text, improvement text, safety_concern text, created_at timestamptz)` テーブルを追加、RLS: voter_user_id = auth.uid() で書き込み・KPのみ全件閲覧。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLが星5段階スライダー×3項目（楽しさ・怖さ・ペース）＋自由記述3欄（ハイライト・改善点・セーフティ）を入力。KP閲覧ビューは各評価の平均を表示し、自由記述は匿名化してカード一覧表示。`src/app/scenarios/[id]/page.tsx` に「フィードバックを送る」ボタンを追加（PLのみ表示）、KP向けには「フィードバック集計を見る」ボタンを表示。
