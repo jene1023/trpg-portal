@@ -1849,7 +1849,7 @@
 **実装ヒント:** `src/app/sessions/[id]/preflight/page.tsx` を "use client" で新規作成。チェック項目はセッションに紐付いた `session_preflight_items(id, session_id, label, is_checked, order)` テーブルで管理（デフォルト項目はシード）。全項目チェック完了時にSupabase Realtimeで参加PLのダッシュボードに「セッション準備完了」バナーを表示。`src/app/sessions/[id]/page.tsx` にプレフライトへのリンクボタンを追加。
 **コミット:** `feat: pre-session VTT preflight checklist for KP`
 
-## [TODO] キャンペーン詳細ダッシュボード — 優先度: 高
+## [DONE] キャンペーン詳細ダッシュボード — 優先度: 高
 **対象:** KP / 共通
 **概要:** `campaigns/[id]/page.tsx` が存在しないため、キャンペーン全体のハブとなる詳細ページを新規作成する。参加シナリオの順序・ステータス・次回予定を一覧し、キャンペーンステータス（planning/ongoing/completed）の変更や概要編集も同一画面で行える。
 **実装ヒント:** `src/app/campaigns/[id]/page.tsx` を Server Component で新規作成。`supabase.from("campaigns").select("*").eq("id", id)` でキャンペーン取得。`supabase.from("campaign_scenarios").select("*, scenarios(id, title, status, played_at, next_session_at)").eq("campaign_id", id).order("order_index")` でシナリオ一覧を取得し、order_index順に表示。ステータスバッジ・概要テキスト・シナリオカード（リンク付き）を縦積みで配置。ページ末尾に `/campaigns/[id]/stats`・`/campaigns/[id]/wiki`・`/campaigns/[id]/events` へのクイックリンクを追加。編集ボタンはインラインupsertで実装（"use client" の子コンポーネント）。

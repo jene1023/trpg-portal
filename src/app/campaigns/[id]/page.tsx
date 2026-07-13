@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor, Scroll } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -269,6 +269,13 @@ export default function CampaignDetailPage({ params }: Props) {
           <Gem size={15} />
           アーティファクト
         </Link>
+        <Link
+          href={`/campaigns/${campaignId}/events`}
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <Scroll size={15} />
+          年代記
+        </Link>
         <a
           href={`/api/calendar/campaign/${campaignId}`}
           download="campaign-sessions.ics"
@@ -323,6 +330,20 @@ export default function CampaignDetailPage({ params }: Props) {
                   {scenario.synopsis && (
                     <p className="text-xs text-coc-muted mt-1 line-clamp-1">{scenario.synopsis}</p>
                   )}
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    {scenario.played_at && (
+                      <span className="flex items-center gap-1 text-xs text-coc-muted">
+                        <Clock size={11} />
+                        {new Date(scenario.played_at).toLocaleDateString("ja-JP")}
+                      </span>
+                    )}
+                    {scenario.next_session_at && scenario.status !== "completed" && (
+                      <span className="flex items-center gap-1 text-xs text-coc-gold">
+                        <CalendarDays size={11} />
+                        次回: {new Date(scenario.next_session_at).toLocaleDateString("ja-JP")}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => handleRemove(scenario.linkId)}
