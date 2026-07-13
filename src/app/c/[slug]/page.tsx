@@ -45,6 +45,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const DEFAULT_PUBLIC_FIELDS = [
+  "portrait_url",
+  "occupation",
+  "age",
+  "background",
+];
+
 export default async function PublicCharacterPage({ params }: Props) {
   const { slug } = await params;
 
@@ -71,6 +78,11 @@ export default async function PublicCharacterPage({ params }: Props) {
     .eq("character_id", char.id)
     .order("created_at", { ascending: false })
     .limit(5);
+
+  const publicFields = new Set<string>(
+    (char.public_fields as string[] | null) ?? DEFAULT_PUBLIC_FIELDS
+  );
+  const show = (field: string) => publicFields.has(field);
 
   const skills = char.character_skills ?? [];
   const traits = char.character_traits ?? [];
@@ -101,10 +113,12 @@ export default async function PublicCharacterPage({ params }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
         {/* 左カラム */}
         <div className="space-y-4">
-          <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-coc-border">
-            <PortraitImage url={char.portrait_url} name={char.name} />
-            <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
-          </div>
+          {show("portrait_url") && (
+            <div className="relative aspect-[3/4] rounded-lg overflow-hidden border border-coc-border">
+              <PortraitImage url={char.portrait_url} name={char.name} />
+              <div className="absolute inset-0 pointer-events-none coc-portrait-vignette" />
+            </div>
+          )}
 
           <div className={sectionClass}>
             <div>
@@ -113,13 +127,13 @@ export default async function PublicCharacterPage({ params }: Props) {
               </h1>
               <div className="flex items-center gap-2 mt-1.5">
                 <StatusBadge status={char.status} />
-                {char.occupation && (
+                {show("occupation") && char.occupation && (
                   <span className="text-xs text-coc-muted">{char.occupation}</span>
                 )}
               </div>
             </div>
 
-            {char.catchphrase && (
+            {show("catchphrase") && char.catchphrase && (
               <p className="font-crimson italic text-coc-gold text-sm leading-relaxed border-l-2 border-coc-gold-dim pl-3">
                 &ldquo;{char.catchphrase}&rdquo;
               </p>
@@ -128,31 +142,31 @@ export default async function PublicCharacterPage({ params }: Props) {
             <SectionDivider className="my-2" />
 
             <dl className="space-y-1.5 text-sm">
-              {char.furigana && (
+              {show("furigana") && char.furigana && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">ふりがな</dt>
                   <dd className="text-coc-text">{char.furigana}</dd>
                 </div>
               )}
-              {char.age && (
+              {show("age") && char.age && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">年齢</dt>
                   <dd className="text-coc-text">{char.age}歳</dd>
                 </div>
               )}
-              {char.birthday && (
+              {show("birthday") && char.birthday && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">誕生日</dt>
                   <dd className="text-coc-text">{char.birthday}</dd>
                 </div>
               )}
-              {char.gender && (
+              {show("gender") && char.gender && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">性別</dt>
                   <dd className="text-coc-text">{char.gender}</dd>
                 </div>
               )}
-              {(char.height_cm || char.weight_kg) && (
+              {show("appearance") && (char.height_cm || char.weight_kg) && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">体格</dt>
                   <dd className="text-coc-text">
@@ -162,7 +176,7 @@ export default async function PublicCharacterPage({ params }: Props) {
                   </dd>
                 </div>
               )}
-              {(char.eye_color || char.hair_color) && (
+              {show("appearance") && (char.eye_color || char.hair_color) && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">外見</dt>
                   <dd className="text-coc-text text-right leading-tight">
@@ -172,13 +186,13 @@ export default async function PublicCharacterPage({ params }: Props) {
                   </dd>
                 </div>
               )}
-              {(char.mythos_books_read ?? 0) > 0 && (
+              {show("mythos_books_read") && (char.mythos_books_read ?? 0) > 0 && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">神話書読了</dt>
                   <dd className="text-coc-text">{char.mythos_books_read}冊</dd>
                 </div>
               )}
-              {char.player_name && (
+              {show("player_name") && char.player_name && (
                 <div className="flex justify-between">
                   <dt className="text-coc-muted">PL</dt>
                   <dd className="text-coc-text">{char.player_name}</dd>
@@ -191,44 +205,48 @@ export default async function PublicCharacterPage({ params }: Props) {
         {/* 右カラム */}
         <div className="space-y-4">
           {/* 能力値 */}
-          <div className={sectionClass}>
-            <h2 className={sectionTitle}>能力値</h2>
-            <StatBlock character={char} />
-          </div>
+          {show("stats") && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>能力値</h2>
+              <StatBlock character={char} />
+            </div>
+          )}
 
           {/* 派生ステータス */}
-          <div className={sectionClass}>
-            <h2 className={sectionTitle}>派生ステータス</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "HP", current: char.hp_current, max: char.hp_max },
-                { label: "MP", current: char.mp_current, max: char.mp_max },
-                { label: "SAN", current: char.san_current, max: char.san_max },
-              ].map(({ label, current, max }) => (
-                <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-3 text-center">
-                  <p className="text-xs text-coc-muted mb-1">{label}</p>
-                  <p className="text-2xl font-bold text-coc-text tabular-nums">{current}</p>
-                  <p className="text-xs text-coc-faint">/{max}</p>
-                </div>
-              ))}
+          {show("derived_stats") && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>派生ステータス</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "HP", current: char.hp_current, max: char.hp_max },
+                  { label: "MP", current: char.mp_current, max: char.mp_max },
+                  { label: "SAN", current: char.san_current, max: char.san_max },
+                ].map(({ label, current, max }) => (
+                  <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-3 text-center">
+                    <p className="text-xs text-coc-muted mb-1">{label}</p>
+                    <p className="text-2xl font-bold text-coc-text tabular-nums">{current}</p>
+                    <p className="text-xs text-coc-faint">/{max}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                {[
+                  { label: "幸運", value: char.luck },
+                  { label: "ダメージボーナス", value: db },
+                  { label: "ビルド", value: build },
+                  { label: "移動力", value: mov },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-2 text-center">
+                    <p className="text-xs text-coc-muted">{label}</p>
+                    <p className="text-lg font-bold text-coc-text tabular-nums">{value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              {[
-                { label: "幸運", value: char.luck },
-                { label: "ダメージボーナス", value: db },
-                { label: "ビルド", value: build },
-                { label: "移動力", value: mov },
-              ].map(({ label, value }) => (
-                <div key={label} className="rounded-md border border-coc-border bg-coc-surface p-2 text-center">
-                  <p className="text-xs text-coc-muted">{label}</p>
-                  <p className="text-lg font-bold text-coc-text tabular-nums">{value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
           {/* 技能 */}
-          {skills.length > 0 && (
+          {show("skills") && skills.length > 0 && (
             <div className={sectionClass}>
               <h2 className={sectionTitle}>技能</h2>
               {occupationSkills.length > 0 && (
@@ -261,7 +279,7 @@ export default async function PublicCharacterPage({ params }: Props) {
           )}
 
           {/* 特質 */}
-          {traits.length > 0 && (
+          {show("traits") && traits.length > 0 && (
             <div className={sectionClass}>
               <h2 className={sectionTitle}>特質・重要情報</h2>
               <div className="flex flex-col gap-2">
@@ -276,7 +294,7 @@ export default async function PublicCharacterPage({ params }: Props) {
           )}
 
           {/* 呪文 */}
-          {spells.length > 0 && (
+          {show("spells") && spells.length > 0 && (
             <div className={sectionClass}>
               <h2 className={sectionTitle}>呪文・魔術</h2>
               <div className="flex flex-col gap-2">
@@ -297,7 +315,7 @@ export default async function PublicCharacterPage({ params }: Props) {
           )}
 
           {/* 背景・経歴 */}
-          {char.background && (
+          {show("background") && char.background && (
             <div className={sectionClass}>
               <h2 className={sectionTitle}>背景・経歴</h2>
               <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
@@ -307,7 +325,7 @@ export default async function PublicCharacterPage({ params }: Props) {
           )}
 
           {/* 名言録 */}
-          {(quotes ?? []).length > 0 && (
+          {show("quotes") && (quotes ?? []).length > 0 && (
             <div className={sectionClass}>
               <h2 className={sectionTitle}>名言録</h2>
               <div className="space-y-3">

@@ -1837,7 +1837,7 @@
 **実装ヒント:** `src/app/characters/[id]/appearance-generator/page.tsx` を新規作成。既存の名前ジェネレーター（`src/app/_components/AIBackstoryGenerator.tsx`）のUIパターンを踏襲。外見テーブルはハードコードされたオプション配列から無作為選択するローカル処理（API不要）で実装しシンプルに保つ。生成結果はキャラクターの `appearance` フィールドにワンクリックで書き込めるよう `characters` テーブルの既存カラムと紐付ける。
 **コミット:** `feat: random character appearance generator`
 
-## [TODO] 探索者公開プロフィール表示項目カスタマイズ — 優先度: 低
+## [DONE] 探索者公開プロフィール表示項目カスタマイズ — 優先度: 低
 **対象:** PL
 **概要:** `/c/[slug]` の公開プロフィールページで表示するフィールドをPL自身が選択できる機能。秘密の背景設定や未公開ステータスを隠したまま他ユーザーに共有できる。
 **実装ヒント:** `characters` テーブルに `public_fields jsonb default '["name","occupation","age","portrait_url","backstory_public"]'::jsonb` カラムを追加（マイグレーション必要）。`src/app/characters/[id]/settings/page.tsx` にチェックボックスUIを追加し公開フィールドを編集可能に。`src/app/c/[slug]/page.tsx` でレンダリング時に `public_fields` を参照して非公開フィールドを除外。RLS: 書き込みは本人のみ、読み取りは公開。

@@ -64,6 +64,7 @@ export type Character = {
   rule_edition: "6th" | "7th";
   successor_of: string | null;
   public_token: string | null;
+  public_fields: string[] | null;
   created_at: string;
   updated_at: string;
 };
