@@ -1969,3 +1969,27 @@
 **概要:** 既存シナリオの構造（シーン数・NPC配置・ハンドアウト枠・クリーチャー枠）だけを抽出して「テンプレート」として保存し、次回シナリオ作成時に骨格として使い回せる機能。毎回ゼロから組み立てる手間を省き、KPのシナリオ制作ペースを上げる。
 **実装ヒント:** Supabaseに `scenario_templates(id uuid pk, kp_id uuid references auth.users, title text, description text, template_data jsonb, is_public bool DEFAULT false, created_at timestamptz)` テーブルを追加、RLS: kp_id = auth.uid() で書き込み・is_public=trueは全員閲覧。`template_data` は `{scenes: [{title, order}], npc_slots: [{role}], handout_count: int, creature_slots: [{role}]}` のJSONスキーマ。`src/app/kp/scenario-templates/page.tsx` を "use client" で新規作成。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の KP メニューに「テンプレートとして保存」ボタンを追加し、構造を自動抽出してupsert。テンプレート一覧からシナリオ新規作成時にテンプレートを選択すると `scenarios`・`scenario_scenes`・`handouts`（空枠）が一括インサートされる。公開テンプレートはコミュニティ共有として `/kp/scenario-templates/public` で閲覧可能。
 **コミット:** `feat: scenario structure template save and reuse for KP`
+
+## [TODO] AIシナリオ難易度自動評価（KP用） — 優先度: 中
+**対象:** KP
+**概要:** シナリオのシーン数・NPC数・クリーチャー能力値・SAN喪失値・ハンドアウト枚数をもとにClaude APIが難易度を自動評価し、「初心者向け/中級/上級」判定と理由を出力する機能。KPがシナリオ作成後に客観的な難易度確認と調整ヒントを得られる。
+**実装ヒント:** `src/app/api/ai/scenario-difficulty/route.ts` を新規作成（既存 `src/app/api/ai/scenario-draft/route.ts` パターンを踏襲）。入力: シナリオID経由で `scenarios`・`scenario_scenes`・`creatures`・`npcs`・`handouts` を結合した構造データをJSON化してプロンプトに埋め込む。出力: `{difficulty_label: "beginner"|"intermediate"|"advanced", reasoning: string, suggestions: string[]}` のJSON（`parseJSON` でパース）。`src/app/scenarios/[id]/page.tsx` のKP向けアクションエリアに「難易度を自動評価」ボタンを追加し、結果をインライン展開パネルで表示。「この評価を採用」ボタンで `scenarios.difficulty` をupsert。追加DBなし。
+**コミット:** `feat: AI-powered scenario difficulty auto-evaluation for KP`
+
+## [TODO] 探索者メモリアルホール（死亡・引退キャラ追悼ページ） — 優先度: 低
+**対象:** PL / 共通
+**概要:** ステータスが `dead` または `retired` の公開キャラクターを一覧で追悼できるメモリアルページ。最終セッション情報・引退/死亡シーン・KPや他PLからの追悼メッセージを残すコミュニティ機能として機能する。
+**実装ヒント:** Supabaseに `character_tributes(id uuid pk, character_id uuid references characters, author_name text, message text, created_at timestamptz)` テーブルを追加（RLS: 書き込みは認証ユーザー全員・閲覧は公開）。`src/app/memorial/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, updated_at").in("status", ["dead", "retired"]).eq("is_public", true).order("updated_at", {ascending: false})` でキャラ一覧取得。各カードに status バッジ（dead=赤/retired=灰）・職業・ポートレート・`farewell_scene` サマリー・追悼メッセージ数を表示。追悼メッセージ投稿は "use client" 子コンポーネント（短文テキスト入力＋送信）。グローバルナビゲーションのフッターに「メモリアル」リンクを追加。`src/lib/supabase.ts` に `CharacterTribute` 型を追加。追加DB1テーブル。
+**コミット:** `feat: character memorial hall for deceased and retired investigators`
+
+## [TODO] キャンペーン横断プレイ統計ダッシュボード — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーン全体を通じた累計統計（総セッション数・累計SAN喪失量・最頻出NPC・キャラクター別ダイス成功率・最多技能使用ランキング）を一画面で確認できる分析ダッシュボード。KPのキャンペーン振り返りやシナリオ難易度調整に役立てる。
+**実装ヒント:** 新規テーブル不要（`campaign_scenarios`・`session_logs`・`dice_rolls`・`session_npc_encounters`・`scenario_participants` を結合）。`src/app/campaigns/[id]/stats/page.tsx` を Server Component で新規作成。`Promise.all` で各集計クエリを並列実行: ① `session_logs` の `san_loss`・`hp_loss` 合計（キャンペーン内シナリオを経由してフィルタ）、② `dice_rolls` の技能別成功率TOP5（`is_success` 平均）、③ `session_npc_encounters` の最頻出NPC TOP3、④ `scenario_participants` のキャラクター参加シナリオ数ランキング。結果をサマリーカード（大数字＋ラベル）＋ネイティブSVG横棒グラフで表示。既存の `src/app/campaigns/[id]/page.tsx` ハブページに「統計」リンクを追加。追加DBなし。
+**コミット:** `feat: campaign cross-session play statistics dashboard`
+
+## [TODO] コンディション連動技能ペナルティ表示 — 優先度: 中
+**対象:** PL / 共通
+**概要:** キャラクターのアクティブなコンディション（`CharacterCondition`）に対してルールブックに基づく技能ペナルティを自動計算し、キャラクターシートの技能一覧にペナルティ後の実効値を括弧付き赤字で表示する機能。セッション中の判定値ミス（コンディション見落とし）を防ぐ。
+**実装ヒント:** 新規テーブル不要。`src/lib/condition-penalties.ts` を新規作成し、コンディション名→影響技能カテゴリ→ペナルティ値のマップ定数を定義（例: `{"負傷": {categories: ["戦闘"], penalty: -20}, "疲弊": {categories: ["all"], penalty: -10}}`）。`src/app/_components/CharacterSkillList.tsx`（または同等の技能一覧コンポーネント）でアクティブコンディション一覧と技能ペナルティマップを照合し、影響技能の `current_value` に実効値 `(current_value + penalty)` を赤字スパンで追記。コンディション一覧ページ（`src/app/characters/[id]/conditions/page.tsx`）の各コンディションカードにも「影響技能」バッジを表示。追加DBなし。
+**コミット:** `feat: condition-based skill penalty display on character sheet`
