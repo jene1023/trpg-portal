@@ -982,6 +982,27 @@ body {
   }
 }
 
+/* 装飾引用符: 深淵の言葉を包む大型引用符 — ヒーロー引用文と位相をずらし、非対称に呼吸する */
+/* 開き括弧は呼吸周期の途中から始め、閉じ括弧はさらに半周期遅らせて交互に明滅する */
+@keyframes coc-quote-mark-breathe {
+  0%, 100% { opacity: 0.38; filter: drop-shadow(0 0 4px rgba(201, 133, 58, 0.08)); }
+  50%       { opacity: 0.65; filter: drop-shadow(0 0 10px rgba(201, 133, 58, 0.22)); }
+}
+
+.coc-quote-open,
+.coc-quote-close {
+  opacity: 0.50;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-quote-open {
+    animation: coc-quote-mark-breathe 7s ease-in-out 2.2s infinite;
+  }
+  .coc-quote-close {
+    animation: coc-quote-mark-breathe 7s ease-in-out 5.7s infinite;
+  }
+}
+
 /* ステータスバーホバーシマー: 燭台の炎が一閃し、残量値が輝く */
 @keyframes coc-stat-shimmer {
   from { transform: translateX(-100%); }

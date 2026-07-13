@@ -163,12 +163,12 @@ export default async function HomePage() {
         </div>
         <p className="font-crimson text-coc-muted text-base sm:text-lg italic tracking-[0.07em] leading-relaxed coc-hero-quote">
           <span
-            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative -top-1 mr-1 opacity-50 select-none"
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative -top-1 mr-1 select-none coc-quote-open"
             aria-hidden="true"
           >&ldquo;</span>
           深淵をのぞき込むとき、深淵もまたのぞき込んでいる
           <span
-            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative top-2 ml-1 opacity-50 select-none"
+            className="font-crimson text-4xl sm:text-5xl text-coc-gold-dim leading-none relative top-2 ml-1 select-none coc-quote-close"
             aria-hidden="true"
           >&rdquo;</span>
         </p>
