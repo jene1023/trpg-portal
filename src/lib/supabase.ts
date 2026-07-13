@@ -1362,3 +1362,18 @@ export type UserNotificationPrefs = {
   bgm_broadcast: boolean;
   updated_at: string;
 };
+
+export type PartyTemplateMember = {
+  user_id?: string;
+  character_id: string;
+  role: string;
+};
+
+export type PartyTemplate = {
+  id: string;
+  kp_id: string;
+  name: string;
+  description: string | null;
+  members: PartyTemplateMember[];
+  created_at: string;
+};

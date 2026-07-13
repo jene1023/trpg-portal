@@ -1825,7 +1825,7 @@
 **実装ヒント:** `src/app/api/ai/scene-narration/route.ts` を新規作成。既存の `src/app/api/ai/session-summary/route.ts` と同じ Claude API 呼び出しパターンを踏襲。入力: `{location: string, weather: string, mood: string, playerCount: number}`。`src/app/kp/narration/page.tsx` にフォームUIを新規作成し、生成結果はクリップボードコピーボタン付きで表示。`src/app/_components/AIScenarioDraftGenerator.tsx` のUIレイアウトを参考にする。
 **コミット:** `feat: AI scene atmosphere narration generator for KP`
 
-## [TODO] 固定パーティーグループ保存（再利用可能な卓構成テンプレート） — 優先度: 中
+## [DONE] 固定パーティーグループ保存（再利用可能な卓構成テンプレート） — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPが頻繁に同じメンバー構成で卓を開催する場合に備え、PLとキャラクターの組み合わせを「パーティーテンプレート」として保存・再利用できる機能。新規セッション作成時の手間を削減。
 **実装ヒント:** Supabaseに `party_templates(id, kp_id, name, description, members jsonb, created_at)` テーブルを追加。`members` は `[{user_id, character_id, role}]` の配列。`src/app/kp/party-templates/page.tsx` と `src/app/kp/party-templates/[id]/page.tsx` を新規作成。セッション新規作成フォーム（`src/app/sessions/new/page.tsx`）にテンプレートから参加者を一括インポートするボタンを追加。RLS: `kp_id = auth.uid()` で保護。
