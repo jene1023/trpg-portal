@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ArrowLeft, BarChart2 } from "lucide-react";
 import {
   supabase,
@@ -11,6 +12,7 @@ import {
   PlayerFeedback,
   ReflectionRole,
 } from "@/lib/supabase";
+import QrCodeShare from "@/app/_components/QrCodeShare";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -63,6 +65,11 @@ export default async function FeedbackSummaryPage({ params }: Props) {
   const { id } = await params;
 
   if (!isSupabaseConfigured) notFound();
+
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const proto = host.startsWith("localhost") ? "http" : "https";
+  const publicFeedbackUrl = `${proto}://${host}/s/${id}/feedback`;
 
   const { data: scenario } = await supabase
     .from("scenarios")
@@ -170,7 +177,7 @@ export default async function FeedbackSummaryPage({ params }: Props) {
 
   return (
     <div className="coc-page-enter mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href={`/scenarios/${id}`}
           className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-text transition-colors"
@@ -178,6 +185,7 @@ export default async function FeedbackSummaryPage({ params }: Props) {
           <ArrowLeft size={16} />
           シナリオ詳細
         </Link>
+        <QrCodeShare url={publicFeedbackUrl} label="pl-feedback" />
       </div>
 
       <div className="mb-6">

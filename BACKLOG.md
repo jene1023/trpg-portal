@@ -1813,7 +1813,7 @@
 **実装ヒント:** `src/app/search/page.tsx` を "use client" で新規作成。Supabase `ilike` を使い `sessions(title, summary)`, `scenario_notes(content)` を横断検索（`Promise.all` で並列実行）。検索結果はソース種別ごとにセクション分けして表示し、リンクでジャンプできるよう設計。`src/app/_components/NavBar.tsx` に検索アイコンリンクを追加。
 **コミット:** `feat: cross-session log and note full-text search`
 
-## [TODO] PLフィードバック収集フォーム（ポストプレイ） — 優先度: 低
+## [DONE] PLフィードバック収集フォーム（ポストプレイ） — 優先度: 低
 **対象:** KP / 共通
 **概要:** セッション終了後にKPがフィードバックフォームURLをPLに共有し、楽しかった点・改善点・印象的なシーンの評価（5段階）を匿名で収集できる機能。次回シナリオ改善に役立てる。
 **実装ヒント:** Supabaseに `session_feedbacks(id, scenario_id, fun_rating smallint, memorable_scene text, improvement text, created_at)` テーブルを追加。`src/app/s/[slug]/feedback/page.tsx` を認証不要の公開ページとして新規作成（Server Component + Client フォーム）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「フィードバック集計」ビューを追加し、平均評点と回答一覧を表示。既存の `QrCodeShare.tsx` を使いフォームURLをQRコードで共有できるようにする。
