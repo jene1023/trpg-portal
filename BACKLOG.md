@@ -1861,7 +1861,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/wiki/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_wiki_pages").select("*").eq("campaign_id", id).order("order_index")` でページ一覧取得。ページタイプ別にタブまたはサイドバーカテゴリで分類表示（Tailwindの `grid-cols-4` でナビ＋コンテンツ2カラム）。各ページは Markdown 対応のテキストエリアで編集（`<textarea>` + `white-space: pre-wrap` 表示で簡易実装、またはsimple-markdown等）。新規追加フォームにはタイトル・page_type select・content を含む。`src/lib/supabase.ts` の `CampaignWikiPage` 型はすでに定義済み。キャンペーン詳細ページ（`/campaigns/[id]`）に「Wiki」リンクを追加。
 **コミット:** `feat: campaign wiki pages for lore and faction management`
 
-## [TODO] キャンペーンイベント年代記 — 優先度: 中
+## [DONE] キャンペーンイベント年代記 — 優先度: 中
 **対象:** KP / 共通
 **概要:** `CampaignEvent` 型（event_type: death/revelation/world_change/npc_action/player_action/other）を活用し、キャンペーン全体を通じた重要出来事を時系列で記録・閲覧できる年代記ページ。どのシナリオで何が起きたかを一望できるため、長期キャンペーンの振り返りやリプレイ執筆に役立つ。
 **実装ヒント:** `src/app/campaigns/[id]/events/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("campaign_events").select("*, scenarios(title)").eq("campaign_id", id).order("event_date", {ascending: true})` でイベント一覧取得。イベントカードは event_type ごとに色分けしたバッジ（death=赤/revelation=紫/world_change=青/npc_action=橙/player_action=緑/other=灰）でタイムライン表示（左ボーダーライン＋縦並びカード）。新規追加フォームで event_title・event_type・event_date・event_description・scenario_id（optional select）を入力。`src/lib/supabase.ts` の `CampaignEvent` 型はすでに定義済み。キャンペーン詳細ページに「年代記」リンクを追加。
