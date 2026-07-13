@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import PublicFieldsEditor from "@/app/_components/PublicFieldsEditor";
+import PlayerSlugEditor from "@/app/_components/PlayerSlugEditor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -15,7 +16,7 @@ export default async function CharacterSettingsPage({ params }: Props) {
 
   const { data: char } = await supabase
     .from("characters")
-    .select("id, name, public_fields")
+    .select("id, name, public_fields, player_name")
     .eq("id", id)
     .single();
 
@@ -33,6 +34,16 @@ export default async function CharacterSettingsPage({ params }: Props) {
         <h1 className="font-cinzel text-xl font-bold text-coc-text">
           {char.name} — 公開設定
         </h1>
+      </div>
+
+      <div className="rounded-lg border border-coc-border coc-card-bg p-4 space-y-4">
+        <h2 className="coc-section-title font-cinzel text-sm font-semibold text-coc-muted uppercase tracking-widest">
+          プレイヤーポートフォリオスラッグ
+        </h2>
+        <PlayerSlugEditor
+          characterId={id}
+          initialSlug={char.player_name ?? null}
+        />
       </div>
 
       <div className="rounded-lg border border-coc-border coc-card-bg p-4 space-y-4">

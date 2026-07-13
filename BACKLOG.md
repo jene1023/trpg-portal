@@ -1891,7 +1891,7 @@
 **実装ヒント:** Supabaseに `campaign_house_rules(id uuid pk, campaign_id uuid references campaigns, title text, description text, order_index int, created_at timestamptz)` テーブルを追加、RLS: campaigns テーブルを経由して kp_id = auth.uid() のみ書き込み可・閲覧は参加者全員。`src/app/campaigns/[id]/house-rules/page.tsx` を新規作成。ルール一覧はナンバリング付きカード（タイトル太字＋説明文）、KPのみ追加・編集・削除ボタン表示。`src/app/campaigns/[id]/page.tsx` のハブページに「ハウスルール」リンクを追加。
 **コミット:** `feat: campaign house rules management page for KP and players`
 
-## [TODO] PLキャラクター履歴ポートフォリオ公開ページ — 優先度: 低
+## [DONE] PLキャラクター履歴ポートフォリオ公開ページ — 優先度: 低
 **対象:** PL
 **概要:** プレイヤーが過去・現在の公開キャラクターを一覧できる `/player/[slug]` ページ。各キャラのステータス（alive/dead/insane/retired）・職業・ポートレートを並べたギャラリービューで、SNSプロフィールに貼れる「自分のキャラ歴」ページとして機能する。
 **実装ヒント:** `users` テーブルまたは Supabase Auth metadata に `public_slug text unique` カラムを追加（ユーザー設定ページで変更可）。`src/app/player/[slug]/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, status, portrait_url, public_slug, created_at").eq("is_public", true).eq("player_public_slug", slug).order("created_at", {ascending: false})` でキャラ一覧取得。カードは status ごとに色付きバッジ（alive=緑/dead=赤/insane=紫/retired=灰）。`/characters/[id]/settings/page.tsx` にプレイヤー公開スラッグ設定欄を追加。
