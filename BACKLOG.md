@@ -1897,7 +1897,7 @@
 **実装ヒント:** `users` テーブルまたは Supabase Auth metadata に `public_slug text unique` カラムを追加（ユーザー設定ページで変更可）。`src/app/player/[slug]/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, status, portrait_url, public_slug, created_at").eq("is_public", true).eq("player_public_slug", slug).order("created_at", {ascending: false})` でキャラ一覧取得。カードは status ごとに色付きバッジ（alive=緑/dead=赤/insane=紫/retired=灰）。`/characters/[id]/settings/page.tsx` にプレイヤー公開スラッグ設定欄を追加。
 **コミット:** `feat: public player character portfolio page at /player/[slug]`
 
-## [TODO] プッシュ通知設定管理ページ — 優先度: 高
+## [DONE] プッシュ通知設定管理ページ — 優先度: 高
 **対象:** PL / KP / 共通
 **概要:** セッションリマインダー・メッセージ受信・ハンドアウト配布・BGMブロードキャストなど種別ごとにプッシュ通知をON/OFFできる設定ページ。セッション直前の見逃し防止とノイズ軽減を両立する。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `UserNotificationPrefs` 型（session_reminder, message_received, handout_distributed, bgm_broadcast）を活用。`src/app/settings/notifications/page.tsx` を "use client" で新規作成。`supabase.from("user_notification_prefs").select("*").eq("user_id", user.id).single()` で現在設定を取得し、トグルスイッチUIで各項目を表示。変更時は `.upsert({user_id, ...prefs})` で即時保存。`src/app/_components/ServiceWorkerRegistrar.tsx` と連携して Web Push 購読状態も確認・表示する。グローバルナビゲーションの設定アイコンからリンクを追加。
