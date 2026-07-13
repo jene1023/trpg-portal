@@ -1848,3 +1848,27 @@
 **概要:** セッション開始30分前にKPが使うプレフライトチェックリスト。VTTツールURL・Discord/VC接続・ハンドアウト配布状況・シナリオ資料のPDF準備などを確認し、チェック完了をPLに通知できる機能。
 **実装ヒント:** `src/app/sessions/[id]/preflight/page.tsx` を "use client" で新規作成。チェック項目はセッションに紐付いた `session_preflight_items(id, session_id, label, is_checked, order)` テーブルで管理（デフォルト項目はシード）。全項目チェック完了時にSupabase Realtimeで参加PLのダッシュボードに「セッション準備完了」バナーを表示。`src/app/sessions/[id]/page.tsx` にプレフライトへのリンクボタンを追加。
 **コミット:** `feat: pre-session VTT preflight checklist for KP`
+
+## [TODO] キャンペーン詳細ダッシュボード — 優先度: 高
+**対象:** KP / 共通
+**概要:** `campaigns/[id]/page.tsx` が存在しないため、キャンペーン全体のハブとなる詳細ページを新規作成する。参加シナリオの順序・ステータス・次回予定を一覧し、キャンペーンステータス（planning/ongoing/completed）の変更や概要編集も同一画面で行える。
+**実装ヒント:** `src/app/campaigns/[id]/page.tsx` を Server Component で新規作成。`supabase.from("campaigns").select("*").eq("id", id)` でキャンペーン取得。`supabase.from("campaign_scenarios").select("*, scenarios(id, title, status, played_at, next_session_at)").eq("campaign_id", id).order("order_index")` でシナリオ一覧を取得し、order_index順に表示。ステータスバッジ・概要テキスト・シナリオカード（リンク付き）を縦積みで配置。ページ末尾に `/campaigns/[id]/stats`・`/campaigns/[id]/wiki`・`/campaigns/[id]/events` へのクイックリンクを追加。編集ボタンはインラインupsertで実装（"use client" の子コンポーネント）。
+**コミット:** `feat: campaign detail dashboard as hub page`
+
+## [TODO] キャンペーンWikiページ管理 — 優先度: 中
+**対象:** KP / 共通
+**概要:** `CampaignWikiPage` 型（lore/faction/glossary/timeline/other）を活用し、キャンペーン世界観のロア・派閥・用語集・年表を構造化管理できるWiki機能。長期キャンペーンでKPとPLが共有する設定資料置き場として機能する。
+**実装ヒント:** `src/app/campaigns/[id]/wiki/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_wiki_pages").select("*").eq("campaign_id", id).order("order_index")` でページ一覧取得。ページタイプ別にタブまたはサイドバーカテゴリで分類表示（Tailwindの `grid-cols-4` でナビ＋コンテンツ2カラム）。各ページは Markdown 対応のテキストエリアで編集（`<textarea>` + `white-space: pre-wrap` 表示で簡易実装、またはsimple-markdown等）。新規追加フォームにはタイトル・page_type select・content を含む。`src/lib/supabase.ts` の `CampaignWikiPage` 型はすでに定義済み。キャンペーン詳細ページ（`/campaigns/[id]`）に「Wiki」リンクを追加。
+**コミット:** `feat: campaign wiki pages for lore and faction management`
+
+## [TODO] キャンペーンイベント年代記 — 優先度: 中
+**対象:** KP / 共通
+**概要:** `CampaignEvent` 型（event_type: death/revelation/world_change/npc_action/player_action/other）を活用し、キャンペーン全体を通じた重要出来事を時系列で記録・閲覧できる年代記ページ。どのシナリオで何が起きたかを一望できるため、長期キャンペーンの振り返りやリプレイ執筆に役立つ。
+**実装ヒント:** `src/app/campaigns/[id]/events/page.tsx` を新規作成（Server Component + "use client" フォーム）。`supabase.from("campaign_events").select("*, scenarios(title)").eq("campaign_id", id).order("event_date", {ascending: true})` でイベント一覧取得。イベントカードは event_type ごとに色分けしたバッジ（death=赤/revelation=紫/world_change=青/npc_action=橙/player_action=緑/other=灰）でタイムライン表示（左ボーダーライン＋縦並びカード）。新規追加フォームで event_title・event_type・event_date・event_description・scenario_id（optional select）を入力。`src/lib/supabase.ts` の `CampaignEvent` 型はすでに定義済み。キャンペーン詳細ページに「年代記」リンクを追加。
+**コミット:** `feat: campaign event chronicle with timeline view`
+
+## [TODO] キャンペーン遺物管理 — 優先度: 低
+**対象:** KP / 共通
+**概要:** `CampaignArtifact` 型（artifact_type: tome/weapon/relic/key_item/other、rarity: common/rare/legendary）を活用し、キャンペーン全体で登場した遺物・重要アイテムを追跡できる管理ページ。現在の所持キャラクター・入手シナリオ・破壊済みフラグを管理し、「失われた遺物」の行方も把握できる。
+**実装ヒント:** `src/app/campaigns/[id]/artifacts/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_artifacts").select("*, characters(id, name), scenarios(id, title)").eq("campaign_id", id)` で取得。カード一覧表示：rarity ごとにグラデーションバッジ（legendary=金/rare=紫/common=灰）、is_destroyed=true のものはグレーアウト＋取り消し線。所持者変更はカード内の select で `current_holder_character_id` を即時 update。新規追加フォームで name・artifact_type・rarity・description・scenario_id（入手シナリオ）を入力。`src/lib/supabase.ts` の `CampaignArtifact` 型はすでに定義済み。キャンペーン詳細ページに「遺物」リンクを追加。
+**コミット:** `feat: campaign artifact tracker with holder and rarity management`
