@@ -1945,3 +1945,27 @@
 **概要:** シナリオに紐づくハンドアウト・KPメモ・クリーチャーシート・シーンノートをまとめて1つのZIPファイルとしてダウンロードできる機能。オフライン卓・印刷用バックアップとして活用でき、シナリオ共有時の素材まとめ作業も不要になる。
 **実装ヒント:** `src/app/api/scenarios/[id]/export-zip/route.ts` を新規作成。Node.js の `archiver` パッケージを使い（`npm install archiver @types/archiver`）、`handouts`・`scenario_notes`・`creatures`・`kp_memos` の各テーブルからデータを取得し Markdown/JSON ファイルとして ZIP にまとめる（例: `handouts/01-タイトル.md`、`creatures/クリーチャー名.json`）。`Content-Type: application/zip` + `Content-Disposition: attachment; filename="scenario-TITLE.zip"` で返す。Supabase Storage に保存された画像（ポートレート・ハンドアウト添付）は Storage `download` APIで取得しバイナリをZIPに追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のKP向けアクションメニューに「資料をZIPで保存」ボタンを追加。追加DBなし。
 **コミット:** `feat: scenario materials bulk ZIP download for offline backup`
+
+## [TODO] セッション後PLフィードバック機能 — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッション終了後にPLが「楽しかった点・怖かった点・改善希望・セーフティ懸念」を匿名または記名で送信できるアンケート機能。KPはシナリオ別に集計結果を確認でき、次回以降の改善に活かせる。
+**実装ヒント:** Supabaseに `session_feedbacks(id uuid pk, scenario_id uuid references scenarios, voter_user_id uuid, is_anonymous bool DEFAULT false, fun_rating int CHECK(1-5), scare_rating int CHECK(1-5), pace_rating int CHECK(1-5), highlight text, improvement text, safety_concern text, created_at timestamptz)` テーブルを追加、RLS: voter_user_id = auth.uid() で書き込み・KPのみ全件閲覧。`src/app/scenarios/[id]/feedback/page.tsx` を "use client" で新規作成。PLが星5段階スライダー×3項目（楽しさ・怖さ・ペース）＋自由記述3欄（ハイライト・改善点・セーフティ）を入力。KP閲覧ビューは各評価の平均を表示し、自由記述は匿名化してカード一覧表示。`src/app/scenarios/[id]/page.tsx` に「フィードバックを送る」ボタンを追加（PLのみ表示）、KP向けには「フィードバック集計を見る」ボタンを表示。
+**コミット:** `feat: post-session player feedback form with KP aggregate view`
+
+## [TODO] CoC内蔵ルールクイックリファレンス — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッション中にポータルを離れずに確認できるCoC7版ルールリファレンスページ。能力値修正表・技能デフォルト値・戦闘アクション一覧・正気度喪失表・プッシュロール条件をすぐ引ける。紙のルールブックやWiki検索を不要にしてセッションの流れを止めない。
+**実装ヒント:** `src/app/rules/page.tsx` を Server Component（静的、追加DBなし）で新規作成。`src/app/rules/` 配下にカテゴリ別サブページ（`/rules/abilities`・`/rules/skills`・`/rules/combat`・`/rules/sanity`・`/rules/push`）を作成し、サイドバーナビで切り替え。データはJSON定数ファイル（`src/lib/rules-data.ts`）で管理し、ビルド時に静的生成（`export const dynamic = "force-static"`）。技能一覧は `character_skills.skill_name` と紐付けキャラクターの現在値をURLクエリで受け取り横並び表示する「セッション中参照モード」も設ける。グローバルナビゲーションに「ルール」リンクを追加。
+**コミット:** `feat: built-in CoC 7th edition quick rule reference pages`
+
+## [TODO] パーティスキルカバレッジ分析（KP用） — 優先度: 中
+**対象:** KP
+**概要:** セッション参加キャラクターの技能値を束ねて「どの技能が誰もカバーしていないか」をKPが事前確認できるツール。「図書館を誰も50以上持っていない」など準備段階でシナリオ難易度を調整するヒントになる。
+**実装ヒント:** `src/app/scenarios/[id]/party-skills/page.tsx` を "use client" で新規作成。参加キャラクター（`scenario_participants` 経由）の `character_skills` を一括取得し、技能名ごとにパーティ内最高値・担当キャラを集計。技能カテゴリ（探索・戦闘・社交・知識・その他）別にグループ化し、最高値が50未満の技能を⚠️バッジで強調。各技能行にキャラクター名と値をインライン表示（`{charName}: {value}`）。ページ内検索（`<input>` フィルタ）で技能名を絞り込み可能。追加DBなし（既存 `character_skills` と `scenario_participants` を結合）。`src/app/scenarios/[id]/page.tsx` のKPセクションに「スキル分析」リンクを追加。
+**コミット:** `feat: party skill coverage analyzer for KP scenario prep`
+
+## [TODO] シナリオ再利用テンプレート機能 — 優先度: 低
+**対象:** KP
+**概要:** 既存シナリオの構造（シーン数・NPC配置・ハンドアウト枠・クリーチャー枠）だけを抽出して「テンプレート」として保存し、次回シナリオ作成時に骨格として使い回せる機能。毎回ゼロから組み立てる手間を省き、KPのシナリオ制作ペースを上げる。
+**実装ヒント:** Supabaseに `scenario_templates(id uuid pk, kp_id uuid references auth.users, title text, description text, template_data jsonb, is_public bool DEFAULT false, created_at timestamptz)` テーブルを追加、RLS: kp_id = auth.uid() で書き込み・is_public=trueは全員閲覧。`template_data` は `{scenes: [{title, order}], npc_slots: [{role}], handout_count: int, creature_slots: [{role}]}` のJSONスキーマ。`src/app/kp/scenario-templates/page.tsx` を "use client" で新規作成。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の KP メニューに「テンプレートとして保存」ボタンを追加し、構造を自動抽出してupsert。テンプレート一覧からシナリオ新規作成時にテンプレートを選択すると `scenarios`・`scenario_scenes`・`handouts`（空枠）が一括インサートされる。公開テンプレートはコミュニティ共有として `/kp/scenario-templates/public` で閲覧可能。
+**コミット:** `feat: scenario structure template save and reuse for KP`
