@@ -1819,7 +1819,7 @@
 **実装ヒント:** Supabaseに `session_feedbacks(id, scenario_id, fun_rating smallint, memorable_scene text, improvement text, created_at)` テーブルを追加。`src/app/s/[slug]/feedback/page.tsx` を認証不要の公開ページとして新規作成（Server Component + Client フォーム）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「フィードバック集計」ビューを追加し、平均評点と回答一覧を表示。既存の `QrCodeShare.tsx` を使いフォームURLをQRコードで共有できるようにする。
 **コミット:** `feat: post-play player feedback form and summary for KP`
 
-## [TODO] AIシーン雰囲気テキスト生成（KP即興ナレーション支援） — 優先度: 中
+## [DONE] AIシーン雰囲気テキスト生成（KP即興ナレーション支援） — 優先度: 中
 **対象:** KP
 **概要:** KPがシーンのキーワード（場所・天候・感情トーン）を入力すると、Claude APIが数パターンの雰囲気ナレーション文章を即座に生成する。即興セッション中の描写に詰まった際の補助ツール。
 **実装ヒント:** `src/app/api/ai/scene-narration/route.ts` を新規作成。既存の `src/app/api/ai/session-summary/route.ts` と同じ Claude API 呼び出しパターンを踏襲。入力: `{location: string, weather: string, mood: string, playerCount: number}`。`src/app/kp/narration/page.tsx` にフォームUIを新規作成し、生成結果はクリップボードコピーボタン付きで表示。`src/app/_components/AIScenarioDraftGenerator.tsx` のUIレイアウトを参考にする。
