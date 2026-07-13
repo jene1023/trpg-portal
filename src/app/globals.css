@@ -351,6 +351,16 @@ body {
   .coc-stagger-grid > *:nth-child(8)  { animation-delay: 0.55s; }
   .coc-stagger-grid > *:nth-child(9)  { animation-delay: 0.62s; }
   .coc-stagger-grid > *:nth-child(10) { animation-delay: 0.69s; }
+  .coc-stagger-grid > *:nth-child(11) { animation-delay: 0.74s; }
+  .coc-stagger-grid > *:nth-child(12) { animation-delay: 0.79s; }
+  .coc-stagger-grid > *:nth-child(13) { animation-delay: 0.84s; }
+  .coc-stagger-grid > *:nth-child(14) { animation-delay: 0.89s; }
+  .coc-stagger-grid > *:nth-child(15) { animation-delay: 0.94s; }
+  .coc-stagger-grid > *:nth-child(16) { animation-delay: 0.99s; }
+  .coc-stagger-grid > *:nth-child(17) { animation-delay: 1.04s; }
+  .coc-stagger-grid > *:nth-child(18) { animation-delay: 1.09s; }
+  .coc-stagger-grid > *:nth-child(19) { animation-delay: 1.14s; }
+  .coc-stagger-grid > *:nth-child(20) { animation-delay: 1.19s; }
 }
 
 /* ロードスケルトン: 燭台の灯のように明滅しながら、琥珀色の光が左から右へ流れる */
@@ -458,6 +468,26 @@ body {
   height: 1px;
   background: linear-gradient(to right, var(--color-coc-border-glow) 0%, var(--color-coc-border) 35%, transparent 100%);
   opacity: 0.65;
+}
+
+/* 区切り線呼吸: ❖ の輝きに呼応して左右の光線が交互に明滅する */
+@keyframes coc-divider-l-breathe {
+  0%, 100% { opacity: 0.40; }
+  50%       { opacity: 0.78; }
+}
+
+@keyframes coc-divider-r-breathe {
+  0%, 100% { opacity: 0.40; }
+  50%       { opacity: 0.78; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-divider-l {
+    animation: coc-divider-l-breathe 6s ease-in-out infinite;
+  }
+  .coc-divider-r {
+    animation: coc-divider-r-breathe 6s ease-in-out 3s infinite;
+  }
 }
 
 /* NavBar ロゴ文字: 燭台の光が古文書の銘板を照らすように金色に微光する */
