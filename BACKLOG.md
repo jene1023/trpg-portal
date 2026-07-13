@@ -1879,7 +1879,7 @@
 **実装ヒント:** Supabaseに `kp_player_notes(id uuid pk, kp_id uuid references auth.users, player_name text, discord_handle text, experience_level text, content_ok text[], content_ng text[], memo text, created_at timestamptz)` テーブルを追加、RLS: `kp_id = auth.uid()`。`src/app/kp/player-notes/page.tsx` を "use client" で新規作成。一覧はカード形式（名前・Discord・経験レベルバッジ）、モーダルで詳細編集。content_ok/content_ng は Tag 入力（Enterで追加・×で削除）。`src/app/kp/` 配下の既存KPページナビゲーションにリンクを追加。
 **コミット:** `feat: KP player notes ledger for tracking regular player preferences`
 
-## [TODO] セッション当日タイムスケジュール管理 — 優先度: 中
+## [DONE] セッション当日タイムスケジュール管理 — 優先度: 中
 **対象:** KP / 共通
 **概要:** セッション当日の進行タイムテーブル（開始・各シーンの予定時間・休憩・終了）をKPが事前作成し、参加PLも閲覧できる機能。KPのペース管理と「あと何分でこのシーンを終わらせるか」の判断を補助する。既存の `ScenePacingList.tsx`（事後記録）とは異なり、事前計画ツールとして機能する。
 **実装ヒント:** Supabaseに `session_timetable_items(id uuid pk, session_id uuid references sessions, label text, estimated_minutes int, order_index int, notes text)` テーブルを追加、RLS: sessions テーブルを結合して kp_id または参加者を確認。`src/app/sessions/[id]/timetable/page.tsx` を新規作成（"use client"）。アイテムは drag-to-reorder なし・矢印ボタンで並び替え。各アイテムに `estimated_minutes` を積算して「合計予定時間」をヘッダーに表示。`src/app/sessions/[id]/page.tsx` に「タイムスケジュール」リンクを追加。

@@ -1390,3 +1390,13 @@ export type KpPlayerNote = {
   memo: string | null;
   created_at: string;
 };
+
+export type SessionTimetableItem = {
+  id: string;
+  session_id: string;
+  label: string;
+  estimated_minutes: number;
+  order_index: number;
+  notes: string | null;
+  created_at: string;
+};
