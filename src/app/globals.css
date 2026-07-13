@@ -429,6 +429,22 @@ body {
   opacity: 0.55;
 }
 
+/* ヒーロー分割線 呼吸: ✦ の回転と呼応して光が脈打つ — 左右非対称に位相をずらし揺らぎを生む */
+@keyframes coc-fade-rule-breathe {
+  0%, 100% { opacity: 0.36; }
+  50%       { opacity: 0.78; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-fade-rule {
+    animation: coc-fade-rule-breathe 4.5s ease-in-out infinite;
+  }
+  /* rotate-180 側（✦ の右翼）は 2.25s 位相ずらしで非対称な揺らぎを演出 */
+  .coc-fade-rule.rotate-180 {
+    animation-delay: 2.25s;
+  }
+}
+
 /* SectionDivider グラデーションライン: ❖ シンボルから外側へ溶けていく */
 .coc-divider-l {
   flex: 1;
@@ -630,6 +646,14 @@ body {
   50%       { opacity: 0.90; }
 }
 
+/* キャッチフレーズ境界線 幅ゆらぎ: 実際の蝋燭の炎が不規則に揺れるように幅が伸縮する */
+@keyframes coc-flame-width {
+  0%, 100% { transform: scaleX(1); }
+  28%       { transform: scaleX(1.75); }
+  58%       { transform: scaleX(0.60); }
+  78%       { transform: scaleX(1.35); }
+}
+
 .coc-catchphrase-block {
   position: relative;
   padding-left: 0.65rem;
@@ -656,7 +680,10 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .coc-catchphrase-block::before {
-    animation: coc-quote-line-glow 3.5s ease-in-out infinite;
+    transform-origin: left center;
+    animation:
+      coc-quote-line-glow 3.5s ease-in-out infinite,
+      coc-flame-width     5.8s ease-in-out 1.1s infinite;
   }
 }
 
