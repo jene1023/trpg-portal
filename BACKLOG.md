@@ -1934,13 +1934,13 @@
 **実装ヒント:** Supabaseに `schedule_polls(id uuid pk, scenario_id uuid references scenarios, created_by_kp_id uuid, candidate_dates jsonb, is_closed bool DEFAULT false, created_at timestamptz)` と `schedule_poll_votes(id uuid pk, poll_id uuid references schedule_polls, voter_user_id uuid, votes jsonb, created_at timestamptz)` テーブルを追加（`candidate_dates` は `{date: string, label: string}[]`、`votes` は `{date: string, availability: "ok"|"maybe"|"ng"}[]`）。`src/app/scenarios/[id]/schedule-poll/page.tsx` を "use client" で新規作成。KPは日時候補（最大10件）を追加し、PLは各日時への○△×をトグルボタンで回答。集計ビューは日時ごとの○数・△数・×数を横棒グラフ（CSSグリッド幅%）で表示。「この日に決定」ボタンで `scenarios.scheduled_at` を更新しポールを閉鎖。RLS: 書き込みはシナリオ参加者のみ・閲覧は同キャンペーンメンバー全員。シナリオ詳細ページに「日程調整」リンクを追加。追加DB2テーブル。
 **コミット:** `feat: Doodle-style session schedule poll for KP and players`
 
-## [TODO] ダイス判定統計ダッシュボード — 優先度: 低
+## [DONE] ダイス判定統計ダッシュボード — 優先度: 低
 **対象:** PL / 共通
 **概要:** キャラクター別のダイス判定履歴（`dice_rolls` テーブル）を集計し、成功率・技能別使用頻度・クリティカル/ファンブル率・セッション別傾向をグラフで可視化するダッシュボード。「このキャラは幸運判定に弱い」「あの夜だけ全判定が成功した」といった振り返りがデータで確認できる。
 **実装ヒント:** 新規テーブル不要（既存 `dice_rolls(id, character_id, skill_name, target_value, rolled_value, is_success, roll_type, session_id, created_at)` を集計）。`src/app/characters/[id]/dice-stats/page.tsx` を Server Component で新規作成。`supabase.from("dice_rolls").select("skill_name, target_value, rolled_value, is_success, roll_type, created_at").eq("character_id", id)` で全ロール取得しサーバー側集計。技能別の成功率・回数をネイティブSVG横棒グラフで描画。総ロール数・成功数・失敗数・クリティカル数・ファンブル数をサマリーカード形式で上部に表示。キャラクター詳細ページ（`/characters/[id]/page.tsx`）に「ダイス統計」リンクを追加。追加DBなし。
 **コミット:** `feat: character dice roll statistics dashboard with skill success rates`
 
-## [TODO] シナリオ資料一括ZIPダウンロード — 優先度: 中
+## [DONE] シナリオ資料一括ZIPダウンロード — 優先度: 中
 **対象:** KP / 共通
 **概要:** シナリオに紐づくハンドアウト・KPメモ・クリーチャーシート・シーンノートをまとめて1つのZIPファイルとしてダウンロードできる機能。オフライン卓・印刷用バックアップとして活用でき、シナリオ共有時の素材まとめ作業も不要になる。
 **実装ヒント:** `src/app/api/scenarios/[id]/export-zip/route.ts` を新規作成。Node.js の `archiver` パッケージを使い（`npm install archiver @types/archiver`）、`handouts`・`scenario_notes`・`creatures`・`kp_memos` の各テーブルからデータを取得し Markdown/JSON ファイルとして ZIP にまとめる（例: `handouts/01-タイトル.md`、`creatures/クリーチャー名.json`）。`Content-Type: application/zip` + `Content-Disposition: attachment; filename="scenario-TITLE.zip"` で返す。Supabase Storage に保存された画像（ポートレート・ハンドアウト添付）は Storage `download` APIで取得しバイナリをZIPに追加。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）のKP向けアクションメニューに「資料をZIPで保存」ボタンを追加。追加DBなし。

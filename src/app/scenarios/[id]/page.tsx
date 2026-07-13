@@ -13,6 +13,7 @@ import ScenarioReminderEditor from "@/app/_components/ScenarioReminderEditor";
 import AddToCampaignButton from "@/app/_components/AddToCampaignButton";
 import ScenarioExportButton from "@/app/_components/ScenarioExportButton";
 import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
+import ScenarioZipDownloadButton from "@/app/_components/ScenarioZipDownloadButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
 import GameClockEditor from "@/app/_components/GameClockEditor";
@@ -150,6 +151,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
           </Link>
           <ScenarioPrintButton scenarioId={id} />
           <ScenarioExportButton scenarioId={id} scenarioTitle={scenario.title} />
+          <ScenarioZipDownloadButton scenarioId={id} scenarioTitle={scenario.title} />
           <AddToCampaignButton scenarioId={id} />
           <ScenarioDuplicateButton scenarioId={id} />
         </div>
