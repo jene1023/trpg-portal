@@ -1896,3 +1896,28 @@
 **概要:** プレイヤーが過去・現在の公開キャラクターを一覧できる `/player/[slug]` ページ。各キャラのステータス（alive/dead/insane/retired）・職業・ポートレートを並べたギャラリービューで、SNSプロフィールに貼れる「自分のキャラ歴」ページとして機能する。
 **実装ヒント:** `users` テーブルまたは Supabase Auth metadata に `public_slug text unique` カラムを追加（ユーザー設定ページで変更可）。`src/app/player/[slug]/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, status, portrait_url, public_slug, created_at").eq("is_public", true).eq("player_public_slug", slug).order("created_at", {ascending: false})` でキャラ一覧取得。カードは status ごとに色付きバッジ（alive=緑/dead=赤/insane=紫/retired=灰）。`/characters/[id]/settings/page.tsx` にプレイヤー公開スラッグ設定欄を追加。
 **コミット:** `feat: public player character portfolio page at /player/[slug]`
+
+## [TODO] プッシュ通知設定管理ページ — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッションリマインダー・メッセージ受信・ハンドアウト配布・BGMブロードキャストなど種別ごとにプッシュ通知をON/OFFできる設定ページ。セッション直前の見逃し防止とノイズ軽減を両立する。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `UserNotificationPrefs` 型（session_reminder, message_received, handout_distributed, bgm_broadcast）を活用。`src/app/settings/notifications/page.tsx` を "use client" で新規作成。`supabase.from("user_notification_prefs").select("*").eq("user_id", user.id).single()` で現在設定を取得し、トグルスイッチUIで各項目を表示。変更時は `.upsert({user_id, ...prefs})` で即時保存。`src/app/_components/ServiceWorkerRegistrar.tsx` と連携して Web Push 購読状態も確認・表示する。グローバルナビゲーションの設定アイコンからリンクを追加。
+**コミット:** `feat: push notification preferences management page`
+
+## [TODO] エンカウンターテンプレート管理（KP用） — 優先度: 高
+**対象:** KP
+**概要:** 繰り返し使うモンスター・クリーチャーの組み合わせ（複数体・種類混在）を「エンカウンターテンプレート」として事前登録し、セッション中に即召喚できるKP専用機能。毎回クリーチャーを手作業で引き出す手間をなくす。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `EncounterTemplate`・`EncounterTemplateEntry`・`EncounterTemplateWithEntries` 型を活用。`src/app/kp/encounters/page.tsx` を "use client" で新規作成。`supabase.from("encounter_templates").select("*, encounter_template_entries(*, creatures(id, name, hp, dex))").order("created_at", {ascending: false})` でテンプレート一覧を取得。各テンプレートカードに登録クリーチャー一覧・個体数を表示し、「セッション中に使う」ボタンでクリーチャーの能力値を展開表示。新規テンプレート作成フォームでクリーチャーをインクリメンタル検索して複数追加できる。既存の `src/app/kp/` ナビゲーションにリンクを追加。
+**コミット:** `feat: encounter template manager for KP session prep`
+
+## [TODO] セッション当日PLチェックイン機能 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** セッション開始前にPLが今日のコンディション（体力・集中度）を5段階＋一言コメントでチェックインし、KPがセッション開始前に全員の状態を一覧確認できる機能。体調不良や集中できない旨を事前共有することでKPのペース調整やセーフティ対話のきっかけになる。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `PlayerCheckin` 型（scenario_id, character_id, energy_level: 1〜5, comment, checked_in_at）を活用。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLはキャラクターを選択してスライダー（1〜5）＋テキスト入力でチェックイン（認証ユーザーのみ）。KP向けに全参加者のチェックイン状況をエネルギーレベルの絵文字バー（🟢🟡🔴）で一覧表示。Supabase Realtime（`supabase.channel().on("postgres_changes",...).subscribe()`）でチェックインがリアルタイム反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」ボタンを追加。
+**コミット:** `feat: pre-session player check-in for energy and readiness`
+
+## [TODO] キャラクター所有権転送承認ページ — 優先度: 中
+**対象:** PL / 共通
+**概要:** プレイヤーが別アカウントへキャラクターを譲渡するとき、受け取り側がメールに届いたトークンURLを開いて承認・拒否できる公開ページ。`CharacterTransferRequest` のDBデータは存在するが受け取りUIが未実装のためフローが完結しない。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `CharacterTransferRequest` 型（token, character_id, from_user_id, to_email, status: "pending"|"accepted"|"rejected", expires_at）を活用。`src/app/characters/transfer/[token]/page.tsx` を Server Component で新規作成（認証不要の公開ページ）。`supabase.from("character_transfer_requests").select("*, characters(id, name, portrait_url, occupation)").eq("token", token).single()` でリクエスト取得。有効期限・ステータスを確認後、キャラクタープレビューカードと「受け取る」「断る」ボタンを表示。受諾時は `characters.update({player_id: auth.uid()})` と `status: "accepted"` を同一トランザクションで更新。送信者には既存の `MessageInbox.tsx` を通じて結果通知。
+**コミット:** `feat: character ownership transfer accept/reject page`
+**コミット:** `feat: public player character portfolio page at /player/[slug]`
