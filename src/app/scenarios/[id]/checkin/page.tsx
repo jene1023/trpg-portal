@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Activity } from "lucide-react";
 import { supabase, isSupabaseConfigured, PlayerCheckin } from "@/lib/supabase";
 
 type CharacterOption = { id: string; name: string; player_name: string | null };
@@ -46,6 +46,8 @@ function EnergyInput({
   );
 }
 
+const ENERGY_EMOJI = ["", "🔴", "🔴🔴", "🟡🟡🟡", "🟢🟢🟢🟢", "🟢🟢🟢🟢🟢"];
+
 function EnergyBadge({ level }: { level: number }) {
   const colors = [
     "",
@@ -55,11 +57,14 @@ function EnergyBadge({ level }: { level: number }) {
     "bg-green-900/30 text-green-400 border-green-800",
     "bg-coc-gold/20 text-coc-gold border-coc-gold-dim",
   ];
-  const labels = ["", "1 かなりしんどい", "2 少し疲れ気味", "3 普通", "4 やる気あり", "5 絶好調！"];
+  const labels = ["", "かなりしんどい", "少し疲れ気味", "普通", "やる気あり", "絶好調！"];
   return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${colors[level]}`}>
-      {labels[level]}
-    </span>
+    <div className="flex items-center gap-2">
+      <span className="text-base tracking-tight">{ENERGY_EMOJI[level]}</span>
+      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${colors[level]}`}>
+        {level} {labels[level]}
+      </span>
+    </div>
   );
 }
 
@@ -73,10 +78,13 @@ export default function CheckinPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
   const [energyLevel, setEnergyLevel] = useState(0);
   const [comment, setComment] = useState("");
+
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -109,9 +117,37 @@ export default function CheckinPage() {
       setCharacters(chars);
       setCheckins((checkinRows ?? []) as unknown as CheckinWithCharacter[]);
       setLoading(false);
+
+      const ch = supabase
+        .channel(`checkin-${scenarioId}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "player_checkins", filter: `scenario_id=eq.${scenarioId}` },
+          async () => {
+            const { data: refreshed } = await supabase
+              .from("player_checkins")
+              .select("*, characters(name, player_name)")
+              .eq("scenario_id", scenarioId)
+              .order("checked_in_at", { ascending: false });
+            setCheckins((refreshed ?? []) as unknown as CheckinWithCharacter[]);
+          }
+        )
+        .subscribe((status: string) => {
+          setConnected(status === "SUBSCRIBED");
+        });
+
+      channelRef.current = ch;
     }
 
     load();
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      setConnected(false);
+    };
   }, [scenarioId]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -152,6 +188,12 @@ export default function CheckinPage() {
           <ArrowLeft size={16} />
           {scenarioTitle || "シナリオ詳細"}
         </Link>
+        {connected && (
+          <span className="flex items-center gap-1 text-xs text-green-400 ml-auto">
+            <Activity size={11} />
+            ライブ更新中
+          </span>
+        )}
       </div>
 
       <h1 className="font-cinzel text-xl font-bold text-coc-text mb-1">

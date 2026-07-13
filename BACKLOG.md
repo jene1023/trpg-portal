@@ -1909,7 +1909,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `EncounterTemplate`・`EncounterTemplateEntry`・`EncounterTemplateWithEntries` 型を活用。`src/app/kp/encounters/page.tsx` を "use client" で新規作成。`supabase.from("encounter_templates").select("*, encounter_template_entries(*, creatures(id, name, hp, dex))").order("created_at", {ascending: false})` でテンプレート一覧を取得。各テンプレートカードに登録クリーチャー一覧・個体数を表示し、「セッション中に使う」ボタンでクリーチャーの能力値を展開表示。新規テンプレート作成フォームでクリーチャーをインクリメンタル検索して複数追加できる。既存の `src/app/kp/` ナビゲーションにリンクを追加。
 **コミット:** `feat: encounter template manager for KP session prep`
 
-## [TODO] セッション当日PLチェックイン機能 — 優先度: 中
+## [DONE] セッション当日PLチェックイン機能 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** セッション開始前にPLが今日のコンディション（体力・集中度）を5段階＋一言コメントでチェックインし、KPがセッション開始前に全員の状態を一覧確認できる機能。体調不良や集中できない旨を事前共有することでKPのペース調整やセーフティ対話のきっかけになる。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `PlayerCheckin` 型（scenario_id, character_id, energy_level: 1〜5, comment, checked_in_at）を活用。`src/app/scenarios/[id]/checkin/page.tsx` を "use client" で新規作成。PLはキャラクターを選択してスライダー（1〜5）＋テキスト入力でチェックイン（認証ユーザーのみ）。KP向けに全参加者のチェックイン状況をエネルギーレベルの絵文字バー（🟢🟡🔴）で一覧表示。Supabase Realtime（`supabase.channel().on("postgres_changes",...).subscribe()`）でチェックインがリアルタイム反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「チェックイン」ボタンを追加。
