@@ -1855,7 +1855,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/page.tsx` を Server Component で新規作成。`supabase.from("campaigns").select("*").eq("id", id)` でキャンペーン取得。`supabase.from("campaign_scenarios").select("*, scenarios(id, title, status, played_at, next_session_at)").eq("campaign_id", id).order("order_index")` でシナリオ一覧を取得し、order_index順に表示。ステータスバッジ・概要テキスト・シナリオカード（リンク付き）を縦積みで配置。ページ末尾に `/campaigns/[id]/stats`・`/campaigns/[id]/wiki`・`/campaigns/[id]/events` へのクイックリンクを追加。編集ボタンはインラインupsertで実装（"use client" の子コンポーネント）。
 **コミット:** `feat: campaign detail dashboard as hub page`
 
-## [TODO] キャンペーンWikiページ管理 — 優先度: 中
+## [DONE] キャンペーンWikiページ管理 — 優先度: 中
 **対象:** KP / 共通
 **概要:** `CampaignWikiPage` 型（lore/faction/glossary/timeline/other）を活用し、キャンペーン世界観のロア・派閥・用語集・年表を構造化管理できるWiki機能。長期キャンペーンでKPとPLが共有する設定資料置き場として機能する。
 **実装ヒント:** `src/app/campaigns/[id]/wiki/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_wiki_pages").select("*").eq("campaign_id", id).order("order_index")` でページ一覧取得。ページタイプ別にタブまたはサイドバーカテゴリで分類表示（Tailwindの `grid-cols-4` でナビ＋コンテンツ2カラム）。各ページは Markdown 対応のテキストエリアで編集（`<textarea>` + `white-space: pre-wrap` 表示で簡易実装、またはsimple-markdown等）。新規追加フォームにはタイトル・page_type select・content を含む。`src/lib/supabase.ts` の `CampaignWikiPage` 型はすでに定義済み。キャンペーン詳細ページ（`/campaigns/[id]`）に「Wiki」リンクを追加。
