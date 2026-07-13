@@ -1378,3 +1378,15 @@ export type PartyTemplate = {
   members: PartyTemplateMember[];
   created_at: string;
 };
+
+export type KpPlayerNote = {
+  id: string;
+  kp_id: string;
+  player_name: string;
+  discord_handle: string | null;
+  experience_level: string | null;
+  content_ok: string[];
+  content_ng: string[];
+  memo: string | null;
+  created_at: string;
+};

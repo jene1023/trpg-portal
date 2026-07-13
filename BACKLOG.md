@@ -1873,7 +1873,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/artifacts/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_artifacts").select("*, characters(id, name), scenarios(id, title)").eq("campaign_id", id)` で取得。カード一覧表示：rarity ごとにグラデーションバッジ（legendary=金/rare=紫/common=灰）、is_destroyed=true のものはグレーアウト＋取り消し線。所持者変更はカード内の select で `current_holder_character_id` を即時 update。新規追加フォームで name・artifact_type・rarity・description・scenario_id（入手シナリオ）を入力。`src/lib/supabase.ts` の `CampaignArtifact` 型はすでに定義済み。キャンペーン詳細ページに「遺物」リンクを追加。
 **コミット:** `feat: campaign artifact tracker with holder and rarity management`
 
-## [TODO] KP向け常連プレイヤー台帳 — 優先度: 高
+## [DONE] KP向け常連プレイヤー台帳 — 優先度: 高
 **対象:** KP
 **概要:** KPが一緒に遊ぶ常連PLの情報（TRPG歴・DiscordID・コンテンツOK/NG・個人メモ）を永続管理できる台帳。セッションのたびに嗜好を再確認する手間を省き、NG項目の見落としによるトラブルを防ぐ。セーフティ設定（`SafetySettingsForm.tsx`）の補完として機能する。
 **実装ヒント:** Supabaseに `kp_player_notes(id uuid pk, kp_id uuid references auth.users, player_name text, discord_handle text, experience_level text, content_ok text[], content_ng text[], memo text, created_at timestamptz)` テーブルを追加、RLS: `kp_id = auth.uid()`。`src/app/kp/player-notes/page.tsx` を "use client" で新規作成。一覧はカード形式（名前・Discord・経験レベルバッジ）、モーダルで詳細編集。content_ok/content_ng は Tag 入力（Enterで追加・×で削除）。`src/app/kp/` 配下の既存KPページナビゲーションにリンクを追加。

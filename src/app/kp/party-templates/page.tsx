@@ -19,6 +19,18 @@ export default async function PartyTemplatesPage() {
   return (
     <div className="min-h-screen coc-bg px-4 py-8">
       <div className="max-w-2xl mx-auto space-y-6">
+        <nav className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-coc-muted">
+          <span className="text-coc-gold">パーティーテンプレート</span>
+          <span>·</span>
+          <Link href="/kp/narration" className="hover:text-coc-gold transition-colors">
+            ナレーション生成
+          </Link>
+          <span>·</span>
+          <Link href="/kp/player-notes" className="hover:text-coc-gold transition-colors">
+            常連プレイヤー台帳
+          </Link>
+        </nav>
+
         <div>
           <h1 className="font-cinzel text-2xl font-bold text-coc-gold tracking-widest mb-1">
             パーティーテンプレート
