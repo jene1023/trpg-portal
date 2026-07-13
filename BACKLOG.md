@@ -1872,3 +1872,27 @@
 **概要:** `CampaignArtifact` 型（artifact_type: tome/weapon/relic/key_item/other、rarity: common/rare/legendary）を活用し、キャンペーン全体で登場した遺物・重要アイテムを追跡できる管理ページ。現在の所持キャラクター・入手シナリオ・破壊済みフラグを管理し、「失われた遺物」の行方も把握できる。
 **実装ヒント:** `src/app/campaigns/[id]/artifacts/page.tsx` を新規作成（"use client"）。`supabase.from("campaign_artifacts").select("*, characters(id, name), scenarios(id, title)").eq("campaign_id", id)` で取得。カード一覧表示：rarity ごとにグラデーションバッジ（legendary=金/rare=紫/common=灰）、is_destroyed=true のものはグレーアウト＋取り消し線。所持者変更はカード内の select で `current_holder_character_id` を即時 update。新規追加フォームで name・artifact_type・rarity・description・scenario_id（入手シナリオ）を入力。`src/lib/supabase.ts` の `CampaignArtifact` 型はすでに定義済み。キャンペーン詳細ページに「遺物」リンクを追加。
 **コミット:** `feat: campaign artifact tracker with holder and rarity management`
+
+## [TODO] KP向け常連プレイヤー台帳 — 優先度: 高
+**対象:** KP
+**概要:** KPが一緒に遊ぶ常連PLの情報（TRPG歴・DiscordID・コンテンツOK/NG・個人メモ）を永続管理できる台帳。セッションのたびに嗜好を再確認する手間を省き、NG項目の見落としによるトラブルを防ぐ。セーフティ設定（`SafetySettingsForm.tsx`）の補完として機能する。
+**実装ヒント:** Supabaseに `kp_player_notes(id uuid pk, kp_id uuid references auth.users, player_name text, discord_handle text, experience_level text, content_ok text[], content_ng text[], memo text, created_at timestamptz)` テーブルを追加、RLS: `kp_id = auth.uid()`。`src/app/kp/player-notes/page.tsx` を "use client" で新規作成。一覧はカード形式（名前・Discord・経験レベルバッジ）、モーダルで詳細編集。content_ok/content_ng は Tag 入力（Enterで追加・×で削除）。`src/app/kp/` 配下の既存KPページナビゲーションにリンクを追加。
+**コミット:** `feat: KP player notes ledger for tracking regular player preferences`
+
+## [TODO] セッション当日タイムスケジュール管理 — 優先度: 中
+**対象:** KP / 共通
+**概要:** セッション当日の進行タイムテーブル（開始・各シーンの予定時間・休憩・終了）をKPが事前作成し、参加PLも閲覧できる機能。KPのペース管理と「あと何分でこのシーンを終わらせるか」の判断を補助する。既存の `ScenePacingList.tsx`（事後記録）とは異なり、事前計画ツールとして機能する。
+**実装ヒント:** Supabaseに `session_timetable_items(id uuid pk, session_id uuid references sessions, label text, estimated_minutes int, order_index int, notes text)` テーブルを追加、RLS: sessions テーブルを結合して kp_id または参加者を確認。`src/app/sessions/[id]/timetable/page.tsx` を新規作成（"use client"）。アイテムは drag-to-reorder なし・矢印ボタンで並び替え。各アイテムに `estimated_minutes` を積算して「合計予定時間」をヘッダーに表示。`src/app/sessions/[id]/page.tsx` に「タイムスケジュール」リンクを追加。
+**コミット:** `feat: session day timetable planner for KP pacing`
+
+## [TODO] キャンペーン別ハウスルール管理 — 優先度: 中
+**対象:** KP / 共通
+**概要:** キャンペーンごとに採用するハウスルール（幸運の使い方・プッシュロール有無・独自クリティカル処理など）をKPがリスト管理し、参加PLが参照できるページ。「そのルールどうでしたっけ？」という確認コストをゼロにし、セッション開始前の説明も省略できる。
+**実装ヒント:** Supabaseに `campaign_house_rules(id uuid pk, campaign_id uuid references campaigns, title text, description text, order_index int, created_at timestamptz)` テーブルを追加、RLS: campaigns テーブルを経由して kp_id = auth.uid() のみ書き込み可・閲覧は参加者全員。`src/app/campaigns/[id]/house-rules/page.tsx` を新規作成。ルール一覧はナンバリング付きカード（タイトル太字＋説明文）、KPのみ追加・編集・削除ボタン表示。`src/app/campaigns/[id]/page.tsx` のハブページに「ハウスルール」リンクを追加。
+**コミット:** `feat: campaign house rules management page for KP and players`
+
+## [TODO] PLキャラクター履歴ポートフォリオ公開ページ — 優先度: 低
+**対象:** PL
+**概要:** プレイヤーが過去・現在の公開キャラクターを一覧できる `/player/[slug]` ページ。各キャラのステータス（alive/dead/insane/retired）・職業・ポートレートを並べたギャラリービューで、SNSプロフィールに貼れる「自分のキャラ歴」ページとして機能する。
+**実装ヒント:** `users` テーブルまたは Supabase Auth metadata に `public_slug text unique` カラムを追加（ユーザー設定ページで変更可）。`src/app/player/[slug]/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, status, portrait_url, public_slug, created_at").eq("is_public", true).eq("player_public_slug", slug).order("created_at", {ascending: false})` でキャラ一覧取得。カードは status ごとに色付きバッジ（alive=緑/dead=赤/insane=紫/retired=灰）。`/characters/[id]/settings/page.tsx` にプレイヤー公開スラッグ設定欄を追加。
+**コミット:** `feat: public player character portfolio page at /player/[slug]`
