@@ -29,6 +29,10 @@ export default async function PartyTemplatesPage() {
           <Link href="/kp/player-notes" className="hover:text-coc-gold transition-colors">
             常連プレイヤー台帳
           </Link>
+          <span>·</span>
+          <Link href="/kp/encounters" className="hover:text-coc-gold transition-colors">
+            エンカウンター
+          </Link>
         </nav>
 
         <div>

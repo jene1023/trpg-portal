@@ -1903,7 +1903,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `UserNotificationPrefs` 型（session_reminder, message_received, handout_distributed, bgm_broadcast）を活用。`src/app/settings/notifications/page.tsx` を "use client" で新規作成。`supabase.from("user_notification_prefs").select("*").eq("user_id", user.id).single()` で現在設定を取得し、トグルスイッチUIで各項目を表示。変更時は `.upsert({user_id, ...prefs})` で即時保存。`src/app/_components/ServiceWorkerRegistrar.tsx` と連携して Web Push 購読状態も確認・表示する。グローバルナビゲーションの設定アイコンからリンクを追加。
 **コミット:** `feat: push notification preferences management page`
 
-## [TODO] エンカウンターテンプレート管理（KP用） — 優先度: 高
+## [DONE] エンカウンターテンプレート管理（KP用） — 優先度: 高
 **対象:** KP
 **概要:** 繰り返し使うモンスター・クリーチャーの組み合わせ（複数体・種類混在）を「エンカウンターテンプレート」として事前登録し、セッション中に即召喚できるKP専用機能。毎回クリーチャーを手作業で引き出す手間をなくす。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `EncounterTemplate`・`EncounterTemplateEntry`・`EncounterTemplateWithEntries` 型を活用。`src/app/kp/encounters/page.tsx` を "use client" で新規作成。`supabase.from("encounter_templates").select("*, encounter_template_entries(*, creatures(id, name, hp, dex))").order("created_at", {ascending: false})` でテンプレート一覧を取得。各テンプレートカードに登録クリーチャー一覧・個体数を表示し、「セッション中に使う」ボタンでクリーチャーの能力値を展開表示。新規テンプレート作成フォームでクリーチャーをインクリメンタル検索して複数追加できる。既存の `src/app/kp/` ナビゲーションにリンクを追加。

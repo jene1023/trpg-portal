@@ -192,6 +192,10 @@ export default function KpPlayerNotesPage() {
           </a>
           <span>·</span>
           <span className="text-coc-gold">常連プレイヤー台帳</span>
+          <span>·</span>
+          <a href="/kp/encounters" className="hover:text-coc-gold transition-colors">
+            エンカウンター
+          </a>
         </nav>
 
         <div>
