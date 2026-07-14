@@ -21,7 +21,7 @@ type Props = { character: Character };
 
 export default function StatBlock({ character }: Props) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-4 gap-2 coc-stagger-grid">
       {STATS.map(({ key, label }) => {
         const val = character[key] as number;
         return (

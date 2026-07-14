@@ -1217,6 +1217,41 @@ body {
   }
 }
 
+/* キャラクター名下線: 古文書の銘板を照らす燭台の金色光線 — 名前の重みを支える細い封印の線 */
+/* coc-name-glow(5s) と周期をずらして非対称な呼吸を生む */
+@keyframes coc-name-rule-glow {
+  0%, 100% { opacity: 0.32; }
+  50%       { opacity: 0.68; }
+}
+
+.coc-name-underline {
+  position: relative;
+}
+
+.coc-name-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-coc-gold-dim) 0%,
+    var(--color-coc-gold)     28%,
+    var(--color-coc-gold-dim) 55%,
+    transparent               90%
+  );
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-name-underline::after {
+    animation: coc-name-rule-glow 5.5s ease-in-out 2.2s infinite;
+  }
+}
+
 /* フッター引用文: 深淵の彼方から届く幽冥の声 — opacity が静かに呼吸し、紫青の微光が揺らめく */
 /* サンが削られるほどに深淵は近づく: 読み手を静かに引き込む */
 @keyframes coc-footer-quote-glow {

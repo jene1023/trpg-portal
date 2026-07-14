@@ -158,7 +158,7 @@ export default async function CharacterDetailPage({ params }: Props) {
 
           <div className={sectionClass}>
             <div>
-              <h1 className="font-cinzel text-xl font-bold text-coc-text leading-tight coc-name-glow">
+              <h1 className="font-cinzel text-xl font-bold text-coc-text leading-tight coc-name-glow coc-name-underline">
                 {char.name}
               </h1>
               <div className="flex items-center gap-2 mt-1.5">
