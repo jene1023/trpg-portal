@@ -2017,3 +2017,27 @@
 **概要:** セッション終了後、シナリオに紐づく全参加者のSAN/HP喪失量・達成目標数・遭遇NPC/クリーチャー・ダイス成功率・フィードバック評価をClaude APIが分析し、「今回うまくいった点・改善できる点・次回の提案」を含む構造化KPレポートを自動生成する機能。既存の「セッションリプレイ生成」（PLシェア向け物語形式）・「KP振り返りノート」（手動記入）・「SAN/HP喪失サマリー」（数値のみ）とは異なり、AI視点のKP向け改善提案に特化する。
 **実装ヒント:** `src/app/api/ai/kp-debrief/route.ts` を新規作成（既存 `src/app/api/ai/session-summary/route.ts` のパターンを踏襲）。入力データ: シナリオID経由で `session_logs`（SAN/HP喪失量）・`session_npc_encounters`（遭遇NPC一覧）・`scenario_participants + dice_rolls`（参加者成功率）・`scenario_player_ratings`（PL評価平均）を `Promise.all` で並行取得してJSON化しプロンプトに埋め込む。AIへの指示: 「KPとして今回のセッションを振り返り、①うまくいった演出・ペース管理、②改善点（SAN喪失が偏った場面・目標未達の原因）、③次回セッションへの具体的提案3点、をJSON形式で出力してください」。レスポンス型: `{ went_well: string[], improvements: string[], next_suggestions: string[] }`。`src/app/scenarios/[id]/kp-debrief/page.tsx` を "use client" で新規作成し、ボタン押下でAPIコール→結果をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のKPセクションに「AIデブリーフ」リンクを追加。追加DBなし。
 **コミット:** `feat: AI-powered KP debrief report with session analytics and improvement suggestions`
+
+## [TODO] コンバット・イニシアチブトラッカー（戦闘順序・HP管理） — 優先度: 高
+**対象:** PL / KP / 共通
+**概要:** セッション中の戦闘シーンで、DEX順のイニシアチブ並び替え・各エントリ（PC/NPC/クリーチャー）のHP・MP・コンディションをリアルタイムで追跡できる戦闘管理ツール。現在は戦闘管理を紙や暗算で行うしかなく、HP計算ミスやターン忘れが起きやすい。セッション中に最も頻繁に参照するデータ（HP/DEX）が一画面に集約されることで、卓の進行スピードが上がる。
+**実装ヒント:** Supabaseに `combat_entries(id uuid pk, scenario_id uuid references scenarios, entry_name text, is_npc bool DEFAULT false, dex int, hp_max int, hp_current int, mp_current int, conditions text[], is_defeated bool DEFAULT false, sort_order int, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・参加PLは閲覧のみ）。`src/app/scenarios/[id]/combat/page.tsx` を "use client" で新規作成。シナリオ参加キャラクター（`scenario_participants` → `characters`）のDEX・HP・MPを初期値として自動ロードし、KPが手動でNPC/クリーチャー行を追加できる「＋追加」フォームを配置。表示はDEX降順の縦リスト形式: 各行に「名前 | HP現在/最大（スライダー） | MP現在 | コンディションバッジ | 撃破チェック」。HP変更は「−5」「+5」ボタンとダイレクト入力の両方に対応。ラウンドカウンターをヘッダに表示し「次のラウンド」ボタンで進める。DEX順ソートは `entry.dex` を参照して `sort()` でクライアント側処理。Supabase Realtime（`supabase.channel`）でサブスクライブすればKP・PL全員が同一画面を参照できる。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）の「セッション中ツール」セクションに「⚔️ 戦闘トラッカー」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: real-time combat initiative tracker with HP/MP management`
+
+## [TODO] シナリオ探索ロケーション管理（場所メモ・訪問状況追跡） — 優先度: 中
+**対象:** KP
+**概要:** シナリオに紐づく探索地点（屋敷の各部屋・街の施設・遺跡のエリアなど）をKPが事前登録し、セッション中にPLが訪問済みかどうかをトグルで管理できる機能。各ロケーションに「発見できる手がかり」「在中NPC」「危険度」メモを紐付けることで、KPが場所ごとの情報をまとめて管理できる。現在はシーンリスト（`ScenarioSceneList`）やKPメモに分散して書いており、探索状況の把握が困難。
+**実装ヒント:** Supabaseに `scenario_locations(id uuid pk, scenario_id uuid references scenarios, name text, description text, clue_summary text, npc_names text[], danger_level int CHECK(1-3) DEFAULT 1, is_revealed bool DEFAULT false, display_order int, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・参加PLは is_revealed=true のみ閲覧）。`src/app/scenarios/[id]/locations/page.tsx` を "use client" で新規作成。追加フォームは「場所名・説明・手がかりメモ・在中NPC（カンマ区切り）・危険度（1〜3）」の入力欄。ロケーション一覧は探索状況別タブ（全件/未訪問/訪問済み）で切り替え。各カードにKP向けの「手がかり・NPC」詳細を表示し、PL公開トグルで `is_revealed` を切り替える。`src/app/scenarios/[id]/page.tsx` のKPツールセクションに「🗺️ ロケーション」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: scenario location tracker with clue/NPC notes and exploration status`
+
+## [TODO] キャラクタービルドシミュレーター（技能ポイント配分シミュ） — 優先度: 中
+**対象:** PL
+**概要:** CoC 7版のキャラクター作成ルールに沿って、能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）を入力すると職業ポイント（EDU×4など）・興味ポイント（INT×2）が自動計算され、どの技能に何ポイント振るか事前にシミュレーションできるツール。「技能ポイントが足りない」「配分が非効率だった」に気づかずキャラクターを作成してしまう新規PLの失敗を防ぎ、本登録前の計画段階に役立てる。
+**実装ヒント:** 新規テーブル不要（純粋なクライアントサイド計算）。`src/app/build-simulator/page.tsx` を "use client" で新規作成。ステップ1: 能力値入力（各1〜100のスライダー）で自動計算: `occupationPoints = EDU × 4`（職業によっては `EDU×2 + DEX×2` など）、`interestPoints = INT × 2`、HP最大 `= floor((CON + SIZ) / 10)`、MP最大 `= POW`、初期SAN `= POW × 5`。ステップ2: 職業選択ドロップダウン（探偵・医師・学者など10種程度）で職業ポイント計算式を切り替え。ステップ3: 技能リスト（`src/lib/rules-data.ts` の技能定数を流用）に対してスライダーで振り分けポイントを入力し、残り職業ポイント/興味ポイントをリアルタイム残量表示。「このビルドでキャラ作成へ」ボタンで `src/app/characters/new` に `buildData` をURLSearchParamsで渡してフォームに初期値を反映。グローバルナビゲーションに「ビルドシミュ」リンクを追加（ログイン不要のツールとして公開可）。追加DBなし。
+**コミット:** `feat: character build simulator for CoC 7e skill point planning`
+
+## [TODO] クルー・コネクションボード（手がかり関係マップ） — 優先度: 中
+**対象:** KP / 共通
+**概要:** シナリオ内で発見された手がかり・NPC・ロケーションをノードとして、「この手がかりはこのNPCを指す」「このロケーションにこの証拠がある」という関係をビジュアルに結びつけられる探偵ボード。現在は各キャラクターの `clues` ページ（`src/app/characters/[id]/clues/page.tsx`）がキャラ個別のメモに留まっており、シナリオ全体を俯瞰した手がかり構造のマッピングが存在しない。KPが事前準備として全体像を描き、PLにも公開することでセッション中の推理支援として活用できる。
+**実装ヒント:** Supabaseに `clue_nodes(id uuid pk, scenario_id uuid references scenarios, node_type text CHECK("clue"|"npc"|"location"|"event"), label text, detail text, is_revealed bool DEFAULT false, position_x float DEFAULT 0, position_y float DEFAULT 0, created_at timestamptz)` と `clue_edges(id uuid pk, from_node_id uuid references clue_nodes, to_node_id uuid references clue_nodes, relation_label text, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・is_revealed=trueのノードはPL閲覧可）。`src/app/scenarios/[id]/clue-board/page.tsx` を "use client" で新規作成。ノード描画はネイティブSVGの `<circle>`（ノード）＋`<line>`（エッジ）＋`<text>`（ラベル）で実装し、外部ライブラリ不要。ドラッグによる位置変更は `onMouseMove` イベントで `position_x/y` をupsert。KPが「＋ノード追加」でtype・ラベル・詳細を入力し、ノードとノードをクリックで「エッジを引く」モードを持つ。PLには `is_revealed=true` のノード・エッジのみ表示し、KPは全表示+トグルでPL公開を切り替え。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「🕵️ 手がかりボード」リンクを追加。追加DB2テーブル。
+**コミット:** `feat: clue connection board with SVG node-edge visualization for scenario investigation`
