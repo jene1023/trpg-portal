@@ -13,6 +13,8 @@ import {
   Bug,
   Skull,
   Layers,
+  Radio,
+  X,
 } from "lucide-react";
 import {
   supabase,
@@ -23,39 +25,53 @@ import {
   EncounterTemplateWithEntries,
 } from "@/lib/supabase";
 
+type CombatEntry = {
+  id: string;
+  scenario_id: string;
+  entry_name: string;
+  is_npc: boolean;
+  dex: number;
+  hp_max: number;
+  hp_current: number;
+  mp_current: number;
+  conditions: string[];
+  is_defeated: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
 type ParticipantWithCharacter = ScenarioParticipant & {
-  characters: Pick<
-    Character,
-    "id" | "name" | "dex" | "status" | "hp_current" | "hp_max"
-  >;
+  characters: Pick<Character, "id" | "name" | "dex" | "hp_current" | "hp_max" | "mp_current">;
 };
 
 type CreatureRow = Pick<Creature, "id" | "name" | "hp" | "dex">;
 
-type Combatant = {
-  id: string;
-  type: "pc" | "enemy";
-  characterId?: string;
-  name: string;
-  dex: number;
-  hpCurrent: number;
-  hpMax: number;
-  acted: boolean;
-};
+const PRESET_CONDITIONS = ["毒", "燃焼", "麻痺", "恐怖", "狂気", "拘束", "負傷", "疲労"];
 
 export default function CombatPage() {
   const params = useParams<{ id: string }>();
   const scenarioId = params.id;
 
   const [scenarioTitle, setScenarioTitle] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [combatants, setCombatants] = useState<Combatant[]>([]);
+  const [entries, setEntries] = useState<CombatEntry[]>([]);
   const [creatures, setCreatures] = useState<CreatureRow[]>([]);
   const [templates, setTemplates] = useState<EncounterTemplateWithEntries[]>([]);
   const [round, setRound] = useState(1);
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [newName, setNewName] = useState("");
   const [newDex, setNewDex] = useState("");
   const [newHp, setNewHp] = useState("");
+  const [newMp, setNewMp] = useState("0");
+
+  const [directHpInputs, setDirectHpInputs] = useState<Record<string, string>>({});
+  const [conditionInputs, setConditionInputs] = useState<Record<string, string>>({});
+
+  const sorted = [...entries].sort((a, b) => {
+    if (a.is_defeated !== b.is_defeated) return a.is_defeated ? 1 : -1;
+    return b.dex - a.dex;
+  });
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -63,145 +79,231 @@ export default function CombatPage() {
       return;
     }
 
-    (async () => {
-      const { data: scenario } = await supabase
-        .from("scenarios")
-        .select("title")
-        .eq("id", scenarioId)
-        .single();
+    async function reload() {
+      const { data } = await supabase
+        .from("combat_entries")
+        .select("*")
+        .eq("scenario_id", scenarioId)
+        .order("dex", { ascending: false });
+      setEntries((data ?? []) as CombatEntry[]);
+    }
+
+    async function loadAll() {
+      const [
+        { data: scenario },
+        { data: participants },
+        { data: creatureData },
+        { data: tplData },
+        { data: existing },
+      ] = await Promise.all([
+        supabase.from("scenarios").select("title").eq("id", scenarioId).single(),
+        supabase
+          .from("scenario_participants")
+          .select("*, characters(id, name, dex, hp_current, hp_max, mp_current)")
+          .eq("scenario_id", scenarioId),
+        supabase.from("creatures").select("id, name, hp, dex").eq("scenario_id", scenarioId),
+        supabase
+          .from("encounter_templates")
+          .select("*, encounter_template_entries(*, creatures(id, name, hp, dex))")
+          .order("created_at", { ascending: false }),
+        supabase.from("combat_entries").select("*").eq("scenario_id", scenarioId),
+      ]);
+
       setScenarioTitle(scenario?.title ?? "");
-
-      const { data: participants } = await supabase
-        .from("scenario_participants")
-        .select("*, characters(id, name, dex, status, hp_current, hp_max)")
-        .eq("scenario_id", scenarioId);
-
-      const list = (participants ?? []) as ParticipantWithCharacter[];
-      const pcCombatants: Combatant[] = list.map((p) => ({
-        id: `pc-${p.characters.id}`,
-        type: "pc" as const,
-        characterId: p.characters.id,
-        name: p.characters.name,
-        dex: p.characters.dex,
-        hpCurrent: p.characters.hp_current,
-        hpMax: p.characters.hp_max,
-        acted: false,
-      }));
-
-      const { data: creatureData } = await supabase
-        .from("creatures")
-        .select("id, name, hp, dex")
-        .eq("scenario_id", scenarioId);
-
-      setCreatures(
-        ((creatureData ?? []) as CreatureRow[]).filter((c) => c.hp !== null)
-      );
-
-      const { data: tplData } = await supabase
-        .from("encounter_templates")
-        .select("*, encounter_template_entries(*, creatures(id, name, hp, dex))")
-        .order("created_at", { ascending: false });
-
+      setCreatures(((creatureData ?? []) as CreatureRow[]).filter((c) => c.hp !== null));
       setTemplates((tplData ?? []) as EncounterTemplateWithEntries[]);
 
-      setCombatants(pcCombatants.sort((a, b) => b.dex - a.dex));
+      if ((existing ?? []).length === 0 && (participants ?? []).length > 0) {
+        const list = (participants ?? []) as ParticipantWithCharacter[];
+        const toInsert = list.map((p, i) => ({
+          scenario_id: scenarioId,
+          entry_name: p.characters.name,
+          is_npc: false,
+          dex: p.characters.dex,
+          hp_max: p.characters.hp_max,
+          hp_current: p.characters.hp_current,
+          mp_current: p.characters.mp_current,
+          conditions: [],
+          is_defeated: false,
+          sort_order: i,
+        }));
+        await supabase.from("combat_entries").insert(toInsert);
+        await reload();
+      } else {
+        setEntries((existing ?? []) as CombatEntry[]);
+      }
+
       setLoading(false);
-    })();
+    }
+
+    loadAll();
+
+    const channel = supabase
+      .channel(`combat-${scenarioId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "combat_entries",
+          filter: `scenario_id=eq.${scenarioId}`,
+        },
+        reload
+      )
+      .subscribe((status: string) => {
+        setConnected(status === "SUBSCRIBED");
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+      setConnected(false);
+    };
   }, [scenarioId]);
 
-  const sorted = [...combatants].sort((a, b) => b.dex - a.dex);
-  const allActed =
-    combatants.length > 0 && combatants.every((c) => c.acted || c.hpCurrent <= 0);
-
-  function toggleActed(id: string) {
-    setCombatants((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, acted: !c.acted } : c))
-    );
-  }
-
-  function adjustHp(id: string, delta: number) {
-    setCombatants((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              hpCurrent: Math.max(0, Math.min(c.hpMax, c.hpCurrent + delta)),
-            }
-          : c
-      )
-    );
-  }
-
-  function removeEnemy(id: string) {
-    setCombatants((prev) => prev.filter((c) => c.id !== id));
-  }
-
-  function addEnemy() {
+  async function addEnemy() {
     const dexNum = parseInt(newDex, 10) || 0;
     const hpNum = parseInt(newHp, 10);
+    const mpNum = parseInt(newMp, 10) || 0;
     if (!newName.trim() || isNaN(hpNum) || hpNum <= 0) return;
-    setCombatants((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        type: "enemy" as const,
-        name: newName.trim(),
-        dex: dexNum,
-        hpCurrent: hpNum,
-        hpMax: hpNum,
-        acted: false,
-      },
-    ]);
+    if (!isSupabaseConfigured) return;
+
+    await supabase.from("combat_entries").insert({
+      scenario_id: scenarioId,
+      entry_name: newName.trim(),
+      is_npc: true,
+      dex: dexNum,
+      hp_max: hpNum,
+      hp_current: hpNum,
+      mp_current: mpNum,
+      conditions: [],
+      is_defeated: false,
+      sort_order: entries.length,
+    });
     setNewName("");
     setNewDex("");
     setNewHp("");
+    setNewMp("0");
   }
 
-  function addCreatureAsEnemy(creature: CreatureRow) {
-    if (!creature.hp) return;
-    setCombatants((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        type: "enemy" as const,
-        name: creature.name,
-        dex: creature.dex ?? 0,
-        hpCurrent: creature.hp!,
-        hpMax: creature.hp!,
-        acted: false,
-      },
-    ]);
+  async function addCreatureAsEnemy(creature: CreatureRow) {
+    if (!creature.hp || !isSupabaseConfigured) return;
+    await supabase.from("combat_entries").insert({
+      scenario_id: scenarioId,
+      entry_name: creature.name,
+      is_npc: true,
+      dex: creature.dex ?? 0,
+      hp_max: creature.hp,
+      hp_current: creature.hp,
+      mp_current: 0,
+      conditions: [],
+      is_defeated: false,
+      sort_order: entries.length,
+    });
   }
 
-  function addFromTemplate(tpl: EncounterTemplateWithEntries) {
-    const newCombatants: Combatant[] = [];
+  async function addFromTemplate(tpl: EncounterTemplateWithEntries) {
+    if (!isSupabaseConfigured) return;
+    const toInsert = [];
+    let sortBase = entries.length;
     for (const entry of tpl.encounter_template_entries) {
       if (!entry.creatures.hp) continue;
       for (let i = 0; i < entry.count; i++) {
-        newCombatants.push({
-          id: crypto.randomUUID(),
-          type: "enemy" as const,
-          name: entry.count > 1 ? `${entry.creatures.name} ${i + 1}` : entry.creatures.name,
+        toInsert.push({
+          scenario_id: scenarioId,
+          entry_name:
+            entry.count > 1 ? `${entry.creatures.name} ${i + 1}` : entry.creatures.name,
+          is_npc: true,
           dex: entry.creatures.dex ?? 0,
-          hpCurrent: entry.creatures.hp,
-          hpMax: entry.creatures.hp,
-          acted: false,
+          hp_max: entry.creatures.hp,
+          hp_current: entry.creatures.hp,
+          mp_current: 0,
+          conditions: [],
+          is_defeated: false,
+          sort_order: sortBase++,
         });
       }
     }
-    setCombatants((prev) => [...prev, ...newCombatants]);
+    if (toInsert.length > 0) {
+      await supabase.from("combat_entries").insert(toInsert);
+    }
   }
 
-  function nextRound() {
-    setRound((r) => r + 1);
-    setCombatants((prev) => prev.map((c) => ({ ...c, acted: false })));
-  }
-
-  function resetCombat() {
-    setRound(1);
-    setCombatants((prev) =>
-      prev.filter((c) => c.type === "pc").map((c) => ({ ...c, acted: false }))
+  async function adjustHp(entry: CombatEntry, delta: number) {
+    if (!isSupabaseConfigured) return;
+    const newVal = Math.max(0, Math.min(entry.hp_max, entry.hp_current + delta));
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, hp_current: newVal } : e))
     );
+    await supabase.from("combat_entries").update({ hp_current: newVal }).eq("id", entry.id);
+  }
+
+  async function setHpDirect(entry: CombatEntry, value: string) {
+    if (!isSupabaseConfigured) return;
+    const num = parseInt(value, 10);
+    if (isNaN(num)) return;
+    const newVal = Math.max(0, Math.min(entry.hp_max, num));
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, hp_current: newVal } : e))
+    );
+    await supabase.from("combat_entries").update({ hp_current: newVal }).eq("id", entry.id);
+  }
+
+  async function adjustMp(entry: CombatEntry, delta: number) {
+    if (!isSupabaseConfigured) return;
+    const newVal = Math.max(0, entry.mp_current + delta);
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, mp_current: newVal } : e))
+    );
+    await supabase.from("combat_entries").update({ mp_current: newVal }).eq("id", entry.id);
+  }
+
+  async function toggleDefeated(entry: CombatEntry) {
+    if (!isSupabaseConfigured) return;
+    const newVal = !entry.is_defeated;
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, is_defeated: newVal } : e))
+    );
+    await supabase.from("combat_entries").update({ is_defeated: newVal }).eq("id", entry.id);
+  }
+
+  async function addCondition(entry: CombatEntry, condition: string) {
+    const trimmed = condition.trim();
+    if (!trimmed || entry.conditions.includes(trimmed) || !isSupabaseConfigured) return;
+    const newConditions = [...entry.conditions, trimmed];
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, conditions: newConditions } : e))
+    );
+    await supabase
+      .from("combat_entries")
+      .update({ conditions: newConditions })
+      .eq("id", entry.id);
+    setConditionInputs((prev) => ({ ...prev, [entry.id]: "" }));
+  }
+
+  async function removeCondition(entry: CombatEntry, condition: string) {
+    if (!isSupabaseConfigured) return;
+    const newConditions = entry.conditions.filter((c) => c !== condition);
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entry.id ? { ...e, conditions: newConditions } : e))
+    );
+    await supabase
+      .from("combat_entries")
+      .update({ conditions: newConditions })
+      .eq("id", entry.id);
+  }
+
+  async function removeEntry(id: string) {
+    if (!isSupabaseConfigured) return;
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+    await supabase.from("combat_entries").delete().eq("id", id);
+  }
+
+  async function resetCombat() {
+    if (!isSupabaseConfigured) return;
+    if (!confirm("戦闘データをリセットしますか？全エントリが削除されます。")) return;
+    await supabase.from("combat_entries").delete().eq("scenario_id", scenarioId);
+    setEntries([]);
+    setRound(1);
   }
 
   function hpColor(current: number, max: number) {
@@ -210,6 +312,13 @@ export default function CombatPage() {
     if (pct <= 0.25) return "text-red-400";
     if (pct <= 0.5) return "text-yellow-400";
     return "text-green-400";
+  }
+
+  function hpBarColor(pct: number) {
+    if (pct <= 0) return "bg-coc-muted";
+    if (pct <= 25) return "bg-red-500";
+    if (pct <= 50) return "bg-yellow-500";
+    return "bg-green-500";
   }
 
   if (loading) {
@@ -222,7 +331,7 @@ export default function CombatPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href={`/scenarios/${scenarioId}`}
           className="flex items-center gap-1.5 text-sm text-coc-muted hover:text-coc-text transition-colors"
@@ -230,22 +339,34 @@ export default function CombatPage() {
           <ArrowLeft size={16} />
           シナリオ詳細
         </Link>
+        {isSupabaseConfigured && (
+          <span
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+              connected
+                ? "border-green-700 bg-green-900/20 text-green-400"
+                : "border-coc-border text-coc-muted"
+            }`}
+          >
+            <Radio size={11} className={connected ? "animate-pulse" : ""} />
+            {connected ? "同期中" : "接続中…"}
+          </span>
+        )}
       </div>
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
           <p className="text-xs text-coc-muted mb-1">{scenarioTitle}</p>
           <h1 className="font-cinzel text-xl font-bold text-coc-text flex items-center gap-2">
             <Swords size={20} className="text-coc-gold" />
-            戦闘管理
+            戦闘イニシアチブトラッカー
           </h1>
           <p className="text-xs text-coc-muted mt-1">
-            PC+NPC統合イニシアチブ（DEX順）— 敵はリロードでリセット
+            DEX順・HP/MP管理・コンディション追跡（リアルタイム同期）
           </p>
         </div>
         <button
           onClick={resetCombat}
-          className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold transition-colors"
+          className="flex items-center gap-1.5 rounded-lg border border-coc-border px-3 py-1.5 text-xs text-coc-muted hover:text-red-400 hover:border-red-800 transition-colors"
         >
           <RotateCcw size={14} />
           リセット
@@ -253,9 +374,17 @@ export default function CombatPage() {
       </div>
 
       {/* Round counter */}
-      <div className="mb-6 rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-4 text-center">
-        <p className="text-xs text-coc-muted mb-1">現在ラウンド</p>
-        <p className="text-4xl font-bold text-coc-gold tabular-nums">{round}</p>
+      <div className="mb-6 rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-4 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-coc-muted mb-1">現在ラウンド</p>
+          <p className="text-4xl font-bold text-coc-gold tabular-nums">{round}</p>
+        </div>
+        <button
+          onClick={() => setRound((r) => r + 1)}
+          className="flex items-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-4 py-2 text-sm font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
+        >
+          次のラウンド ({round + 1})
+        </button>
       </div>
 
       {/* Creature quick-add */}
@@ -326,7 +455,7 @@ export default function CombatPage() {
             placeholder="DEX"
             value={newDex}
             onChange={(e) => setNewDex(e.target.value)}
-            className="w-20 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
+            className="w-18 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
           />
           <input
             type="number"
@@ -334,7 +463,14 @@ export default function CombatPage() {
             value={newHp}
             onChange={(e) => setNewHp(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addEnemy()}
-            className="w-24 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
+            className="w-22 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
+          />
+          <input
+            type="number"
+            placeholder="MP"
+            value={newMp}
+            onChange={(e) => setNewMp(e.target.value)}
+            className="w-16 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-sm text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
           />
           <button
             onClick={addEnemy}
@@ -361,24 +497,21 @@ export default function CombatPage() {
       ) : (
         <>
           <p className="text-xs text-coc-muted mb-3">DEX順イニシアチブ（高い順）</p>
-          <div className="flex flex-col gap-2 mb-6">
-            {sorted.map((c, index) => {
-              const defeated = c.hpCurrent <= 0;
-              const hpPct =
-                c.hpMax > 0 ? (c.hpCurrent / c.hpMax) * 100 : 0;
+          <div className="flex flex-col gap-3 mb-6">
+            {sorted.map((entry, index) => {
+              const hpPct = entry.hp_max > 0 ? (entry.hp_current / entry.hp_max) * 100 : 0;
 
               return (
                 <div
-                  key={c.id}
+                  key={entry.id}
                   className={`rounded-xl border px-4 py-3 transition-colors ${
-                    defeated
+                    entry.is_defeated
                       ? "border-coc-border bg-coc-raised opacity-60"
-                      : c.acted
-                      ? "border-coc-border bg-coc-raised opacity-75"
                       : "border-coc-border bg-coc-surface"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3 mb-2">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-coc-border text-xs text-coc-muted">
                         {index + 1}
@@ -387,48 +520,40 @@ export default function CombatPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p
                             className={`font-medium ${
-                              defeated
-                                ? "text-coc-muted line-through"
-                                : c.acted
+                              entry.is_defeated
                                 ? "text-coc-muted line-through"
                                 : "text-coc-text"
                             }`}
                           >
-                            {c.name}
+                            {entry.entry_name}
                           </p>
                           <span
                             className={`rounded-full border px-1.5 py-0.5 text-xs ${
-                              c.type === "pc"
-                                ? "border-blue-800 text-blue-400"
-                                : "border-red-800 text-red-400"
+                              entry.is_npc
+                                ? "border-red-800 text-red-400"
+                                : "border-blue-800 text-blue-400"
                             }`}
                           >
-                            {c.type === "pc" ? "PC" : "敵"}
+                            {entry.is_npc ? "NPC" : "PC"}
                           </span>
-                          {defeated && (
-                            <span className="rounded-full border border-coc-border px-1.5 py-0.5 text-xs text-coc-muted">
-                              倒れた
-                            </span>
-                          )}
                         </div>
-                        <p className="text-xs text-coc-muted">DEX {c.dex}</p>
+                        <p className="text-xs text-coc-muted">DEX {entry.dex}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button
-                        onClick={() => toggleActed(c.id)}
-                        disabled={defeated}
-                        className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors disabled:cursor-not-allowed ${
-                          c.acted
-                            ? "border-green-800 text-green-400"
+                        onClick={() => toggleDefeated(entry)}
+                        className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                          entry.is_defeated
+                            ? "border-red-800 text-red-400"
                             : "border-coc-border text-coc-muted hover:border-coc-gold"
                         }`}
                       >
-                        {c.acted ? "行動済み" : "未行動"}
+                        {entry.is_defeated ? "撃破" : "戦闘中"}
                       </button>
-                      {c.type === "enemy" && (
+                      {entry.is_npc && (
                         <button
-                          onClick={() => removeEnemy(c.id)}
+                          onClick={() => removeEntry(entry.id)}
                           className="text-coc-muted hover:text-red-400 transition-colors"
                           aria-label="削除"
                         >
@@ -438,30 +563,100 @@ export default function CombatPage() {
                     </div>
                   </div>
 
+                  {/* Condition badges */}
+                  <div className="mb-3">
+                    {entry.conditions.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {entry.conditions.map((cond) => (
+                          <span
+                            key={cond}
+                            className="flex items-center gap-1 rounded-full border border-yellow-800 bg-yellow-950/30 px-2 py-0.5 text-xs text-yellow-400"
+                          >
+                            {cond}
+                            <button
+                              onClick={() => removeCondition(entry, cond)}
+                              className="hover:text-red-400 transition-colors"
+                              aria-label="コンディション削除"
+                            >
+                              <X size={10} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {PRESET_CONDITIONS.filter((c) => !entry.conditions.includes(c)).map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => addCondition(entry, c)}
+                          className="rounded-full border border-coc-border px-2 py-0.5 text-xs text-coc-muted hover:border-yellow-700 hover:text-yellow-400 transition-colors"
+                        >
+                          +{c}
+                        </button>
+                      ))}
+                      <input
+                        type="text"
+                        placeholder="カスタム…"
+                        value={conditionInputs[entry.id] ?? ""}
+                        onChange={(e) =>
+                          setConditionInputs((prev) => ({
+                            ...prev,
+                            [entry.id]: e.target.value,
+                          }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            addCondition(entry, conditionInputs[entry.id] ?? "");
+                          }
+                        }}
+                        className="w-24 rounded-lg border border-coc-border bg-coc-raised px-2 py-0.5 text-xs text-coc-text placeholder:text-coc-muted focus:outline-none focus:border-coc-gold"
+                      />
+                    </div>
+                  </div>
+
                   {/* HP section */}
-                  <div>
+                  <div className="mb-2">
                     <div className="flex items-end justify-between mb-1">
                       <span className="text-xs text-coc-muted">HP</span>
-                      <span
-                        className={`font-cinzel text-lg font-bold tabular-nums ${hpColor(c.hpCurrent, c.hpMax)}`}
-                      >
-                        {c.hpCurrent}
-                        <span className="text-sm text-coc-muted font-normal">
-                          /{c.hpMax}
-                        </span>
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={0}
+                          max={entry.hp_max}
+                          value={directHpInputs[entry.id] ?? entry.hp_current}
+                          onChange={(e) =>
+                            setDirectHpInputs((prev) => ({
+                              ...prev,
+                              [entry.id]: e.target.value,
+                            }))
+                          }
+                          onBlur={(e) => {
+                            setHpDirect(entry, e.target.value);
+                            setDirectHpInputs((prev) => {
+                              const next = { ...prev };
+                              delete next[entry.id];
+                              return next;
+                            });
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const val = (e.target as HTMLInputElement).value;
+                              setHpDirect(entry, val);
+                              setDirectHpInputs((prev) => {
+                                const next = { ...prev };
+                                delete next[entry.id];
+                                return next;
+                              });
+                            }
+                          }}
+                          className={`w-14 rounded border border-coc-border bg-coc-raised px-2 py-0.5 text-right text-sm font-bold tabular-nums focus:outline-none focus:border-coc-gold ${hpColor(entry.hp_current, entry.hp_max)}`}
+                        />
+                        <span className="text-sm text-coc-muted">/{entry.hp_max}</span>
+                      </div>
                     </div>
                     <div className="h-1.5 rounded-full bg-coc-raised overflow-hidden mb-2">
                       <div
-                        className={`h-full rounded-full transition-all ${
-                          hpPct <= 0
-                            ? "bg-coc-muted"
-                            : hpPct <= 25
-                            ? "bg-red-500"
-                            : hpPct <= 50
-                            ? "bg-yellow-500"
-                            : "bg-green-500"
-                        }`}
+                        className={`h-full rounded-full transition-all ${hpBarColor(hpPct)}`}
                         style={{ width: `${hpPct}%` }}
                       />
                     </div>
@@ -469,8 +664,8 @@ export default function CombatPage() {
                       {[-5, -3, -1].map((delta) => (
                         <button
                           key={delta}
-                          onClick={() => adjustHp(c.id, delta)}
-                          disabled={defeated}
+                          onClick={() => adjustHp(entry, delta)}
+                          disabled={entry.is_defeated || entry.hp_current <= 0}
                           className="flex-1 flex items-center justify-center gap-0.5 rounded border border-red-900 bg-red-950/20 py-1 text-xs text-red-400 hover:bg-red-950/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <Minus size={10} />
@@ -481,8 +676,8 @@ export default function CombatPage() {
                       {[1, 3, 5].map((delta) => (
                         <button
                           key={delta}
-                          onClick={() => adjustHp(c.id, delta)}
-                          disabled={c.hpCurrent >= c.hpMax}
+                          onClick={() => adjustHp(entry, delta)}
+                          disabled={entry.hp_current >= entry.hp_max}
                           className="flex-1 flex items-center justify-center gap-0.5 rounded border border-green-900 bg-green-950/20 py-1 text-xs text-green-400 hover:bg-green-950/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <Plus size={10} />
@@ -491,18 +686,33 @@ export default function CombatPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* MP section */}
+                  <div className="flex items-center gap-3 pt-2 border-t border-coc-border">
+                    <span className="text-xs text-coc-muted w-6">MP</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => adjustMp(entry, -1)}
+                        disabled={entry.mp_current <= 0}
+                        className="rounded border border-coc-border px-1.5 py-0.5 text-xs text-coc-muted hover:border-coc-gold hover:text-coc-text transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <Minus size={10} />
+                      </button>
+                      <span className="text-sm font-bold tabular-nums text-blue-400 min-w-[28px] text-center">
+                        {entry.mp_current}
+                      </span>
+                      <button
+                        onClick={() => adjustMp(entry, 1)}
+                        className="rounded border border-coc-border px-1.5 py-0.5 text-xs text-coc-muted hover:border-coc-gold hover:text-coc-text transition-colors"
+                      >
+                        <Plus size={10} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
-
-          <button
-            onClick={nextRound}
-            disabled={!allActed}
-            className="w-full rounded-xl border border-coc-gold-dim bg-coc-surface px-5 py-3 text-sm font-medium text-coc-gold transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-coc-gold"
-          >
-            次のラウンドへ ({round + 1})
-          </button>
         </>
       )}
     </div>

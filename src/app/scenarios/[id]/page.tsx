@@ -504,8 +504,8 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <div className="flex items-center gap-3">
             <Swords size={20} className="text-coc-gold" />
             <div>
-              <p className="font-medium text-coc-text">戦闘管理</p>
-              <p className="text-xs text-coc-muted">PC+NPC統合イニシアチブ・HP追跡・行動済みフラグ管理</p>
+              <p className="font-medium text-coc-text">⚔️ 戦闘トラッカー</p>
+              <p className="text-xs text-coc-muted">DEX順イニシアチブ・HP/MP管理・コンディションバッジ・リアルタイム同期</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
