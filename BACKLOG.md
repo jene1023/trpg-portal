@@ -1994,7 +1994,7 @@
 **実装ヒント:** 新規テーブル不要。`src/lib/condition-penalties.ts` を新規作成し、コンディション名→影響技能カテゴリ→ペナルティ値のマップ定数を定義（例: `{"負傷": {categories: ["戦闘"], penalty: -20}, "疲弊": {categories: ["all"], penalty: -10}}`）。`src/app/_components/CharacterSkillList.tsx`（または同等の技能一覧コンポーネント）でアクティブコンディション一覧と技能ペナルティマップを照合し、影響技能の `current_value` に実効値 `(current_value + penalty)` を赤字スパンで追記。コンディション一覧ページ（`src/app/characters/[id]/conditions/page.tsx`）の各コンディションカードにも「影響技能」バッジを表示。追加DBなし。
 **コミット:** `feat: condition-based skill penalty display on character sheet`
 
-## [TODO] AIロール結果即興演出テキスト（判定ナレーション生成） — 優先度: 低
+## [DONE] AIロール結果即興演出テキスト（判定ナレーション生成） — 優先度: 低
 **対象:** PL / KP / 共通
 **概要:** ダイスローラーで技能判定をした直後に、成功度（決定的成功/通常成功/失敗/致命的失敗）・技能名・シーンコンテキストをもとにClaude APIが50〜80字の没入感ある演出テキストを生成する機能。既存のAI機能（バックストーリー生成・シナリオドラフト・NPCセリフ・セッションサマリー・雰囲気テキスト）はすべてセッション外かNPC向けで、判定の瞬間に発動するリアルタイム演出は未対応。
 **実装ヒント:** `src/app/api/ai/roll-narration/route.ts` を新規作成（`src/app/api/ai/npc-dialogue/route.ts` の実装パターンを踏襲）。リクエストボディ: `{ skillName: string, successLevel: "critical_success"|"success"|"failure"|"fumble", characterOccupation: string, sceneContext?: string }`。プロンプト: 「CoC 7版の探索者が『{skillName}』判定で『{successLevel}』を出しました。職業は{occupation}。以下のシーンで起きたこと: {sceneContext}。この瞬間を60字以内の情景描写で表現してください。」レスポンス: `{ narration: string }`。`src/app/_components/DiceRoller.tsx` のロール結果表示部に「AIナレーション生成」ボタンを追加（"use client"のまま、fetch で route.ts を呼ぶ）。生成テキストはロール結果カード内にアニメーション付きで展開表示。追加DBなし。

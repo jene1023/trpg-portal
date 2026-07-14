@@ -74,6 +74,9 @@ export default function DiceRoller({ skills, characterId, scenarioId, characterN
   const [macroRolling, setMacroRolling] = useState<string | null>(null);
   const [macroResult, setMacroResult] = useState<MacroResult | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
+  const [narration, setNarration] = useState<string | null>(null);
+  const [narrationLoading, setNarrationLoading] = useState(false);
+  const [sceneContext, setSceneContext] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const channelRef = useRef<any>(null);
 
@@ -119,10 +122,35 @@ export default function DiceRoller({ skills, characterId, scenarioId, characterN
 
   const selected = skills.find((s) => s.id === selectedId) ?? skills[0];
 
+  async function generateNarration() {
+    if (!result || narrationLoading) return;
+    setNarrationLoading(true);
+    setNarration(null);
+    try {
+      const res = await fetch("/api/ai/roll-narration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          skillName: result.skillName,
+          successLevel: DEGREE_TO_LEVEL[result.degree],
+          characterOccupation: character?.occupation ?? "",
+          sceneContext: sceneContext.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.narration) setNarration(data.narration);
+    } catch {
+      setNarration(null);
+    } finally {
+      setNarrationLoading(false);
+    }
+  }
+
   function roll() {
     if (rolling) return;
     setRolling(true);
     setResult(null);
+    setNarration(null);
     setTimeout(() => {
       const rolled = rollPercentile(rollType);
       const degree = judge(rolled, selected.current_value);
@@ -337,23 +365,54 @@ export default function DiceRoller({ skills, characterId, scenarioId, characterN
           )}
 
           {result && (
-            <div
-              className={`rounded-md border px-4 py-3 flex items-center justify-between transition-all ${DEGREE_STYLE[result.degree].border} ${DEGREE_STYLE[result.degree].bg}`}
-            >
-              <div>
-                <p className="text-xs text-coc-muted mb-0.5">
-                  {result.skillName}（{result.skillValue}%）
-                </p>
-                <p className={`font-bold text-base ${DEGREE_STYLE[result.degree].text}`}>
-                  {result.degree}
-                </p>
+            <div className="space-y-2">
+              <div
+                className={`rounded-md border px-4 py-3 flex items-center justify-between transition-all ${DEGREE_STYLE[result.degree].border} ${DEGREE_STYLE[result.degree].bg}`}
+              >
+                <div>
+                  <p className="text-xs text-coc-muted mb-0.5">
+                    {result.skillName}（{result.skillValue}%）
+                  </p>
+                  <p className={`font-bold text-base ${DEGREE_STYLE[result.degree].text}`}>
+                    {result.degree}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-coc-muted mb-0.5">ロール</p>
+                  <p className={`font-cinzel text-2xl font-bold ${DEGREE_STYLE[result.degree].text}`}>
+                    {result.roll}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-coc-muted mb-0.5">ロール</p>
-                <p className={`font-cinzel text-2xl font-bold ${DEGREE_STYLE[result.degree].text}`}>
-                  {result.roll}
-                </p>
+
+              <div className="space-y-1.5">
+                <input
+                  type="text"
+                  value={sceneContext}
+                  onChange={(e) => setSceneContext(e.target.value)}
+                  placeholder="シーンの状況（任意）"
+                  className="w-full rounded-md border border-coc-border bg-coc-raised text-coc-text text-xs px-2 py-1.5 placeholder:text-coc-muted/50 focus:outline-none focus:border-coc-gold"
+                />
+                <button
+                  onClick={generateNarration}
+                  disabled={narrationLoading}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-md border border-coc-gold/60 text-coc-gold px-3 py-1.5 text-xs font-medium hover:bg-coc-gold/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {narrationLoading ? (
+                    <span className="inline-block w-3 h-3 border border-coc-gold border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "✦"
+                  )}
+                  AIナレーション生成
+                </button>
               </div>
+
+              {narration && (
+                <div className="rounded-md border border-coc-gold/30 bg-coc-gold/5 px-3 py-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                  <p className="text-xs text-coc-muted mb-1">ナレーション</p>
+                  <p className="text-sm text-coc-text leading-relaxed">{narration}</p>
+                </div>
+              )}
             </div>
           )}
         </>
