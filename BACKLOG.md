@@ -2041,3 +2041,27 @@
 **概要:** シナリオ内で発見された手がかり・NPC・ロケーションをノードとして、「この手がかりはこのNPCを指す」「このロケーションにこの証拠がある」という関係をビジュアルに結びつけられる探偵ボード。現在は各キャラクターの `clues` ページ（`src/app/characters/[id]/clues/page.tsx`）がキャラ個別のメモに留まっており、シナリオ全体を俯瞰した手がかり構造のマッピングが存在しない。KPが事前準備として全体像を描き、PLにも公開することでセッション中の推理支援として活用できる。
 **実装ヒント:** Supabaseに `clue_nodes(id uuid pk, scenario_id uuid references scenarios, node_type text CHECK("clue"|"npc"|"location"|"event"), label text, detail text, is_revealed bool DEFAULT false, position_x float DEFAULT 0, position_y float DEFAULT 0, created_at timestamptz)` と `clue_edges(id uuid pk, from_node_id uuid references clue_nodes, to_node_id uuid references clue_nodes, relation_label text, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・is_revealed=trueのノードはPL閲覧可）。`src/app/scenarios/[id]/clue-board/page.tsx` を "use client" で新規作成。ノード描画はネイティブSVGの `<circle>`（ノード）＋`<line>`（エッジ）＋`<text>`（ラベル）で実装し、外部ライブラリ不要。ドラッグによる位置変更は `onMouseMove` イベントで `position_x/y` をupsert。KPが「＋ノード追加」でtype・ラベル・詳細を入力し、ノードとノードをクリックで「エッジを引く」モードを持つ。PLには `is_revealed=true` のノード・エッジのみ表示し、KPは全表示+トグルでPL公開を切り替え。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「🕵️ 手がかりボード」リンクを追加。追加DB2テーブル。
 **コミット:** `feat: clue connection board with SVG node-edge visualization for scenario investigation`
+
+## [TODO] セッション中リアルタイムHP/SAN同期 — 優先度: 高
+**対象:** PL / 共通
+**概要:** セッション中、パーティの全PLが他のキャラクターのHP/SAN/MP変化をリロードなしでリアルタイムに確認できる機能。「〇〇のSANが急に下がった」など互いの状態を即座に把握でき、協力判断の精度が上がる。
+**実装ヒント:** Supabase Realtime の `channel.on('postgres_changes', ...)` を使い `characters` テーブルの `UPDATE` イベントを購読。`src/app/_components/QuickStatEditor.tsx` に `useEffect` でチャンネル購読を追加（既存の supabase クライアントをそのまま利用）。`src/app/characters/[id]/quick/page.tsx` ではキャラ自身のリアルタイム購読を追加し、他PCのミニステータス（名前+HP/SAN）を横スクロールで表示するオプションバーを追加（scenario_id が一致するキャラを対象）。追加DBなし。
+**コミット:** `feat: realtime HP/SAN sync via Supabase Realtime during sessions`
+
+## [TODO] KP用パーティステータスモニター — 優先度: 高
+**対象:** KP
+**概要:** KPがシナリオに参加している全キャラクターのHP・SAN・MPを一覧で監視できるボード。セッション中に「誰が今どれだけ消耗しているか」をKPがリアルタイムで把握し、ペース調整・SAN喪失タイミングの判断に使う。
+**実装ヒント:** `src/app/scenarios/[id]/party-status/page.tsx` を新規作成（"use client"）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加キャラ+ステータスを一括取得。各キャラをカード形式で表示し、HP/SAN/MPをカラーバー（残量割合でCSS widthを設定: 50%以下で黄、25%以下で赤）で可視化。Supabase Realtime で `characters` テーブルの変更を購読し自動更新。`src/app/scenarios/[id]/page.tsx` に「パーティ状態」リンクを追加。追加DBなし。
+**コミット:** `feat: KP party status monitor board with realtime HP/SAN tracking`
+
+## [TODO] カスタムダイスマクロ管理ページ — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** よく使うダイス式（例：「1D6+DB」「2D6×5（SAN損失ロール）」）を名前付きマクロとして保存し、ワンクリックでロールできる機能。キャンペーン内で共有することでセッション中の入力コストを大幅に削減する。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `DiceMacro` 型（owner_id, campaign_id, name, expression, description, is_public）を流用。`src/app/dice-macros/page.tsx` を "use client" で新規作成し、マクロの一覧・追加・削除・ロール実行UIを実装。`expression` は BCDice 形式（例: `2D6+3`）をパースし `Math.random()` で実行する簡易エバリュエーターを実装（外部ライブラリ不要: d4/d6/d8/d10/d12/d20/d100 のみ対応）。マクロをクリックするとその場でロール結果をポップアップ表示し、`dice_rolls` テーブルにも保存（character_id は null 可）。キャンペーン詳細ページからも参照できるよう `campaign_id` で絞り込みビューを追加。グローバルナビに「マクロ」リンクを追加。追加DBなし（`dice_macros` テーブルは型から既に存在想定）。
+**コミット:** `feat: custom dice macro management page with one-click rolls`
+
+## [TODO] 技能成功確率ビジュアライザー — 優先度: 低
+**対象:** PL
+**概要:** キャラクターの各技能値に対し、CoC 7版ルールの成功確率（決定的成功・通常成功・失敗・致命的失敗）を計算し、色分けバーで可視化するページ。「この技能は何%で成功するのか」を一目で把握でき、セッション前の技能選択や成長目標の設定に役立てる。
+**実装ヒント:** `src/app/characters/[id]/skill-probs/page.tsx` を新規作成（Server Component + クライアント絞り込み）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得。各技能値 `v` に対して: 決定的成功 = `Math.floor(v / 5)%`、通常成功 = `(v - Math.floor(v/5))%`、失敗 = `(95 - v)%`、致命的失敗 = `5%`（96〜100固定）を計算（1の位が0の場合の端数処理あり）。技能ごとに `<div>` 幅100%のうち4色の横バーをCSS flexで構成（追加ライブラリ不要）。技能カテゴリ別にソートし、現在値でフィルタ可能（低確率技能を非表示にするスイッチ）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「確率チャート」リンクを追加。追加DBなし。
+**コミット:** `feat: skill success probability visualizer for character skills`
