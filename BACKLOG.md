@@ -2102,7 +2102,7 @@
 **実装ヒント:** `src/app/characters/[id]/growth-advisor/page.tsx` を新規作成（"use client"）。`supabase.from("dice_rolls").select("*").eq("character_id", id).order("rolled_at", {ascending: false}).limit(100)` でロール履歴取得。`supabase.from("character_skills").select("*").eq("character_id", id)` でスキル一覧取得。取得データをAI APIに送信: プロンプトは「以下のダイスロール履歴とスキル一覧を分析し、成長させるべきスキルTOP3を理由（使用頻度・成功率・現在値）とともにJSON形式で返してください。スキル名・推薦理由・期待成功率向上値を含めること。」AI APIは `/api/ai-growth-advisor` エンドポイント（`src/app/api/ai-growth-advisor/route.ts`）で実装（既存の他AI APIエンドポイントと同様のパターン）。結果をカード形式で表示。`src/app/characters/[id]/growth/page.tsx` に「AIアドバイス」ボタンを追加してリンク。
 **コミット:** `feat: AI skill growth recommendation based on session dice history`
 
-## [TODO] シナリオ公募グローバル掲示板 — 優先度: 中
+## [DONE] シナリオ公募グローバル掲示板 — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** KPが参加者募集中のシナリオをグローバル掲示板に公開し、PLが難易度・人数・プレイ時間でフィルタして参加申請できるページ。既存の各シナリオの `recruit_token` を活用し、SNSシェアなしでも同ポータル内でPLがセッションを探せるようにする。
 **実装ヒント:** `src/app/scenarios/recruit-board/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, playtime_type, min_players, max_players, estimated_hours, recruit_token, teaser_text").not("recruit_token", "is", null).eq("teaser_is_public", true).order("created_at", {ascending: false})` でパブリック公募シナリオを取得。カード形式で一覧表示（タイトル・概要・難易度バッジ・プレイ時間・募集人数）。難易度・プレイ時間の useState フィルタを実装。各カードの「参加申請」ボタンは既存の `src/app/scenarios/[id]/recruit/page.tsx` へのリンク。`src/app/_components/NavBar.tsx` に「公募掲示板」リンクを追加。KP側シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「掲示板に公開する」トグルを追加し `teaser_is_public` を更新。

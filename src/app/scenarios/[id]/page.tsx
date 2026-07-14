@@ -22,6 +22,7 @@ import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGen
 import ScenarioTemplateToggle from "@/app/_components/ScenarioTemplateToggle";
 import TeaserEditor from "@/app/_components/TeaserEditor";
 import SaveAsTemplateButton from "@/app/_components/SaveAsTemplateButton";
+import RecruitBoardPublishToggle from "@/app/_components/RecruitBoardPublishToggle";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -1459,6 +1460,18 @@ export default async function ScenarioDetailPage({ params }: Props) {
               </div>
             </div>
             <RecruitShareButton scenarioId={id} />
+          </div>
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-coc-border">
+            <RecruitBoardPublishToggle
+              scenarioId={id}
+              initialIsPublic={scenario.teaser_is_public ?? false}
+            />
+            <Link
+              href="/scenarios/recruit-board"
+              className="text-xs text-coc-muted hover:text-coc-gold transition-colors"
+            >
+              公募掲示板を見る →
+            </Link>
           </div>
         </div>
 
