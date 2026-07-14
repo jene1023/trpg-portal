@@ -2012,7 +2012,7 @@
 **実装ヒント:** 新規テーブル不要（純粋なクライアントサイド計算）。`src/app/_components/CombinedRollHelper.tsx` を "use client" で新規作成。UIは「リード役の技能値」数値入力＋「補助者の技能値」を複数追加できる入力リスト（最大4人）。計算式: `finalValue = leadSkill + sum(helperSkills.map(s => Math.floor(s / 5)))`（上限: リードの技能値の通常成功値×2）。リアルタイム計算で最終判定値・通常成功ライン・ハード成功ライン・決定的成功ラインを自動表示。「補助者を追加」ボタンで入力フィールドを最大4個まで追加。シナリオ詳細ページのパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に「組み合わせ判定」ボタンとしてモーダル展開で配置。追加DBなし。
 **コミット:** `feat: Combined Roll calculator for cooperative skill checks per CoC 7e rules`
 
-## [TODO] AIセッション後KPデブリーフィングレポート — 優先度: 中
+## [DONE] AIセッション後KPデブリーフィングレポート — 優先度: 中
 **対象:** KP
 **概要:** セッション終了後、シナリオに紐づく全参加者のSAN/HP喪失量・達成目標数・遭遇NPC/クリーチャー・ダイス成功率・フィードバック評価をClaude APIが分析し、「今回うまくいった点・改善できる点・次回の提案」を含む構造化KPレポートを自動生成する機能。既存の「セッションリプレイ生成」（PLシェア向け物語形式）・「KP振り返りノート」（手動記入）・「SAN/HP喪失サマリー」（数値のみ）とは異なり、AI視点のKP向け改善提案に特化する。
 **実装ヒント:** `src/app/api/ai/kp-debrief/route.ts` を新規作成（既存 `src/app/api/ai/session-summary/route.ts` のパターンを踏襲）。入力データ: シナリオID経由で `session_logs`（SAN/HP喪失量）・`session_npc_encounters`（遭遇NPC一覧）・`scenario_participants + dice_rolls`（参加者成功率）・`scenario_player_ratings`（PL評価平均）を `Promise.all` で並行取得してJSON化しプロンプトに埋め込む。AIへの指示: 「KPとして今回のセッションを振り返り、①うまくいった演出・ペース管理、②改善点（SAN喪失が偏った場面・目標未達の原因）、③次回セッションへの具体的提案3点、をJSON形式で出力してください」。レスポンス型: `{ went_well: string[], improvements: string[], next_suggestions: string[] }`。`src/app/scenarios/[id]/kp-debrief/page.tsx` を "use client" で新規作成し、ボタン押下でAPIコール→結果をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のKPセクションに「AIデブリーフ」リンクを追加。追加DBなし。

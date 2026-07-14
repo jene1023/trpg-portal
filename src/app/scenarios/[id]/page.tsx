@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target, BookMarked, ClipboardCheck, Heart } from "lucide-react";
+import { ArrowLeft, Users, FileText, User, Shield, StickyNote, Swords, CalendarClock, ShieldCheck, ClipboardList, BarChart2, MapPin, Vote, Bug, Music, ListChecks, Star, Clock, ExternalLink, UserCheck, Monitor, Radio, Skull, Package, Dices, MessageSquare, BookOpen, HelpCircle, TimerIcon, PlayCircle, TrendingUp, PenLine, Film, Trophy, AlertTriangle, MessageSquarePlus, ShieldAlert, UserPlus, Search, GitBranch, Gauge, Download, Library, ScrollText, Archive, UserMinus, CheckSquare, Users2, Megaphone, Activity, Share2, RefreshCw, Target, BookMarked, ClipboardCheck, Heart, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, AttendanceStatus } from "@/lib/supabase";
 import ScenarioDuplicateButton from "@/app/_components/ScenarioDuplicateButton";
 import SessionPackShareButton from "@/app/_components/SessionPackShareButton";
@@ -819,6 +819,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
             <div>
               <p className="font-medium text-coc-text">振り返りノート</p>
               <p className="text-xs text-coc-muted">うまくいったこと・改善点・PLの反応を記録</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
+          href={`/scenarios/${id}/kp-debrief`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Sparkles size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">AIデブリーフ</p>
+              <p className="text-xs text-coc-muted">セッションデータをAIが分析してKP向けの改善提案・振り返りレポートを生成</p>
             </div>
           </div>
           <span className="text-coc-muted">→</span>
