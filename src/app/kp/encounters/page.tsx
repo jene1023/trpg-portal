@@ -326,6 +326,10 @@ export default function KpEncountersPage() {
           </a>
           <span>·</span>
           <span className="text-coc-gold">エンカウンターテンプレート</span>
+          <span>·</span>
+          <a href="/kp/random-tables" className="hover:text-coc-gold transition-colors">
+            ランダムテーブル
+          </a>
         </nav>
 
         <div>

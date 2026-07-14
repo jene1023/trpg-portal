@@ -2066,7 +2066,7 @@
 **実装ヒント:** `src/app/characters/[id]/skill-probs/page.tsx` を新規作成（Server Component + クライアント絞り込み）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得。各技能値 `v` に対して: 決定的成功 = `Math.floor(v / 5)%`、通常成功 = `(v - Math.floor(v/5))%`、失敗 = `(95 - v)%`、致命的失敗 = `5%`（96〜100固定）を計算（1の位が0の場合の端数処理あり）。技能ごとに `<div>` 幅100%のうち4色の横バーをCSS flexで構成（追加ライブラリ不要）。技能カテゴリ別にソートし、現在値でフィルタ可能（低確率技能を非表示にするスイッチ）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「確率チャート」リンクを追加。追加DBなし。
 **コミット:** `feat: skill success probability visualizer for character skills`
 
-## [TODO] カスタムランダムテーブル管理・ロールページ — 優先度: 中
+## [DONE] カスタムランダムテーブル管理・ロールページ — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPが「狂気症状表」「ランダムNPC性格」「天候変化」などシナリオ独自のランダムテーブルを自作・管理し、セッション中にダイスロールで結果を引けるページ。繰り返し使うランダム要素を即時参照できるため、即興シナリオ運営の速度と幅が広がる。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `RandomTable` 型（name, entries: jsonb, scenario_id, is_public）を活用。`src/app/kp/random-tables/page.tsx` を "use client" で新規作成。テーブル作成フォームで名前・ダイス面数（d6/d8/d10/d12/d20/d100）・エントリ一覧（`[{min: 1, max: 5, result: "暗闇に蠢く影"}]` 形式の配列）を入力。「ロール！」ボタンで `Math.random()` による結果抽選を行い、マッチするエントリを強調表示。既存の `DiceRoller.tsx` のロール結果表示パターンを参考にアニメーション付き結果カードを表示。テーブルはシナリオ別（`scenario_id` 指定）またはグローバル（`scenario_id: null`）で管理しタブで切り替え。`src/app/kp/` 配下の KP ナビゲーションにリンクを追加。追加DBなし（`random_tables` テーブルは型定義から既存想定）。
