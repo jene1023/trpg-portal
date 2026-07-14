@@ -1993,3 +1993,27 @@
 **概要:** キャラクターのアクティブなコンディション（`CharacterCondition`）に対してルールブックに基づく技能ペナルティを自動計算し、キャラクターシートの技能一覧にペナルティ後の実効値を括弧付き赤字で表示する機能。セッション中の判定値ミス（コンディション見落とし）を防ぐ。
 **実装ヒント:** 新規テーブル不要。`src/lib/condition-penalties.ts` を新規作成し、コンディション名→影響技能カテゴリ→ペナルティ値のマップ定数を定義（例: `{"負傷": {categories: ["戦闘"], penalty: -20}, "疲弊": {categories: ["all"], penalty: -10}}`）。`src/app/_components/CharacterSkillList.tsx`（または同等の技能一覧コンポーネント）でアクティブコンディション一覧と技能ペナルティマップを照合し、影響技能の `current_value` に実効値 `(current_value + penalty)` を赤字スパンで追記。コンディション一覧ページ（`src/app/characters/[id]/conditions/page.tsx`）の各コンディションカードにも「影響技能」バッジを表示。追加DBなし。
 **コミット:** `feat: condition-based skill penalty display on character sheet`
+
+## [TODO] AIロール結果即興演出テキスト（判定ナレーション生成） — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** ダイスローラーで技能判定をした直後に、成功度（決定的成功/通常成功/失敗/致命的失敗）・技能名・シーンコンテキストをもとにClaude APIが50〜80字の没入感ある演出テキストを生成する機能。既存のAI機能（バックストーリー生成・シナリオドラフト・NPCセリフ・セッションサマリー・雰囲気テキスト）はすべてセッション外かNPC向けで、判定の瞬間に発動するリアルタイム演出は未対応。
+**実装ヒント:** `src/app/api/ai/roll-narration/route.ts` を新規作成（`src/app/api/ai/npc-dialogue/route.ts` の実装パターンを踏襲）。リクエストボディ: `{ skillName: string, successLevel: "critical_success"|"success"|"failure"|"fumble", characterOccupation: string, sceneContext?: string }`。プロンプト: 「CoC 7版の探索者が『{skillName}』判定で『{successLevel}』を出しました。職業は{occupation}。以下のシーンで起きたこと: {sceneContext}。この瞬間を60字以内の情景描写で表現してください。」レスポンス: `{ narration: string }`。`src/app/_components/DiceRoller.tsx` のロール結果表示部に「AIナレーション生成」ボタンを追加（"use client"のまま、fetch で route.ts を呼ぶ）。生成テキストはロール結果カード内にアニメーション付きで展開表示。追加DBなし。
+**コミット:** `feat: AI roll narration for immersive dice result descriptions`
+
+## [TODO] セッション横断SAN喪失パターン分析（原因種別集計） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** 複数セッションにわたるSAN喪失の記録を原因種別（神話的クリーチャー遭遇・一時的狂気・不定の狂気・呪文使用など）ごとに集計し、「このキャラクターが何に最も精神を削られているか」をグラフで可視化するページ。既存の「ダイス判定統計」はロール成功率中心で、SAN喪失の原因分析には対応していない。KPがシナリオ難易度調整の材料として使うほか、PLが自キャラの弱点パターンを把握できる。
+**実装ヒント:** 新規テーブル不要（既存 `session_logs(id, character_id, san_loss, summary, created_at)` と `madness_records(id, character_id, symptom, started_at)` を流用）。`src/app/characters/[id]/san-analysis/page.tsx` を Server Component で新規作成。`supabase.from("session_logs").select("san_loss, summary, created_at").eq("character_id", id).gt("san_loss", 0)` で喪失ログ全件取得。`summary` テキストからキーワード（「クリーチャー」「死体」「神格」「呪文」等）を正規表現で抽出しカテゴリに振り分け、カテゴリ別の累計SAN喪失量をCSSのみのネイティブSVG横棒グラフで描画。喪失量トップ3カテゴリをハイライトカードで上部表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「SAN分析」リンクを追加。追加DBなし。
+**コミット:** `feat: cross-session SAN loss cause breakdown and pattern visualization`
+
+## [TODO] 組み合わせ技能判定サポーター（CoC7版Combined Roll計算） — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** CoC 7版の「組み合わせ判定（Combined Roll）」ルール——複数の探索者が協力して1つの判定を行う場合に、リード役の技能値＋補助者の技能値の1/5を加算し最終判定値を算出するルール——を即座に計算できるUI。現在はプレイヤーが電卓や暗算で計算しており、計算ミスや手間が生じている。
+**実装ヒント:** 新規テーブル不要（純粋なクライアントサイド計算）。`src/app/_components/CombinedRollHelper.tsx` を "use client" で新規作成。UIは「リード役の技能値」数値入力＋「補助者の技能値」を複数追加できる入力リスト（最大4人）。計算式: `finalValue = leadSkill + sum(helperSkills.map(s => Math.floor(s / 5)))`（上限: リードの技能値の通常成功値×2）。リアルタイム計算で最終判定値・通常成功ライン・ハード成功ライン・決定的成功ラインを自動表示。「補助者を追加」ボタンで入力フィールドを最大4個まで追加。シナリオ詳細ページのパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に「組み合わせ判定」ボタンとしてモーダル展開で配置。追加DBなし。
+**コミット:** `feat: Combined Roll calculator for cooperative skill checks per CoC 7e rules`
+
+## [TODO] AIセッション後KPデブリーフィングレポート — 優先度: 中
+**対象:** KP
+**概要:** セッション終了後、シナリオに紐づく全参加者のSAN/HP喪失量・達成目標数・遭遇NPC/クリーチャー・ダイス成功率・フィードバック評価をClaude APIが分析し、「今回うまくいった点・改善できる点・次回の提案」を含む構造化KPレポートを自動生成する機能。既存の「セッションリプレイ生成」（PLシェア向け物語形式）・「KP振り返りノート」（手動記入）・「SAN/HP喪失サマリー」（数値のみ）とは異なり、AI視点のKP向け改善提案に特化する。
+**実装ヒント:** `src/app/api/ai/kp-debrief/route.ts` を新規作成（既存 `src/app/api/ai/session-summary/route.ts` のパターンを踏襲）。入力データ: シナリオID経由で `session_logs`（SAN/HP喪失量）・`session_npc_encounters`（遭遇NPC一覧）・`scenario_participants + dice_rolls`（参加者成功率）・`scenario_player_ratings`（PL評価平均）を `Promise.all` で並行取得してJSON化しプロンプトに埋め込む。AIへの指示: 「KPとして今回のセッションを振り返り、①うまくいった演出・ペース管理、②改善点（SAN喪失が偏った場面・目標未達の原因）、③次回セッションへの具体的提案3点、をJSON形式で出力してください」。レスポンス型: `{ went_well: string[], improvements: string[], next_suggestions: string[] }`。`src/app/scenarios/[id]/kp-debrief/page.tsx` を "use client" で新規作成し、ボタン押下でAPIコール→結果をカード形式で表示。シナリオ詳細ダッシュボード（`src/app/scenarios/[id]/page.tsx`）のKPセクションに「AIデブリーフ」リンクを追加。追加DBなし。
+**コミット:** `feat: AI-powered KP debrief report with session analytics and improvement suggestions`
