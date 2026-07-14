@@ -2072,7 +2072,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `RandomTable` 型（name, entries: jsonb, scenario_id, is_public）を活用。`src/app/kp/random-tables/page.tsx` を "use client" で新規作成。テーブル作成フォームで名前・ダイス面数（d6/d8/d10/d12/d20/d100）・エントリ一覧（`[{min: 1, max: 5, result: "暗闇に蠢く影"}]` 形式の配列）を入力。「ロール！」ボタンで `Math.random()` による結果抽選を行い、マッチするエントリを強調表示。既存の `DiceRoller.tsx` のロール結果表示パターンを参考にアニメーション付き結果カードを表示。テーブルはシナリオ別（`scenario_id` 指定）またはグローバル（`scenario_id: null`）で管理しタブで切り替え。`src/app/kp/` 配下の KP ナビゲーションにリンクを追加。追加DBなし（`random_tables` テーブルは型定義から既存想定）。
 **コミット:** `feat: custom random table manager with one-click dice roll results`
 
-## [TODO] 探索者日記ページ（キャラクター主観ログ） — 優先度: 低
+## [DONE] 探索者日記ページ（キャラクター主観ログ） — 優先度: 低
 **対象:** PL
 **概要:** PLがセッションごとにキャラクターの一人称視点の「日記・手記」を記録し、キャンペーン全体を探索者の主観で振り返れる専用ページ。KP視点の客観的なセッションログと対をなす、PL創作表現の場として機能する。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `CharacterJournal` 型（character_id, session_id, title, content, written_at, is_public）を活用。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。`supabase.from("character_journals").select("*, sessions(title, played_at)").eq("character_id", id).order("written_at", {ascending: false})` で取得しタイムライン形式で表示。各エントリはタイトル・日付・本文テキストエリア（`white-space: pre-wrap` 表示）で構成。`is_public: true` の日記は公開キャラプロフィール（`/c/[slug]`）に「手記」タブとして公開可能。新規作成時にシナリオ（セッション）を選択するセレクタで `session_id` を紐付け。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📔 日記」リンクを追加。追加DBなし（`character_journals` テーブルは型定義から既存想定）。

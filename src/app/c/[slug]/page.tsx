@@ -79,6 +79,15 @@ export default async function PublicCharacterPage({ params }: Props) {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  const { data: journalEntries } = await supabase
+    .from("character_journal_entries")
+    .select("id, title, content, mood, session_label, entry_date, created_at")
+    .eq("character_id", char.id)
+    .eq("is_private", false)
+    .order("entry_date", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(10);
+
   const publicFields = new Set<string>(
     (char.public_fields as string[] | null) ?? DEFAULT_PUBLIC_FIELDS
   );
@@ -339,6 +348,29 @@ export default async function PublicCharacterPage({ params }: Props) {
                       {q.session_label && <span>🎲 {q.session_label}</span>}
                       {q.context && <span>— {q.context}</span>}
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 手記（公開日誌） */}
+          {(journalEntries ?? []).length > 0 && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>📔 手記</h2>
+              <div className="space-y-4">
+                {(journalEntries ?? []).map((entry: { id: string; title: string; content: string; mood: string | null; session_label: string | null; entry_date: string | null; created_at: string }) => (
+                  <div key={entry.id} className="rounded border border-coc-border bg-coc-surface px-4 py-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-coc-text">{entry.title}</p>
+                      <div className="flex items-center gap-2 text-xs text-coc-muted">
+                        {entry.entry_date && <span>{entry.entry_date}</span>}
+                        {entry.session_label && <span>· {entry.session_label}</span>}
+                      </div>
+                    </div>
+                    <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
+                      {entry.content}
+                    </p>
                   </div>
                 ))}
               </div>
