@@ -2048,7 +2048,7 @@
 **実装ヒント:** Supabase Realtime の `channel.on('postgres_changes', ...)` を使い `characters` テーブルの `UPDATE` イベントを購読。`src/app/_components/QuickStatEditor.tsx` に `useEffect` でチャンネル購読を追加（既存の supabase クライアントをそのまま利用）。`src/app/characters/[id]/quick/page.tsx` ではキャラ自身のリアルタイム購読を追加し、他PCのミニステータス（名前+HP/SAN）を横スクロールで表示するオプションバーを追加（scenario_id が一致するキャラを対象）。追加DBなし。
 **コミット:** `feat: realtime HP/SAN sync via Supabase Realtime during sessions`
 
-## [TODO] KP用パーティステータスモニター — 優先度: 高
+## [DONE] KP用パーティステータスモニター — 優先度: 高
 **対象:** KP
 **概要:** KPがシナリオに参加している全キャラクターのHP・SAN・MPを一覧で監視できるボード。セッション中に「誰が今どれだけ消耗しているか」をKPがリアルタイムで把握し、ペース調整・SAN喪失タイミングの判断に使う。
 **実装ヒント:** `src/app/scenarios/[id]/party-status/page.tsx` を新規作成（"use client"）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加キャラ+ステータスを一括取得。各キャラをカード形式で表示し、HP/SAN/MPをカラーバー（残量割合でCSS widthを設定: 50%以下で黄、25%以下で赤）で可視化。Supabase Realtime で `characters` テーブルの変更を購読し自動更新。`src/app/scenarios/[id]/page.tsx` に「パーティ状態」リンクを追加。追加DBなし。

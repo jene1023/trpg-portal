@@ -470,6 +470,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         <Link
+          href={`/scenarios/${id}/party-status`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Activity size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">パーティ状態モニター</p>
+              <p className="text-xs text-coc-muted">HP/SAN/MPをカラーバーでリアルタイム監視 — KPのペース調整・SAN喪失タイミング判断に</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
+        <Link
           href={`/scenarios/${id}/party-balance`}
           className="flex items-center justify-between rounded-xl border border-coc-border bg-coc-surface px-5 py-4 hover:border-coc-gold transition-colors"
         >
