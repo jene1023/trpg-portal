@@ -2006,7 +2006,7 @@
 **実装ヒント:** 新規テーブル不要（既存 `session_logs(id, character_id, san_loss, summary, created_at)` と `madness_records(id, character_id, symptom, started_at)` を流用）。`src/app/characters/[id]/san-analysis/page.tsx` を Server Component で新規作成。`supabase.from("session_logs").select("san_loss, summary, created_at").eq("character_id", id).gt("san_loss", 0)` で喪失ログ全件取得。`summary` テキストからキーワード（「クリーチャー」「死体」「神格」「呪文」等）を正規表現で抽出しカテゴリに振り分け、カテゴリ別の累計SAN喪失量をCSSのみのネイティブSVG横棒グラフで描画。喪失量トップ3カテゴリをハイライトカードで上部表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「SAN分析」リンクを追加。追加DBなし。
 **コミット:** `feat: cross-session SAN loss cause breakdown and pattern visualization`
 
-## [TODO] 組み合わせ技能判定サポーター（CoC7版Combined Roll計算） — 優先度: 中
+## [DONE] 組み合わせ技能判定サポーター（CoC7版Combined Roll計算） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** CoC 7版の「組み合わせ判定（Combined Roll）」ルール——複数の探索者が協力して1つの判定を行う場合に、リード役の技能値＋補助者の技能値の1/5を加算し最終判定値を算出するルール——を即座に計算できるUI。現在はプレイヤーが電卓や暗算で計算しており、計算ミスや手間が生じている。
 **実装ヒント:** 新規テーブル不要（純粋なクライアントサイド計算）。`src/app/_components/CombinedRollHelper.tsx` を "use client" で新規作成。UIは「リード役の技能値」数値入力＋「補助者の技能値」を複数追加できる入力リスト（最大4人）。計算式: `finalValue = leadSkill + sum(helperSkills.map(s => Math.floor(s / 5)))`（上限: リードの技能値の通常成功値×2）。リアルタイム計算で最終判定値・通常成功ライン・ハード成功ライン・決定的成功ラインを自動表示。「補助者を追加」ボタンで入力フィールドを最大4個まで追加。シナリオ詳細ページのパーティービュー（`src/app/scenarios/[id]/party/page.tsx`）に「組み合わせ判定」ボタンとしてモーダル展開で配置。追加DBなし。
