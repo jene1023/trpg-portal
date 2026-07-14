@@ -1976,7 +1976,7 @@
 **実装ヒント:** `src/app/api/ai/scenario-difficulty/route.ts` を新規作成（既存 `src/app/api/ai/scenario-draft/route.ts` パターンを踏襲）。入力: シナリオID経由で `scenarios`・`scenario_scenes`・`creatures`・`npcs`・`handouts` を結合した構造データをJSON化してプロンプトに埋め込む。出力: `{difficulty_label: "beginner"|"intermediate"|"advanced", reasoning: string, suggestions: string[]}` のJSON（`parseJSON` でパース）。`src/app/scenarios/[id]/page.tsx` のKP向けアクションエリアに「難易度を自動評価」ボタンを追加し、結果をインライン展開パネルで表示。「この評価を採用」ボタンで `scenarios.difficulty` をupsert。追加DBなし。
 **コミット:** `feat: AI-powered scenario difficulty auto-evaluation for KP`
 
-## [TODO] 探索者メモリアルホール（死亡・引退キャラ追悼ページ） — 優先度: 低
+## [DONE] 探索者メモリアルホール（死亡・引退キャラ追悼ページ） — 優先度: 低
 **対象:** PL / 共通
 **概要:** ステータスが `dead` または `retired` の公開キャラクターを一覧で追悼できるメモリアルページ。最終セッション情報・引退/死亡シーン・KPや他PLからの追悼メッセージを残すコミュニティ機能として機能する。
 **実装ヒント:** Supabaseに `character_tributes(id uuid pk, character_id uuid references characters, author_name text, message text, created_at timestamptz)` テーブルを追加（RLS: 書き込みは認証ユーザー全員・閲覧は公開）。`src/app/memorial/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, updated_at").in("status", ["dead", "retired"]).eq("is_public", true).order("updated_at", {ascending: false})` でキャラ一覧取得。各カードに status バッジ（dead=赤/retired=灰）・職業・ポートレート・`farewell_scene` サマリー・追悼メッセージ数を表示。追悼メッセージ投稿は "use client" 子コンポーネント（短文テキスト入力＋送信）。グローバルナビゲーションのフッターに「メモリアル」リンクを追加。`src/lib/supabase.ts` に `CharacterTribute` 型を追加。追加DB1テーブル。
