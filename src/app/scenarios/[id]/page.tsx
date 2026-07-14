@@ -20,6 +20,7 @@ import GameClockEditor from "@/app/_components/GameClockEditor";
 import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGenerator";
 import ScenarioTemplateToggle from "@/app/_components/ScenarioTemplateToggle";
 import TeaserEditor from "@/app/_components/TeaserEditor";
+import SaveAsTemplateButton from "@/app/_components/SaveAsTemplateButton";
 
 const STATUS_LABELS: Record<ScenarioStatus, string> = {
   planning: "準備中",
@@ -1465,11 +1466,11 @@ export default async function ScenarioDetailPage({ params }: Props) {
         <div className="flex items-center justify-between mb-3">
           <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest">テンプレートライブラリ</p>
           <Link
-            href="/templates"
+            href="/kp/scenario-templates"
             className="flex items-center gap-1 text-xs text-coc-muted hover:text-coc-gold transition-colors"
           >
             <BookMarked size={12} />
-            ライブラリを見る
+            テンプレートを管理
           </Link>
         </div>
         <ScenarioTemplateToggle
@@ -1477,6 +1478,9 @@ export default async function ScenarioDetailPage({ params }: Props) {
           initialIsTemplate={scenario.is_template ?? false}
           initialPublishedAt={scenario.template_published_at ?? null}
         />
+        <div className="mt-3 pt-3 border-t border-coc-border">
+          <SaveAsTemplateButton scenarioId={id} scenarioTitle={scenario.title} />
+        </div>
       </div>
 
       {/* ティザーページ */}

@@ -1450,3 +1450,20 @@ export type SessionFeedbackPost = {
   safety_concern: string | null;
   created_at: string;
 };
+
+export type ScenarioTemplateData = {
+  scenes: { title: string; order: number }[];
+  npc_slots: { role: string }[];
+  handout_count: number;
+  creature_slots: { role: string }[];
+};
+
+export type ScenarioTemplate = {
+  id: string;
+  kp_id: string;
+  title: string;
+  description: string | null;
+  template_data: ScenarioTemplateData;
+  is_public: boolean;
+  created_at: string;
+};

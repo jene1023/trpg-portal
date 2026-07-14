@@ -1964,7 +1964,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party-skills/page.tsx` を "use client" で新規作成。参加キャラクター（`scenario_participants` 経由）の `character_skills` を一括取得し、技能名ごとにパーティ内最高値・担当キャラを集計。技能カテゴリ（探索・戦闘・社交・知識・その他）別にグループ化し、最高値が50未満の技能を⚠️バッジで強調。各技能行にキャラクター名と値をインライン表示（`{charName}: {value}`）。ページ内検索（`<input>` フィルタ）で技能名を絞り込み可能。追加DBなし（既存 `character_skills` と `scenario_participants` を結合）。`src/app/scenarios/[id]/page.tsx` のKPセクションに「スキル分析」リンクを追加。
 **コミット:** `feat: party skill coverage analyzer for KP scenario prep`
 
-## [TODO] シナリオ再利用テンプレート機能 — 優先度: 低
+## [DONE] シナリオ再利用テンプレート機能 — 優先度: 低
 **対象:** KP
 **概要:** 既存シナリオの構造（シーン数・NPC配置・ハンドアウト枠・クリーチャー枠）だけを抽出して「テンプレート」として保存し、次回シナリオ作成時に骨格として使い回せる機能。毎回ゼロから組み立てる手間を省き、KPのシナリオ制作ペースを上げる。
 **実装ヒント:** Supabaseに `scenario_templates(id uuid pk, kp_id uuid references auth.users, title text, description text, template_data jsonb, is_public bool DEFAULT false, created_at timestamptz)` テーブルを追加、RLS: kp_id = auth.uid() で書き込み・is_public=trueは全員閲覧。`template_data` は `{scenes: [{title, order}], npc_slots: [{role}], handout_count: int, creature_slots: [{role}]}` のJSONスキーマ。`src/app/kp/scenario-templates/page.tsx` を "use client" で新規作成。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の KP メニューに「テンプレートとして保存」ボタンを追加し、構造を自動抽出してupsert。テンプレート一覧からシナリオ新規作成時にテンプレートを選択すると `scenarios`・`scenario_scenes`・`handouts`（空枠）が一括インサートされる。公開テンプレートはコミュニティ共有として `/kp/scenario-templates/public` で閲覧可能。
