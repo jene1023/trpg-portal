@@ -2065,3 +2065,27 @@
 **概要:** キャラクターの各技能値に対し、CoC 7版ルールの成功確率（決定的成功・通常成功・失敗・致命的失敗）を計算し、色分けバーで可視化するページ。「この技能は何%で成功するのか」を一目で把握でき、セッション前の技能選択や成長目標の設定に役立てる。
 **実装ヒント:** `src/app/characters/[id]/skill-probs/page.tsx` を新規作成（Server Component + クライアント絞り込み）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得。各技能値 `v` に対して: 決定的成功 = `Math.floor(v / 5)%`、通常成功 = `(v - Math.floor(v/5))%`、失敗 = `(95 - v)%`、致命的失敗 = `5%`（96〜100固定）を計算（1の位が0の場合の端数処理あり）。技能ごとに `<div>` 幅100%のうち4色の横バーをCSS flexで構成（追加ライブラリ不要）。技能カテゴリ別にソートし、現在値でフィルタ可能（低確率技能を非表示にするスイッチ）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「確率チャート」リンクを追加。追加DBなし。
 **コミット:** `feat: skill success probability visualizer for character skills`
+
+## [TODO] カスタムランダムテーブル管理・ロールページ — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPが「狂気症状表」「ランダムNPC性格」「天候変化」などシナリオ独自のランダムテーブルを自作・管理し、セッション中にダイスロールで結果を引けるページ。繰り返し使うランダム要素を即時参照できるため、即興シナリオ運営の速度と幅が広がる。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `RandomTable` 型（name, entries: jsonb, scenario_id, is_public）を活用。`src/app/kp/random-tables/page.tsx` を "use client" で新規作成。テーブル作成フォームで名前・ダイス面数（d6/d8/d10/d12/d20/d100）・エントリ一覧（`[{min: 1, max: 5, result: "暗闇に蠢く影"}]` 形式の配列）を入力。「ロール！」ボタンで `Math.random()` による結果抽選を行い、マッチするエントリを強調表示。既存の `DiceRoller.tsx` のロール結果表示パターンを参考にアニメーション付き結果カードを表示。テーブルはシナリオ別（`scenario_id` 指定）またはグローバル（`scenario_id: null`）で管理しタブで切り替え。`src/app/kp/` 配下の KP ナビゲーションにリンクを追加。追加DBなし（`random_tables` テーブルは型定義から既存想定）。
+**コミット:** `feat: custom random table manager with one-click dice roll results`
+
+## [TODO] 探索者日記ページ（キャラクター主観ログ） — 優先度: 低
+**対象:** PL
+**概要:** PLがセッションごとにキャラクターの一人称視点の「日記・手記」を記録し、キャンペーン全体を探索者の主観で振り返れる専用ページ。KP視点の客観的なセッションログと対をなす、PL創作表現の場として機能する。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `CharacterJournal` 型（character_id, session_id, title, content, written_at, is_public）を活用。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。`supabase.from("character_journals").select("*, sessions(title, played_at)").eq("character_id", id).order("written_at", {ascending: false})` で取得しタイムライン形式で表示。各エントリはタイトル・日付・本文テキストエリア（`white-space: pre-wrap` 表示）で構成。`is_public: true` の日記は公開キャラプロフィール（`/c/[slug]`）に「手記」タブとして公開可能。新規作成時にシナリオ（セッション）を選択するセレクタで `session_id` を紐付け。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📔 日記」リンクを追加。追加DBなし（`character_journals` テーブルは型定義から既存想定）。
+**コミット:** `feat: character journal page for first-person session log entries`
+
+## [TODO] シナリオ目標追跡ボード（クエストオブジェクティブ） — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** KPがシナリオのメイン目標・サブ目標を事前登録し、セッション中に達成状況をリアルタイムにトグル更新、参加PLが進捗を一覧できるクエストボード。「今のゴールが分からない」というPLの混乱を解消し、KPの目標管理漏れも防ぐ。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `ScenarioObjective` 型（scenario_id, title, description, is_mandatory, is_achieved, achieved_at, display_order）を活用。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成。KPは目標名・説明・必須/サブ目標の種別を登録。一覧はメイン目標セクション（赤バッジ）とサブ目標セクション（橙バッジ）に分けてカード表示。「達成！」ボタンを押すと `is_achieved: true` + `achieved_at: now()` にupsertし `supabase.channel("objectives-${scenarioId}").send({type: "broadcast", event: "objective_achieved"})` で全PL画面に達成演出（パルスアニメーション）をブロードキャスト。達成済み目標はチェックマーク付き薄グレー表示。`src/app/scenarios/[id]/page.tsx` に「🎯 目標」リンクを追加。追加DBなし（`scenario_objectives` テーブルは型定義から既存想定）。
+**コミット:** `feat: scenario quest objectives board with realtime achievement tracking`
+
+## [TODO] セッション開幕イントロダクション配信ページ — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPがセッション開幕のオープニングナレーション・世界観説明・コンテンツ警告を事前作成し、セッション開始時にワンクリックで参加PL全員の画面にリアルタイムブロードキャストできる機能。毎回冒頭で読み上げる定型説明を省力化し、演出クオリティを安定させる。
+**実装ヒント:** `src/lib/supabase.ts` に既存の `SessionIntroduction` 型（scenario_id, narration_text, world_setting_note, content_warnings, bgm_suggestion, created_by_kp_id, is_broadcast, broadcast_at）を活用。`src/app/scenarios/[id]/introduction/page.tsx` を "use client" で新規作成。KP向け編集ビュー: テキストエリアでナレーション本文・世界観補足・コンテンツ警告・BGM推薦曲を入力し upsert 保存。「配信開始」ボタンで `is_broadcast: true` + `broadcast_at: now()` に更新し `supabase.channel("intro-${scenarioId}").send({type: "broadcast", event: "intro_started", payload: {narration_text, content_warnings}})` でPLに送信。PL向け受信ビュー: 同チャンネルを購読し、イベント受信時にフルスクリーンモーダルでナレーション文を表示（コンテンツ警告は先頭に赤字太字で表示）。`src/app/scenarios/[id]/page.tsx` に「📢 イントロ配信」リンクを追加。追加DBなし（`session_introductions` テーブルは型定義から既存想定）。
+**コミット:** `feat: session opening introduction broadcast page for KP narration delivery`
