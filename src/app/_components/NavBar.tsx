@@ -11,6 +11,7 @@ import SearchBar from "./SearchBar";
 const navLinks = [
   { href: "/dashboard", label: "ダッシュボード" },
   { href: "/characters", label: "キャラクター" },
+  { href: "/build-simulator", label: "ビルドシミュ" },
   { href: "/scenarios", label: "シナリオ" },
   { href: "/campaigns", label: "キャンペーン" },
   { href: "/npcs", label: "NPC" },

@@ -2030,7 +2030,7 @@
 **実装ヒント:** Supabaseに `scenario_locations(id uuid pk, scenario_id uuid references scenarios, name text, description text, clue_summary text, npc_names text[], danger_level int CHECK(1-3) DEFAULT 1, is_revealed bool DEFAULT false, display_order int, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・参加PLは is_revealed=true のみ閲覧）。`src/app/scenarios/[id]/locations/page.tsx` を "use client" で新規作成。追加フォームは「場所名・説明・手がかりメモ・在中NPC（カンマ区切り）・危険度（1〜3）」の入力欄。ロケーション一覧は探索状況別タブ（全件/未訪問/訪問済み）で切り替え。各カードにKP向けの「手がかり・NPC」詳細を表示し、PL公開トグルで `is_revealed` を切り替える。`src/app/scenarios/[id]/page.tsx` のKPツールセクションに「🗺️ ロケーション」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: scenario location tracker with clue/NPC notes and exploration status`
 
-## [TODO] キャラクタービルドシミュレーター（技能ポイント配分シミュ） — 優先度: 中
+## [DONE] キャラクタービルドシミュレーター（技能ポイント配分シミュ） — 優先度: 中
 **対象:** PL
 **概要:** CoC 7版のキャラクター作成ルールに沿って、能力値（STR/CON/POW/DEX/APP/SIZ/INT/EDU）を入力すると職業ポイント（EDU×4など）・興味ポイント（INT×2）が自動計算され、どの技能に何ポイント振るか事前にシミュレーションできるツール。「技能ポイントが足りない」「配分が非効率だった」に気づかずキャラクターを作成してしまう新規PLの失敗を防ぎ、本登録前の計画段階に役立てる。
 **実装ヒント:** 新規テーブル不要（純粋なクライアントサイド計算）。`src/app/build-simulator/page.tsx` を "use client" で新規作成。ステップ1: 能力値入力（各1〜100のスライダー）で自動計算: `occupationPoints = EDU × 4`（職業によっては `EDU×2 + DEX×2` など）、`interestPoints = INT × 2`、HP最大 `= floor((CON + SIZ) / 10)`、MP最大 `= POW`、初期SAN `= POW × 5`。ステップ2: 職業選択ドロップダウン（探偵・医師・学者など10種程度）で職業ポイント計算式を切り替え。ステップ3: 技能リスト（`src/lib/rules-data.ts` の技能定数を流用）に対してスライダーで振り分けポイントを入力し、残り職業ポイント/興味ポイントをリアルタイム残量表示。「このビルドでキャラ作成へ」ボタンで `src/app/characters/new` に `buildData` をURLSearchParamsで渡してフォームに初期値を反映。グローバルナビゲーションに「ビルドシミュ」リンクを追加（ログイン不要のツールとして公開可）。追加DBなし。
