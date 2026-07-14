@@ -174,6 +174,8 @@ export default async function HomePage() {
         </p>
         {/* 燭台の炎から漂う火の粉: position:absolute なのでレイアウトに影響なし */}
         <div className="coc-hero-embers" aria-hidden="true" />
+        {/* 魔法の鏡走査線: 水晶球に映る記録が定期的に掃引される */}
+        <div className="coc-hero-scan" aria-hidden="true" />
       </div>
 
       {/* ヒーローとタイルの区切り */}
@@ -187,7 +189,7 @@ export default async function HomePage() {
             href={href}
             className={`group relative rounded-lg border coc-card-bg p-5 space-y-3 transition-all duration-300 ease-out ${
               available
-                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.25),inset_0_1px_0_rgba(201,133,58,0.10)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98] motion-safe:active:translate-y-0 coc-tile-shimmer"
+                ? "border-coc-border hover:border-coc-border-glow hover:shadow-[0_4px_18px_rgba(201,133,58,0.25),inset_0_1px_0_rgba(201,133,58,0.10)] motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98] motion-safe:active:translate-y-0 coc-tile-shimmer coc-btn-ripple"
                 : "border-coc-border opacity-50 pointer-events-none"
             }`}
           >

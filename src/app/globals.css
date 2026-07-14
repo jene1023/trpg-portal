@@ -1285,6 +1285,87 @@ body {
   }
 }
 
+/* ヒーローパネル走査線: 魔法の鏡を覗き込むような金色の光走が静かに流れる */
+/* 深淵の記録水晶に触れるように、定期的に光の帯がパネルを掃引する */
+/* coc-hero-scan 自体が inset:0 なので background-position を動かして親高さに依存しない */
+@keyframes coc-hero-scan {
+  0%   { background-position: 0 -6px;  opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 0.50; }
+  100% { background-position: 0 400px; opacity: 0; }
+}
+
+.coc-hero-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    rgba(201, 133, 58, 0.08) 2px,
+    rgba(255, 220, 150, 0.22) 3px,
+    rgba(201, 133, 58, 0.10) 4px,
+    transparent 6px
+  );
+  background-size: 100% 6px;
+  background-repeat: no-repeat;
+  background-position: 0 -6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-hero-scan {
+    animation: coc-hero-scan 14s cubic-bezier(0.40, 0, 0.60, 1) 6s infinite;
+  }
+}
+
+/* クリックリプル: 封印を解くように波紋が広がる黄金の衝撃波 */
+@keyframes coc-ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.70;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* coc-tile-shimmer が ::after を使用するため ripple は ::before を使用して共存させる */
+/* 固定サイズ円を中央配置し overflow:hidden で親にクリップされるので要素サイズ依存なし */
+.coc-btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.coc-btn-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  margin: -200px 0 0 -200px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(201, 133, 58, 0.22) 0%,
+    rgba(201, 133, 58, 0.06) 45%,
+    transparent 68%
+  );
+  transform: scale(0);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-btn-ripple:active::before {
+    animation: coc-ripple 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+}
+
 /* 最終章バッジ: 逝去・引退した探索者への鎮魂の炎 — 消え入る蝋燭が黄金に揺れる追憶 */
 @keyframes coc-final-chapter-breathe {
   0%, 100% {
