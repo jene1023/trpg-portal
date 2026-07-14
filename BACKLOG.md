@@ -2096,7 +2096,7 @@
 **実装ヒント:** Supabaseに `handout_reads(id, handout_id, character_id, read_at, created_at)` テーブルを追加（RLS: own character のみ insert、KP は select all）。既存の `src/app/scenarios/[id]/handouts/page.tsx` のハンドアウトカードに既読人数バッジ `[既読 2/3]` を追加（supabase.from("handout_reads").select("character_id").eq("handout_id", h.id) でカウント）。PLがハンドアウト詳細を開いた際に `supabase.from("handout_reads").upsert({handout_id, character_id, read_at: new Date().toISOString()})` を発火。Supabase Realtime channel `handout-reads-${scenarioId}` で INSERT を購読しKP画面を即時更新。`src/app/scenarios/[id]/handouts/page.tsx` にKP向けの「未読確認モード」トグルを追加し、未読キャラクター名をアイコン付きで一覧表示。
 **コミット:** `feat: handout read-receipt tracking per player character`
 
-## [TODO] AIキャラクター成長スキル推薦 — 優先度: 中
+## [DONE] AIキャラクター成長スキル推薦 — 優先度: 中
 **対象:** PL
 **概要:** セッション終了後、AIがそのキャラクターのダイスロール履歴を分析し「最も成長させるべきスキル」上位3件を理由とともに推薦するページ。成功率・使用頻度・現在値の伸び代を総合判断し、次セッション前の成長ロールの意思決定を支援する。
 **実装ヒント:** `src/app/characters/[id]/growth-advisor/page.tsx` を新規作成（"use client"）。`supabase.from("dice_rolls").select("*").eq("character_id", id).order("rolled_at", {ascending: false}).limit(100)` でロール履歴取得。`supabase.from("character_skills").select("*").eq("character_id", id)` でスキル一覧取得。取得データをAI APIに送信: プロンプトは「以下のダイスロール履歴とスキル一覧を分析し、成長させるべきスキルTOP3を理由（使用頻度・成功率・現在値）とともにJSON形式で返してください。スキル名・推薦理由・期待成功率向上値を含めること。」AI APIは `/api/ai-growth-advisor` エンドポイント（`src/app/api/ai-growth-advisor/route.ts`）で実装（既存の他AI APIエンドポイントと同様のパターン）。結果をカード形式で表示。`src/app/characters/[id]/growth/page.tsx` に「AIアドバイス」ボタンを追加してリンク。

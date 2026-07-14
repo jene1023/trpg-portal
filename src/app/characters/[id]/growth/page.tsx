@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured, GrowthHistory } from "@/lib/supabase";
 import GrowthHistoryList from "@/app/_components/GrowthHistoryList";
 
@@ -173,9 +173,18 @@ export default async function GrowthPage({ params }: Props) {
         </Link>
       </div>
 
-      <h1 className="font-cinzel text-xl font-bold text-coc-text mb-1">
-        技能成長グラフ
-      </h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="font-cinzel text-xl font-bold text-coc-text">
+          技能成長グラフ
+        </h1>
+        <Link
+          href={`/characters/${id}/growth-advisor`}
+          className="flex items-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-3 py-1.5 text-xs font-semibold text-coc-gold hover:bg-coc-gold/20 transition-colors"
+        >
+          <Sparkles size={13} />
+          AIアドバイス
+        </Link>
+      </div>
       <p className="text-xs text-coc-muted mb-6">
         セッションごとの技能値変遷を折れ線グラフで可視化します。各点にカーソルを合わせるとセッション名が表示されます。
       </p>
