@@ -1510,3 +1510,11 @@ export type ClueEdge = {
   relation_label: string | null;
   created_at: string;
 };
+
+export type HandoutRead = {
+  id: string;
+  handout_id: string;
+  character_id: string;
+  read_at: string;
+  created_at: string;
+};

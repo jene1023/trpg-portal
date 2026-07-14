@@ -8,6 +8,9 @@ import HandoutList from "@/app/_components/HandoutList";
 
 type Props = { params: Promise<{ id: string }> };
 
+export type ParticipantInfo = { characterId: string; characterName: string };
+export type ReadInfo = { handoutId: string; characterId: string };
+
 export default async function HandoutsPage({ params }: Props) {
   const { id } = await params;
 
@@ -21,11 +24,42 @@ export default async function HandoutsPage({ params }: Props) {
 
   if (!scenario) notFound();
 
-  const { data: handouts } = await supabase
-    .from("handouts")
-    .select("*")
-    .eq("scenario_id", id)
-    .order("created_at", { ascending: false });
+  const [{ data: handouts }, { data: participantsRaw }] = await Promise.all([
+    supabase
+      .from("handouts")
+      .select("*")
+      .eq("scenario_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("scenario_participants")
+      .select("character_id, characters(id, name)")
+      .eq("scenario_id", id),
+  ]);
+
+  const handoutIds = (handouts ?? []).map((h) => h.id);
+  const { data: readsRaw } =
+    handoutIds.length > 0
+      ? await supabase
+          .from("handout_reads")
+          .select("handout_id, character_id")
+          .in("handout_id", handoutIds)
+      : { data: [] };
+
+  const participants: ParticipantInfo[] = (participantsRaw ?? []).map((p) => {
+    const char = p as unknown as {
+      character_id: string;
+      characters: { name: string } | null;
+    };
+    return {
+      characterId: char.character_id,
+      characterName: char.characters?.name ?? char.character_id,
+    };
+  });
+
+  const initialReads: ReadInfo[] = (readsRaw ?? []).map((r) => ({
+    handoutId: r.handout_id as string,
+    characterId: r.character_id as string,
+  }));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -49,6 +83,8 @@ export default async function HandoutsPage({ params }: Props) {
       <HandoutList
         scenarioId={id}
         initialHandouts={(handouts ?? []) as Handout[]}
+        participants={participants}
+        initialReads={initialReads}
       />
     </div>
   );

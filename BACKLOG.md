@@ -2090,7 +2090,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `SessionIntroduction` 型（scenario_id, narration_text, world_setting_note, content_warnings, bgm_suggestion, created_by_kp_id, is_broadcast, broadcast_at）を活用。`src/app/scenarios/[id]/introduction/page.tsx` を "use client" で新規作成。KP向け編集ビュー: テキストエリアでナレーション本文・世界観補足・コンテンツ警告・BGM推薦曲を入力し upsert 保存。「配信開始」ボタンで `is_broadcast: true` + `broadcast_at: now()` に更新し `supabase.channel("intro-${scenarioId}").send({type: "broadcast", event: "intro_started", payload: {narration_text, content_warnings}})` でPLに送信。PL向け受信ビュー: 同チャンネルを購読し、イベント受信時にフルスクリーンモーダルでナレーション文を表示（コンテンツ警告は先頭に赤字太字で表示）。`src/app/scenarios/[id]/page.tsx` に「📢 イントロ配信」リンクを追加。追加DBなし（`session_introductions` テーブルは型定義から既存想定）。
 **コミット:** `feat: session opening introduction broadcast page for KP narration delivery`
 
-## [TODO] ハンドアウト既読確認管理 — 優先度: 高
+## [DONE] ハンドアウト既読確認管理 — 優先度: 高
 **対象:** KP / 共通
 **概要:** KPが配布済みハンドアウトをどのPL（キャラクター）が既読済みかをリアルタイムで確認できる機能。セッション中に「まだ読んでいないPLがいる」ままシーンを進めるミスを防ぐ。PL側はハンドアウト閲覧時に自動で既読フラグが立ち、KPダッシュボードに「未読」「既読」バッジが反映される。
 **実装ヒント:** Supabaseに `handout_reads(id, handout_id, character_id, read_at, created_at)` テーブルを追加（RLS: own character のみ insert、KP は select all）。既存の `src/app/scenarios/[id]/handouts/page.tsx` のハンドアウトカードに既読人数バッジ `[既読 2/3]` を追加（supabase.from("handout_reads").select("character_id").eq("handout_id", h.id) でカウント）。PLがハンドアウト詳細を開いた際に `supabase.from("handout_reads").upsert({handout_id, character_id, read_at: new Date().toISOString()})` を発火。Supabase Realtime channel `handout-reads-${scenarioId}` で INSERT を購読しKP画面を即時更新。`src/app/scenarios/[id]/handouts/page.tsx` にKP向けの「未読確認モード」トグルを追加し、未読キャラクター名をアイコン付きで一覧表示。
