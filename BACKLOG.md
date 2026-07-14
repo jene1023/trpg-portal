@@ -2042,7 +2042,7 @@
 **実装ヒント:** Supabaseに `clue_nodes(id uuid pk, scenario_id uuid references scenarios, node_type text CHECK("clue"|"npc"|"location"|"event"), label text, detail text, is_revealed bool DEFAULT false, position_x float DEFAULT 0, position_y float DEFAULT 0, created_at timestamptz)` と `clue_edges(id uuid pk, from_node_id uuid references clue_nodes, to_node_id uuid references clue_nodes, relation_label text, created_at timestamptz)` テーブルを追加（RLS: KPのみ書き込み・is_revealed=trueのノードはPL閲覧可）。`src/app/scenarios/[id]/clue-board/page.tsx` を "use client" で新規作成。ノード描画はネイティブSVGの `<circle>`（ノード）＋`<line>`（エッジ）＋`<text>`（ラベル）で実装し、外部ライブラリ不要。ドラッグによる位置変更は `onMouseMove` イベントで `position_x/y` をupsert。KPが「＋ノード追加」でtype・ラベル・詳細を入力し、ノードとノードをクリックで「エッジを引く」モードを持つ。PLには `is_revealed=true` のノード・エッジのみ表示し、KPは全表示+トグルでPL公開を切り替え。シナリオ詳細（`src/app/scenarios/[id]/page.tsx`）に「🕵️ 手がかりボード」リンクを追加。追加DB2テーブル。
 **コミット:** `feat: clue connection board with SVG node-edge visualization for scenario investigation`
 
-## [TODO] セッション中リアルタイムHP/SAN同期 — 優先度: 高
+## [DONE] セッション中リアルタイムHP/SAN同期 — 優先度: 高
 **対象:** PL / 共通
 **概要:** セッション中、パーティの全PLが他のキャラクターのHP/SAN/MP変化をリロードなしでリアルタイムに確認できる機能。「〇〇のSANが急に下がった」など互いの状態を即座に把握でき、協力判断の精度が上がる。
 **実装ヒント:** Supabase Realtime の `channel.on('postgres_changes', ...)` を使い `characters` テーブルの `UPDATE` イベントを購読。`src/app/_components/QuickStatEditor.tsx` に `useEffect` でチャンネル購読を追加（既存の supabase クライアントをそのまま利用）。`src/app/characters/[id]/quick/page.tsx` ではキャラ自身のリアルタイム購読を追加し、他PCのミニステータス（名前+HP/SAN）を横スクロールで表示するオプションバーを追加（scenario_id が一致するキャラを対象）。追加DBなし。

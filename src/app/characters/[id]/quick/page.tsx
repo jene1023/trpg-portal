@@ -9,8 +9,18 @@ import QuickStatsDisplay from "@/app/_components/QuickStatsDisplay";
 import DiceRoller from "@/app/_components/DiceRoller";
 import ConditionBadgeEditor from "@/app/_components/ConditionBadgeEditor";
 import LongRestButton from "@/app/_components/LongRestButton";
+import PartyStatusBar from "@/app/_components/PartyStatusBar";
 
 type Props = { params: Promise<{ id: string }> };
+
+type PartyMember = {
+  id: string;
+  name: string;
+  hp_current: number;
+  hp_max: number;
+  san_current: number;
+  san_max: number;
+};
 
 export default async function QuickDashboardPage({ params }: Props) {
   const { id } = await params;
@@ -37,6 +47,33 @@ export default async function QuickDashboardPage({ params }: Props) {
     .select("*")
     .eq("character_id", id)
     .order("created_at", { ascending: true });
+
+  // Fetch party members from the same scenario for realtime status bar
+  let partyMembers: PartyMember[] = [];
+  let partyScenarioId = "";
+
+  const { data: myParticipation } = await supabase
+    .from("scenario_participants")
+    .select("scenario_id")
+    .eq("character_id", id)
+    .limit(1)
+    .maybeSingle();
+
+  if (myParticipation?.scenario_id) {
+    partyScenarioId = myParticipation.scenario_id;
+    const { data: others } = await supabase
+      .from("scenario_participants")
+      .select("characters(id, name, hp_current, hp_max, san_current, san_max)")
+      .eq("scenario_id", myParticipation.scenario_id)
+      .neq("character_id", id);
+
+    if (others) {
+      partyMembers = others
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((o: any) => o.characters)
+        .filter(Boolean) as PartyMember[];
+    }
+  }
 
   return (
     <div className="mx-auto max-w-md px-4 py-6 space-y-6">
@@ -129,6 +166,11 @@ export default async function QuickDashboardPage({ params }: Props) {
             </p>
           </div>
         </details>
+      )}
+
+      {/* パーティ状態バー（同シナリオの他PCをリアルタイム表示） */}
+      {partyMembers.length > 0 && (
+        <PartyStatusBar members={partyMembers} scenarioId={partyScenarioId} />
       )}
 
       {/* クイックノートへのショートカット */}
