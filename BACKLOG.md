@@ -1982,7 +1982,7 @@
 **実装ヒント:** Supabaseに `character_tributes(id uuid pk, character_id uuid references characters, author_name text, message text, created_at timestamptz)` テーブルを追加（RLS: 書き込みは認証ユーザー全員・閲覧は公開）。`src/app/memorial/page.tsx` を Server Component で新規作成。`supabase.from("characters").select("id, name, occupation, portrait_url, status, farewell_scene, farewell_message, updated_at").in("status", ["dead", "retired"]).eq("is_public", true).order("updated_at", {ascending: false})` でキャラ一覧取得。各カードに status バッジ（dead=赤/retired=灰）・職業・ポートレート・`farewell_scene` サマリー・追悼メッセージ数を表示。追悼メッセージ投稿は "use client" 子コンポーネント（短文テキスト入力＋送信）。グローバルナビゲーションのフッターに「メモリアル」リンクを追加。`src/lib/supabase.ts` に `CharacterTribute` 型を追加。追加DB1テーブル。
 **コミット:** `feat: character memorial hall for deceased and retired investigators`
 
-## [TODO] キャンペーン横断プレイ統計ダッシュボード — 優先度: 中
+## [DONE] キャンペーン横断プレイ統計ダッシュボード — 優先度: 中
 **対象:** KP / 共通
 **概要:** キャンペーン全体を通じた累計統計（総セッション数・累計SAN喪失量・最頻出NPC・キャラクター別ダイス成功率・最多技能使用ランキング）を一画面で確認できる分析ダッシュボード。KPのキャンペーン振り返りやシナリオ難易度調整に役立てる。
 **実装ヒント:** 新規テーブル不要（`campaign_scenarios`・`session_logs`・`dice_rolls`・`session_npc_encounters`・`scenario_participants` を結合）。`src/app/campaigns/[id]/stats/page.tsx` を Server Component で新規作成。`Promise.all` で各集計クエリを並列実行: ① `session_logs` の `san_loss`・`hp_loss` 合計（キャンペーン内シナリオを経由してフィルタ）、② `dice_rolls` の技能別成功率TOP5（`is_success` 平均）、③ `session_npc_encounters` の最頻出NPC TOP3、④ `scenario_participants` のキャラクター参加シナリオ数ランキング。結果をサマリーカード（大数字＋ラベル）＋ネイティブSVG横棒グラフで表示。既存の `src/app/campaigns/[id]/page.tsx` ハブページに「統計」リンクを追加。追加DBなし。
