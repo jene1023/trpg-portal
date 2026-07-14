@@ -170,7 +170,7 @@ export default async function CharacterDetailPage({ params }: Props) {
             </div>
 
             {char.catchphrase && (
-              <p className="font-crimson italic text-coc-gold text-sm leading-relaxed coc-catchphrase-block">
+              <p className="font-crimson italic text-coc-gold text-sm leading-relaxed coc-catchphrase-block coc-catchphrase-text">
                 &ldquo;{char.catchphrase}&rdquo;
               </p>
             )}

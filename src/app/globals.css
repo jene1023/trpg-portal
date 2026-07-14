@@ -1200,6 +1200,23 @@ body {
   }
 }
 
+/* キャッチフレーズテキスト微光: 古文書の金泥書きが燭台の光を受けてほのかに輝く */
+/* coc-name-glow(5s)・coc-quote-line-glow(3.5s) と周期をずらして位相ドリフトを生む */
+@keyframes coc-catchphrase-text-glow {
+  0%, 100% { text-shadow: 0 0 8px rgba(201, 133, 58, 0.12); }
+  50%       { text-shadow: 0 0 20px rgba(201, 133, 58, 0.38), 0 0 40px rgba(201, 133, 58, 0.12); }
+}
+
+.coc-catchphrase-text {
+  text-shadow: 0 0 8px rgba(201, 133, 58, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-catchphrase-text {
+    animation: coc-catchphrase-text-glow 4.2s ease-in-out 0.8s infinite;
+  }
+}
+
 /* フッター引用文: 深淵の彼方から届く幽冥の声 — opacity が静かに呼吸し、紫青の微光が揺らめく */
 /* サンが削られるほどに深淵は近づく: 読み手を静かに引き込む */
 @keyframes coc-footer-quote-glow {
