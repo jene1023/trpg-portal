@@ -361,6 +361,16 @@ body {
   .coc-stagger-grid > *:nth-child(18) { animation-delay: 1.09s; }
   .coc-stagger-grid > *:nth-child(19) { animation-delay: 1.14s; }
   .coc-stagger-grid > *:nth-child(20) { animation-delay: 1.19s; }
+  .coc-stagger-grid > *:nth-child(21) { animation-delay: 1.24s; }
+  .coc-stagger-grid > *:nth-child(22) { animation-delay: 1.29s; }
+  .coc-stagger-grid > *:nth-child(23) { animation-delay: 1.34s; }
+  .coc-stagger-grid > *:nth-child(24) { animation-delay: 1.39s; }
+  .coc-stagger-grid > *:nth-child(25) { animation-delay: 1.44s; }
+  .coc-stagger-grid > *:nth-child(26) { animation-delay: 1.49s; }
+  .coc-stagger-grid > *:nth-child(27) { animation-delay: 1.54s; }
+  .coc-stagger-grid > *:nth-child(28) { animation-delay: 1.59s; }
+  .coc-stagger-grid > *:nth-child(29) { animation-delay: 1.64s; }
+  .coc-stagger-grid > *:nth-child(30) { animation-delay: 1.69s; }
 }
 
 /* ロードスケルトン: 燭台の灯のように明滅しながら、琥珀色の光が左から右へ流れる */
@@ -1272,5 +1282,30 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .coc-footer-quote {
     animation: coc-footer-quote-glow 10s ease-in-out 4s infinite;
+  }
+}
+
+/* 最終章バッジ: 逝去・引退した探索者への鎮魂の炎 — 消え入る蝋燭が黄金に揺れる追憶 */
+@keyframes coc-final-chapter-breathe {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(201, 133, 58, 0.15), inset 0 0 3px rgba(201, 133, 58, 0.05);
+    border-color: rgba(201, 133, 58, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(201, 133, 58, 0.38), inset 0 0 7px rgba(201, 133, 58, 0.10);
+    border-color: rgba(201, 133, 58, 0.52);
+  }
+}
+
+.coc-final-chapter-badge {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(201, 133, 58, 0.24);
+  color: rgba(201, 133, 58, 0.68);
+  box-shadow: 0 0 4px rgba(201, 133, 58, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-final-chapter-badge {
+    animation: coc-final-chapter-breathe 6.5s ease-in-out 1.5s infinite;
   }
 }

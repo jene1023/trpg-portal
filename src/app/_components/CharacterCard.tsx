@@ -105,7 +105,7 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
             (character.farewell_scene || character.farewell_message) && (
               <div className="absolute bottom-2 right-2">
                 <span
-                  className="rounded-full bg-black/70 border border-white/20 px-1.5 py-0.5 text-[10px] text-white/60 font-cinzel"
+                  className="rounded-full coc-final-chapter-badge px-1.5 py-0.5 text-[10px] font-cinzel"
                   title="最終章が記録されています"
                 >
                   ✦ 最終章
