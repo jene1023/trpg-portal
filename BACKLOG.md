@@ -1988,7 +1988,7 @@
 **実装ヒント:** 新規テーブル不要（`campaign_scenarios`・`session_logs`・`dice_rolls`・`session_npc_encounters`・`scenario_participants` を結合）。`src/app/campaigns/[id]/stats/page.tsx` を Server Component で新規作成。`Promise.all` で各集計クエリを並列実行: ① `session_logs` の `san_loss`・`hp_loss` 合計（キャンペーン内シナリオを経由してフィルタ）、② `dice_rolls` の技能別成功率TOP5（`is_success` 平均）、③ `session_npc_encounters` の最頻出NPC TOP3、④ `scenario_participants` のキャラクター参加シナリオ数ランキング。結果をサマリーカード（大数字＋ラベル）＋ネイティブSVG横棒グラフで表示。既存の `src/app/campaigns/[id]/page.tsx` ハブページに「統計」リンクを追加。追加DBなし。
 **コミット:** `feat: campaign cross-session play statistics dashboard`
 
-## [TODO] コンディション連動技能ペナルティ表示 — 優先度: 中
+## [DONE] コンディション連動技能ペナルティ表示 — 優先度: 中
 **対象:** PL / 共通
 **概要:** キャラクターのアクティブなコンディション（`CharacterCondition`）に対してルールブックに基づく技能ペナルティを自動計算し、キャラクターシートの技能一覧にペナルティ後の実効値を括弧付き赤字で表示する機能。セッション中の判定値ミス（コンディション見落とし）を防ぐ。
 **実装ヒント:** 新規テーブル不要。`src/lib/condition-penalties.ts` を新規作成し、コンディション名→影響技能カテゴリ→ペナルティ値のマップ定数を定義（例: `{"負傷": {categories: ["戦闘"], penalty: -20}, "疲弊": {categories: ["all"], penalty: -10}}`）。`src/app/_components/CharacterSkillList.tsx`（または同等の技能一覧コンポーネント）でアクティブコンディション一覧と技能ペナルティマップを照合し、影響技能の `current_value` に実効値 `(current_value + penalty)` を赤字スパンで追記。コンディション一覧ページ（`src/app/characters/[id]/conditions/page.tsx`）の各コンディションカードにも「影響技能」バッジを表示。追加DBなし。

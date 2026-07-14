@@ -328,7 +328,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               <SanCheckRoller characterId={id} sanCurrent={char.san_current} sanMax={char.san_max} characterName={char.name} discordWebhookUrl={discordWebhookUrl} />
             </div>
             <SectionDivider className="my-2" />
-            <SkillList skills={skills ?? []} characterId={id} sanCurrent={char.san_current} />
+            <SkillList skills={skills ?? []} characterId={id} sanCurrent={char.san_current} activeConditions={(conditions ?? []).filter((c) => c.is_active)} />
           </div>
 
           {/* 口調・ロールプレイメモ */}

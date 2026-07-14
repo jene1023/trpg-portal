@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CharacterSkill, supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { CharacterSkill, CharacterCondition, supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getSkillPenalty } from "@/lib/condition-penalties";
 
 const CATEGORIES: Record<string, string[]> = {
   戦闘:   ["近接戦闘（格闘）", "近接戦闘", "回避", "拳銃", "ライフル/ショットガン", "自動火器", "投擲", "弓", "フレイル"],
@@ -26,9 +27,11 @@ function getSkillCategory(skill: CharacterSkill): string {
   return skill.category || categorize(skill.skill_name);
 }
 
-type Props = { skills: CharacterSkill[]; characterId: string; sanCurrent?: number };
+type Props = { skills: CharacterSkill[]; characterId: string; sanCurrent?: number; activeConditions?: CharacterCondition[] };
 
-export default function SkillList({ skills, characterId, sanCurrent }: Props) {
+export default function SkillList({ skills, characterId, sanCurrent, activeConditions = [] }: Props) {
+  const activeConditionNames = activeConditions.map((c) => c.condition_name);
+
   const cats = [...new Set(skills.map((s) => getSkillCategory(s)))].sort(
     (a, b) =>
       Object.keys(CATEGORIES).indexOf(a) - Object.keys(CATEGORIES).indexOf(b)
@@ -210,6 +213,10 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
         {visible.map((skill) => {
           const isChecked = checkedMap[skill.id] ?? false;
           const isSaving = savingId === skill.id;
+          const skillCat = getSkillCategory(skill);
+          const penalty = getSkillPenalty(skillCat, activeConditionNames);
+          const baseDisplayValue = valueMap[skill.id] ?? skill.current_value;
+          const effectiveValue = Math.max(0, baseDisplayValue + penalty);
           return (
             <div
               key={skill.id}
@@ -269,17 +276,24 @@ export default function SkillList({ skills, characterId, sanCurrent }: Props) {
                     className="w-14 text-sm font-bold text-center rounded border border-coc-gold bg-coc-raised text-coc-text tabular-nums focus:outline-none focus:ring-1 focus:ring-coc-gold px-1"
                   />
                 ) : (
-                  <button
-                    onClick={() => startEdit(skill)}
-                    title="クリックして値を編集"
-                    className={`text-sm font-bold tabular-nums hover:text-coc-gold transition-colors ${
-                      skill.skill_name.startsWith("クトゥルフ神話")
-                        ? "text-purple-400"
-                        : "text-coc-text"
-                    }`}
-                  >
-                    {valueMap[skill.id] ?? skill.current_value}%
-                  </button>
+                  <span className="flex items-center gap-1">
+                    <button
+                      onClick={() => startEdit(skill)}
+                      title="クリックして値を編集"
+                      className={`text-sm font-bold tabular-nums hover:text-coc-gold transition-colors ${
+                        skill.skill_name.startsWith("クトゥルフ神話")
+                          ? "text-purple-400"
+                          : "text-coc-text"
+                      }`}
+                    >
+                      {baseDisplayValue}%
+                    </button>
+                    {penalty < 0 && (
+                      <span className="text-xs font-semibold tabular-nums text-red-400" title={`コンディションペナルティ: ${penalty}`}>
+                        ({effectiveValue}%)
+                      </span>
+                    )}
+                  </span>
                 )}
                 {/* 成長チェックボックス */}
                 <button

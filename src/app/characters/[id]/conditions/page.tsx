@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured, CharacterCondition } from "@/lib/supabase";
+import { getConditionAffectedLabels } from "@/lib/condition-penalties";
 
 const COLOR_OPTIONS = [
   { value: "red", label: "赤（負傷・出血）", badge: "border-red-700 bg-red-950/40 text-red-300", button: "bg-red-900/30 border-red-700 text-red-300" },
@@ -149,7 +150,9 @@ export default function ConditionsPage() {
           <p className="text-sm text-coc-muted">現在の状態異常なし</p>
         ) : (
           <div className="space-y-2">
-            {activeConditions.map((c) => (
+            {activeConditions.map((c) => {
+              const affectedLabels = getConditionAffectedLabels(c.condition_name);
+              return (
               <div
                 key={c.id}
                 className={`flex items-start justify-between rounded-lg border px-3 py-2.5 ${colorBadgeClass(c.color)}`}
@@ -157,6 +160,16 @@ export default function ConditionsPage() {
                 <div className="space-y-0.5 flex-1 min-w-0">
                   <p className="font-semibold text-sm">{c.condition_name}</p>
                   {c.notes && <p className="text-xs opacity-75 break-words">{c.notes}</p>}
+                  {affectedLabels.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <span className="text-xs opacity-60">影響技能:</span>
+                      {affectedLabels.map((label) => (
+                        <span key={label} className="rounded border border-current/30 bg-current/10 px-1.5 py-0.5 text-xs opacity-80">
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 ml-3 shrink-0">
                   <button
@@ -175,7 +188,8 @@ export default function ConditionsPage() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
