@@ -2060,7 +2060,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `DiceMacro` 型（owner_id, campaign_id, name, expression, description, is_public）を流用。`src/app/dice-macros/page.tsx` を "use client" で新規作成し、マクロの一覧・追加・削除・ロール実行UIを実装。`expression` は BCDice 形式（例: `2D6+3`）をパースし `Math.random()` で実行する簡易エバリュエーターを実装（外部ライブラリ不要: d4/d6/d8/d10/d12/d20/d100 のみ対応）。マクロをクリックするとその場でロール結果をポップアップ表示し、`dice_rolls` テーブルにも保存（character_id は null 可）。キャンペーン詳細ページからも参照できるよう `campaign_id` で絞り込みビューを追加。グローバルナビに「マクロ」リンクを追加。追加DBなし（`dice_macros` テーブルは型から既に存在想定）。
 **コミット:** `feat: custom dice macro management page with one-click rolls`
 
-## [TODO] 技能成功確率ビジュアライザー — 優先度: 低
+## [DONE] 技能成功確率ビジュアライザー — 優先度: 低
 **対象:** PL
 **概要:** キャラクターの各技能値に対し、CoC 7版ルールの成功確率（決定的成功・通常成功・失敗・致命的失敗）を計算し、色分けバーで可視化するページ。「この技能は何%で成功するのか」を一目で把握でき、セッション前の技能選択や成長目標の設定に役立てる。
 **実装ヒント:** `src/app/characters/[id]/skill-probs/page.tsx` を新規作成（Server Component + クライアント絞り込み）。`supabase.from("character_skills").select("*").eq("character_id", id)` で技能取得。各技能値 `v` に対して: 決定的成功 = `Math.floor(v / 5)%`、通常成功 = `(v - Math.floor(v/5))%`、失敗 = `(95 - v)%`、致命的失敗 = `5%`（96〜100固定）を計算（1の位が0の場合の端数処理あり）。技能ごとに `<div>` 幅100%のうち4色の横バーをCSS flexで構成（追加ライブラリ不要）。技能カテゴリ別にソートし、現在値でフィルタ可能（低確率技能を非表示にするスイッチ）。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「確率チャート」リンクを追加。追加DBなし。
