@@ -2113,3 +2113,27 @@
 **概要:** 次セッション開始前にKPがワンクリックで「前回のあらすじ」をAIがドラマチックな日本語ナレーションとして生成できるページ。既存のrecapページ（データ一覧表示）とは異なりAIが読み上げ可能な台本形式で出力し、そのままDiscordやVTTのテキストチャンネルにペーストできる。
 **実装ヒント:** `src/app/scenarios/[id]/previously/page.tsx` を新規作成（"use client"）。データ収集: `supabase.from("session_logs").select("title, summary, san_loss, hp_loss, played_at").eq("character_id", in(characterIds)).order("played_at")` で最新数セッション分のログ取得。`supabase.from("scenario_clues").select("title, content").eq("scenario_id", id).eq("status", "resolved")` で解決済み手がかりを取得。`supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` でプロットスレッドを取得。これらをAI APIに送信: プロンプトは「以下のセッションログ・解決した手がかり・プロットの状況を元に、次回セッション開幕直前に読み上げる『前回のあらすじ』を400字程度のドラマチックな日本語ナレーションとして生成してください。」エンドポイント: `src/app/api/previously-on/route.ts`（既存AI APIパターンを踏襲）。生成結果をテキストエリアに表示し `RecapCopyButton` と同様のコピーボタンを追加。`src/app/scenarios/[id]/page.tsx` に「前回のあらすじ生成」リンクを追加。
 **コミット:** `feat: AI-generated "previously on" pre-session narrative for KP`
+
+## [TODO] CoC 7版チェイスシーン進行管理ページ — 優先度: 中
+**対象:** KP / PL / 共通
+**概要:** CoC 7版固有の「チェイスルール」に特化した追跡シーン管理ページ。DEX順ではなくSPD値で順番を決め、追跡距離カウンターのラウンドごとの増減・逃走/追撃判定・妨害アクションをUIで管理する。既存の戦闘トラッカー（`/scenarios/[id]/combat/`）はイニシアチブ管理に特化しており、チェイス固有の「距離カウンター」「コーナー判定」「逃走成功条件」には対応していない。
+**実装ヒント:** `src/app/scenarios/[id]/chase/page.tsx` を "use client" で新規作成。Supabaseに `chase_entries(id uuid pk, scenario_id uuid references scenarios, entry_name text, is_npc bool, spd int, distance_counter int DEFAULT 0, is_escaped bool DEFAULT false, is_caught bool DEFAULT false, action_this_round text, created_at timestamptz)` テーブルを追加（既存 `combat_entries` テーブルを参考に設計）。チェイス参加者はSPD降順でリスト表示。各ラウンドに「追跡者の距離-1」「逃走者の距離+1」ボタンと、Athletics/Drive/Pilot判定成否を記録するトグルを配置。距離カウンターが0以下で「捕捉」、設定した逃走距離以上で「逃走成功」を自動判定してバッジ表示。Supabase Realtimeで全員の画面に即反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の「セッション中ツール」セクションに「🏃 チェイストラッカー」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: CoC 7e chase scene tracker with distance counter and escape/catch detection`
+
+## [TODO] AIセッション中段階的ヒントカード生成（行き詰まりサポート） — 優先度: 高
+**対象:** KP
+**概要:** セッション中にPLが行き詰まったとき、KPが現在の状況（解決済み手がかり・未達目標・現在ロケーション）をワンクリックでAIに渡し「今PLに見せてよいヒント」を段階3段階（ぼんやり→具体的→直接）で生成するページ。既存のNPC台詞生成・セッション要約・前回のあらすじ生成とは異なり、「行き詰まり脱出のためのKPサポートツール」に特化する。
+**実装ヒント:** `src/app/scenarios/[id]/hint-cards/page.tsx` を "use client" で新規作成。データ取得: `supabase.from("scenario_clues").select("title, status").eq("scenario_id", id)`（解決済み/未解決手がかり）、`supabase.from("scenario_objectives").select("title, is_achieved").eq("scenario_id", id)`（目標達成状況）、`supabase.from("scenario_locations").select("name, is_revealed").eq("scenario_id", id)`（訪問済みロケーション）を Promise.all で並行取得。AIへ送信するプロンプト: 「上記の現在状況から、行き詰まったPLへの段階的ヒントを3段階（①雰囲気レベル=情報を明かさず雰囲気だけ、②方向性レベル=何を探すべきか示唆、③具体レベル=次の行動を直接提案）でJSON配列として生成してください。」エンドポイント: `src/app/api/ai/hint-cards/route.ts`（既存 `src/app/api/ai/session-summary/route.ts` パターンを踏襲）。生成結果は3つのカード形式で並べ、KPが「このカードをPLに開示する」ボタンでRealtimeブロードキャスト送信（PLのモバイル画面に表示）。`src/app/scenarios/[id]/page.tsx` に「💡 ヒントカード」リンクを追加。追加DBなし。
+**コミット:** `feat: AI tiered hint card generator for KP session support`
+
+## [TODO] ポータル横断コンテンツ発見ギャラリー — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** ポータル内で `is_public` フラグが立った公開キャラクター・公開シナリオ・公開ハンドアウト・公開ランダムテーブルを一元的に閲覧できるコミュニティ発見ページ。KPがシナリオ素材のインスピレーションを得たり、PLが他者のキャラクターシートを参考にしたりできる。既存の「シナリオ公募掲示板」（セッション参加募集目的）や個別の公開共有URLとは異なり、「コンテンツ鑑賞・インスピレーション取得」に特化したギャラリービュー。
+**実装ヒント:** `src/app/discover/page.tsx` を "use client" で新規作成。タブ構成:「キャラクター」「シナリオ」「ハンドアウト」「ランダムテーブル」。各タブで `supabase.from("characters").select("id, name, occupation, image_url, hp_max, san_max").eq("is_public", true).order("updated_at", {ascending: false}).limit(24)` のように公開データを取得しカードグリッド表示。キャラクターカードはポートレート・名前・職業を表示し `/c/[slug]` へリンク。シナリオカードはタイトル・概要・難易度を表示し `/s/[slug]` へリンク。上部に「キーワード検索」入力欄（useState でフィルタ）と「更新日順/人気順」ソート切り替えを配置。`src/app/_components/NavBar.tsx` に「発見する」リンクを追加。追加DBなし（既存 is_public インフラを流用）。
+**コミット:** `feat: community content discovery gallery for public characters, scenarios, and handouts`
+
+## [TODO] キャンペーン続編・シーズン2設計ウィザード — 優先度: 中
+**対象:** KP
+**概要:** 長期キャンペーン終了後、「生き残ったキャラクター」「変化した世界状態」「未解決プロットスレッド」「KPが伏せていた真実」を整理して次のキャンペーン（シーズン2）の設計書にまとめるウィザード形式ページ。既存の `campaigns/[id]/wiki/`（世界観wiki）・`campaigns/[id]/timeline/`（年表）・`campaigns/[id]/events/`（イベント記録）はキャンペーン内の記録ツールであり、「次キャンペーンへの引き継ぎ設計」には特化していない。
+**実装ヒント:** `src/app/campaigns/[id]/sequel/page.tsx` を "use client" で新規作成。4ステップウィザード構成: ① 生存キャラクター選択（`supabase.from("characters").select("id, name, status").eq("campaign_id", id)` で生存者リストを取得しチェックボックス選択）→ ② 世界変化メモ（テキストエリア: KPが「プレイヤーの行動でどう世界が変わったか」を記述）→ ③ 未解決プロットスレッド引き継ぎ（`supabase.from("plot_threads").select("title, status").eq("scenario_id", ...)` で未解決スレッドを取得し「次作に持ち越す/消化済み」をトグル）→ ④ 生成・保存（入力内容をもとにAI APIへリクエスト: 「以下の引き継ぎ情報から、シーズン2のオープニングシーン設計案と最初のシナリオへの導入フックを提案してください」を送信し結果をテキストエリアに展開）。新規Supabaseテーブル `campaign_sequel_designs(id, campaign_id, surviving_character_ids, world_changes, carried_over_threads, ai_suggestion, created_at)` を追加。`src/app/campaigns/[id]/page.tsx` にキャンペーン完了後にのみ表示される「📖 シーズン2設計」ボタンを追加。
+**コミット:** `feat: campaign sequel design wizard for KP world-state handoff and season 2 planning`
