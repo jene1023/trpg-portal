@@ -2000,7 +2000,7 @@
 **実装ヒント:** `src/app/api/ai/roll-narration/route.ts` を新規作成（`src/app/api/ai/npc-dialogue/route.ts` の実装パターンを踏襲）。リクエストボディ: `{ skillName: string, successLevel: "critical_success"|"success"|"failure"|"fumble", characterOccupation: string, sceneContext?: string }`。プロンプト: 「CoC 7版の探索者が『{skillName}』判定で『{successLevel}』を出しました。職業は{occupation}。以下のシーンで起きたこと: {sceneContext}。この瞬間を60字以内の情景描写で表現してください。」レスポンス: `{ narration: string }`。`src/app/_components/DiceRoller.tsx` のロール結果表示部に「AIナレーション生成」ボタンを追加（"use client"のまま、fetch で route.ts を呼ぶ）。生成テキストはロール結果カード内にアニメーション付きで展開表示。追加DBなし。
 **コミット:** `feat: AI roll narration for immersive dice result descriptions`
 
-## [TODO] セッション横断SAN喪失パターン分析（原因種別集計） — 優先度: 中
+## [DONE] セッション横断SAN喪失パターン分析（原因種別集計） — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** 複数セッションにわたるSAN喪失の記録を原因種別（神話的クリーチャー遭遇・一時的狂気・不定の狂気・呪文使用など）ごとに集計し、「このキャラクターが何に最も精神を削られているか」をグラフで可視化するページ。既存の「ダイス判定統計」はロール成功率中心で、SAN喪失の原因分析には対応していない。KPがシナリオ難易度調整の材料として使うほか、PLが自キャラの弱点パターンを把握できる。
 **実装ヒント:** 新規テーブル不要（既存 `session_logs(id, character_id, san_loss, summary, created_at)` と `madness_records(id, character_id, symptom, started_at)` を流用）。`src/app/characters/[id]/san-analysis/page.tsx` を Server Component で新規作成。`supabase.from("session_logs").select("san_loss, summary, created_at").eq("character_id", id).gt("san_loss", 0)` で喪失ログ全件取得。`summary` テキストからキーワード（「クリーチャー」「死体」「神格」「呪文」等）を正規表現で抽出しカテゴリに振り分け、カテゴリ別の累計SAN喪失量をCSSのみのネイティブSVG横棒グラフで描画。喪失量トップ3カテゴリをハイライトカードで上部表示。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「SAN分析」リンクを追加。追加DBなし。
