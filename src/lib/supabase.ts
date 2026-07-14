@@ -1475,3 +1475,16 @@ export type CharacterTribute = {
   message: string;
   created_at: string;
 };
+
+export type ScenarioLocation = {
+  id: string;
+  scenario_id: string;
+  name: string;
+  description: string | null;
+  clue_summary: string | null;
+  npc_names: string[];
+  danger_level: number;
+  is_revealed: boolean;
+  display_order: number;
+  created_at: string;
+};
