@@ -2089,3 +2089,27 @@
 **概要:** KPがセッション開幕のオープニングナレーション・世界観説明・コンテンツ警告を事前作成し、セッション開始時にワンクリックで参加PL全員の画面にリアルタイムブロードキャストできる機能。毎回冒頭で読み上げる定型説明を省力化し、演出クオリティを安定させる。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `SessionIntroduction` 型（scenario_id, narration_text, world_setting_note, content_warnings, bgm_suggestion, created_by_kp_id, is_broadcast, broadcast_at）を活用。`src/app/scenarios/[id]/introduction/page.tsx` を "use client" で新規作成。KP向け編集ビュー: テキストエリアでナレーション本文・世界観補足・コンテンツ警告・BGM推薦曲を入力し upsert 保存。「配信開始」ボタンで `is_broadcast: true` + `broadcast_at: now()` に更新し `supabase.channel("intro-${scenarioId}").send({type: "broadcast", event: "intro_started", payload: {narration_text, content_warnings}})` でPLに送信。PL向け受信ビュー: 同チャンネルを購読し、イベント受信時にフルスクリーンモーダルでナレーション文を表示（コンテンツ警告は先頭に赤字太字で表示）。`src/app/scenarios/[id]/page.tsx` に「📢 イントロ配信」リンクを追加。追加DBなし（`session_introductions` テーブルは型定義から既存想定）。
 **コミット:** `feat: session opening introduction broadcast page for KP narration delivery`
+
+## [TODO] ハンドアウト既読確認管理 — 優先度: 高
+**対象:** KP / 共通
+**概要:** KPが配布済みハンドアウトをどのPL（キャラクター）が既読済みかをリアルタイムで確認できる機能。セッション中に「まだ読んでいないPLがいる」ままシーンを進めるミスを防ぐ。PL側はハンドアウト閲覧時に自動で既読フラグが立ち、KPダッシュボードに「未読」「既読」バッジが反映される。
+**実装ヒント:** Supabaseに `handout_reads(id, handout_id, character_id, read_at, created_at)` テーブルを追加（RLS: own character のみ insert、KP は select all）。既存の `src/app/scenarios/[id]/handouts/page.tsx` のハンドアウトカードに既読人数バッジ `[既読 2/3]` を追加（supabase.from("handout_reads").select("character_id").eq("handout_id", h.id) でカウント）。PLがハンドアウト詳細を開いた際に `supabase.from("handout_reads").upsert({handout_id, character_id, read_at: new Date().toISOString()})` を発火。Supabase Realtime channel `handout-reads-${scenarioId}` で INSERT を購読しKP画面を即時更新。`src/app/scenarios/[id]/handouts/page.tsx` にKP向けの「未読確認モード」トグルを追加し、未読キャラクター名をアイコン付きで一覧表示。
+**コミット:** `feat: handout read-receipt tracking per player character`
+
+## [TODO] AIキャラクター成長スキル推薦 — 優先度: 中
+**対象:** PL
+**概要:** セッション終了後、AIがそのキャラクターのダイスロール履歴を分析し「最も成長させるべきスキル」上位3件を理由とともに推薦するページ。成功率・使用頻度・現在値の伸び代を総合判断し、次セッション前の成長ロールの意思決定を支援する。
+**実装ヒント:** `src/app/characters/[id]/growth-advisor/page.tsx` を新規作成（"use client"）。`supabase.from("dice_rolls").select("*").eq("character_id", id).order("rolled_at", {ascending: false}).limit(100)` でロール履歴取得。`supabase.from("character_skills").select("*").eq("character_id", id)` でスキル一覧取得。取得データをAI APIに送信: プロンプトは「以下のダイスロール履歴とスキル一覧を分析し、成長させるべきスキルTOP3を理由（使用頻度・成功率・現在値）とともにJSON形式で返してください。スキル名・推薦理由・期待成功率向上値を含めること。」AI APIは `/api/ai-growth-advisor` エンドポイント（`src/app/api/ai-growth-advisor/route.ts`）で実装（既存の他AI APIエンドポイントと同様のパターン）。結果をカード形式で表示。`src/app/characters/[id]/growth/page.tsx` に「AIアドバイス」ボタンを追加してリンク。
+**コミット:** `feat: AI skill growth recommendation based on session dice history`
+
+## [TODO] シナリオ公募グローバル掲示板 — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** KPが参加者募集中のシナリオをグローバル掲示板に公開し、PLが難易度・人数・プレイ時間でフィルタして参加申請できるページ。既存の各シナリオの `recruit_token` を活用し、SNSシェアなしでも同ポータル内でPLがセッションを探せるようにする。
+**実装ヒント:** `src/app/scenarios/recruit-board/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, playtime_type, min_players, max_players, estimated_hours, recruit_token, teaser_text").not("recruit_token", "is", null).eq("teaser_is_public", true).order("created_at", {ascending: false})` でパブリック公募シナリオを取得。カード形式で一覧表示（タイトル・概要・難易度バッジ・プレイ時間・募集人数）。難易度・プレイ時間の useState フィルタを実装。各カードの「参加申請」ボタンは既存の `src/app/scenarios/[id]/recruit/page.tsx` へのリンク。`src/app/_components/NavBar.tsx` に「公募掲示板」リンクを追加。KP側シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「掲示板に公開する」トグルを追加し `teaser_is_public` を更新。
+**コミット:** `feat: global scenario recruitment board for KPs and PLs`
+
+## [TODO] AI「前回のあらすじ」ナレーション生成 — 優先度: 中
+**対象:** KP / 共通
+**概要:** 次セッション開始前にKPがワンクリックで「前回のあらすじ」をAIがドラマチックな日本語ナレーションとして生成できるページ。既存のrecapページ（データ一覧表示）とは異なりAIが読み上げ可能な台本形式で出力し、そのままDiscordやVTTのテキストチャンネルにペーストできる。
+**実装ヒント:** `src/app/scenarios/[id]/previously/page.tsx` を新規作成（"use client"）。データ収集: `supabase.from("session_logs").select("title, summary, san_loss, hp_loss, played_at").eq("character_id", in(characterIds)).order("played_at")` で最新数セッション分のログ取得。`supabase.from("scenario_clues").select("title, content").eq("scenario_id", id).eq("status", "resolved")` で解決済み手がかりを取得。`supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` でプロットスレッドを取得。これらをAI APIに送信: プロンプトは「以下のセッションログ・解決した手がかり・プロットの状況を元に、次回セッション開幕直前に読み上げる『前回のあらすじ』を400字程度のドラマチックな日本語ナレーションとして生成してください。」エンドポイント: `src/app/api/previously-on/route.ts`（既存AI APIパターンを踏襲）。生成結果をテキストエリアに表示し `RecapCopyButton` と同様のコピーボタンを追加。`src/app/scenarios/[id]/page.tsx` に「前回のあらすじ生成」リンクを追加。
+**コミット:** `feat: AI-generated "previously on" pre-session narrative for KP`
