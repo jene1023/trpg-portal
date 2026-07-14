@@ -2084,7 +2084,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `ScenarioObjective` 型（scenario_id, title, description, is_mandatory, is_achieved, achieved_at, display_order）を活用。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成。KPは目標名・説明・必須/サブ目標の種別を登録。一覧はメイン目標セクション（赤バッジ）とサブ目標セクション（橙バッジ）に分けてカード表示。「達成！」ボタンを押すと `is_achieved: true` + `achieved_at: now()` にupsertし `supabase.channel("objectives-${scenarioId}").send({type: "broadcast", event: "objective_achieved"})` で全PL画面に達成演出（パルスアニメーション）をブロードキャスト。達成済み目標はチェックマーク付き薄グレー表示。`src/app/scenarios/[id]/page.tsx` に「🎯 目標」リンクを追加。追加DBなし（`scenario_objectives` テーブルは型定義から既存想定）。
 **コミット:** `feat: scenario quest objectives board with realtime achievement tracking`
 
-## [TODO] セッション開幕イントロダクション配信ページ — 優先度: 中
+## [DONE] セッション開幕イントロダクション配信ページ — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPがセッション開幕のオープニングナレーション・世界観説明・コンテンツ警告を事前作成し、セッション開始時にワンクリックで参加PL全員の画面にリアルタイムブロードキャストできる機能。毎回冒頭で読み上げる定型説明を省力化し、演出クオリティを安定させる。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `SessionIntroduction` 型（scenario_id, narration_text, world_setting_note, content_warnings, bgm_suggestion, created_by_kp_id, is_broadcast, broadcast_at）を活用。`src/app/scenarios/[id]/introduction/page.tsx` を "use client" で新規作成。KP向け編集ビュー: テキストエリアでナレーション本文・世界観補足・コンテンツ警告・BGM推薦曲を入力し upsert 保存。「配信開始」ボタンで `is_broadcast: true` + `broadcast_at: now()` に更新し `supabase.channel("intro-${scenarioId}").send({type: "broadcast", event: "intro_started", payload: {narration_text, content_warnings}})` でPLに送信。PL向け受信ビュー: 同チャンネルを購読し、イベント受信時にフルスクリーンモーダルでナレーション文を表示（コンテンツ警告は先頭に赤字太字で表示）。`src/app/scenarios/[id]/page.tsx` に「📢 イントロ配信」リンクを追加。追加DBなし（`session_introductions` テーブルは型定義から既存想定）。
