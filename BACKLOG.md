@@ -2054,7 +2054,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/party-status/page.tsx` を新規作成（"use client"）。`supabase.from("scenario_participants").select("*, characters(*)").eq("scenario_id", id)` で参加キャラ+ステータスを一括取得。各キャラをカード形式で表示し、HP/SAN/MPをカラーバー（残量割合でCSS widthを設定: 50%以下で黄、25%以下で赤）で可視化。Supabase Realtime で `characters` テーブルの変更を購読し自動更新。`src/app/scenarios/[id]/page.tsx` に「パーティ状態」リンクを追加。追加DBなし。
 **コミット:** `feat: KP party status monitor board with realtime HP/SAN tracking`
 
-## [TODO] カスタムダイスマクロ管理ページ — 優先度: 中
+## [DONE] カスタムダイスマクロ管理ページ — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** よく使うダイス式（例：「1D6+DB」「2D6×5（SAN損失ロール）」）を名前付きマクロとして保存し、ワンクリックでロールできる機能。キャンペーン内で共有することでセッション中の入力コストを大幅に削減する。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `DiceMacro` 型（owner_id, campaign_id, name, expression, description, is_public）を流用。`src/app/dice-macros/page.tsx` を "use client" で新規作成し、マクロの一覧・追加・削除・ロール実行UIを実装。`expression` は BCDice 形式（例: `2D6+3`）をパースし `Math.random()` で実行する簡易エバリュエーターを実装（外部ライブラリ不要: d4/d6/d8/d10/d12/d20/d100 のみ対応）。マクロをクリックするとその場でロール結果をポップアップ表示し、`dice_rolls` テーブルにも保存（character_id は null 可）。キャンペーン詳細ページからも参照できるよう `campaign_id` で絞り込みビューを追加。グローバルナビに「マクロ」リンクを追加。追加DBなし（`dice_macros` テーブルは型から既に存在想定）。

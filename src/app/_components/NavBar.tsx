@@ -23,6 +23,7 @@ const navLinks = [
   { href: "/materials", label: "素材" },
   { href: "/stats", label: "統計" },
   { href: "/dice-calc", label: "確率計算" },
+  { href: "/dice/macros", label: "マクロ" },
   { href: "/item-catalog", label: "装備カタログ" },
   { href: "/tags", label: "タグ" },
   { href: "/archive", label: "アーカイブ" },
