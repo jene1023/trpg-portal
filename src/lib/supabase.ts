@@ -1488,3 +1488,25 @@ export type ScenarioLocation = {
   display_order: number;
   created_at: string;
 };
+
+export type ClueNodeType = "clue" | "npc" | "location" | "event";
+
+export type ClueNode = {
+  id: string;
+  scenario_id: string;
+  node_type: ClueNodeType;
+  label: string;
+  detail: string | null;
+  is_revealed: boolean;
+  position_x: number;
+  position_y: number;
+  created_at: string;
+};
+
+export type ClueEdge = {
+  id: string;
+  from_node_id: string;
+  to_node_id: string;
+  relation_label: string | null;
+  created_at: string;
+};
