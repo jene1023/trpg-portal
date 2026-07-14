@@ -2078,7 +2078,7 @@
 **実装ヒント:** `src/lib/supabase.ts` に既存の `CharacterJournal` 型（character_id, session_id, title, content, written_at, is_public）を活用。`src/app/characters/[id]/journal/page.tsx` を "use client" で新規作成。`supabase.from("character_journals").select("*, sessions(title, played_at)").eq("character_id", id).order("written_at", {ascending: false})` で取得しタイムライン形式で表示。各エントリはタイトル・日付・本文テキストエリア（`white-space: pre-wrap` 表示）で構成。`is_public: true` の日記は公開キャラプロフィール（`/c/[slug]`）に「手記」タブとして公開可能。新規作成時にシナリオ（セッション）を選択するセレクタで `session_id` を紐付け。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📔 日記」リンクを追加。追加DBなし（`character_journals` テーブルは型定義から既存想定）。
 **コミット:** `feat: character journal page for first-person session log entries`
 
-## [TODO] シナリオ目標追跡ボード（クエストオブジェクティブ） — 優先度: 中
+## [DONE] シナリオ目標追跡ボード（クエストオブジェクティブ） — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** KPがシナリオのメイン目標・サブ目標を事前登録し、セッション中に達成状況をリアルタイムにトグル更新、参加PLが進捗を一覧できるクエストボード。「今のゴールが分からない」というPLの混乱を解消し、KPの目標管理漏れも防ぐ。
 **実装ヒント:** `src/lib/supabase.ts` に既存の `ScenarioObjective` 型（scenario_id, title, description, is_mandatory, is_achieved, achieved_at, display_order）を活用。`src/app/scenarios/[id]/objectives/page.tsx` を "use client" で新規作成。KPは目標名・説明・必須/サブ目標の種別を登録。一覧はメイン目標セクション（赤バッジ）とサブ目標セクション（橙バッジ）に分けてカード表示。「達成！」ボタンを押すと `is_achieved: true` + `achieved_at: now()` にupsertし `supabase.channel("objectives-${scenarioId}").send({type: "broadcast", event: "objective_achieved"})` で全PL画面に達成演出（パルスアニメーション）をブロードキャスト。達成済み目標はチェックマーク付き薄グレー表示。`src/app/scenarios/[id]/page.tsx` に「🎯 目標」リンクを追加。追加DBなし（`scenario_objectives` テーブルは型定義から既存想定）。

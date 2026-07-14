@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, Target, CheckCircle2, Circle, Trash2 } from "lucide-react";
 import { supabase, isSupabaseConfigured, ScenarioObjective } from "@/lib/supabase";
@@ -16,6 +16,8 @@ export default function ScenarioObjectivesPage({ params }: Props) {
   const [newTitle, setNewTitle] = useState("");
   const [newType, setNewType] = useState<"main" | "sub">("main");
   const [saving, setSaving] = useState(false);
+  const [pulsing, setPulsing] = useState<Set<string>>(new Set());
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -36,20 +38,59 @@ export default function ScenarioObjectivesPage({ params }: Props) {
         setObjectives((objectivesRes.data ?? []) as ScenarioObjective[]);
         setLoading(false);
       });
+
+      if (!isSupabaseConfigured) return;
+      const channel = supabase
+        .channel(`objectives-${id}`)
+        .on("broadcast", { event: "objective_achieved" }, ({ payload }: { payload: { id: string } }) => {
+          const { id: objId } = payload;
+          setObjectives((prev) =>
+            prev.map((o) =>
+              o.id === objId
+                ? { ...o, is_achieved: true, achieved_at: new Date().toISOString() }
+                : o
+            )
+          );
+          triggerPulse(objId);
+        })
+        .subscribe();
+      channelRef.current = channel;
     });
+
+    return () => {
+      if (channelRef.current && isSupabaseConfigured) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
   }, [params]);
 
-  async function toggleAchieved(obj: ScenarioObjective) {
-    if (!isSupabaseConfigured) return;
-    const newAchieved = !obj.is_achieved;
-    const update = {
-      is_achieved: newAchieved,
-      achieved_at: newAchieved ? new Date().toISOString() : null,
-    };
-    await supabase.from("scenario_objectives").update(update).eq("id", obj.id);
+  function triggerPulse(id: string) {
+    setPulsing((prev) => new Set(prev).add(id));
+    setTimeout(() => {
+      setPulsing((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 2000);
+  }
+
+  async function achieveObjective(obj: ScenarioObjective) {
+    if (!isSupabaseConfigured || obj.is_achieved) return;
+    const now = new Date().toISOString();
+    await supabase
+      .from("scenario_objectives")
+      .update({ is_achieved: true, achieved_at: now })
+      .eq("id", obj.id);
     setObjectives((prev) =>
-      prev.map((o) => (o.id === obj.id ? { ...o, ...update } : o))
+      prev.map((o) => (o.id === obj.id ? { ...o, is_achieved: true, achieved_at: now } : o))
     );
+    triggerPulse(obj.id);
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "objective_achieved",
+      payload: { id: obj.id },
+    });
   }
 
   async function addObjective() {
@@ -115,10 +156,10 @@ export default function ScenarioObjectivesPage({ params }: Props) {
         <p className="text-xs text-coc-muted mb-1">{scenarioTitle}</p>
         <h1 className="font-cinzel text-xl font-bold text-coc-text flex items-center gap-2">
           <Target size={20} className="text-coc-gold" />
-          目標トラッカー
+          🎯 目標ボード
         </h1>
         <p className="text-xs text-coc-muted mt-1">
-          シナリオのメイン・サブ目標を登録し、達成状況をチェックしながら進捗を可視化します。
+          シナリオのメイン・サブ目標を登録し、達成状況をリアルタイムに追跡します。
         </p>
       </div>
 
@@ -132,7 +173,7 @@ export default function ScenarioObjectivesPage({ params }: Props) {
           </div>
           <div className="h-3 rounded-full bg-coc-border overflow-hidden">
             <div
-              className="h-full rounded-full bg-coc-gold transition-all duration-300"
+              className="h-full rounded-full bg-coc-gold transition-all duration-500"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -140,9 +181,12 @@ export default function ScenarioObjectivesPage({ params }: Props) {
       )}
 
       <div className="mb-5">
-        <h2 className="text-xs font-semibold text-coc-gold uppercase tracking-widest mb-2">
-          メイン目標
-        </h2>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="rounded-full border border-red-700 bg-red-950/40 px-2.5 py-0.5 text-xs font-semibold text-red-300">
+            MAIN
+          </span>
+          <h2 className="text-sm font-semibold text-coc-text">メイン目標</h2>
+        </div>
         <div className="space-y-2">
           {mainObjectives.length === 0 && (
             <p className="text-sm text-coc-muted py-3 text-center">
@@ -153,7 +197,8 @@ export default function ScenarioObjectivesPage({ params }: Props) {
             <ObjectiveCard
               key={obj.id}
               obj={obj}
-              onToggle={() => toggleAchieved(obj)}
+              pulsing={pulsing.has(obj.id)}
+              onAchieve={() => achieveObjective(obj)}
               onDelete={() => deleteObjective(obj.id)}
             />
           ))}
@@ -161,9 +206,12 @@ export default function ScenarioObjectivesPage({ params }: Props) {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-xs font-semibold text-coc-muted uppercase tracking-widest mb-2">
-          サブ目標
-        </h2>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="rounded-full border border-orange-700 bg-orange-950/40 px-2.5 py-0.5 text-xs font-semibold text-orange-300">
+            SUB
+          </span>
+          <h2 className="text-sm font-semibold text-coc-text">サブ目標</h2>
+        </div>
         <div className="space-y-2">
           {subObjectives.length === 0 && (
             <p className="text-sm text-coc-muted py-3 text-center">
@@ -174,7 +222,8 @@ export default function ScenarioObjectivesPage({ params }: Props) {
             <ObjectiveCard
               key={obj.id}
               obj={obj}
-              onToggle={() => toggleAchieved(obj)}
+              pulsing={pulsing.has(obj.id)}
+              onAchieve={() => achieveObjective(obj)}
               onDelete={() => deleteObjective(obj.id)}
             />
           ))}
@@ -188,8 +237,8 @@ export default function ScenarioObjectivesPage({ params }: Props) {
               onClick={() => setNewType("main")}
               className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
                 newType === "main"
-                  ? "bg-coc-gold/20 border-coc-gold text-coc-gold"
-                  : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+                  ? "bg-red-900/30 border-red-700 text-red-300"
+                  : "border-coc-border text-coc-muted hover:border-red-800 hover:text-red-400"
               }`}
             >
               メイン
@@ -198,8 +247,8 @@ export default function ScenarioObjectivesPage({ params }: Props) {
               onClick={() => setNewType("sub")}
               className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
                 newType === "sub"
-                  ? "bg-coc-gold/20 border-coc-gold text-coc-gold"
-                  : "border-coc-border text-coc-muted hover:border-coc-gold hover:text-coc-gold"
+                  ? "bg-orange-900/30 border-orange-700 text-orange-300"
+                  : "border-coc-border text-coc-muted hover:border-orange-800 hover:text-orange-400"
               }`}
             >
               サブ
@@ -248,47 +297,57 @@ export default function ScenarioObjectivesPage({ params }: Props) {
 
 function ObjectiveCard({
   obj,
-  onToggle,
+  pulsing,
+  onAchieve,
   onDelete,
 }: {
   obj: ScenarioObjective;
-  onToggle: () => void;
+  pulsing: boolean;
+  onAchieve: () => void;
   onDelete: () => void;
 }) {
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${
+      className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-300 ${
         obj.is_achieved
-          ? "border-green-800 bg-green-950/20"
+          ? "border-coc-border bg-coc-border/10 opacity-60"
+          : pulsing
+          ? "border-coc-gold bg-coc-gold/10 animate-pulse"
           : "border-coc-border bg-coc-surface"
       }`}
     >
-      <button
-        onClick={onToggle}
-        className="flex-shrink-0 text-coc-muted hover:text-coc-gold transition-colors"
-        aria-label={obj.is_achieved ? "未達成に戻す" : "達成済みにする"}
-      >
+      <span className="flex-shrink-0">
         {obj.is_achieved ? (
           <CheckCircle2 size={20} className="text-green-400" />
         ) : (
-          <Circle size={20} />
+          <Circle size={20} className="text-coc-muted" />
         )}
-      </button>
-      <span
-        className={`flex-1 text-sm ${
-          obj.is_achieved ? "line-through text-coc-muted" : "text-coc-text"
-        }`}
-      >
-        {obj.title}
       </span>
-      {obj.is_achieved && obj.achieved_at && (
-        <span className="text-xs text-coc-muted flex-shrink-0">
-          {new Date(obj.achieved_at).toLocaleDateString("ja-JP")}
+      <div className="flex-1 min-w-0">
+        <span
+          className={`text-sm block ${
+            obj.is_achieved ? "line-through text-coc-muted" : "text-coc-text"
+          }`}
+        >
+          {obj.title}
         </span>
+        {obj.is_achieved && obj.achieved_at && (
+          <span className="text-xs text-coc-muted">
+            達成: {new Date(obj.achieved_at).toLocaleDateString("ja-JP")}
+          </span>
+        )}
+      </div>
+      {!obj.is_achieved && (
+        <button
+          onClick={onAchieve}
+          className="flex-shrink-0 rounded-lg border border-coc-gold bg-coc-gold/10 px-3 py-1 text-xs font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
+        >
+          達成！
+        </button>
       )}
       <button
         onClick={onDelete}
-        className="flex-shrink-0 p-1 rounded hover:bg-coc-raised text-red-400 transition-colors"
+        className="flex-shrink-0 p-1 rounded hover:bg-coc-raised text-coc-muted hover:text-red-400 transition-colors"
         aria-label="削除"
       >
         <Trash2 size={13} />
