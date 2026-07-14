@@ -1970,7 +1970,7 @@
 **実装ヒント:** Supabaseに `scenario_templates(id uuid pk, kp_id uuid references auth.users, title text, description text, template_data jsonb, is_public bool DEFAULT false, created_at timestamptz)` テーブルを追加、RLS: kp_id = auth.uid() で書き込み・is_public=trueは全員閲覧。`template_data` は `{scenes: [{title, order}], npc_slots: [{role}], handout_count: int, creature_slots: [{role}]}` のJSONスキーマ。`src/app/kp/scenario-templates/page.tsx` を "use client" で新規作成。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の KP メニューに「テンプレートとして保存」ボタンを追加し、構造を自動抽出してupsert。テンプレート一覧からシナリオ新規作成時にテンプレートを選択すると `scenarios`・`scenario_scenes`・`handouts`（空枠）が一括インサートされる。公開テンプレートはコミュニティ共有として `/kp/scenario-templates/public` で閲覧可能。
 **コミット:** `feat: scenario structure template save and reuse for KP`
 
-## [TODO] AIシナリオ難易度自動評価（KP用） — 優先度: 中
+## [DONE] AIシナリオ難易度自動評価（KP用） — 優先度: 中
 **対象:** KP
 **概要:** シナリオのシーン数・NPC数・クリーチャー能力値・SAN喪失値・ハンドアウト枚数をもとにClaude APIが難易度を自動評価し、「初心者向け/中級/上級」判定と理由を出力する機能。KPがシナリオ作成後に客観的な難易度確認と調整ヒントを得られる。
 **実装ヒント:** `src/app/api/ai/scenario-difficulty/route.ts` を新規作成（既存 `src/app/api/ai/scenario-draft/route.ts` パターンを踏襲）。入力: シナリオID経由で `scenarios`・`scenario_scenes`・`creatures`・`npcs`・`handouts` を結合した構造データをJSON化してプロンプトに埋め込む。出力: `{difficulty_label: "beginner"|"intermediate"|"advanced", reasoning: string, suggestions: string[]}` のJSON（`parseJSON` でパース）。`src/app/scenarios/[id]/page.tsx` のKP向けアクションエリアに「難易度を自動評価」ボタンを追加し、結果をインライン展開パネルで表示。「この評価を採用」ボタンで `scenarios.difficulty` をupsert。追加DBなし。

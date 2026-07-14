@@ -16,6 +16,7 @@ import ScenarioPrintButton from "@/app/_components/ScenarioPrintButton";
 import ScenarioZipDownloadButton from "@/app/_components/ScenarioZipDownloadButton";
 import KpMemoSection from "@/app/_components/KpMemoSection";
 import TagSelector from "@/app/_components/TagSelector";
+import ScenarioDifficultyEvaluator from "@/app/_components/ScenarioDifficultyEvaluator";
 import GameClockEditor from "@/app/_components/GameClockEditor";
 import NextEpisodePreviewGenerator from "@/app/_components/NextEpisodePreviewGenerator";
 import ScenarioTemplateToggle from "@/app/_components/ScenarioTemplateToggle";
@@ -1440,6 +1441,8 @@ export default async function ScenarioDetailPage({ params }: Props) {
           discordWebhookUrl={scenario.discord_webhook_url ?? null}
         />
       </div>
+
+      <ScenarioDifficultyEvaluator scenarioId={id} />
 
       <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
         <p className="coc-section-title font-cinzel text-xs font-medium text-coc-muted uppercase tracking-widest mb-3">Discord 通知設定</p>
