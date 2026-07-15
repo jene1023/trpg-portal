@@ -204,6 +204,11 @@ export default function CharacterCard({ character, skills = [], onTogglePin, isC
             </button>
           )}
         </div>
+        {/* ボトムグロー: ポートレートの上部グローと対をなし、カード底辺から燭台の光が内側へ広がる */}
+        <div
+          className="absolute inset-0 pointer-events-none coc-card-bottom-glow opacity-0 motion-safe:group-hover:opacity-100 transition-opacity duration-500"
+          aria-hidden="true"
+        />
       </div>
     </Link>
   );
