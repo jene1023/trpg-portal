@@ -2168,7 +2168,7 @@
 **実装ヒント:** `src/app/characters/[id]/stats-history/page.tsx` を "use client" で新規作成。`supabase.from("character_stat_snapshots").select("*").eq("character_id", id).order("snapshot_at")` でスナップショット取得（`CharacterStatSnapshot` 型は supabase.ts に既存）。グラフ描画はネイティブSVGの `<polyline>` / `<path>` でライブラリ不要実装。X軸: session_label、Y軸: hp_current/san_current。`supabase.from("growth_histories").select("*").eq("character_id", id)` と組み合わせてスキル推移も表示。セッションログ保存時に `character_stat_snapshots` へ自動INSERT する API を `src/app/api/snapshots/route.ts` に追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📈 成長グラフ」リンクを追加。追加APIルート1本。
 **コミット:** `feat: character stat history graph with SVG line chart for HP/SAN/skill trends`
 
-## [TODO] KPセッション当日オールインワンダッシュボード — 優先度: 高
+## [DONE] KPセッション当日オールインワンダッシュボード — 優先度: 高
 **対象:** KP
 **概要:** セッション当日にKPが1ページで「ハンドアウト配布状況・NPC登場予定・参加者出席確認・残未解決プロット・準備タスク残数」をまとめて確認できるダッシュボード。KPがセッション中に複数タブを行き来するストレスを解消する。
 **実装ヒント:** `src/app/scenarios/[id]/kp-dashboard/page.tsx` を "use client" で新規作成。`Promise.all` で ① `supabase.from("handouts").select("id, title, is_distributed, recipient_name, handout_reads(character_id)").eq("scenario_id", id)` ② `supabase.from("scenario_participants").select("character_id, attendance_status, characters(name)")` ③ `supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` ④ `supabase.from("scenario_prep_tasks").select("task_name, is_done").eq("scenario_id", id)` を並列取得。4カードUIで「配布済みハンドアウト数/未配布数・出席確定数/未確認数・未解決プロット数・未完了タスク数」をバッジ表示。Supabase Realtime channel `kp-dashboard-${scenarioId}` でリアルタイム更新。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「🎛 KPダッシュボード」リンクを追加。追加DBなし。

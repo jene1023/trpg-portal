@@ -146,6 +146,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
         <div className="flex items-center gap-2">
           <Link
+            href={`/scenarios/${id}/kp-dashboard`}
+            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-surface px-3 py-1.5 text-sm font-medium text-coc-text hover:border-coc-gold hover:text-coc-gold transition-colors"
+          >
+            🎛 KPダッシュボード
+          </Link>
+          <Link
             href={`/scenarios/${id}/ops`}
             className="flex items-center gap-1.5 rounded-lg border border-coc-gold bg-coc-gold/10 px-3 py-1.5 text-sm font-medium text-coc-gold hover:bg-coc-gold/20 transition-colors"
           >
