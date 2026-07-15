@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, User, Edit3, Users, BookOpen, Dice5, Brain, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, User, Edit3, Users, BookOpen, Dice5, Brain, Eye, EyeOff, BarChart2 } from "lucide-react";
 import { supabase, isSupabaseConfigured, PlayerProfile, Character } from "@/lib/supabase";
 import StatusBadge from "@/app/_components/StatusBadge";
 
@@ -98,13 +98,22 @@ export default async function PlayerProfilePage({ params }: Props) {
               )}
             </div>
           </div>
-          <Link
-            href="/profile/edit"
-            className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold-dim transition-colors"
-          >
-            <Edit3 size={13} />
-            編集
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/profile/report"
+              className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold-dim transition-colors"
+            >
+              <BarChart2 size={13} />
+              プレイレポート
+            </Link>
+            <Link
+              href="/profile/edit"
+              className="flex items-center gap-1.5 rounded-lg border border-coc-border bg-coc-raised px-3 py-2 text-xs text-coc-muted hover:text-coc-text hover:border-coc-gold-dim transition-colors"
+            >
+              <Edit3 size={13} />
+              編集
+            </Link>
+          </div>
         </div>
 
         {profile?.bio && (

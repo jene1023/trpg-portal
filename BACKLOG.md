@@ -2180,7 +2180,7 @@
 **実装ヒント:** `src/app/scenarios/templates/page.tsx` を "use client" で新規作成。`supabase.from("scenario_templates").select("*").eq("is_public", true).order("created_at", {ascending: false})` で公開テンプレートを取得。カードには「シーン数・NPC枠数・ハンドアウト枠数・クリーチャー枠数」を表示（`ScenarioTemplateData` の各フィールドを活用）。「このテンプレートで新規シナリオ」ボタンで `template_data` のシーン/NPC/ハンドアウトを新シナリオにコピーして `src/app/scenarios/new/page.tsx?templateId=XXX` に遷移。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」ボタンを追加（`is_public: true` でUPDATE）。`src/app/_components/NavBar.tsx` に「テンプレート」リンクを追加。追加DBなし（`scenario_templates` テーブルは型定義から既存）。
 **コミット:** `feat: public scenario template gallery with one-click new scenario creation`
 
-## [TODO] PLプレイ傾向分析レポートカード — 優先度: 中
+## [DONE] PLプレイ傾向分析レポートカード — 優先度: 中
 **対象:** PL / 共通
 **概要:** ユーザーの全キャラクター・全セッションを横断して「総参加セッション数・合計SAN喪失量・生存率・最多使用スキル・最長生存キャラクター」などをレポートカード形式で表示するマイページ。共有URLで他PLへ自分のTRPG活動実績をシェアできる。
 **実装ヒント:** `src/app/profile/report/page.tsx` を "use client" で新規作成。並列クエリ: `supabase.from("characters").select("id, name, status, created_at").eq("user_id", user.id)` でキャラ一覧を取得後、`supabase.from("session_logs").select("san_loss, hp_loss, played_at").in("character_id", characterIds)` でログ集計。`supabase.from("dice_rolls").select("skill_name, success_level").in("character_id", characterIds)` で最多使用スキルを集計。集計値（総セッション数・総SAN喪失・生存率・最多成功スキル）を `text-4xl font-bold` で大きく表示したカードUI。「シェアする」ボタンで `?public=true` パラメータ付きURLを生成しコピー（認証不要で閲覧可能なビューを条件分岐で実装）。`src/app/profile/page.tsx` から「📊 プレイレポート」リンクを追加。追加DBなし。
