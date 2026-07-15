@@ -2161,3 +2161,33 @@
 **概要:** セッション参加数・クリティカル成功回数・SAN喪失合計・初シナリオ完走・キャンペーン完結などのマイルストーンを達成するとユーザーにバッジが付与されるアチーブメントシステム。ゲームへの愛着を深めコミュニティ継続率を上げるソーシャル要素として機能し、公開プロフィールページに獲得バッジ一覧が表示される。
 **実装ヒント:** Supabaseに `achievement_definitions(id text pk, label text, description text, icon_emoji text, condition_type text, condition_threshold int)` シードテーブルと `user_achievements(id uuid pk, user_id uuid references auth.users, achievement_id text references achievement_definitions, unlocked_at timestamptz, UNIQUE(user_id, achievement_id))` テーブルを追加（RLS: 閲覧は公開・INSERT はサービスロールのみ）。バッジ付与はサーバーサイドの `src/app/api/achievements/check/route.ts` で実装し、`session_logs`・`dice_rolls`・`scenario_participants` を集計して条件達成を検出しINSERT。トリガーとなるアクション（セッション終了・ダイスロール保存・キャンペーン完結マーク）の各APIルートから内部呼び出し。`src/app/achievements/page.tsx` を Server Component で新規作成し、全バッジ定義を「取得済み（カラー）/未取得（グレーアウト）」で一覧表示。`src/app/c/[slug]/page.tsx` の公開キャラクタープロフィールに「獲得バッジ」セクションを追加。追加DB2テーブル。
 **コミット:** `feat: achievement badge system with milestone tracking and public profile display`
+
+## [TODO] キャラクター統計グラフ（HP/SAN/スキル推移の可視化） — 優先度: 高
+**対象:** PL
+**概要:** セッションを経るごとのHP・SAN推移と主要スキル成長を折れ線グラフで可視化するページ。「どのセッションで大きくSANを失ったか」「スキルがどう伸びたか」が一目でわかり、キャラクターへの愛着と振り返りを促進する。
+**実装ヒント:** `src/app/characters/[id]/stats-history/page.tsx` を "use client" で新規作成。`supabase.from("character_stat_snapshots").select("*").eq("character_id", id).order("snapshot_at")` でスナップショット取得（`CharacterStatSnapshot` 型は supabase.ts に既存）。グラフ描画はネイティブSVGの `<polyline>` / `<path>` でライブラリ不要実装。X軸: session_label、Y軸: hp_current/san_current。`supabase.from("growth_histories").select("*").eq("character_id", id)` と組み合わせてスキル推移も表示。セッションログ保存時に `character_stat_snapshots` へ自動INSERT する API を `src/app/api/snapshots/route.ts` に追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📈 成長グラフ」リンクを追加。追加APIルート1本。
+**コミット:** `feat: character stat history graph with SVG line chart for HP/SAN/skill trends`
+
+## [TODO] KPセッション当日オールインワンダッシュボード — 優先度: 高
+**対象:** KP
+**概要:** セッション当日にKPが1ページで「ハンドアウト配布状況・NPC登場予定・参加者出席確認・残未解決プロット・準備タスク残数」をまとめて確認できるダッシュボード。KPがセッション中に複数タブを行き来するストレスを解消する。
+**実装ヒント:** `src/app/scenarios/[id]/kp-dashboard/page.tsx` を "use client" で新規作成。`Promise.all` で ① `supabase.from("handouts").select("id, title, is_distributed, recipient_name, handout_reads(character_id)").eq("scenario_id", id)` ② `supabase.from("scenario_participants").select("character_id, attendance_status, characters(name)")` ③ `supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` ④ `supabase.from("scenario_prep_tasks").select("task_name, is_done").eq("scenario_id", id)` を並列取得。4カードUIで「配布済みハンドアウト数/未配布数・出席確定数/未確認数・未解決プロット数・未完了タスク数」をバッジ表示。Supabase Realtime channel `kp-dashboard-${scenarioId}` でリアルタイム更新。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「🎛 KPダッシュボード」リンクを追加。追加DBなし。
+**コミット:** `feat: KP all-in-one session day dashboard aggregating handouts, attendance, plots, and prep tasks`
+
+## [TODO] シナリオ公開テンプレートギャラリー — 優先度: 中
+**対象:** KP / 共通
+**概要:** KPが自作シナリオの骨格（シーン構成・NPC枠・ハンドアウト枠・クリーチャー枠）をテンプレートとして公開し、他のKPが1クリックで流用できるギャラリーページ。既存の `ScenarioTemplate` 型・`is_public` フラグを活用し、0からシナリオを設計するより速く準備できる。
+**実装ヒント:** `src/app/scenarios/templates/page.tsx` を "use client" で新規作成。`supabase.from("scenario_templates").select("*").eq("is_public", true).order("created_at", {ascending: false})` で公開テンプレートを取得。カードには「シーン数・NPC枠数・ハンドアウト枠数・クリーチャー枠数」を表示（`ScenarioTemplateData` の各フィールドを活用）。「このテンプレートで新規シナリオ」ボタンで `template_data` のシーン/NPC/ハンドアウトを新シナリオにコピーして `src/app/scenarios/new/page.tsx?templateId=XXX` に遷移。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」ボタンを追加（`is_public: true` でUPDATE）。`src/app/_components/NavBar.tsx` に「テンプレート」リンクを追加。追加DBなし（`scenario_templates` テーブルは型定義から既存）。
+**コミット:** `feat: public scenario template gallery with one-click new scenario creation`
+
+## [TODO] PLプレイ傾向分析レポートカード — 優先度: 中
+**対象:** PL / 共通
+**概要:** ユーザーの全キャラクター・全セッションを横断して「総参加セッション数・合計SAN喪失量・生存率・最多使用スキル・最長生存キャラクター」などをレポートカード形式で表示するマイページ。共有URLで他PLへ自分のTRPG活動実績をシェアできる。
+**実装ヒント:** `src/app/profile/report/page.tsx` を "use client" で新規作成。並列クエリ: `supabase.from("characters").select("id, name, status, created_at").eq("user_id", user.id)` でキャラ一覧を取得後、`supabase.from("session_logs").select("san_loss, hp_loss, played_at").in("character_id", characterIds)` でログ集計。`supabase.from("dice_rolls").select("skill_name, success_level").in("character_id", characterIds)` で最多使用スキルを集計。集計値（総セッション数・総SAN喪失・生存率・最多成功スキル）を `text-4xl font-bold` で大きく表示したカードUI。「シェアする」ボタンで `?public=true` パラメータ付きURLを生成しコピー（認証不要で閲覧可能なビューを条件分岐で実装）。`src/app/profile/page.tsx` から「📊 プレイレポート」リンクを追加。追加DBなし。
+**コミット:** `feat: PL play trend report card with cross-character session stats and shareable URL`
+
+## [TODO] AIセッションハイライトアルバム生成 — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** セッション終了後、そのセッションのハイライト・名言・ダイスロール成功/失敗・SAN喪失量を素材に、AIが「セッションアルバムページ」を自動生成するページ。既存の「セッション要約生成」「名言リスト」とは異なり、SNSシェア向けビジュアルカード形式での出力に特化する。
+**実装ヒント:** `src/app/scenarios/[id]/album/page.tsx` を "use client" で新規作成。`Promise.all` でデータ取得: `supabase.from("session_highlights").select("*").eq("scenario_id", id)` + `supabase.from("character_quotes").select("quote_text, context, character_name").in("character_id", participantIds).order("likes", {ascending: false}).limit(5)` + `supabase.from("session_logs").select("title, san_loss, hp_loss").in("character_id", participantIds)`。取得データを `src/app/api/ai/session-album/route.ts`（新規・既存 `src/app/api/ai/session-summary/route.ts` パターンを踏襲）に送信し「このセッションの思い出アルバム見出しと5つのハイライト見出しをJSON形式で生成」。生成結果をカード形式のビジュアルUIで表示し `window.print()` で印刷/PDF保存へ誘導。`src/app/scenarios/[id]/page.tsx` に「📸 アルバム生成」リンクを追加。追加DBなし・追加APIルート1本。
+**コミット:** `feat: AI session highlight album generator with SNS-shareable visual card layout`
