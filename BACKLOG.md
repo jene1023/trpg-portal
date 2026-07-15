@@ -2108,7 +2108,7 @@
 **実装ヒント:** `src/app/scenarios/recruit-board/page.tsx` を新規作成（Server Component）。`supabase.from("scenarios").select("id, title, synopsis, difficulty, playtime_type, min_players, max_players, estimated_hours, recruit_token, teaser_text").not("recruit_token", "is", null).eq("teaser_is_public", true).order("created_at", {ascending: false})` でパブリック公募シナリオを取得。カード形式で一覧表示（タイトル・概要・難易度バッジ・プレイ時間・募集人数）。難易度・プレイ時間の useState フィルタを実装。各カードの「参加申請」ボタンは既存の `src/app/scenarios/[id]/recruit/page.tsx` へのリンク。`src/app/_components/NavBar.tsx` に「公募掲示板」リンクを追加。KP側シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「掲示板に公開する」トグルを追加し `teaser_is_public` を更新。
 **コミット:** `feat: global scenario recruitment board for KPs and PLs`
 
-## [TODO] AI「前回のあらすじ」ナレーション生成 — 優先度: 中
+## [DONE] AI「前回のあらすじ」ナレーション生成 — 優先度: 中
 **対象:** KP / 共通
 **概要:** 次セッション開始前にKPがワンクリックで「前回のあらすじ」をAIがドラマチックな日本語ナレーションとして生成できるページ。既存のrecapページ（データ一覧表示）とは異なりAIが読み上げ可能な台本形式で出力し、そのままDiscordやVTTのテキストチャンネルにペーストできる。
 **実装ヒント:** `src/app/scenarios/[id]/previously/page.tsx` を新規作成（"use client"）。データ収集: `supabase.from("session_logs").select("title, summary, san_loss, hp_loss, played_at").eq("character_id", in(characterIds)).order("played_at")` で最新数セッション分のログ取得。`supabase.from("scenario_clues").select("title, content").eq("scenario_id", id).eq("status", "resolved")` で解決済み手がかりを取得。`supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` でプロットスレッドを取得。これらをAI APIに送信: プロンプトは「以下のセッションログ・解決した手がかり・プロットの状況を元に、次回セッション開幕直前に読み上げる『前回のあらすじ』を400字程度のドラマチックな日本語ナレーションとして生成してください。」エンドポイント: `src/app/api/previously-on/route.ts`（既存AI APIパターンを踏襲）。生成結果をテキストエリアに表示し `RecapCopyButton` と同様のコピーボタンを追加。`src/app/scenarios/[id]/page.tsx` に「前回のあらすじ生成」リンクを追加。

@@ -1450,6 +1450,20 @@ export default async function ScenarioDetailPage({ params }: Props) {
           <span className="text-coc-muted">→</span>
         </Link>
 
+        <Link
+          href={`/scenarios/${id}/previously`}
+          className="flex items-center justify-between rounded-xl border border-coc-gold-dim bg-coc-raised px-5 py-4 hover:border-coc-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Sparkles size={20} className="text-coc-gold" />
+            <div>
+              <p className="font-medium text-coc-gold">前回のあらすじ生成</p>
+              <p className="text-xs text-coc-muted">セッションログ・解決済み手がかり・プロットをもとにAIがドラマチックなナレーションを生成</p>
+            </div>
+          </div>
+          <span className="text-coc-muted">→</span>
+        </Link>
+
         <div className="rounded-xl border border-coc-border bg-coc-surface px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
