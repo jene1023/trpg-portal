@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/characters", label: "キャラクター" },
   { href: "/build-simulator", label: "ビルドシミュ" },
   { href: "/scenarios", label: "シナリオ" },
+  { href: "/scenarios/templates", label: "テンプレート" },
   { href: "/scenarios/recruit-board", label: "公募掲示板" },
   { href: "/campaigns", label: "キャンペーン" },
   { href: "/npcs", label: "NPC" },

@@ -2,16 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, ScenarioStatus, ScenarioDifficulty, ScenarioPlaytimeType, ScenarioTemplateData } from "@/lib/supabase";
 import AIScenarioDraftGenerator from "@/app/_components/AIScenarioDraftGenerator";
 
-export default function ScenarioForm() {
+type Props = {
+  initialTitle?: string;
+  templateData?: ScenarioTemplateData;
+};
+
+export default function ScenarioForm({ initialTitle, templateData }: Props = {}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    title: "",
+    title: initialTitle ?? "",
     synopsis: "",
     gm_notes: "",
     status: "planning" as ScenarioStatus,
@@ -60,7 +65,7 @@ export default function ScenarioForm() {
       ? rawTags.split(/[,、]/).map((t) => t.trim()).filter(Boolean)
       : null;
 
-    const { error: err } = await supabase.from("scenarios").insert({
+    const { data: newScenario, error: err } = await supabase.from("scenarios").insert({
       title: form.title.trim(),
       synopsis: form.synopsis.trim() || null,
       gm_notes: form.gm_notes.trim() || null,
@@ -81,11 +86,39 @@ export default function ScenarioForm() {
       content_tags: contentTagsArray,
       remind_enabled: form.remind_enabled,
       remind_email: form.remind_email.trim() || null,
-    });
+    }).select("id").single();
     if (err) {
       setError(err.message);
       setSaving(false);
       return;
+    }
+    if (newScenario && templateData) {
+      const insertOps: Promise<unknown>[] = [];
+      if (templateData.scenes.length > 0) {
+        insertOps.push(
+          supabase.from("scenario_scenes").insert(
+            templateData.scenes.map((s) => ({
+              scenario_id: newScenario.id,
+              title: s.title,
+              scene_order: s.order,
+              is_done: false,
+            }))
+          )
+        );
+      }
+      if (templateData.handout_count > 0) {
+        insertOps.push(
+          supabase.from("handouts").insert(
+            Array.from({ length: templateData.handout_count }, (_, i) => ({
+              scenario_id: newScenario.id,
+              title: `ハンドアウト ${i + 1}`,
+              is_secret: false,
+              is_distributed: false,
+            }))
+          )
+        );
+      }
+      await Promise.all(insertOps);
     }
     router.push("/scenarios");
     router.refresh();

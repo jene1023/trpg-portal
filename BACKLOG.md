@@ -2174,7 +2174,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/kp-dashboard/page.tsx` を "use client" で新規作成。`Promise.all` で ① `supabase.from("handouts").select("id, title, is_distributed, recipient_name, handout_reads(character_id)").eq("scenario_id", id)` ② `supabase.from("scenario_participants").select("character_id, attendance_status, characters(name)")` ③ `supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` ④ `supabase.from("scenario_prep_tasks").select("task_name, is_done").eq("scenario_id", id)` を並列取得。4カードUIで「配布済みハンドアウト数/未配布数・出席確定数/未確認数・未解決プロット数・未完了タスク数」をバッジ表示。Supabase Realtime channel `kp-dashboard-${scenarioId}` でリアルタイム更新。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「🎛 KPダッシュボード」リンクを追加。追加DBなし。
 **コミット:** `feat: KP all-in-one session day dashboard aggregating handouts, attendance, plots, and prep tasks`
 
-## [TODO] シナリオ公開テンプレートギャラリー — 優先度: 中
+## [DONE] シナリオ公開テンプレートギャラリー — 優先度: 中
 **対象:** KP / 共通
 **概要:** KPが自作シナリオの骨格（シーン構成・NPC枠・ハンドアウト枠・クリーチャー枠）をテンプレートとして公開し、他のKPが1クリックで流用できるギャラリーページ。既存の `ScenarioTemplate` 型・`is_public` フラグを活用し、0からシナリオを設計するより速く準備できる。
 **実装ヒント:** `src/app/scenarios/templates/page.tsx` を "use client" で新規作成。`supabase.from("scenario_templates").select("*").eq("is_public", true).order("created_at", {ascending: false})` で公開テンプレートを取得。カードには「シーン数・NPC枠数・ハンドアウト枠数・クリーチャー枠数」を表示（`ScenarioTemplateData` の各フィールドを活用）。「このテンプレートで新規シナリオ」ボタンで `template_data` のシーン/NPC/ハンドアウトを新シナリオにコピーして `src/app/scenarios/new/page.tsx?templateId=XXX` に遷移。既存シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「テンプレートとして公開」ボタンを追加（`is_public: true` でUPDATE）。`src/app/_components/NavBar.tsx` に「テンプレート」リンクを追加。追加DBなし（`scenario_templates` テーブルは型定義から既存）。
