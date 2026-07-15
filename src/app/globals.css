@@ -1395,6 +1395,62 @@ body {
   }
 }
 
+/* キャラクターカード情報エリア区切り: ポートレートと情報の境界に燭台の光が左から右へ流れる細い金線 */
+/* coc-nav-border(5s) と coc-divider 系 (6s) と周期をずらし位相ドリフトを生む */
+@keyframes coc-card-info-divider-breathe {
+  0%, 100% { opacity: 0.38; }
+  50%       { opacity: 0.68; }
+}
+
+.coc-card-info-divider {
+  position: relative;
+}
+
+.coc-card-info-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--color-coc-border) 18%,
+    var(--color-coc-border-glow) 50%,
+    var(--color-coc-border) 82%,
+    transparent 100%
+  );
+  opacity: 0.40;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-card-info-divider::before {
+    animation: coc-card-info-divider-breathe 7.5s ease-in-out 0.8s infinite;
+  }
+}
+
+/* グループホバー時: 燭台の炎が揺れ上がるように区切り線が金色に輝く */
+.group:hover .coc-card-info-divider::before,
+.group:focus-within .coc-card-info-divider::before {
+  opacity: 0.82;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--color-coc-border-glow) 15%,
+    var(--color-coc-gold) 50%,
+    var(--color-coc-border-glow) 85%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coc-card-info-divider::before {
+    transition: opacity 0.40s ease-out, background 0.40s ease-out;
+  }
+}
+
 /* 最終章バッジ: 逝去・引退した探索者への鎮魂の炎 — 消え入る蝋燭が黄金に揺れる追憶 */
 @keyframes coc-final-chapter-breathe {
   0%, 100% {
