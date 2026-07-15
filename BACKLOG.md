@@ -2126,7 +2126,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/hint-cards/page.tsx` を "use client" で新規作成。データ取得: `supabase.from("scenario_clues").select("title, status").eq("scenario_id", id)`（解決済み/未解決手がかり）、`supabase.from("scenario_objectives").select("title, is_achieved").eq("scenario_id", id)`（目標達成状況）、`supabase.from("scenario_locations").select("name, is_revealed").eq("scenario_id", id)`（訪問済みロケーション）を Promise.all で並行取得。AIへ送信するプロンプト: 「上記の現在状況から、行き詰まったPLへの段階的ヒントを3段階（①雰囲気レベル=情報を明かさず雰囲気だけ、②方向性レベル=何を探すべきか示唆、③具体レベル=次の行動を直接提案）でJSON配列として生成してください。」エンドポイント: `src/app/api/ai/hint-cards/route.ts`（既存 `src/app/api/ai/session-summary/route.ts` パターンを踏襲）。生成結果は3つのカード形式で並べ、KPが「このカードをPLに開示する」ボタンでRealtimeブロードキャスト送信（PLのモバイル画面に表示）。`src/app/scenarios/[id]/page.tsx` に「💡 ヒントカード」リンクを追加。追加DBなし。
 **コミット:** `feat: AI tiered hint card generator for KP session support`
 
-## [TODO] ポータル横断コンテンツ発見ギャラリー — 優先度: 中
+## [DONE] ポータル横断コンテンツ発見ギャラリー — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** ポータル内で `is_public` フラグが立った公開キャラクター・公開シナリオ・公開ハンドアウト・公開ランダムテーブルを一元的に閲覧できるコミュニティ発見ページ。KPがシナリオ素材のインスピレーションを得たり、PLが他者のキャラクターシートを参考にしたりできる。既存の「シナリオ公募掲示板」（セッション参加募集目的）や個別の公開共有URLとは異なり、「コンテンツ鑑賞・インスピレーション取得」に特化したギャラリービュー。
 **実装ヒント:** `src/app/discover/page.tsx` を "use client" で新規作成。タブ構成:「キャラクター」「シナリオ」「ハンドアウト」「ランダムテーブル」。各タブで `supabase.from("characters").select("id, name, occupation, image_url, hp_max, san_max").eq("is_public", true).order("updated_at", {ascending: false}).limit(24)` のように公開データを取得しカードグリッド表示。キャラクターカードはポートレート・名前・職業を表示し `/c/[slug]` へリンク。シナリオカードはタイトル・概要・難易度を表示し `/s/[slug]` へリンク。上部に「キーワード検索」入力欄（useState でフィルタ）と「更新日順/人気順」ソート切り替えを配置。`src/app/_components/NavBar.tsx` に「発見する」リンクを追加。追加DBなし（既存 is_public インフラを流用）。
