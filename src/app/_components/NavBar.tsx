@@ -29,6 +29,7 @@ const navLinks = [
   { href: "/item-catalog", label: "装備カタログ" },
   { href: "/tags", label: "タグ" },
   { href: "/archive", label: "アーカイブ" },
+  { href: "/achievements", label: "バッジ" },
 ];
 
 export default function NavBar() {

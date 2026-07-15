@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { supabase, isSupabaseConfigured, CharacterReaction } from "@/lib/supabase";
+import { ACHIEVEMENTS } from "@/app/api/achievements/check/route";
 import { calcDamageBonus, calcBuild, calcMov } from "@/lib/coc-calc";
 import StatBlock from "@/app/_components/StatBlock";
 import StatusBadge from "@/app/_components/StatusBadge";
@@ -87,6 +88,16 @@ export default async function PublicCharacterPage({ params }: Props) {
     .order("entry_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(10);
+
+  const { data: userAchievements } = char.user_id
+    ? await supabase
+        .from("user_achievements")
+        .select("achievement_id")
+        .eq("user_id", char.user_id)
+    : { data: null };
+
+  const earnedAchievementIds = new Set((userAchievements ?? []).map((a: { achievement_id: string }) => a.achievement_id));
+  const earnedAchievements = ACHIEVEMENTS.filter((a) => earnedAchievementIds.has(a.id));
 
   const publicFields = new Set<string>(
     (char.public_fields as string[] | null) ?? DEFAULT_PUBLIC_FIELDS
@@ -371,6 +382,25 @@ export default async function PublicCharacterPage({ params }: Props) {
                     <p className="font-crimson text-coc-text leading-relaxed whitespace-pre-wrap text-[15px]">
                       {entry.content}
                     </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 獲得バッジ */}
+          {earnedAchievements.length > 0 && (
+            <div className={sectionClass}>
+              <h2 className={sectionTitle}>🏅 獲得バッジ</h2>
+              <div className="flex flex-wrap gap-2">
+                {earnedAchievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    title={achievement.description}
+                    className="flex items-center gap-1.5 rounded-full border border-coc-gold/30 bg-coc-gold/5 px-3 py-1.5 text-xs"
+                  >
+                    <span>{achievement.icon_emoji}</span>
+                    <span className="text-coc-gold font-medium">{achievement.label}</span>
                   </div>
                 ))}
               </div>

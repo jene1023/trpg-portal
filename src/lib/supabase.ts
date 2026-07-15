@@ -20,6 +20,7 @@ export type CharacterStatus = "alive" | "dead" | "insane" | "retired";
 
 export type Character = {
   id: string;
+  user_id: string | null;
   name: string;
   player_name: string | null;
   portrait_url: string | null;
@@ -1562,4 +1563,29 @@ export type CampaignCharacterRelation = {
   relation_note: string | null;
   is_mutual: boolean;
   created_at: string;
+};
+
+export type AchievementConditionType =
+  | "session_count"
+  | "critical_success_count"
+  | "san_loss_total"
+  | "first_scenario"
+  | "campaign_complete"
+  | "character_count"
+  | "survival_streak";
+
+export type AchievementDefinition = {
+  id: string;
+  label: string;
+  description: string;
+  icon_emoji: string;
+  condition_type: AchievementConditionType;
+  condition_threshold: number;
+};
+
+export type UserAchievement = {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  unlocked_at: string;
 };
