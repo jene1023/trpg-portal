@@ -2138,7 +2138,7 @@
 **実装ヒント:** `src/app/campaigns/[id]/sequel/page.tsx` を "use client" で新規作成。4ステップウィザード構成: ① 生存キャラクター選択（`supabase.from("characters").select("id, name, status").eq("campaign_id", id)` で生存者リストを取得しチェックボックス選択）→ ② 世界変化メモ（テキストエリア: KPが「プレイヤーの行動でどう世界が変わったか」を記述）→ ③ 未解決プロットスレッド引き継ぎ（`supabase.from("plot_threads").select("title, status").eq("scenario_id", ...)` で未解決スレッドを取得し「次作に持ち越す/消化済み」をトグル）→ ④ 生成・保存（入力内容をもとにAI APIへリクエスト: 「以下の引き継ぎ情報から、シーズン2のオープニングシーン設計案と最初のシナリオへの導入フックを提案してください」を送信し結果をテキストエリアに展開）。新規Supabaseテーブル `campaign_sequel_designs(id, campaign_id, surviving_character_ids, world_changes, carried_over_threads, ai_suggestion, created_at)` を追加。`src/app/campaigns/[id]/page.tsx` にキャンペーン完了後にのみ表示される「📖 シーズン2設計」ボタンを追加。
 **コミット:** `feat: campaign sequel design wizard for KP world-state handoff and season 2 planning`
 
-## [TODO] セッション参加カレンダービュー — 優先度: 中
+## [DONE] セッション参加カレンダービュー — 優先度: 中
 **対象:** PL / KP / 共通
 **概要:** ユーザーが参加予定・参加済みの全セッション（キャンペーン横断）を月別カレンダーUIで一覧できるページ。日程調整投票で確定した日時・セッションリマインダーと連動し、「今月どこの卓に入っているか」を一目で把握できる。
 **実装ヒント:** `src/app/calendar/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("id, title, scheduled_at, campaign_id, campaigns(name)").in("id", participantScenarioIds)` で参加シナリオを取得し `scheduled_at` が当月のものをカレンダーグリッドに配置（`participantScenarioIds` は `scenario_participants.eq("user_id", user.id)` から取得）。カレンダー描画はネイティブCSS Gridの `grid-cols-7` で月曜始まり7列実装（外部ライブラリ不要）。各日付セルにイベントドット＋シナリオタイトルを表示しクリックでシナリオ詳細ページへジャンプ。ヘッダーに「＜ 前月 | 今月 | 翌月 ＞」ナビゲーションを配置し `useState` で表示月を切り替え。グローバルナビゲーション（`src/app/_components/NavBar.tsx`）に「📅 カレンダー」リンクを追加。追加DBなし（既存 `scenarios.scheduled_at` と `scenario_participants` を活用）。
