@@ -2120,7 +2120,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/chase/page.tsx` を "use client" で新規作成。Supabaseに `chase_entries(id uuid pk, scenario_id uuid references scenarios, entry_name text, is_npc bool, spd int, distance_counter int DEFAULT 0, is_escaped bool DEFAULT false, is_caught bool DEFAULT false, action_this_round text, created_at timestamptz)` テーブルを追加（既存 `combat_entries` テーブルを参考に設計）。チェイス参加者はSPD降順でリスト表示。各ラウンドに「追跡者の距離-1」「逃走者の距離+1」ボタンと、Athletics/Drive/Pilot判定成否を記録するトグルを配置。距離カウンターが0以下で「捕捉」、設定した逃走距離以上で「逃走成功」を自動判定してバッジ表示。Supabase Realtimeで全員の画面に即反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の「セッション中ツール」セクションに「🏃 チェイストラッカー」リンクを追加。追加DB1テーブル。
 **コミット:** `feat: CoC 7e chase scene tracker with distance counter and escape/catch detection`
 
-## [TODO] AIセッション中段階的ヒントカード生成（行き詰まりサポート） — 優先度: 高
+## [DONE] AIセッション中段階的ヒントカード生成（行き詰まりサポート） — 優先度: 高
 **対象:** KP
 **概要:** セッション中にPLが行き詰まったとき、KPが現在の状況（解決済み手がかり・未達目標・現在ロケーション）をワンクリックでAIに渡し「今PLに見せてよいヒント」を段階3段階（ぼんやり→具体的→直接）で生成するページ。既存のNPC台詞生成・セッション要約・前回のあらすじ生成とは異なり、「行き詰まり脱出のためのKPサポートツール」に特化する。
 **実装ヒント:** `src/app/scenarios/[id]/hint-cards/page.tsx` を "use client" で新規作成。データ取得: `supabase.from("scenario_clues").select("title, status").eq("scenario_id", id)`（解決済み/未解決手がかり）、`supabase.from("scenario_objectives").select("title, is_achieved").eq("scenario_id", id)`（目標達成状況）、`supabase.from("scenario_locations").select("name, is_revealed").eq("scenario_id", id)`（訪問済みロケーション）を Promise.all で並行取得。AIへ送信するプロンプト: 「上記の現在状況から、行き詰まったPLへの段階的ヒントを3段階（①雰囲気レベル=情報を明かさず雰囲気だけ、②方向性レベル=何を探すべきか示唆、③具体レベル=次の行動を直接提案）でJSON配列として生成してください。」エンドポイント: `src/app/api/ai/hint-cards/route.ts`（既存 `src/app/api/ai/session-summary/route.ts` パターンを踏襲）。生成結果は3つのカード形式で並べ、KPが「このカードをPLに開示する」ボタンでRealtimeブロードキャスト送信（PLのモバイル画面に表示）。`src/app/scenarios/[id]/page.tsx` に「💡 ヒントカード」リンクを追加。追加DBなし。
