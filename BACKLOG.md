@@ -2162,7 +2162,7 @@
 **実装ヒント:** Supabaseに `achievement_definitions(id text pk, label text, description text, icon_emoji text, condition_type text, condition_threshold int)` シードテーブルと `user_achievements(id uuid pk, user_id uuid references auth.users, achievement_id text references achievement_definitions, unlocked_at timestamptz, UNIQUE(user_id, achievement_id))` テーブルを追加（RLS: 閲覧は公開・INSERT はサービスロールのみ）。バッジ付与はサーバーサイドの `src/app/api/achievements/check/route.ts` で実装し、`session_logs`・`dice_rolls`・`scenario_participants` を集計して条件達成を検出しINSERT。トリガーとなるアクション（セッション終了・ダイスロール保存・キャンペーン完結マーク）の各APIルートから内部呼び出し。`src/app/achievements/page.tsx` を Server Component で新規作成し、全バッジ定義を「取得済み（カラー）/未取得（グレーアウト）」で一覧表示。`src/app/c/[slug]/page.tsx` の公開キャラクタープロフィールに「獲得バッジ」セクションを追加。追加DB2テーブル。
 **コミット:** `feat: achievement badge system with milestone tracking and public profile display`
 
-## [TODO] キャラクター統計グラフ（HP/SAN/スキル推移の可視化） — 優先度: 高
+## [DONE] キャラクター統計グラフ（HP/SAN/スキル推移の可視化） — 優先度: 高
 **対象:** PL
 **概要:** セッションを経るごとのHP・SAN推移と主要スキル成長を折れ線グラフで可視化するページ。「どのセッションで大きくSANを失ったか」「スキルがどう伸びたか」が一目でわかり、キャラクターへの愛着と振り返りを促進する。
 **実装ヒント:** `src/app/characters/[id]/stats-history/page.tsx` を "use client" で新規作成。`supabase.from("character_stat_snapshots").select("*").eq("character_id", id).order("snapshot_at")` でスナップショット取得（`CharacterStatSnapshot` 型は supabase.ts に既存）。グラフ描画はネイティブSVGの `<polyline>` / `<path>` でライブラリ不要実装。X軸: session_label、Y軸: hp_current/san_current。`supabase.from("growth_histories").select("*").eq("character_id", id)` と組み合わせてスキル推移も表示。セッションログ保存時に `character_stat_snapshots` へ自動INSERT する API を `src/app/api/snapshots/route.ts` に追加。キャラクター詳細ページ（`src/app/characters/[id]/page.tsx`）に「📈 成長グラフ」リンクを追加。追加APIルート1本。
