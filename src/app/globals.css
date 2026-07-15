@@ -121,29 +121,40 @@ body {
 }
 
 /* ページ入場フェードイン（stagger-grid 用） */
+/* 70% 付近で一瞬輝度が上がり、燭台の炎が紙面を照らすように各カードが召喚される */
 @keyframes coc-fade-up {
   from {
     opacity: 0;
     transform: translateY(14px) scale(0.98);
+    filter: brightness(0.55);
+  }
+  65% {
+    filter: brightness(1.15);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: brightness(1);
   }
 }
 
-/* ページ召喚: 深淵の霧から探索者が招かれるように現れる */
+/* ページ召喚: 深淵の霧から探索者が招かれるように現れ、70% で一瞬だけ燭台が煌めく */
 @keyframes coc-page-summon {
   from {
     opacity: 0;
     transform: translateY(20px) scale(0.984);
+    filter: brightness(0.6);
   }
   60% {
     opacity: 1;
   }
+  72% {
+    filter: brightness(1.08);
+  }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: brightness(1);
   }
 }
 
@@ -183,10 +194,10 @@ body {
   opacity: 0.65;
 }
 
-/* ◆ 印: 封印が静かに脈打つように明滅する */
+/* ◆ 印: 封印が静かに脈打つように明滅し、頂点では燭台の炎のような黄金の光輪を帯びる */
 @keyframes coc-diamond-pulse {
-  0%, 100% { opacity: 0.50; }
-  50%       { opacity: 1; color: var(--color-coc-gold); }
+  0%, 100% { opacity: 0.50; text-shadow: 0 0 0px rgba(201, 133, 58, 0); }
+  50%       { opacity: 1; color: var(--color-coc-gold); text-shadow: 0 0 8px rgba(201, 133, 58, 0.72), 0 0 18px rgba(201, 133, 58, 0.28); }
 }
 
 /* 右フェードライン: 燭台の光が左から右へ流れるように揺らめく */
@@ -846,16 +857,22 @@ body {
   }
 }
 
-/* 達人スキルタグ: 燭台の炎のように脈打つ黄金の微光（職業技能で80%以上） */
+/* 達人スキルタグ: 燭台の炎のように脈打つ黄金の微光（職業技能で80%以上）— 頂点でテキストも金色に輝く */
 @keyframes coc-skill-master-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(201, 133, 58, 0.30), inset 0 0 4px rgba(201, 133, 58, 0.08); }
-  50%       { box-shadow: 0 0 10px rgba(201, 133, 58, 0.55), inset 0 0 8px rgba(201, 133, 58, 0.14); }
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(201, 133, 58, 0.30), inset 0 0 4px rgba(201, 133, 58, 0.08);
+    text-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(201, 133, 58, 0.55), inset 0 0 8px rgba(201, 133, 58, 0.14);
+    text-shadow: 0 0 7px rgba(201, 133, 58, 0.50);
+  }
 }
 
-/* 高スキルタグ: 銅板のような鈍い輝き（非職業技能で80%以上） */
+/* 高スキルタグ: 銅板のような鈍い輝き（非職業技能で80%以上）— 頂点でわずかに文字が浮かぶ */
 @keyframes coc-skill-expert-glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(122, 90, 42, 0.22); }
-  50%       { box-shadow: 0 0 8px rgba(122, 90, 42, 0.40); }
+  0%, 100% { box-shadow: 0 0 4px rgba(122, 90, 42, 0.22); text-shadow: none; }
+  50%       { box-shadow: 0 0 8px rgba(122, 90, 42, 0.40); text-shadow: 0 0 5px rgba(122, 90, 42, 0.35); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
