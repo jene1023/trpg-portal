@@ -1531,3 +1531,13 @@ export type ChaseEntry = {
   action_this_round: string | null;
   created_at: string;
 };
+
+export type CampaignSequelDesign = {
+  id: string;
+  campaign_id: string;
+  surviving_character_ids: string[];
+  world_changes: string;
+  carried_over_threads: string;
+  ai_suggestion: string | null;
+  created_at: string;
+};

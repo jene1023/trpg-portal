@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor, Scroll, ScrollText } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor, Scroll, ScrollText, Sparkles } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -283,6 +283,15 @@ export default function CampaignDetailPage({ params }: Props) {
           <ScrollText size={15} />
           ハウスルール
         </Link>
+        {campaign.status === "completed" && (
+          <Link
+            href={`/campaigns/${campaignId}/sequel`}
+            className="flex items-center gap-2 rounded-lg border border-coc-gold bg-coc-gold/10 px-4 py-2 text-sm text-coc-gold hover:bg-coc-gold/20 transition-colors"
+          >
+            <Sparkles size={15} />
+            📖 シーズン2設計
+          </Link>
+        )}
         <a
           href={`/api/calendar/campaign/${campaignId}`}
           download="campaign-sessions.ics"

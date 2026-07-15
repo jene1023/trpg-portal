@@ -2132,7 +2132,7 @@
 **実装ヒント:** `src/app/discover/page.tsx` を "use client" で新規作成。タブ構成:「キャラクター」「シナリオ」「ハンドアウト」「ランダムテーブル」。各タブで `supabase.from("characters").select("id, name, occupation, image_url, hp_max, san_max").eq("is_public", true).order("updated_at", {ascending: false}).limit(24)` のように公開データを取得しカードグリッド表示。キャラクターカードはポートレート・名前・職業を表示し `/c/[slug]` へリンク。シナリオカードはタイトル・概要・難易度を表示し `/s/[slug]` へリンク。上部に「キーワード検索」入力欄（useState でフィルタ）と「更新日順/人気順」ソート切り替えを配置。`src/app/_components/NavBar.tsx` に「発見する」リンクを追加。追加DBなし（既存 is_public インフラを流用）。
 **コミット:** `feat: community content discovery gallery for public characters, scenarios, and handouts`
 
-## [TODO] キャンペーン続編・シーズン2設計ウィザード — 優先度: 中
+## [DONE] キャンペーン続編・シーズン2設計ウィザード — 優先度: 中
 **対象:** KP
 **概要:** 長期キャンペーン終了後、「生き残ったキャラクター」「変化した世界状態」「未解決プロットスレッド」「KPが伏せていた真実」を整理して次のキャンペーン（シーズン2）の設計書にまとめるウィザード形式ページ。既存の `campaigns/[id]/wiki/`（世界観wiki）・`campaigns/[id]/timeline/`（年表）・`campaigns/[id]/events/`（イベント記録）はキャンペーン内の記録ツールであり、「次キャンペーンへの引き継ぎ設計」には特化していない。
 **実装ヒント:** `src/app/campaigns/[id]/sequel/page.tsx` を "use client" で新規作成。4ステップウィザード構成: ① 生存キャラクター選択（`supabase.from("characters").select("id, name, status").eq("campaign_id", id)` で生存者リストを取得しチェックボックス選択）→ ② 世界変化メモ（テキストエリア: KPが「プレイヤーの行動でどう世界が変わったか」を記述）→ ③ 未解決プロットスレッド引き継ぎ（`supabase.from("plot_threads").select("title, status").eq("scenario_id", ...)` で未解決スレッドを取得し「次作に持ち越す/消化済み」をトグル）→ ④ 生成・保存（入力内容をもとにAI APIへリクエスト: 「以下の引き継ぎ情報から、シーズン2のオープニングシーン設計案と最初のシナリオへの導入フックを提案してください」を送信し結果をテキストエリアに展開）。新規Supabaseテーブル `campaign_sequel_designs(id, campaign_id, surviving_character_ids, world_changes, carried_over_threads, ai_suggestion, created_at)` を追加。`src/app/campaigns/[id]/page.tsx` にキャンペーン完了後にのみ表示される「📖 シーズン2設計」ボタンを追加。
