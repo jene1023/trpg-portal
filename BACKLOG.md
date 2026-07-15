@@ -2137,3 +2137,27 @@
 **概要:** 長期キャンペーン終了後、「生き残ったキャラクター」「変化した世界状態」「未解決プロットスレッド」「KPが伏せていた真実」を整理して次のキャンペーン（シーズン2）の設計書にまとめるウィザード形式ページ。既存の `campaigns/[id]/wiki/`（世界観wiki）・`campaigns/[id]/timeline/`（年表）・`campaigns/[id]/events/`（イベント記録）はキャンペーン内の記録ツールであり、「次キャンペーンへの引き継ぎ設計」には特化していない。
 **実装ヒント:** `src/app/campaigns/[id]/sequel/page.tsx` を "use client" で新規作成。4ステップウィザード構成: ① 生存キャラクター選択（`supabase.from("characters").select("id, name, status").eq("campaign_id", id)` で生存者リストを取得しチェックボックス選択）→ ② 世界変化メモ（テキストエリア: KPが「プレイヤーの行動でどう世界が変わったか」を記述）→ ③ 未解決プロットスレッド引き継ぎ（`supabase.from("plot_threads").select("title, status").eq("scenario_id", ...)` で未解決スレッドを取得し「次作に持ち越す/消化済み」をトグル）→ ④ 生成・保存（入力内容をもとにAI APIへリクエスト: 「以下の引き継ぎ情報から、シーズン2のオープニングシーン設計案と最初のシナリオへの導入フックを提案してください」を送信し結果をテキストエリアに展開）。新規Supabaseテーブル `campaign_sequel_designs(id, campaign_id, surviving_character_ids, world_changes, carried_over_threads, ai_suggestion, created_at)` を追加。`src/app/campaigns/[id]/page.tsx` にキャンペーン完了後にのみ表示される「📖 シーズン2設計」ボタンを追加。
 **コミット:** `feat: campaign sequel design wizard for KP world-state handoff and season 2 planning`
+
+## [TODO] セッション参加カレンダービュー — 優先度: 中
+**対象:** PL / KP / 共通
+**概要:** ユーザーが参加予定・参加済みの全セッション（キャンペーン横断）を月別カレンダーUIで一覧できるページ。日程調整投票で確定した日時・セッションリマインダーと連動し、「今月どこの卓に入っているか」を一目で把握できる。
+**実装ヒント:** `src/app/calendar/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("id, title, scheduled_at, campaign_id, campaigns(name)").in("id", participantScenarioIds)` で参加シナリオを取得し `scheduled_at` が当月のものをカレンダーグリッドに配置（`participantScenarioIds` は `scenario_participants.eq("user_id", user.id)` から取得）。カレンダー描画はネイティブCSS Gridの `grid-cols-7` で月曜始まり7列実装（外部ライブラリ不要）。各日付セルにイベントドット＋シナリオタイトルを表示しクリックでシナリオ詳細ページへジャンプ。ヘッダーに「＜ 前月 | 今月 | 翌月 ＞」ナビゲーションを配置し `useState` で表示月を切り替え。グローバルナビゲーション（`src/app/_components/NavBar.tsx`）に「📅 カレンダー」リンクを追加。追加DBなし（既存 `scenarios.scheduled_at` と `scenario_participants` を活用）。
+**コミット:** `feat: cross-campaign session calendar view for all participants`
+
+## [TODO] シナリオコミュニティレビュー投稿 — 優先度: 中
+**対象:** PL / 共通
+**概要:** PLが参加・閲覧した公開シナリオに5段階評価と公開コメントを投稿できるコミュニティレビュー機能。既存の「セッション後PLフィードバック」はKP専用の非公開集計であり、本機能はポータル全体に公開されコミュニティのシナリオ選択指標となる点で異なる。
+**実装ヒント:** Supabaseに `scenario_community_reviews(id uuid pk, scenario_id uuid references scenarios, reviewer_user_id uuid references auth.users, rating smallint CHECK(rating >= 1 AND rating <= 5), review_body text, created_at timestamptz, UNIQUE(scenario_id, reviewer_user_id))` テーブルを追加（RLS: 認証ユーザーのみ INSERT/UPDATE own row・閲覧は公開）。`src/app/scenarios/[id]/reviews/page.tsx` を "use client" で新規作成。星5段階の選択UI＋テキストエリア（任意）でレビュー投稿フォームを上部に配置。投稿済みレビュー一覧をページネーション付きカード表示（評価星・本文・投稿日）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「⭐ レビュー」タブを追加し平均評価と件数を表示。発見ギャラリー（`src/app/discover/page.tsx`）のシナリオカードにも平均評価バッジを表示。追加DB1テーブル。
+**コミット:** `feat: community scenario review and rating system for public scenarios`
+
+## [TODO] パーティキャラクター関係図（人間関係ノードマップ） — 優先度: 低
+**対象:** PL / 共通
+**概要:** キャンペーン参加キャラクター同士の関係性（友好・因縁・恋愛・師弟・疑惑など）をPL自身が登録し、ノードとエッジのビジュアルマップで確認できるページ。シナリオ内の証拠ネットワークを扱う「手がかりコネクションボード」とは異なり、プレイヤーキャラクター間のRP関係を記録・共有する機能。
+**実装ヒント:** Supabaseに `character_relations(id uuid pk, campaign_id uuid references campaigns, from_character_id uuid references characters, to_character_id uuid references characters, relation_type text CHECK(relation_type IN ('ally','rival','romantic','mentor','distrust','other')), relation_note text, is_mutual bool DEFAULT false, created_at timestamptz, UNIQUE(campaign_id, from_character_id, to_character_id))` テーブルを追加（RLS: from_character_id の所有者のみ書き込み・キャンペーン参加者は閲覧可）。`src/app/campaigns/[id]/relations/page.tsx` を "use client" で新規作成。キャンペーン参加キャラクターをノード（`<circle>`）としてSVGキャンバス上に配置し、関係エッジを `<line>` で描画（relation_type ごとに色分け: ally=緑/rival=赤/romantic=ピンク/mentor=青/distrust=橙/other=灰）。自キャラクターと他キャラを選んで関係種別・メモを入力して「関係を追加」するフォームを下部に配置。既存の `src/app/scenarios/[id]/clue-board/page.tsx` のSVGノード描画パターンを参考に実装。`src/app/campaigns/[id]/page.tsx` のハブページに「🤝 関係図」リンクを追加。追加DB1テーブル。
+**コミット:** `feat: party character relationship map with SVG node visualization for campaign RP`
+
+## [TODO] アチーブメント・バッジシステム — 優先度: 低
+**対象:** PL / KP / 共通
+**概要:** セッション参加数・クリティカル成功回数・SAN喪失合計・初シナリオ完走・キャンペーン完結などのマイルストーンを達成するとユーザーにバッジが付与されるアチーブメントシステム。ゲームへの愛着を深めコミュニティ継続率を上げるソーシャル要素として機能し、公開プロフィールページに獲得バッジ一覧が表示される。
+**実装ヒント:** Supabaseに `achievement_definitions(id text pk, label text, description text, icon_emoji text, condition_type text, condition_threshold int)` シードテーブルと `user_achievements(id uuid pk, user_id uuid references auth.users, achievement_id text references achievement_definitions, unlocked_at timestamptz, UNIQUE(user_id, achievement_id))` テーブルを追加（RLS: 閲覧は公開・INSERT はサービスロールのみ）。バッジ付与はサーバーサイドの `src/app/api/achievements/check/route.ts` で実装し、`session_logs`・`dice_rolls`・`scenario_participants` を集計して条件達成を検出しINSERT。トリガーとなるアクション（セッション終了・ダイスロール保存・キャンペーン完結マーク）の各APIルートから内部呼び出し。`src/app/achievements/page.tsx` を Server Component で新規作成し、全バッジ定義を「取得済み（カラー）/未取得（グレーアウト）」で一覧表示。`src/app/c/[slug]/page.tsx` の公開キャラクタープロフィールに「獲得バッジ」セクションを追加。追加DB2テーブル。
+**コミット:** `feat: achievement badge system with milestone tracking and public profile display`
