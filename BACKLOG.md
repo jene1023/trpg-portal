@@ -2114,7 +2114,7 @@
 **実装ヒント:** `src/app/scenarios/[id]/previously/page.tsx` を新規作成（"use client"）。データ収集: `supabase.from("session_logs").select("title, summary, san_loss, hp_loss, played_at").eq("character_id", in(characterIds)).order("played_at")` で最新数セッション分のログ取得。`supabase.from("scenario_clues").select("title, content").eq("scenario_id", id).eq("status", "resolved")` で解決済み手がかりを取得。`supabase.from("plot_threads").select("title, status").eq("scenario_id", id)` でプロットスレッドを取得。これらをAI APIに送信: プロンプトは「以下のセッションログ・解決した手がかり・プロットの状況を元に、次回セッション開幕直前に読み上げる『前回のあらすじ』を400字程度のドラマチックな日本語ナレーションとして生成してください。」エンドポイント: `src/app/api/previously-on/route.ts`（既存AI APIパターンを踏襲）。生成結果をテキストエリアに表示し `RecapCopyButton` と同様のコピーボタンを追加。`src/app/scenarios/[id]/page.tsx` に「前回のあらすじ生成」リンクを追加。
 **コミット:** `feat: AI-generated "previously on" pre-session narrative for KP`
 
-## [TODO] CoC 7版チェイスシーン進行管理ページ — 優先度: 中
+## [DONE] CoC 7版チェイスシーン進行管理ページ — 優先度: 中
 **対象:** KP / PL / 共通
 **概要:** CoC 7版固有の「チェイスルール」に特化した追跡シーン管理ページ。DEX順ではなくSPD値で順番を決め、追跡距離カウンターのラウンドごとの増減・逃走/追撃判定・妨害アクションをUIで管理する。既存の戦闘トラッカー（`/scenarios/[id]/combat/`）はイニシアチブ管理に特化しており、チェイス固有の「距離カウンター」「コーナー判定」「逃走成功条件」には対応していない。
 **実装ヒント:** `src/app/scenarios/[id]/chase/page.tsx` を "use client" で新規作成。Supabaseに `chase_entries(id uuid pk, scenario_id uuid references scenarios, entry_name text, is_npc bool, spd int, distance_counter int DEFAULT 0, is_escaped bool DEFAULT false, is_caught bool DEFAULT false, action_this_round text, created_at timestamptz)` テーブルを追加（既存 `combat_entries` テーブルを参考に設計）。チェイス参加者はSPD降順でリスト表示。各ラウンドに「追跡者の距離-1」「逃走者の距離+1」ボタンと、Athletics/Drive/Pilot判定成否を記録するトグルを配置。距離カウンターが0以下で「捕捉」、設定した逃走距離以上で「逃走成功」を自動判定してバッジ表示。Supabase Realtimeで全員の画面に即反映。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）の「セッション中ツール」セクションに「🏃 チェイストラッカー」リンクを追加。追加DB1テーブル。

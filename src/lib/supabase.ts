@@ -1518,3 +1518,16 @@ export type HandoutRead = {
   read_at: string;
   created_at: string;
 };
+
+export type ChaseEntry = {
+  id: string;
+  scenario_id: string;
+  entry_name: string;
+  is_npc: boolean;
+  spd: number;
+  distance_counter: number;
+  is_escaped: boolean;
+  is_caught: boolean;
+  action_this_round: string | null;
+  created_at: string;
+};
