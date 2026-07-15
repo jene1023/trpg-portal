@@ -2144,7 +2144,7 @@
 **実装ヒント:** `src/app/calendar/page.tsx` を "use client" で新規作成。`supabase.from("scenarios").select("id, title, scheduled_at, campaign_id, campaigns(name)").in("id", participantScenarioIds)` で参加シナリオを取得し `scheduled_at` が当月のものをカレンダーグリッドに配置（`participantScenarioIds` は `scenario_participants.eq("user_id", user.id)` から取得）。カレンダー描画はネイティブCSS Gridの `grid-cols-7` で月曜始まり7列実装（外部ライブラリ不要）。各日付セルにイベントドット＋シナリオタイトルを表示しクリックでシナリオ詳細ページへジャンプ。ヘッダーに「＜ 前月 | 今月 | 翌月 ＞」ナビゲーションを配置し `useState` で表示月を切り替え。グローバルナビゲーション（`src/app/_components/NavBar.tsx`）に「📅 カレンダー」リンクを追加。追加DBなし（既存 `scenarios.scheduled_at` と `scenario_participants` を活用）。
 **コミット:** `feat: cross-campaign session calendar view for all participants`
 
-## [TODO] シナリオコミュニティレビュー投稿 — 優先度: 中
+## [DONE] シナリオコミュニティレビュー投稿 — 優先度: 中
 **対象:** PL / 共通
 **概要:** PLが参加・閲覧した公開シナリオに5段階評価と公開コメントを投稿できるコミュニティレビュー機能。既存の「セッション後PLフィードバック」はKP専用の非公開集計であり、本機能はポータル全体に公開されコミュニティのシナリオ選択指標となる点で異なる。
 **実装ヒント:** Supabaseに `scenario_community_reviews(id uuid pk, scenario_id uuid references scenarios, reviewer_user_id uuid references auth.users, rating smallint CHECK(rating >= 1 AND rating <= 5), review_body text, created_at timestamptz, UNIQUE(scenario_id, reviewer_user_id))` テーブルを追加（RLS: 認証ユーザーのみ INSERT/UPDATE own row・閲覧は公開）。`src/app/scenarios/[id]/reviews/page.tsx` を "use client" で新規作成。星5段階の選択UI＋テキストエリア（任意）でレビュー投稿フォームを上部に配置。投稿済みレビュー一覧をページネーション付きカード表示（評価星・本文・投稿日）。シナリオ詳細ページ（`src/app/scenarios/[id]/page.tsx`）に「⭐ レビュー」タブを追加し平均評価と件数を表示。発見ギャラリー（`src/app/discover/page.tsx`）のシナリオカードにも平均評価バッジを表示。追加DB1テーブル。

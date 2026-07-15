@@ -1541,3 +1541,12 @@ export type CampaignSequelDesign = {
   ai_suggestion: string | null;
   created_at: string;
 };
+
+export type ScenarioCommunityReview = {
+  id: string;
+  scenario_id: string;
+  reviewer_user_id: string;
+  rating: number;
+  review_body: string | null;
+  created_at: string;
+};

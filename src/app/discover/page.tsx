@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Compass, Search, User, BookOpen, FileText, Shuffle } from "lucide-react";
+import { Compass, Search, User, BookOpen, FileText, Shuffle, Star } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type PublicCharacter = {
@@ -45,6 +45,7 @@ type PublicRandomTable = {
 
 type Tab = "characters" | "scenarios" | "handouts" | "tables";
 type SortOrder = "updated" | "name";
+type ScenarioRatings = Record<string, number>;
 
 const DIFFICULTY_LABELS: Record<string, string> = {
   beginner: "初心者向け",
@@ -68,6 +69,7 @@ export default function DiscoverPage() {
   const [scenarios, setScenarios] = useState<PublicScenario[]>([]);
   const [handouts, setHandouts] = useState<PublicHandout[]>([]);
   const [tables, setTables] = useState<PublicRandomTable[]>([]);
+  const [scenarioRatings, setScenarioRatings] = useState<ScenarioRatings>({});
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -104,6 +106,27 @@ export default function DiscoverPage() {
       if (scenariosRes.data) setScenarios(scenariosRes.data as PublicScenario[]);
       if (handoutsRes.data) setHandouts(handoutsRes.data as PublicHandout[]);
       if (tablesRes.data) setTables(tablesRes.data as PublicRandomTable[]);
+
+      if (scenariosRes.data && scenariosRes.data.length > 0) {
+        const ids = scenariosRes.data.map((s) => s.id);
+        const ratingsRes = await supabase
+          .from("scenario_participant_reviews")
+          .select("scenario_id, rating")
+          .in("scenario_id", ids);
+        if (ratingsRes.data) {
+          const grouped: Record<string, number[]> = {};
+          for (const r of ratingsRes.data as { scenario_id: string; rating: number }[]) {
+            if (!grouped[r.scenario_id]) grouped[r.scenario_id] = [];
+            grouped[r.scenario_id].push(r.rating);
+          }
+          const avgs: ScenarioRatings = {};
+          for (const [id, ratings] of Object.entries(grouped)) {
+            avgs[id] = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+          }
+          setScenarioRatings(avgs);
+        }
+      }
+
       setLoading(false);
     }
 
@@ -303,15 +326,23 @@ export default function DiscoverPage() {
                         <p className="text-sm font-semibold text-coc-text group-hover:text-coc-gold transition-colors line-clamp-2">
                           {s.title}
                         </p>
-                        {s.difficulty && (
-                          <span
-                            className={`shrink-0 text-xs border rounded px-1.5 py-0.5 ${
-                              DIFFICULTY_COLORS[s.difficulty] ?? "text-coc-muted border-coc-border"
-                            }`}
-                          >
-                            {DIFFICULTY_LABELS[s.difficulty] ?? s.difficulty}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {scenarioRatings[s.id] !== undefined && (
+                            <span className="flex items-center gap-0.5 rounded border border-coc-gold-dim bg-coc-gold/10 px-1.5 py-0.5 text-xs text-coc-gold">
+                              <Star size={10} fill="currentColor" />
+                              {scenarioRatings[s.id].toFixed(1)}
+                            </span>
+                          )}
+                          {s.difficulty && (
+                            <span
+                              className={`text-xs border rounded px-1.5 py-0.5 ${
+                                DIFFICULTY_COLORS[s.difficulty] ?? "text-coc-muted border-coc-border"
+                              }`}
+                            >
+                              {DIFFICULTY_LABELS[s.difficulty] ?? s.difficulty}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-coc-muted line-clamp-3">
                         {s.teaser_text ?? s.synopsis ?? "—"}
