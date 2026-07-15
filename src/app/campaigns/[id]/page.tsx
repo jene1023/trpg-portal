@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor, Scroll, ScrollText, Sparkles } from "lucide-react";
+import { ArrowLeft, BarChart2, BookOpen, Trash2, Clock, BookMarked, Brain, TrendingUp, Gem, CalendarDays, Download, Monitor, Scroll, ScrollText, Sparkles, Users } from "lucide-react";
 import { supabase, isSupabaseConfigured, Campaign, CampaignStatus, Scenario, ScenarioStatus } from "@/lib/supabase";
 
 const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
@@ -282,6 +282,13 @@ export default function CampaignDetailPage({ params }: Props) {
         >
           <ScrollText size={15} />
           ハウスルール
+        </Link>
+        <Link
+          href={`/campaigns/${campaignId}/relations`}
+          className="flex items-center gap-2 rounded-lg border border-coc-border bg-coc-surface px-4 py-2 text-sm text-coc-muted hover:text-coc-gold hover:border-coc-gold-dim transition-colors"
+        >
+          <Users size={15} />
+          🤝 関係図
         </Link>
         {campaign.status === "completed" && (
           <Link

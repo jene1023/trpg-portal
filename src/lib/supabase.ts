@@ -1550,3 +1550,16 @@ export type ScenarioCommunityReview = {
   review_body: string | null;
   created_at: string;
 };
+
+export type CampaignRelationType = "ally" | "rival" | "romantic" | "mentor" | "distrust" | "other";
+
+export type CampaignCharacterRelation = {
+  id: string;
+  campaign_id: string;
+  from_character_id: string;
+  to_character_id: string;
+  relation_type: CampaignRelationType;
+  relation_note: string | null;
+  is_mutual: boolean;
+  created_at: string;
+};
